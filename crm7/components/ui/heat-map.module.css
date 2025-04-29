@@ -1,0 +1,108 @@
+.container {
+  position: relative;
+  width: fit-content;
+}
+
+.heatmap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 1rem;
+  --cell-size: 30px;
+  --cell-gap: 1px;
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+}
+
+.cell {
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  border-radius: 2px;
+  outline: none;
+  position: relative;
+  width: var(--cell-size);
+  height: var(--cell-size);
+  margin: var(--cell-gap);
+  background-color: var(--cell-color);
+}
+
+/* Heat levels from 0 to 10 */
+.heat-0 {
+  background-color: hsl(120, 70%, 50%);
+}
+.heat-1 {
+  background-color: hsl(108, 70%, 50%);
+}
+.heat-2 {
+  background-color: hsl(96, 70%, 50%);
+}
+.heat-3 {
+  background-color: hsl(84, 70%, 50%);
+}
+.heat-4 {
+  background-color: hsl(72, 70%, 50%);
+}
+.heat-5 {
+  background-color: hsl(60, 70%, 50%);
+}
+.heat-6 {
+  background-color: hsl(48, 70%, 50%);
+}
+.heat-7 {
+  background-color: hsl(36, 70%, 50%);
+}
+.heat-8 {
+  background-color: hsl(24, 70%, 50%);
+}
+.heat-9 {
+  background-color: hsl(12, 70%, 50%);
+}
+.heat-10 {
+  background-color: hsl(0, 70%, 50%);
+}
+
+.cell:hover {
+  transform: scale(1.1);
+  z-index: 1;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.cell:focus {
+  outline: 2px solid #0070f3;
+  transform: scale(1.1);
+  z-index: 2;
+  box-shadow: 0 2px 12px rgba(0, 112, 243, 0.2);
+}
+
+.cell[data-selected='true'] {
+  outline: 2px solid #0070f3;
+  z-index: 2;
+  box-shadow: 0 2px 12px rgba(0, 112, 243, 0.2);
+}
+
+.empty {
+  padding: 1rem;
+  color: #666;
+  text-align: center;
+  border: 1px dashed #ccc;
+  border-radius: 4px;
+  background-color: #f9f9f9;
+  width: 100%;
+  min-width: 200px;
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+  pointer-events: none;
+}

@@ -1,0 +1,36 @@
+name: Build and Test
+
+on:
+  push:
+    branches: [ development-clean ]
+  pull_request:
+    branches: [ development-clean ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.19.0'
+        
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v3
+      with:
+        version: '10.2.1'
+        
+    - name: Install dependencies
+      run: pnpm install
+      
+    - name: Run lint
+      run: pnpm lint
+      
+    - name: Run tests
+      run: pnpm test
+      
+    - name: Build
+      run: pnpm build

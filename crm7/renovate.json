@@ -1,0 +1,42 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended"
+  ],
+  "schedule": ["every weekend"],
+  "prConcurrentLimit": 3,
+  "packageRules": [
+    {
+      "matchUpdateTypes": ["minor", "patch"],
+      "matchCurrentVersion": "!/^0/",
+      "automerge": true,
+      "automergeType": "branch"
+    },
+    {
+      "groupName": "all non-major dependencies",
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupSlug": "all-minor-patch"
+    },
+    {
+      "groupName": "TypeScript-related packages",
+      "matchPackagePatterns": ["^@types/", "typescript", "ts-"],
+      "groupSlug": "typescript"
+    },
+    {
+      "groupName": "Testing packages",
+      "matchPackagePatterns": ["jest", "testing-library"],
+      "groupSlug": "testing"
+    },
+    {
+      "groupName": "React and Next.js packages",
+      "matchPackagePatterns": ["^@next", "^next$", "react", "^@tanstack"],
+      "groupSlug": "react-next"
+    }
+  ],
+  "rangeStrategy": "pin",
+  "stabilityDays": 3,
+  "dependencyDashboard": true,
+  "major": {
+    "dependencyDashboardApproval": true
+  }
+}
