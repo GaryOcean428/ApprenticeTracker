@@ -830,6 +830,101 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get apprentice progress modules
+  app.get("/api/progress/modules", async (req, res) => {
+    try {
+      // Return sample progress data
+      const progressData = [
+        {
+          module: "Core Vocational Skills",
+          progress: 85,
+          status: "in_progress",
+          lastActivity: "2024-04-25"
+        },
+        {
+          module: "Health & Safety Fundamentals",
+          progress: 100,
+          status: "completed",
+          lastActivity: "2024-04-15"
+        },
+        {
+          module: "Industry Knowledge",
+          progress: 100,
+          status: "completed",
+          lastActivity: "2024-04-10"
+        },
+        {
+          module: "Practical Assessment",
+          progress: 0,
+          status: "not_started"
+        }
+      ];
+      res.json(progressData);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching progress modules" });
+    }
+  });
+  
+  // Get apprentice assessments
+  app.get("/api/progress/assessments", async (req, res) => {
+    try {
+      // Return sample assessment data
+      const assessmentData = [
+        {
+          name: "Health & Safety Exam",
+          score: 92,
+          date: "2024-04-15",
+          feedback: "Excellent understanding of workplace safety protocols"
+        },
+        {
+          name: "Industry Knowledge Quiz",
+          score: 88,
+          date: "2024-04-10",
+          feedback: "Good grasp of industry standards and practices"
+        },
+        {
+          name: "Vocational Skills Assessment 1",
+          score: 76,
+          date: "2024-03-20",
+          feedback: "Needs improvement in technical documentation"
+        }
+      ];
+      res.json(assessmentData);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching assessments" });
+    }
+  });
+  
+  // Get compliance alerts
+  app.get("/api/compliance/alerts", async (req, res) => {
+    try {
+      // Return sample compliance alerts
+      const alerts = [
+        {
+          id: "1",
+          type: "High",
+          message: "Missing required documentation for apprentice onboarding",
+          date: "2024-04-28"
+        },
+        {
+          id: "2",
+          type: "Medium",
+          message: "Incomplete risk assessment form for XYZ Construction",
+          date: "2024-04-26"
+        },
+        {
+          id: "3",
+          type: "Low",
+          message: "Pending annual review for apprentice John Smith",
+          date: "2024-04-25"
+        }
+      ];
+      res.json(alerts);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching compliance alerts" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
