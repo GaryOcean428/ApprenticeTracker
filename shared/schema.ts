@@ -40,11 +40,22 @@ export const apprentices = pgTable("apprentices", {
   startDate: date("start_date"),
   endDate: date("end_date"),
   notes: text("notes"),
+  // AVETMISS & Fair Work Fields
+  clientIdentifierApprenticeships: text("client_identifier_apprenticeships").unique(),  // AVETMISS unique identifier
+  uniqueStudentIdentifier: text("unique_student_identifier"),      // USI for VET tracking
+  highestSchoolLevelCompleted: text("highest_school_level_completed"), // e.g. 'Year 12'
+  indigenousStatus: text("indigenous_status"),                    // For demographic reporting
+  languageIdentifier: text("language_identifier"),                // Based on ASCL standards
+  countryOfBirth: text("country_of_birth"),                       // Based on SACC standards
+  disabilityFlag: boolean("disability_flag").default(false),      // For support requirements
   // AQF & GTO fields
-  aqfLevel: text("aqf_level"),                          // e.g. 'Certificate III', 'Diploma'
-  apprenticeshipYear: integer("apprenticeship_year"),     // Tracks which year of apprenticeship
-  gtoEnrolled: boolean("gto_enrolled").default(false),   // Flag if placed via a GTO
-  gtoId: integer("gto_id"),                              // Reference to GTO organization
+  aqfLevel: text("aqf_level"),                                   // e.g. 'Certificate III', 'Diploma'
+  apprenticeshipYear: integer("apprenticeship_year"),            // Tracks which year of apprenticeship
+  gtoEnrolled: boolean("gto_enrolled").default(false),           // Flag if placed via a GTO
+  gtoId: integer("gto_id"),                                      // Reference to GTO organization
+  atSchoolFlag: boolean("at_school_flag").default(false),        // Indicates if still at school
+  schoolLevelIdentifier: text("school_level_identifier"),        // Current school level if applicable
+  schoolBasedFlag: boolean("school_based_flag").default(false),  // Indicates school-based apprenticeship
 });
 
 export const insertApprenticeSchema = createInsertSchema(apprentices).omit({
@@ -64,9 +75,20 @@ export const hostEmployers = pgTable("host_employers", {
   safetyRating: integer("safety_rating"),
   complianceStatus: text("compliance_status").notNull().default("pending"),
   notes: text("notes"),
+  // AVETMISS and Fair Work fields
+  employerIdentifier: text("employer_identifier").unique(),     // AVETMISS employer identifier
+  employerLegalName: text("employer_legal_name"),               // Legal business name
+  employerSize: text("employer_size"),                          // Size category (small, medium, large)
+  employerTypeIdentifier: text("employer_type_identifier"),     // Type of employer (e.g., private, government)
+  anzsicCode: text("anzsic_code"),                              // Industry classification code
+  // WHS & Compliance fields
+  whsPolicy: boolean("whs_policy").default(false),              // Has workplace health & safety policy
+  whsLastAudit: date("whs_last_audit"),                         // Date of last safety audit
+  whsNextAudit: date("whs_next_audit"),                         // Date of next scheduled audit
   // Labour hire fields
-  isGto: boolean("is_gto").default(false),             // Indicates if this org is a Group Training Organisation
-  labourHireLicenceNo: text("labour_hire_licence_no"), // For orgs operating under labour hire licensing laws
+  isGto: boolean("is_gto").default(false),                      // Indicates if this org is a Group Training Organisation
+  labourHireLicenceNo: text("labour_hire_licence_no"),          // For orgs operating under labour hire licensing laws
+  labourHireLicenceExpiry: date("labour_hire_licence_expiry"),  // Expiry date for labour hire license
 });
 
 export const insertHostEmployerSchema = createInsertSchema(hostEmployers).omit({
