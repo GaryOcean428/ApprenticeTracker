@@ -1,0 +1,21 @@
+{
+  "version": 2,
+  "buildCommand": "corepack enable && COREPACK_DISABLE_SIGNATURES=1 pnpm install --no-frozen-lockfile && pnpm run build",
+  "installCommand": "corepack enable && COREPACK_DISABLE_SIGNATURES=1 pnpm install --no-frozen-lockfile",
+  "framework": "nextjs",
+  "outputDirectory": ".next",
+  "env": {
+    "NEXT_PUBLIC_SUPABASE_URL": "https://iykrauzuutvmnxpqppzk.supabase.co",
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml5a3JhdXp1dXR2bW54cHFwcHprIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzU4NzE1NjcsImV4cCI6MjA1MTQ0NzU2N30.kvAGD6FrOhmdpYzRHMyXam3p337w8Ijd5_raruHPd6U",
+    "NEXT_PUBLIC_APP_URL": "https://crm7.vercel.app"
+  },
+  "build": {
+    "env": {
+      "NEXT_TELEMETRY_DISABLED": "1",
+      "PNPM_VERSION": "10.7.1",
+      "NODE_VERSION": "22.x",
+      "ENABLE_COREPACK": "1",
+      "ENABLE_EXPERIMENTAL_COREPACK": "1"
+    }
+  }
+}

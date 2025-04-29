@@ -1,0 +1,93 @@
+name: Code Quality Check
+
+on:
+  push:
+    branches: [main, development]
+  pull_request:
+    branches: [main, development]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: read
+  statuses: write
+
+env:
+  PNPM_VERSION: 10.7.1
+  NODE_VERSION: '22'
+
+jobs:
+  quality:
+    name: Code Quality
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup PNPM
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+          run_install: false
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install Dependencies
+        run: pnpm install
+
+      - name: Run ESLint
+        run: pnpm lint
+
+      - name: Run Type Check
+        run: pnpm type-check
+
+      - name: Super-Linter
+        uses: super-linter/super-linter@v7.3.0
+        env:
+          VALIDATE_ALL_CODEBASE: false
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Linting Configuration
+          VALIDATE_TYPESCRIPT_ES: true
+          VALIDATE_JAVASCRIPT_ES: true
+          VALIDATE_CSS: true
+          VALIDATE_YAML: true
+          VALIDATE_JSON: true
+          VALIDATE_MARKDOWN: true
+          VALIDATE_GITHUB_ACTIONS: true
+          VALIDATE_ENV: true
+          VALIDATE_HTML: true
+          VALIDATE_SECURITY: true
+          # Config Files
+          TYPESCRIPT_ES_CONFIG_FILE: .eslintrc.json
+          JAVASCRIPT_ES_CONFIG_FILE: .eslintrc.json
+          MARKDOWN_CONFIG_FILE: .markdownlint.json
+          TYPESCRIPT_DEFAULT_STYLE: prettier
+          # Prettier Validation
+          VALIDATE_TYPESCRIPT_PRETTIER: true
+          VALIDATE_JAVASCRIPT_PRETTIER: true
+          VALIDATE_CSS_PRETTIER: true
+          VALIDATE_JSON_PRETTIER: true
+          VALIDATE_MARKDOWN_PRETTIER: true
+          VALIDATE_YAML_PRETTIER: true
+          # GitHub Actions Display
+          ENABLE_GITHUB_ACTIONS_GROUP_TITLE: true
+          ENABLE_GITHUB_ACTIONS_STEP_SUMMARY: true

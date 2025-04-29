@@ -1,0 +1,52 @@
+.progressBar {
+  width: var(--percentage);
+  height: 100%;
+  background-color: var(--primary);
+  transition: width 0.3s ease-in-out;
+}
+
+.progressBar[data-percentage] {
+  --percentage: attr(data-percentage) %;
+}
+
+.flexItemsCenter {
+  display: flex;
+  align-items: center;
+}
+
+.ml2 {
+  margin-left: 0.5rem;
+  width: 4rem;
+  height: 0.5rem;
+  background-color: rgb(229, 231, 235);
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.mlAuto {
+  margin-left: auto;
+}
+
+.maxWidthSm {
+  max-width: 24rem;
+}
+
+.capitalize {
+  text-transform: capitalize;
+}
+
+.roundedMd {
+  border-radius: 0.375rem;
+}
+
+.h24 {
+  height: 6rem;
+}
+
+.flex1 {
+  flex: 1 1 0%;
+}
+
+.spaceX2 > * + * {
+  margin-left: 0.5rem;
+}
