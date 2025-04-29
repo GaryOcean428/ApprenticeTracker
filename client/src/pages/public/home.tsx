@@ -6,25 +6,25 @@ export default function HomePage() {
   return (
     <PublicLayout>
       {/* Hero Section */}
-      <section className="w-full py-12 md:py-24 lg:py-32 bg-gradient-to-br from-blue-50 to-blue-100">
+      <section className="w-full py-12 md:py-24 lg:py-32 bg-blue-50">
         <div className="container px-4 md:px-6">
           <div className="flex flex-col items-center space-y-4 text-center">
             <div className="space-y-2">
-              <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl">
-                Connecting apprentices with career opportunities, and employers with skilled talent.
+              <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl text-white">
+                <span className="bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">Connecting apprentices with career opportunities, and employers with skilled talent.</span>
               </h1>
-              <p className="mx-auto max-w-[700px] text-gray-500 md:text-xl">
+              <p className="mx-auto max-w-[700px] text-gray-600 md:text-xl lg:text-2xl">
                 Group Training Organisation specialising in apprenticeship and traineeship management in Western Australia.
               </p>
             </div>
             <div className="space-x-4">
               <Link href="/find-apprenticeship">
-                <Button className="bg-blue-600 hover:bg-blue-700" size="lg">
+                <Button className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-6 rounded-md" size="lg">
                   Find an Apprenticeship
                 </Button>
               </Link>
               <Link href="/host-apprentice">
-                <Button variant="outline" size="lg">
+                <Button variant="outline" size="lg" className="border-2 border-blue-600 text-blue-600 hover:bg-blue-50 font-semibold px-8 py-6 rounded-md">
                   Become a Host Employer
                 </Button>
               </Link>

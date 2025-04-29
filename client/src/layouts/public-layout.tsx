@@ -13,7 +13,7 @@ export default function PublicLayout({ children }: PublicLayoutProps) {
         <div className="container flex h-16 items-center justify-between py-4">
           <div className="flex gap-6 md:gap-10">
             <Link href="/" className="flex items-center space-x-2">
-              <span className="hidden font-bold sm:inline-block text-blue-600">Braden Group</span>
+              <span className="hidden font-bold text-xl sm:inline-block bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">Braden Group</span>
             </Link>
             <nav className="hidden gap-6 md:flex">
               <Link href="/">
