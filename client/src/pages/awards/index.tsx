@@ -41,6 +41,20 @@ import { toast } from "sonner";
 import { Link } from "wouter";
 import { queryClient } from "@/lib/queryClient";
 
+// Define Award interface
+interface Award {
+  id: number;
+  name: string;
+  code: string;
+  fairWorkReference?: string;
+  fairWorkTitle?: string;
+  description?: string;
+  effectiveDate?: Date | string;
+  isActive: boolean;
+  createdAt: Date | string;
+  updatedAt: Date | string;
+}
+
 const AwardsList = () => {
   const [filter, setFilter] = useState({
     search: "",
@@ -48,7 +62,7 @@ const AwardsList = () => {
   });
   
   // Fetch awards
-  const { data: awards, isLoading, error } = useQuery({
+  const { data: awards, isLoading, error } = useQuery<Award[]>({
     queryKey: ['/api/awards'],
     queryFn: async () => {
       const res = await fetch('/api/awards');
@@ -58,7 +72,7 @@ const AwardsList = () => {
   });
   
   // Filter awards based on search and filters
-  const filteredAwards = awards?.filter(award => {
+  const filteredAwards = awards?.filter((award: Award) => {
     const matchesSearch = 
       filter.search === "" || 
       award.name?.toLowerCase().includes(filter.search.toLowerCase()) ||
@@ -190,7 +204,7 @@ const AwardsList = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredAwards.map((award) => (
+                  {filteredAwards.map((award: Award) => (
                     <TableRow key={award.id}>
                       <TableCell className="font-medium">{award.code}</TableCell>
                       <TableCell>{award.name}</TableCell>

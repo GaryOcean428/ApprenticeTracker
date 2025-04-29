@@ -19,6 +19,8 @@ import ComplianceList from "./pages/compliance/index";
 import CreateComplianceRecord from "./pages/compliance/create";
 import TimesheetsList from "./pages/timesheets/index";
 import ReportsList from "./pages/reports/index";
+import AwardsList from "./pages/awards/index";
+import CreateAward from "./pages/awards/create";
 
 // Public pages
 import HomePage from "./pages/public/home";
@@ -68,6 +70,10 @@ function Router() {
       <Route path="/hosts" component={HostsList} />
       <Route path="/hosts/create" component={CreateHost} />
       <Route path="/hosts/:id" component={HostDetails} />
+      
+      {/* Fair Work Routes */}
+      <Route path="/awards" component={AwardsList} />
+      <Route path="/awards/create" component={CreateAward} />
       
       {/* Other Routes */}
       <Route path="/contracts" component={ContractsList} />
