@@ -952,8 +952,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteUser(id: number): Promise<boolean> {
-    const result = await db.delete(users).where(eq(users.id, id));
-    return result.count > 0;
+    await db.delete(users).where(eq(users.id, id));
+    return true;
   }
 
   // Apprentices
@@ -980,8 +980,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteApprentice(id: number): Promise<boolean> {
-    const result = await db.delete(apprentices).where(eq(apprentices.id, id));
-    return result.count > 0;
+    await db.delete(apprentices).where(eq(apprentices.id, id));
+    return true;
   }
 
   // Host Employers

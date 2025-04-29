@@ -1,6 +1,11 @@
 import { storage } from "./storage";
 import { InsertUser, InsertApprentice, InsertHostEmployer, InsertTrainingContract, InsertPlacement, InsertDocument, InsertComplianceRecord, InsertTask, InsertActivityLog } from "@shared/schema";
 
+// Helper function to convert JavaScript Date to ISO string (date part only)
+function formatDate(date: Date): string {
+  return date.toISOString().split('T')[0];
+}
+
 /**
  * Seeds the database with initial sample data
  */
@@ -30,13 +35,13 @@ export async function seedDatabase() {
         lastName: "Smith",
         email: "john.smith@example.com",
         phone: "123-456-7890",
-        dateOfBirth: new Date("1995-05-15"),
+        dateOfBirth: "1995-05-15",
         trade: "Electrical",
         status: "active",
         profileImage: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80",
         progress: 75,
-        startDate: new Date("2023-01-15"),
-        endDate: new Date("2026-01-15"),
+        startDate: formatDate(new Date("2023-01-15")),
+        endDate: formatDate(new Date("2026-01-15")),
         notes: "Excellent progress in technical skills",
       },
       {
@@ -45,13 +50,13 @@ export async function seedDatabase() {
         lastName: "Johnson",
         email: "sarah.j@example.com",
         phone: "123-456-7891",
-        dateOfBirth: new Date("1998-08-22"),
+        dateOfBirth: "1998-08-22",
         trade: "Carpentry",
         status: "active",
         profileImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80",
         progress: 45,
-        startDate: new Date("2023-03-10"),
-        endDate: new Date("2026-03-10"),
+        startDate: formatDate(new Date("2023-03-10")),
+        endDate: formatDate(new Date("2026-03-10")),
         notes: "Needs improvement in time management",
       },
       {
@@ -60,13 +65,13 @@ export async function seedDatabase() {
         lastName: "Chen",
         email: "m.chen@example.com",
         phone: "123-456-7892",
-        dateOfBirth: new Date("1997-11-30"),
+        dateOfBirth: "1997-11-30",
         trade: "IT Support",
         status: "active",
         profileImage: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80",
         progress: 90,
-        startDate: new Date("2022-09-05"),
-        endDate: new Date("2025-09-05"),
+        startDate: formatDate(new Date("2022-09-05")),
+        endDate: formatDate(new Date("2025-09-05")),
         notes: "Excellent technical skills",
       },
       {
@@ -75,13 +80,13 @@ export async function seedDatabase() {
         lastName: "Wilson",
         email: "d.wilson@example.com",
         phone: "123-456-7893",
-        dateOfBirth: new Date("1996-04-12"),
+        dateOfBirth: "1996-04-12",
         trade: "Plumbing",
         status: "on_hold",
         profileImage: "https://images.unsplash.com/photo-1552374196-c4e7ffc6e126?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80",
         progress: 30,
-        startDate: new Date("2023-02-20"),
-        endDate: new Date("2026-02-20"),
+        startDate: formatDate(new Date("2023-02-20")),
+        endDate: formatDate(new Date("2026-02-20")),
         notes: "Currently on hold due to personal reasons",
       }
     ];
@@ -157,46 +162,46 @@ export async function seedDatabase() {
       {
         apprenticeId: createdApprentices[0].id,
         contractNumber: "TC-2023-001",
-        startDate: new Date("2023-01-15"),
-        endDate: new Date("2026-01-15"),
+        startDate: formatDate(new Date("2023-01-15")),
+        endDate: formatDate(new Date("2026-01-15")),
         status: "active",
         documentUrl: "/documents/contracts/TC-2023-001.pdf",
         terms: {},
         approvedBy: "HR Manager",
-        approvalDate: new Date("2023-01-10"),
+        approvalDate: formatDate(new Date("2023-01-10")),
       },
       {
         apprenticeId: createdApprentices[1].id,
         contractNumber: "TC-2023-002",
-        startDate: new Date("2023-03-10"),
-        endDate: new Date("2026-03-10"),
+        startDate: formatDate(new Date("2023-03-10")),
+        endDate: formatDate(new Date("2026-03-10")),
         status: "active",
         documentUrl: "/documents/contracts/TC-2023-002.pdf",
         terms: {},
         approvedBy: "HR Manager",
-        approvalDate: new Date("2023-03-05"),
+        approvalDate: formatDate(new Date("2023-03-05")),
       },
       {
         apprenticeId: createdApprentices[2].id,
         contractNumber: "TC-2022-015",
-        startDate: new Date("2022-09-05"),
-        endDate: new Date("2025-09-05"),
+        startDate: formatDate(new Date("2022-09-05")),
+        endDate: formatDate(new Date("2025-09-05")),
         status: "active",
         documentUrl: "/documents/contracts/TC-2022-015.pdf",
         terms: {},
         approvedBy: "HR Manager",
-        approvalDate: new Date("2022-09-01"),
+        approvalDate: formatDate(new Date("2022-09-01")),
       },
       {
         apprenticeId: createdApprentices[3].id,
         contractNumber: "TC-2023-003",
-        startDate: new Date("2023-02-20"),
-        endDate: new Date("2026-02-20"),
+        startDate: formatDate(new Date("2023-02-20")),
+        endDate: formatDate(new Date("2026-02-20")),
         status: "on_hold",
         documentUrl: "/documents/contracts/TC-2023-003.pdf",
         terms: {},
         approvedBy: "HR Manager",
-        approvalDate: new Date("2023-02-15"),
+        approvalDate: formatDate(new Date("2023-02-15")),
       }
     ];
     
@@ -212,8 +217,8 @@ export async function seedDatabase() {
       {
         apprenticeId: createdApprentices[0].id,
         hostEmployerId: createdHostEmployers[0].id,
-        startDate: new Date("2023-01-20"),
-        endDate: new Date("2023-07-20"),
+        startDate: formatDate(new Date("2023-01-20")),
+        endDate: formatDate(new Date("2023-07-20")),
         status: "active",
         position: "Electrical Apprentice",
         supervisor: "Thomas Edison",
@@ -223,8 +228,8 @@ export async function seedDatabase() {
       {
         apprenticeId: createdApprentices[1].id,
         hostEmployerId: createdHostEmployers[1].id,
-        startDate: new Date("2023-03-15"),
-        endDate: new Date("2023-09-15"),
+        startDate: formatDate(new Date("2023-03-15")),
+        endDate: formatDate(new Date("2023-09-15")),
         status: "active",
         position: "Carpentry Apprentice",
         supervisor: "Bob Builder",
@@ -234,8 +239,8 @@ export async function seedDatabase() {
       {
         apprenticeId: createdApprentices[2].id,
         hostEmployerId: createdHostEmployers[2].id,
-        startDate: new Date("2022-09-10"),
-        endDate: new Date("2023-03-10"),
+        startDate: formatDate(new Date("2022-09-10")),
+        endDate: formatDate(new Date("2023-03-10")),
         status: "completed",
         position: "IT Support Apprentice",
         supervisor: "Ada Lovelace",
@@ -245,8 +250,8 @@ export async function seedDatabase() {
       {
         apprenticeId: createdApprentices[2].id,
         hostEmployerId: createdHostEmployers[2].id,
-        startDate: new Date("2023-04-01"),
-        endDate: new Date("2023-10-01"),
+        startDate: formatDate(new Date("2023-04-01")),
+        endDate: formatDate(new Date("2023-10-01")),
         status: "active",
         position: "IT Support Apprentice - Advanced",
         supervisor: "Ada Lovelace",
@@ -256,8 +261,8 @@ export async function seedDatabase() {
       {
         apprenticeId: createdApprentices[3].id,
         hostEmployerId: createdHostEmployers[3].id,
-        startDate: new Date("2023-02-25"),
-        endDate: new Date("2023-08-25"),
+        startDate: formatDate(new Date("2023-02-25")),
+        endDate: formatDate(new Date("2023-08-25")),
         status: "on_hold",
         position: "Plumbing Apprentice",
         supervisor: "Joe Plumber",
@@ -317,7 +322,7 @@ export async function seedDatabase() {
         relatedTo: "host",
         relatedId: createdHostEmployers[3].id,
         status: "pending",
-        dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
+        dueDate: formatDate(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)), // 7 days from now
         completionDate: null,
         notes: "Workplace safety assessment due",
       },
@@ -326,7 +331,7 @@ export async function seedDatabase() {
         relatedTo: "apprentice",
         relatedId: createdApprentices[1].id,
         status: "non-compliant",
-        dueDate: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), // 3 days ago
+        dueDate: formatDate(new Date(Date.now() - 3 * 24 * 60 * 60 * 1000)), // 3 days ago
         completionDate: null,
         notes: "Updated certifications required",
       },
@@ -335,8 +340,8 @@ export async function seedDatabase() {
         relatedTo: "apprentice",
         relatedId: createdApprentices[0].id,
         status: "compliant",
-        dueDate: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000), // 10 days ago
-        completionDate: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000), // 12 days ago
+        dueDate: formatDate(new Date(Date.now() - 10 * 24 * 60 * 60 * 1000)), // 10 days ago
+        completionDate: formatDate(new Date(Date.now() - 12 * 24 * 60 * 60 * 1000)), // 12 days ago
         notes: "Annual contract review completed",
       }
     ];
@@ -352,7 +357,7 @@ export async function seedDatabase() {
         title: "Review new apprentice applications",
         description: "Review and process the applications received this week",
         assignedTo: admin.id,
-        dueDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000), // 2 days from now
+        dueDate: formatDate(new Date(Date.now() + 2 * 24 * 60 * 60 * 1000)), // 2 days from now
         priority: "high",
         status: "pending",
         relatedTo: null,
@@ -363,7 +368,7 @@ export async function seedDatabase() {
         title: "Schedule safety training for hosts",
         description: "Set up the quarterly safety training session for host employers",
         assignedTo: admin.id,
-        dueDate: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000), // 10 days from now
+        dueDate: formatDate(new Date(Date.now() + 10 * 24 * 60 * 60 * 1000)), // 10 days from now
         priority: "medium",
         status: "pending",
         relatedTo: null,
@@ -374,7 +379,7 @@ export async function seedDatabase() {
         title: "Update compliance documentation",
         description: "Ensure all compliance documents are up to date for the upcoming audit",
         assignedTo: admin.id,
-        dueDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000), // 5 days from now
+        dueDate: formatDate(new Date(Date.now() + 5 * 24 * 60 * 60 * 1000)), // 5 days from now
         priority: "urgent",
         status: "in_progress",
         relatedTo: null,
