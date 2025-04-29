@@ -85,15 +85,15 @@ const ComplianceList = () => {
       record.type.toLowerCase().includes(filter.search.toLowerCase()) ||
       record.relatedTo.toLowerCase().includes(filter.search.toLowerCase());
     
-    const matchesType = filter.type === "" || record.type === filter.type;
-    const matchesStatus = filter.status === "" || record.status === filter.status;
+    const matchesType = filter.type === "all_types" || record.type === filter.type;
+    const matchesStatus = filter.status === "all_statuses" || record.status === filter.status;
     
     return matchesSearch && matchesType && matchesStatus;
   });
   
   // Get unique compliance record types for the filter dropdown
   const recordTypes = complianceRecords 
-    ? [...new Set(complianceRecords.map(record => record.type))]
+    ? Array.from(new Set(complianceRecords.map(record => record.type)))
     : [];
   
   const getStatusBadgeClass = (status: string) => {
@@ -167,7 +167,7 @@ const ComplianceList = () => {
                     <SelectValue placeholder="Record Type" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Types</SelectItem>
+                    <SelectItem value="all_types">All Types</SelectItem>
                     {recordTypes.map((type) => (
                       <SelectItem key={type} value={type}>{type}</SelectItem>
                     ))}
@@ -184,7 +184,7 @@ const ComplianceList = () => {
                     <SelectValue placeholder="Status" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Statuses</SelectItem>
+                    <SelectItem value="all_statuses">All Statuses</SelectItem>
                     <SelectItem value="compliant">Compliant</SelectItem>
                     <SelectItem value="non-compliant">Non-Compliant</SelectItem>
                     <SelectItem value="pending">Pending</SelectItem>
