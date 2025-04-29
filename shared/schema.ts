@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, date, timestamp, json } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, date, timestamp, json, numeric, uuid } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -40,6 +40,11 @@ export const apprentices = pgTable("apprentices", {
   startDate: date("start_date"),
   endDate: date("end_date"),
   notes: text("notes"),
+  // AQF & GTO fields
+  aqfLevel: text("aqf_level"),                          // e.g. 'Certificate III', 'Diploma'
+  apprenticeshipYear: integer("apprenticeship_year"),     // Tracks which year of apprenticeship
+  gtoEnrolled: boolean("gto_enrolled").default(false),   // Flag if placed via a GTO
+  gtoId: integer("gto_id"),                              // Reference to GTO organization
 });
 
 export const insertApprenticeSchema = createInsertSchema(apprentices).omit({
@@ -59,6 +64,9 @@ export const hostEmployers = pgTable("host_employers", {
   safetyRating: integer("safety_rating"),
   complianceStatus: text("compliance_status").notNull().default("pending"),
   notes: text("notes"),
+  // Labour hire fields
+  isGto: boolean("is_gto").default(false),             // Indicates if this org is a Group Training Organisation
+  labourHireLicenceNo: text("labour_hire_licence_no"), // For orgs operating under labour hire licensing laws
 });
 
 export const insertHostEmployerSchema = createInsertSchema(hostEmployers).omit({
@@ -77,6 +85,10 @@ export const trainingContracts = pgTable("training_contracts", {
   terms: json("terms"),
   approvedBy: text("approved_by"),
   approvalDate: date("approval_date"),
+  // Fair Work & AQF fields
+  aqfLevel: text("aqf_level"),                 // e.g. 'Certificate III', 'Diploma'
+  rtoName: text("rto_name"),                   // Name of the Registered Training Organisation
+  rtoCode: text("rto_code"),                   // e.g., provider's RTO code
 });
 
 export const insertTrainingContractSchema = createInsertSchema(trainingContracts).omit({
@@ -95,6 +107,10 @@ export const placements = pgTable("placements", {
   supervisor: text("supervisor"),
   supervisorContact: text("supervisor_contact"),
   notes: text("notes"),
+  // Labour hire & GTO fields
+  labourHireIndicator: boolean("labour_hire_indicator").default(false), // Distinguish direct hire vs. labour hire
+  gtoPlacement: boolean("gto_placement").default(false),             // If placed by a GTO
+  ebaId: integer("eba_id"),                                         // Link to enterprise agreement
 });
 
 export const insertPlacementSchema = createInsertSchema(placements).omit({
@@ -207,6 +223,229 @@ export const insertTaskSchema = createInsertSchema(tasks).omit({
   completedAt: true,
 });
 
+// Fair Work Awards
+export const awards = pgTable("awards", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  code: text("code").notNull().unique(),
+  fairWorkReference: text("fair_work_reference"), // e.g. 'MA000010'
+  fairWorkTitle: text("fair_work_title"),        // e.g. 'Clerks — Private Sector Award 2010'
+  description: text("description"),
+  effectiveDate: date("effective_date"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertAwardSchema = createInsertSchema(awards).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+// Award Classifications
+export const awardClassifications = pgTable("award_classifications", {
+  id: serial("id").primaryKey(),
+  awardId: integer("award_id").references(() => awards.id).notNull(),
+  name: text("name").notNull(),
+  level: text("level").notNull(),
+  fairWorkLevelCode: text("fair_work_level_code"), // e.g. 'Level 1', 'Level 2'
+  fairWorkLevelDesc: text("fair_work_level_desc"),
+  aqfLevel: text("aqf_level"),                    // e.g. 'Certificate III', 'Diploma'
+  description: text("description"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertAwardClassificationSchema = createInsertSchema(awardClassifications).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+// Pay Rates
+export const payRates = pgTable("pay_rates", {
+  id: serial("id").primaryKey(),
+  classificationId: integer("classification_id").references(() => awardClassifications.id).notNull(),
+  hourlyRate: numeric("hourly_rate").notNull(),
+  effectiveFrom: date("effective_from").notNull(),
+  effectiveTo: date("effective_to"),
+  payRateType: text("pay_rate_type").default("award"), // 'award', 'EBA', 'individual_agreement'
+  isApprenticeRate: boolean("is_apprentice_rate").default(false),
+  apprenticeshipYear: integer("apprenticeship_year"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertPayRateSchema = createInsertSchema(payRates).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+// Penalty Rules
+export const penaltyRules = pgTable("penalty_rules", {
+  id: serial("id").primaryKey(),
+  awardId: integer("award_id").references(() => awards.id).notNull(),
+  classificationId: integer("classification_id").references(() => awardClassifications.id),
+  penaltyName: text("penalty_name").notNull(),       // e.g. 'Weekend Loading', 'Overtime 1.5x'
+  penaltyType: text("penalty_type"),                 // e.g. 'overtime', 'weekend', 'public_holiday'
+  multiplier: numeric("multiplier", { precision: 5, scale: 2 }), // e.g. 1.50 for time-and-a-half
+  daysOfWeek: json("days_of_week"),                  // e.g. [6,7] for Sat/Sun, or empty if not restricted
+  startTime: text("start_time"),                     // If penalty applies after certain hour
+  endTime: text("end_time"),                         // If penalty applies until certain hour
+  notes: text("notes"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertPenaltyRuleSchema = createInsertSchema(penaltyRules).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+// Allowance Rules
+export const allowanceRules = pgTable("allowance_rules", {
+  id: serial("id").primaryKey(),
+  awardId: integer("award_id").references(() => awards.id).notNull(),
+  classificationId: integer("classification_id").references(() => awardClassifications.id),
+  allowanceName: text("allowance_name").notNull(),    // e.g. 'Tool Allowance'
+  allowanceAmount: numeric("allowance_amount", { precision: 10, scale: 2 }),
+  allowanceType: text("allowance_type"),             // e.g. 'per_hour', 'per_day', 'per_shift'
+  notes: text("notes"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertAllowanceRuleSchema = createInsertSchema(allowanceRules).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+// Public Holidays
+export const publicHolidays = pgTable("public_holidays", {
+  id: serial("id").primaryKey(),
+  state: text("state").notNull(),       // e.g. 'VIC', 'NSW', or 'NATIONAL'
+  holidayDate: date("holiday_date").notNull(),
+  holidayName: text("holiday_name").notNull(),   // e.g. 'Australia Day'
+  notes: text("notes"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertPublicHolidaySchema = createInsertSchema(publicHolidays).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+// Fair Work Compliance Logs
+export const fairworkComplianceLogs = pgTable("fairwork_compliance_logs", {
+  id: serial("id").primaryKey(),
+  employeeId: integer("employee_id").references(() => apprentices.id).notNull(),
+  timesheetId: integer("timesheet_id").references(() => timesheets.id),
+  payRateId: integer("pay_rate_id").references(() => payRates.id),
+  complianceCheck: text("compliance_check"),     // JSON or text describing checks performed
+  outcome: text("outcome"),                     // 'compliant', 'adjustment_needed', etc.
+  notes: text("notes"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const insertFairworkComplianceLogSchema = createInsertSchema(fairworkComplianceLogs).omit({
+  id: true,
+  createdAt: true,
+});
+
+// Enterprise Agreements
+export const enterpriseAgreements = pgTable("enterprise_agreements", {
+  id: serial("id").primaryKey(),
+  agreementName: text("agreement_name").notNull(),
+  agreementCode: text("agreement_code"),      // e.g. an internal or official code
+  description: text("description"),
+  effectiveDate: date("effective_date"),
+  expiryDate: date("expiry_date"),
+  agreementStatus: text("agreement_status").default("active"), // 'active', 'expired'
+  notes: text("notes"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertEnterpriseAgreementSchema = createInsertSchema(enterpriseAgreements).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+// GTO Organizations
+export const gtoOrganizations = pgTable("gto_organizations", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  isGto: boolean("is_gto").default(true),  // Indicates if this org is a Group Training Organisation
+  labourHireLicenceNo: text("labour_hire_licence_no"),   // For orgs operating under labour hire licensing laws
+  contactPerson: text("contact_person"),
+  email: text("email"),
+  phone: text("phone"),
+  address: text("address"),
+  status: text("status").default("active"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertGtoOrganizationSchema = createInsertSchema(gtoOrganizations).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+// External Portals Configuration
+export const externalPortals = pgTable("external_portals", {
+  id: serial("id").primaryKey(),
+  organizationId: integer("organization_id").references(() => gtoOrganizations.id).notNull(),
+  portalName: text("portal_name").notNull(),            // e.g. 'RatesCalc', 'FairWork API Portal'
+  portalType: text("portal_type"),                     // e.g. 'pay_calculation', 'compliance'
+  baseUrl: text("base_url"),
+  apiKey: text("api_key"),                     // If needed for authentication
+  configuration: json("configuration").default({}),       // Extra config
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertExternalPortalSchema = createInsertSchema(externalPortals).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+// Extend existing tables
+
+// Add AQF & GTO fields to apprentices
+export const extendedApprentices = {
+  aqfLevel: text("aqf_level"),                 // e.g. 'Certificate III', 'Diploma'
+  apprenticeshipYear: integer("apprenticeship_year"),   // Tracks which year of apprenticeship
+  gtoEnrolled: boolean("gto_enrolled").default(false),  // Flag if the employee is placed via a GTO
+  gtoId: integer("gto_id").references(() => gtoOrganizations.id),  // Reference to GTO organization
+};
+
+// Add labour hire & GTO fields to placements
+export const extendedPlacements = {
+  labourHireIndicator: boolean("labour_hire_indicator").default(false), // Distinguish direct hire vs. labour hire
+  gtoPlacement: boolean("gto_placement").default(false),             // If placed by a GTO
+  ebaId: integer("eba_id").references(() => enterpriseAgreements.id), // Link to enterprise agreement
+};
+
+// Add Fair Work & AQF fields to training contracts
+export const extendedTrainingContracts = {
+  aqfLevel: text("aqf_level"),                 // e.g. 'Certificate III', 'Diploma'
+  rtoName: text("rto_name"),                    // Name of the Registered Training Organisation
+  rtoCode: text("rto_code"),                    // e.g., provider's RTO code
+};
+
 // Export types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -240,3 +479,34 @@ export type InsertActivityLog = z.infer<typeof insertActivityLogSchema>;
 
 export type Task = typeof tasks.$inferSelect;
 export type InsertTask = z.infer<typeof insertTaskSchema>;
+
+// Export new Australian-specific types
+export type Award = typeof awards.$inferSelect;
+export type InsertAward = z.infer<typeof insertAwardSchema>;
+
+export type AwardClassification = typeof awardClassifications.$inferSelect;
+export type InsertAwardClassification = z.infer<typeof insertAwardClassificationSchema>;
+
+export type PayRate = typeof payRates.$inferSelect;
+export type InsertPayRate = z.infer<typeof insertPayRateSchema>;
+
+export type PenaltyRule = typeof penaltyRules.$inferSelect;
+export type InsertPenaltyRule = z.infer<typeof insertPenaltyRuleSchema>;
+
+export type AllowanceRule = typeof allowanceRules.$inferSelect;
+export type InsertAllowanceRule = z.infer<typeof insertAllowanceRuleSchema>;
+
+export type PublicHoliday = typeof publicHolidays.$inferSelect;
+export type InsertPublicHoliday = z.infer<typeof insertPublicHolidaySchema>;
+
+export type FairworkComplianceLog = typeof fairworkComplianceLogs.$inferSelect;
+export type InsertFairworkComplianceLog = z.infer<typeof insertFairworkComplianceLogSchema>;
+
+export type EnterpriseAgreement = typeof enterpriseAgreements.$inferSelect;
+export type InsertEnterpriseAgreement = z.infer<typeof insertEnterpriseAgreementSchema>;
+
+export type GtoOrganization = typeof gtoOrganizations.$inferSelect;
+export type InsertGtoOrganization = z.infer<typeof insertGtoOrganizationSchema>;
+
+export type ExternalPortal = typeof externalPortals.$inferSelect;
+export type InsertExternalPortal = z.infer<typeof insertExternalPortalSchema>;
