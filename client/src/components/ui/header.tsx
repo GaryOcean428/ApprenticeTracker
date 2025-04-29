@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { Link } from "wouter";
-import { Bell, Search, Menu, X } from "lucide-react";
+import { Bell, Search, Menu } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
+import UserNav from "@/components/ui/user-nav";
 
 interface HeaderProps {
   onMenuToggle: () => void;
@@ -70,15 +70,8 @@ const Header = ({ onMenuToggle }: HeaderProps) => {
             <span className="absolute top-0 right-0 inline-block w-3 h-3 bg-destructive rounded-full border-2 border-white dark:border-background"></span>
           </Button>
           
-          {/* Profile menu */}
-          <div className="relative">
-            <Link href="/profile">
-              <Avatar className="cursor-pointer">
-                <AvatarImage src="https://images.unsplash.com/photo-1531427186611-ecfd6d936c79?ixlib=rb-1.2.1&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=200&fit=max&ixid=eyJhcHBfaWQiOjE3Nzg0fQ" alt="Admin User" />
-                <AvatarFallback>AU</AvatarFallback>
-              </Avatar>
-            </Link>
-          </div>
+          {/* User Navigation */}
+          <UserNav />
         </div>
       </div>
     </header>

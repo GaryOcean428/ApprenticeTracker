@@ -1,15 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface ProgressData {
@@ -26,181 +18,154 @@ interface Assessment {
   feedback?: string;
 }
 
+const statusColors = {
+  completed: "text-success",
+  in_progress: "text-amber-500",
+  not_started: "text-muted-foreground"
+};
+
 export default function ApprenticeProgress(): React.ReactElement {
-  // In a real app, we would fetch this data from an API
-  const { data: modules, isLoading: isLoadingModules } = useQuery({
-    queryKey: ["/api/apprentices/progress/modules"],
+  const { data: progressData, isLoading: isLoadingProgress } = useQuery({
+    queryKey: ["/api/progress/modules"],
     queryFn: async () => {
       // For demo purposes, returning mock data
       return [
         {
-          module: "Foundation Skills",
+          module: "Core Vocational Skills",
+          progress: 85,
+          status: "in_progress" as const,
+          lastActivity: "2024-04-25"
+        },
+        {
+          module: "Health & Safety Fundamentals",
           progress: 100,
           status: "completed" as const,
-          lastActivity: "2024-02-01",
+          lastActivity: "2024-04-15"
         },
         {
-          module: "Core Competencies",
-          progress: 75,
-          status: "in_progress" as const,
-          lastActivity: "2024-02-05",
+          module: "Industry Knowledge",
+          progress: 100,
+          status: "completed" as const,
+          lastActivity: "2024-04-10"
         },
         {
-          module: "Advanced Topics",
+          module: "Practical Assessment",
           progress: 0,
-          status: "not_started" as const,
-        },
-      ];
-    },
+          status: "not_started" as const
+        }
+      ] as ProgressData[];
+    }
   });
 
   const { data: assessments, isLoading: isLoadingAssessments } = useQuery({
-    queryKey: ["/api/apprentices/progress/assessments"],
+    queryKey: ["/api/progress/assessments"],
     queryFn: async () => {
       // For demo purposes, returning mock data
       return [
         {
-          name: "Foundation Skills Assessment",
+          name: "Health & Safety Exam",
           score: 92,
-          date: "2024-02-01",
-          feedback: "Excellent understanding of core concepts",
+          date: "2024-04-15",
+          feedback: "Excellent understanding of workplace safety protocols"
         },
         {
-          name: "Core Competencies Mid-Module",
-          score: 85,
-          date: "2024-02-05",
-          feedback: "Good progress, focus on practical applications",
+          name: "Industry Knowledge Quiz",
+          score: 88,
+          date: "2024-04-10",
+          feedback: "Good grasp of industry standards and practices"
         },
-      ];
-    },
+        {
+          name: "Vocational Skills Assessment 1",
+          score: 76,
+          date: "2024-03-20",
+          feedback: "Needs improvement in technical documentation"
+        }
+      ] as Assessment[];
+    }
   });
 
-  const getStatusColor = (status: ProgressData["status"]): string => {
-    switch (status) {
-      case "completed":
-        return "text-success";
-      case "in_progress":
-        return "text-info";
-      case "not_started":
-        return "text-muted-foreground";
-      default:
-        return "text-muted-foreground";
-    }
-  };
-
-  const formatDate = (date: string): string => {
-    return new Intl.DateTimeFormat("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    }).format(new Date(date));
-  };
-
   return (
-    <Tabs defaultValue="progress" className="space-y-4">
-      <TabsList>
-        <TabsTrigger value="progress">Progress</TabsTrigger>
-        <TabsTrigger value="assessments">Assessments</TabsTrigger>
-      </TabsList>
-
-      <TabsContent value="progress" className="space-y-4">
-        <Card>
-          <CardHeader>
-            <CardTitle>Module Progress</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {isLoadingModules ? (
-              <div className="space-y-4">
-                {Array.from({ length: 3 }).map((_, i) => (
+    <Card>
+      <CardHeader>
+        <CardTitle>Apprentice Progress</CardTitle>
+      </CardHeader>
+      <CardContent className="p-6">
+        <Tabs defaultValue="modules">
+          <TabsList className="grid w-full grid-cols-2 mb-4">
+            <TabsTrigger value="modules">Modules</TabsTrigger>
+            <TabsTrigger value="assessments">Assessments</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="modules">
+            <div className="space-y-6">
+              {isLoadingProgress ? (
+                Array.from({ length: 4 }).map((_, i) => (
                   <div key={i} className="space-y-2">
-                    <div className="flex justify-between items-center">
-                      <Skeleton className="h-5 w-40" />
-                      <Skeleton className="h-4 w-10" />
-                    </div>
-                    <Skeleton className="h-2 w-full" />
-                    <Skeleton className="h-4 w-32" />
+                    <Skeleton className="h-4 w-1/3" />
+                    <Skeleton className="h-4 w-full" />
                   </div>
-                ))}
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {modules?.map((module) => (
-                  <div key={module.module} className="space-y-2">
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <p className="font-medium">{module.module}</p>
-                        <p className={`text-sm ${getStatusColor(module.status)}`}>
-                          {module.status
-                            .replace("_", " ")
-                            .charAt(0)
-                            .toUpperCase() + module.status.slice(1)}
-                        </p>
-                      </div>
-                      <p className="text-sm text-muted-foreground">
-                        {module.progress}%
-                      </p>
+                ))
+              ) : (
+                progressData?.map((item, index) => (
+                  <div key={index} className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="font-medium text-sm">{item.module}</span>
+                      <span className={`text-sm ${statusColors[item.status]}`}>
+                        {item.status === 'completed' ? 'Completed' :
+                         item.status === 'in_progress' ? 'In Progress' : 'Not Started'}
+                      </span>
                     </div>
-                    <Progress value={module.progress} />
-                    {module.lastActivity && (
-                      <p className="text-sm text-muted-foreground">
-                        Last activity: {formatDate(module.lastActivity)}
-                      </p>
+                    <Progress value={item.progress} className="h-2" />
+                    <div className="flex justify-between text-xs text-muted-foreground">
+                      <span>{item.progress}% complete</span>
+                      {item.lastActivity && (
+                        <span>Last activity: {item.lastActivity}</span>
+                      )}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="assessments">
+            <div className="space-y-6">
+              {isLoadingAssessments ? (
+                Array.from({ length: 3 }).map((_, i) => (
+                  <div key={i} className="border rounded-lg p-4 space-y-2">
+                    <Skeleton className="h-4 w-2/3" />
+                    <Skeleton className="h-4 w-1/3" />
+                    <Skeleton className="h-4 w-full" />
+                  </div>
+                ))
+              ) : (
+                assessments?.map((assessment, index) => (
+                  <div key={index} className="border rounded-lg p-4 space-y-2">
+                    <div className="flex justify-between">
+                      <span className="font-medium">{assessment.name}</span>
+                      <span 
+                        className={`font-medium ${assessment.score >= 80 ? 'text-success' : 
+                                               assessment.score >= 70 ? 'text-amber-500' : 
+                                               'text-destructive'}`}
+                      >
+                        {assessment.score}%
+                      </span>
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      Date: {assessment.date}
+                    </div>
+                    {assessment.feedback && (
+                      <div className="text-sm border-t pt-2 mt-2">
+                        <span className="font-medium">Feedback:</span> {assessment.feedback}
+                      </div>
                     )}
                   </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </TabsContent>
-
-      <TabsContent value="assessments">
-        <Card>
-          <CardHeader>
-            <CardTitle>Assessment Results</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {isLoadingAssessments ? (
-              <div className="w-full">
-                <Skeleton className="h-60 w-full" />
-              </div>
-            ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Assessment</TableHead>
-                    <TableHead>Score</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Feedback</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {assessments?.map((assessment) => (
-                    <TableRow key={assessment.name}>
-                      <TableCell className="font-medium">
-                        {assessment.name}
-                      </TableCell>
-                      <TableCell>
-                        <span
-                          className={
-                            assessment.score >= 85
-                              ? "text-success"
-                              : "text-warning"
-                          }
-                        >
-                          {assessment.score}%
-                        </span>
-                      </TableCell>
-                      <TableCell>{formatDate(assessment.date)}</TableCell>
-                      <TableCell>{assessment.feedback}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            )}
-          </CardContent>
-        </Card>
-      </TabsContent>
-    </Tabs>
+                ))
+              )}
+            </div>
+          </TabsContent>
+        </Tabs>
+      </CardContent>
+    </Card>
   );
 }

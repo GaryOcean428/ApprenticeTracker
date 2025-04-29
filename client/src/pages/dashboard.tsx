@@ -10,11 +10,14 @@ import {
 } from "lucide-react";
 import { Link } from "wouter";
 import StatCard from "@/components/dashboard/stat-card";
+import StatsCard from "@/components/dashboard/stats-card";
 import ChartPlaceholder from "@/components/dashboard/chart-placeholder";
 import RecentActivity from "@/components/dashboard/recent-activity";
 import TaskList from "@/components/dashboard/tasks";
 import ApprenticeTable from "@/components/dashboard/apprentice-table";
 import QuickAccess from "@/components/dashboard/quick-access";
+import ApprenticeProgress from "@/components/dashboard/apprentice-progress";
+import ComplianceAlerts from "@/components/dashboard/compliance-alerts";
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface DashboardMetrics {
@@ -109,13 +112,9 @@ const Dashboard = () => {
         )}
       </div>
       
-      {/* Charts */}
+      {/* Charts & Progress */}
       <div className="grid gap-6 mb-8 md:grid-cols-2">
-        <ChartPlaceholder 
-          title="Apprentice Progress" 
-          icon={BarChart2}
-          description="Apprentice progress chart would appear here"
-        />
+        <ApprenticeProgress />
         
         <ChartPlaceholder 
           title="Financial Summary" 
@@ -137,40 +136,13 @@ const Dashboard = () => {
       
       {/* Quick Access Cards */}
       <div className="grid gap-6 mb-8 md:grid-cols-3">
-        <div className="min-w-0 p-4 bg-white dark:bg-card rounded-lg shadow-sm">
-          <h4 className="mb-4 font-semibold text-foreground flex items-center">
-            <AlertTriangle className="text-primary mr-2 h-5 w-5" /> Compliance Center
-          </h4>
-          <div className="mb-3">
-            <div className="flex justify-between items-center mb-2">
-              <span className="text-sm text-muted-foreground">Document Compliance</span>
-              <span className="text-xs font-medium text-success">93%</span>
-            </div>
-            <div className="w-full h-2 bg-muted rounded-full">
-              <div className="h-2 bg-success rounded-full" style={{ width: "93%" }}></div>
-            </div>
+        <div className="flex flex-col">
+          <ComplianceAlerts />
+          <div className="mt-2">
+            <Link href="/compliance" className="text-sm font-medium text-primary hover:underline">
+              View compliance dashboard →
+            </Link>
           </div>
-          <div className="mb-3">
-            <div className="flex justify-between items-center mb-2">
-              <span className="text-sm text-muted-foreground">Safety Compliance</span>
-              <span className="text-xs font-medium text-warning">78%</span>
-            </div>
-            <div className="w-full h-2 bg-muted rounded-full">
-              <div className="h-2 bg-warning rounded-full" style={{ width: "78%" }}></div>
-            </div>
-          </div>
-          <div className="mb-4">
-            <div className="flex justify-between items-center mb-2">
-              <span className="text-sm text-muted-foreground">Contract Compliance</span>
-              <span className="text-xs font-medium text-success">100%</span>
-            </div>
-            <div className="w-full h-2 bg-muted rounded-full">
-              <div className="h-2 bg-success rounded-full" style={{ width: "100%" }}></div>
-            </div>
-          </div>
-          <Link href="/compliance" className="text-sm font-medium text-primary hover:underline">
-            View compliance dashboard
-          </Link>
         </div>
         
         <div className="min-w-0 p-4 bg-white dark:bg-card rounded-lg shadow-sm">
