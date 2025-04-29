@@ -1,4 +1,4 @@
-import { Switch, Route } from "wouter";
+import { Switch, Route, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -19,10 +19,44 @@ import ComplianceList from "./pages/compliance/index";
 import TimesheetsList from "./pages/timesheets/index";
 import ReportsList from "./pages/reports/index";
 
+// Public pages
+import HomePage from "./pages/public/home";
+import AboutPage from "./pages/public/about";
+import ServicesPage from "./pages/public/services";
+import FindApprenticeshipPage from "./pages/public/find-apprenticeship";
+import HostApprenticePage from "./pages/public/host-apprentice";
+import ContactPage from "./pages/public/contact";
+
 function Router() {
+  const [location] = useLocation();
+  const isPublicRoute = [
+    '/',
+    '/about',
+    '/services',
+    '/find-apprenticeship',
+    '/host-apprentice',
+    '/contact'
+  ].includes(location);
+
+  // If on a public route, we don't need to wrap it in MainLayout
+  if (isPublicRoute) {
+    return (
+      <Switch>
+        {/* Public Routes */}
+        <Route path="/" component={HomePage} />
+        <Route path="/about" component={AboutPage} />
+        <Route path="/services" component={ServicesPage} />
+        <Route path="/find-apprenticeship" component={FindApprenticeshipPage} />
+        <Route path="/host-apprentice" component={HostApprenticePage} />
+        <Route path="/contact" component={ContactPage} />
+      </Switch>
+    );
+  }
+
+  // Admin/Dashboard routes
   return (
     <Switch>
-      <Route path="/" component={Dashboard} />
+      <Route path="/admin" component={Dashboard} />
       
       {/* Apprentice Routes */}
       <Route path="/apprentices" component={ApprenticesList} />
@@ -49,13 +83,27 @@ function Router() {
 }
 
 function App() {
+  const [location] = useLocation();
+  const isPublicRoute = [
+    '/',
+    '/about',
+    '/services',
+    '/find-apprenticeship',
+    '/host-apprentice',
+    '/contact'
+  ].includes(location);
+
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <Toaster />
-        <MainLayout>
+        {isPublicRoute ? (
           <Router />
-        </MainLayout>
+        ) : (
+          <MainLayout>
+            <Router />
+          </MainLayout>
+        )}
       </TooltipProvider>
     </QueryClientProvider>
   );

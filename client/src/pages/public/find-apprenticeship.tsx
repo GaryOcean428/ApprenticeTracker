@@ -5,51 +5,48 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { jobsApi, type JobListing } from "@/lib/api";
+import { useToast } from "@/hooks/use-toast";
 
-// Static job listings for Stage 1 MVP
-const jobs = [
-  {
-    id: "1",
-    title: "Carpentry Apprentice",
-    location: "Perth Metro",
-    type: "Full-time",
-    description:
-      "Join a leading construction company as a Carpentry Apprentice. Learn all aspects of carpentry while earning. Perfect for someone with basic hand tool skills and a passion for building.",
-    requirements: ["Driver's License", "Year 10 completion", "Physically fit", "Reliable transportation"],
-  },
-  {
-    id: "2",
-    title: "Electrical Apprentice",
-    location: "Perth Metro",
-    type: "Full-time",
-    description:
-      "Fantastic opportunity for a motivated individual to join a well-established electrical contracting business as an apprentice electrician. Work on residential and commercial projects.",
-    requirements: ["Year 12 Maths & English", "Driver's License", "Basic technical understanding", "Good communication skills"],
-  },
-  {
-    id: "3",
-    title: "Plumbing Apprentice",
-    location: "Joondalup",
-    type: "Full-time",
-    description:
-      "Join our team as a Plumbing Apprentice. Learn all aspects of plumbing while working alongside experienced tradespeople. Great opportunity for someone looking to build a career in the trades.",
-    requirements: ["Year 10 completion", "Good problem-solving skills", "Physically fit", "Willing to learn"],
-  },
-  {
-    id: "4",
-    title: "Business Traineeship",
-    location: "Perth CBD",
-    type: "Full-time",
-    description:
-      "Exciting opportunity for a business trainee to join our corporate office. Gain hands-on experience in administration, customer service, and office procedures while earning a qualification.",
-    requirements: ["Year 12 completion", "Computer literacy", "Good communication skills", "Customer service focus"],
-  },
-];
+// Use API service for job listings
+function useJobs() {
+  const [jobs, setJobs] = useState<JobListing[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
+  
+  useEffect(() => {
+    async function fetchJobs() {
+      try {
+        setLoading(true);
+        const data = await jobsApi.getJobs();
+        setJobs(data);
+        setError(null);
+      } catch (err) {
+        console.error('Error fetching jobs:', err);
+        setError('Unable to load job listings. Please try again later.');
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to load job listings.",
+        });
+      } finally {
+        setLoading(false);
+      }
+    }
+    
+    fetchJobs();
+  }, [toast]);
+  
+  return { jobs, loading, error };
+}
 
 export default function FindApprenticeshipPage() {
+  const { jobs, loading, error } = useJobs();
   const [selectedJob, setSelectedJob] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
+  const { toast } = useToast();
   
   const handleApply = (jobId: string) => {
     setSelectedJob(jobId);
@@ -60,13 +57,45 @@ export default function FindApprenticeshipPage() {
     }, 100);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // In Stage 1, we're just showing a success message
-    // In Stage 2, this would connect to the CRM
-    alert("Thank you for your application! We'll be in touch soon.");
-    setShowForm(false);
-    setSelectedJob(null);
+    const formData = new FormData(e.currentTarget);
+    
+    try {
+      // Connect to the CRM through our API
+      const application = {
+        jobId: selectedJob as string,
+        firstName: formData.get('first-name') as string,
+        lastName: formData.get('last-name') as string,
+        email: formData.get('email') as string,
+        phone: formData.get('phone') as string,
+        location: formData.get('location') as string,
+        education: formData.get('education') as string,
+        experience: formData.get('experience') as string || undefined,
+        interest: formData.get('interest') as string
+      };
+      
+      const response = await jobsApi.submitApplication(application);
+      
+      if (response.success) {
+        toast({
+          title: "Application Submitted",
+          description: response.message,
+          variant: "success",
+        });
+        setShowForm(false);
+        setSelectedJob(null);
+      } else {
+        throw new Error("Failed to submit application");
+      }
+    } catch (err) {
+      console.error("Error submitting application:", err);
+      toast({
+        title: "Submission Error",
+        description: "There was a problem submitting your application. Please try again later.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -127,44 +156,60 @@ export default function FindApprenticeshipPage() {
       {/* Job Listings Section */}
       <section className="w-full py-12 md:py-24 bg-gray-50">
         <div className="container px-4 md:px-6">
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
-            {jobs.map((job) => (
-              <Card key={job.id} className="flex flex-col h-full">
-                <CardHeader>
-                  <div className="flex justify-between items-start">
+          {loading ? (
+            <div className="flex justify-center items-center py-12">
+              <div className="animate-spin h-8 w-8 border-4 border-blue-500 rounded-full border-t-transparent"></div>
+            </div>
+          ) : error ? (
+            <div className="text-center py-12">
+              <p className="text-red-500">{error}</p>
+              <Button 
+                onClick={() => window.location.reload()} 
+                className="mt-4"
+              >
+                Try Again
+              </Button>
+            </div>
+          ) : (
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
+              {jobs.map((job: JobListing) => (
+                <Card key={job.id} className="flex flex-col h-full">
+                  <CardHeader>
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <CardTitle>{job.title}</CardTitle>
+                        <CardDescription className="mt-2">
+                          {job.location} • {job.type}
+                        </CardDescription>
+                      </div>
+                      <div className="px-2.5 py-0.5 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
+                        New
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="flex-grow">
+                    <p className="text-sm text-gray-600 mb-4">{job.description}</p>
                     <div>
-                      <CardTitle>{job.title}</CardTitle>
-                      <CardDescription className="mt-2">
-                        {job.location} • {job.type}
-                      </CardDescription>
+                      <h4 className="text-sm font-semibold mb-2">Requirements:</h4>
+                      <ul className="list-disc list-inside text-sm text-gray-600 space-y-1">
+                        {job.requirements.map((req: string, index: number) => (
+                          <li key={index}>{req}</li>
+                        ))}
+                      </ul>
                     </div>
-                    <div className="px-2.5 py-0.5 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
-                      New
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="flex-grow">
-                  <p className="text-sm text-gray-600 mb-4">{job.description}</p>
-                  <div>
-                    <h4 className="text-sm font-semibold mb-2">Requirements:</h4>
-                    <ul className="list-disc list-inside text-sm text-gray-600 space-y-1">
-                      {job.requirements.map((req, index) => (
-                        <li key={index}>{req}</li>
-                      ))}
-                    </ul>
-                  </div>
-                </CardContent>
-                <CardFooter>
-                  <Button 
-                    className="w-full bg-blue-600 hover:bg-blue-700"
-                    onClick={() => handleApply(job.id)}
-                  >
-                    Apply Now
-                  </Button>
-                </CardFooter>
-              </Card>
-            ))}
-          </div>
+                  </CardContent>
+                  <CardFooter>
+                    <Button 
+                      className="w-full bg-blue-600 hover:bg-blue-700"
+                      onClick={() => handleApply(job.id)}
+                    >
+                      Apply Now
+                    </Button>
+                  </CardFooter>
+                </Card>
+              ))}
+            </div>
+          )}
           
           {/* Pagination - Static for MVP */}
           <div className="flex items-center justify-center space-x-2 mt-12">
@@ -193,7 +238,7 @@ export default function FindApprenticeshipPage() {
           <div className="container px-4 md:px-6">
             <div className="max-w-3xl mx-auto">
               <h2 className="text-3xl font-bold tracking-tighter mb-8">
-                Apply for {jobs.find(j => j.id === selectedJob)?.title}
+                Apply for {jobs.find((j: JobListing) => j.id === selectedJob)?.title}
               </h2>
               
               <form onSubmit={handleSubmit} className="space-y-6">

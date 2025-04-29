@@ -925,6 +925,131 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Public Website API Routes
+  
+  // Job Listings for public website
+  app.get("/api/jobs", async (req, res) => {
+    try {
+      // In a real implementation, this would fetch job listings from the database
+      // For now, we'll return static data that matches our frontend model
+      const jobs = [
+        {
+          id: "1",
+          title: "Carpentry Apprentice",
+          location: "Perth Metro",
+          type: "Full-time",
+          description:
+            "Join a leading construction company as a Carpentry Apprentice. Learn all aspects of carpentry while earning. Perfect for someone with basic hand tool skills and a passion for building.",
+          requirements: ["Driver's License", "Year 10 completion", "Physically fit", "Reliable transportation"],
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        },
+        {
+          id: "2",
+          title: "Electrical Apprentice",
+          location: "Perth Metro",
+          type: "Full-time",
+          description:
+            "Fantastic opportunity for a motivated individual to join a well-established electrical contracting business as an apprentice electrician. Work on residential and commercial projects.",
+          requirements: ["Year 12 Maths & English", "Driver's License", "Basic technical understanding", "Good communication skills"],
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        },
+        {
+          id: "3",
+          title: "Plumbing Apprentice",
+          location: "Joondalup",
+          type: "Full-time",
+          description:
+            "Join our team as a Plumbing Apprentice. Learn all aspects of plumbing while working alongside experienced tradespeople. Great opportunity for someone looking to build a career in the trades.",
+          requirements: ["Year 10 completion", "Good problem-solving skills", "Physically fit", "Willing to learn"],
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        },
+        {
+          id: "4",
+          title: "Business Traineeship",
+          location: "Perth CBD",
+          type: "Full-time",
+          description:
+            "Exciting opportunity for a business trainee to join our corporate office. Gain hands-on experience in administration, customer service, and office procedures while earning a qualification.",
+          requirements: ["Year 12 completion", "Computer literacy", "Good communication skills", "Customer service focus"],
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        },
+      ];
+      
+      res.json(jobs);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching job listings" });
+    }
+  });
+  
+  // Handle job applications
+  app.post("/api/applications", async (req, res) => {
+    try {
+      // In a real implementation, this would save the application to the database
+      // and potentially create an apprentice record or inquiry
+      
+      // Create activity log for tracking
+      await storage.createActivityLog({
+        userId: 1, // Assuming admin user or system
+        action: "received",
+        relatedTo: "application",
+        relatedId: 0, // This would be the application ID in a real system
+        details: { 
+          message: `New apprentice application received for job ${req.body.jobId}`,
+          applicantName: `${req.body.firstName} ${req.body.lastName}`,
+          applicantEmail: req.body.email,
+          jobId: req.body.jobId
+        }
+      });
+      
+      res.status(201).json({ 
+        success: true, 
+        message: "Your application has been received! We will contact you soon."
+      });
+    } catch (error) {
+      res.status(500).json({ 
+        success: false, 
+        message: "Error submitting application. Please try again later."
+      });
+    }
+  });
+  
+  // Handle host employer inquiries
+  app.post("/api/host-inquiries", async (req, res) => {
+    try {
+      // In a real implementation, this would save the inquiry to the database
+      // and potentially create a host employer record or lead
+      
+      // Create activity log for tracking
+      await storage.createActivityLog({
+        userId: 1, // Assuming admin user or system
+        action: "received",
+        relatedTo: "inquiry",
+        relatedId: 0, // This would be the inquiry ID in a real system
+        details: { 
+          message: `New host employer inquiry received from ${req.body.companyName}`,
+          companyName: req.body.companyName,
+          contactName: req.body.contactName,
+          contactEmail: req.body.email,
+          industry: req.body.industry
+        }
+      });
+      
+      res.status(201).json({ 
+        success: true, 
+        message: "Your inquiry has been received! Our team will contact you shortly."
+      });
+    } catch (error) {
+      res.status(500).json({ 
+        success: false, 
+        message: "Error submitting inquiry. Please try again later."
+      });
+    }
+  });
+  
   const httpServer = createServer(app);
   return httpServer;
 }

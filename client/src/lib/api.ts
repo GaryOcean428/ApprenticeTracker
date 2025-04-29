@@ -51,8 +51,7 @@ export const jobsApi = {
       return await response.json();
     } catch (error) {
       console.error('Error fetching jobs:', error);
-      // For Stage 1 MVP, return static data if API fails
-      return staticJobs;
+      throw error;
     }
   },
   
@@ -68,10 +67,7 @@ export const jobsApi = {
       return await response.json();
     } catch (error) {
       console.error(`Error fetching job ${id}:`, error);
-      // For Stage 1 MVP, return static data if API fails
-      const job = staticJobs.find(j => j.id === id);
-      if (!job) throw new Error('Job not found');
-      return job;
+      throw error;
     }
   },
   
@@ -93,11 +89,7 @@ export const jobsApi = {
       return await response.json();
     } catch (error) {
       console.error('Error submitting application:', error);
-      // For Stage 1 MVP, simulate success response
-      return { 
-        success: true, 
-        message: 'Your application has been received! We will contact you soon.' 
-      };
+      throw error;
     }
   }
 };
@@ -122,60 +114,9 @@ export const hostEmployerApi = {
       return await response.json();
     } catch (error) {
       console.error('Error submitting inquiry:', error);
-      // For Stage 1 MVP, simulate success response
-      return { 
-        success: true, 
-        message: 'Your inquiry has been received! Our team will contact you shortly.' 
-      };
+      throw error;
     }
   }
 };
 
-// Static data for Stage 1 MVP
-// In Stage 2, this data would come from the CRM through API calls
-const staticJobs: JobListing[] = [
-  {
-    id: "1",
-    title: "Carpentry Apprentice",
-    location: "Perth Metro",
-    type: "Full-time",
-    description:
-      "Join a leading construction company as a Carpentry Apprentice. Learn all aspects of carpentry while earning. Perfect for someone with basic hand tool skills and a passion for building.",
-    requirements: ["Driver's License", "Year 10 completion", "Physically fit", "Reliable transportation"],
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: "2",
-    title: "Electrical Apprentice",
-    location: "Perth Metro",
-    type: "Full-time",
-    description:
-      "Fantastic opportunity for a motivated individual to join a well-established electrical contracting business as an apprentice electrician. Work on residential and commercial projects.",
-    requirements: ["Year 12 Maths & English", "Driver's License", "Basic technical understanding", "Good communication skills"],
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: "3",
-    title: "Plumbing Apprentice",
-    location: "Joondalup",
-    type: "Full-time",
-    description:
-      "Join our team as a Plumbing Apprentice. Learn all aspects of plumbing while working alongside experienced tradespeople. Great opportunity for someone looking to build a career in the trades.",
-    requirements: ["Year 10 completion", "Good problem-solving skills", "Physically fit", "Willing to learn"],
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: "4",
-    title: "Business Traineeship",
-    location: "Perth CBD",
-    type: "Full-time",
-    description:
-      "Exciting opportunity for a business trainee to join our corporate office. Gain hands-on experience in administration, customer service, and office procedures while earning a qualification.",
-    requirements: ["Year 12 completion", "Computer literacy", "Good communication skills", "Customer service focus"],
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-];
+
