@@ -16,6 +16,7 @@ import ContractsList from "./pages/contracts/index";
 import PlacementsList from "./pages/placements/index";
 import DocumentsList from "./pages/documents/index";
 import ComplianceList from "./pages/compliance/index";
+import CreateComplianceRecord from "./pages/compliance/create";
 import TimesheetsList from "./pages/timesheets/index";
 import ReportsList from "./pages/reports/index";
 
@@ -73,6 +74,7 @@ function Router() {
       <Route path="/placements" component={PlacementsList} />
       <Route path="/documents" component={DocumentsList} />
       <Route path="/compliance" component={ComplianceList} />
+      <Route path="/compliance/create" component={CreateComplianceRecord} />
       <Route path="/timesheets" component={TimesheetsList} />
       <Route path="/reports" component={ReportsList} />
       

@@ -36,7 +36,7 @@ import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import { queryClient } from "@/lib/queryClient";
-import Link from "wouter/link";
+// No need for Link import
 
 // Extend schema with client-side validation
 const formSchema = insertComplianceRecordSchema.extend({
@@ -113,11 +113,13 @@ export default function CreateComplianceRecord() {
   return (
     <div className="container mx-auto py-8">
       <div className="flex items-center mb-6">
-        <Button variant="ghost" asChild className="mr-4">
-          <Link href="/compliance">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back
-          </Link>
+        <Button 
+          variant="ghost" 
+          className="mr-4" 
+          onClick={() => navigate("/compliance")}
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Back
         </Button>
         <h1 className="text-2xl font-bold">Create Compliance Record</h1>
       </div>
@@ -314,7 +316,11 @@ export default function CreateComplianceRecord() {
                       <Textarea 
                         placeholder="Enter any additional notes or details" 
                         className="min-h-[120px]" 
-                        {...field} 
+                        value={field.value || ''} 
+                        onChange={field.onChange}
+                        onBlur={field.onBlur}
+                        name={field.name}
+                        ref={field.ref}
                       />
                     </FormControl>
                     <FormMessage />
