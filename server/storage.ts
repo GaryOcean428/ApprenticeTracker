@@ -922,4 +922,347 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+import { db } from "./db";
+import { and, eq, desc } from "drizzle-orm";
+
+// DatabaseStorage implementation using PostgreSQL
+export class DatabaseStorage implements IStorage {
+  // Users
+  async getUser(id: number): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || undefined;
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user || undefined;
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const [user] = await db.insert(users).values(insertUser).returning();
+    return user;
+  }
+
+  async updateUser(id: number, userData: Partial<InsertUser>): Promise<User | undefined> {
+    const [updatedUser] = await db.update(users)
+      .set(userData)
+      .where(eq(users.id, id))
+      .returning();
+    return updatedUser || undefined;
+  }
+
+  async deleteUser(id: number): Promise<boolean> {
+    const result = await db.delete(users).where(eq(users.id, id));
+    return result.count > 0;
+  }
+
+  // Apprentices
+  async getAllApprentices(): Promise<Apprentice[]> {
+    return await db.select().from(apprentices);
+  }
+
+  async getApprentice(id: number): Promise<Apprentice | undefined> {
+    const [apprentice] = await db.select().from(apprentices).where(eq(apprentices.id, id));
+    return apprentice || undefined;
+  }
+
+  async createApprentice(insertApprentice: InsertApprentice): Promise<Apprentice> {
+    const [apprentice] = await db.insert(apprentices).values(insertApprentice).returning();
+    return apprentice;
+  }
+
+  async updateApprentice(id: number, apprenticeData: Partial<InsertApprentice>): Promise<Apprentice | undefined> {
+    const [updatedApprentice] = await db.update(apprentices)
+      .set(apprenticeData)
+      .where(eq(apprentices.id, id))
+      .returning();
+    return updatedApprentice || undefined;
+  }
+
+  async deleteApprentice(id: number): Promise<boolean> {
+    const result = await db.delete(apprentices).where(eq(apprentices.id, id));
+    return result.count > 0;
+  }
+
+  // Host Employers
+  async getAllHostEmployers(): Promise<HostEmployer[]> {
+    return await db.select().from(hostEmployers);
+  }
+
+  async getHostEmployer(id: number): Promise<HostEmployer | undefined> {
+    const [hostEmployer] = await db.select().from(hostEmployers).where(eq(hostEmployers.id, id));
+    return hostEmployer || undefined;
+  }
+
+  async createHostEmployer(insertHostEmployer: InsertHostEmployer): Promise<HostEmployer> {
+    const [hostEmployer] = await db.insert(hostEmployers).values(insertHostEmployer).returning();
+    return hostEmployer;
+  }
+
+  async updateHostEmployer(id: number, hostEmployerData: Partial<InsertHostEmployer>): Promise<HostEmployer | undefined> {
+    const [updatedHostEmployer] = await db.update(hostEmployers)
+      .set(hostEmployerData)
+      .where(eq(hostEmployers.id, id))
+      .returning();
+    return updatedHostEmployer || undefined;
+  }
+
+  async deleteHostEmployer(id: number): Promise<boolean> {
+    const result = await db.delete(hostEmployers).where(eq(hostEmployers.id, id));
+    return result.count > 0;
+  }
+
+  // Training Contracts
+  async getAllTrainingContracts(): Promise<TrainingContract[]> {
+    return await db.select().from(trainingContracts);
+  }
+
+  async getTrainingContract(id: number): Promise<TrainingContract | undefined> {
+    const [contract] = await db.select().from(trainingContracts).where(eq(trainingContracts.id, id));
+    return contract || undefined;
+  }
+
+  async getTrainingContractsByApprentice(apprenticeId: number): Promise<TrainingContract[]> {
+    return await db.select().from(trainingContracts).where(eq(trainingContracts.apprenticeId, apprenticeId));
+  }
+
+  async createTrainingContract(insertContract: InsertTrainingContract): Promise<TrainingContract> {
+    const [contract] = await db.insert(trainingContracts).values(insertContract).returning();
+    return contract;
+  }
+
+  async updateTrainingContract(id: number, contractData: Partial<InsertTrainingContract>): Promise<TrainingContract | undefined> {
+    const [updatedContract] = await db.update(trainingContracts)
+      .set(contractData)
+      .where(eq(trainingContracts.id, id))
+      .returning();
+    return updatedContract || undefined;
+  }
+
+  async deleteTrainingContract(id: number): Promise<boolean> {
+    const result = await db.delete(trainingContracts).where(eq(trainingContracts.id, id));
+    return result.count > 0;
+  }
+
+  // Placements
+  async getAllPlacements(): Promise<Placement[]> {
+    return await db.select().from(placements);
+  }
+
+  async getPlacement(id: number): Promise<Placement | undefined> {
+    const [placement] = await db.select().from(placements).where(eq(placements.id, id));
+    return placement || undefined;
+  }
+
+  async getPlacementsByApprentice(apprenticeId: number): Promise<Placement[]> {
+    return await db.select().from(placements).where(eq(placements.apprenticeId, apprenticeId));
+  }
+
+  async getPlacementsByHost(hostEmployerId: number): Promise<Placement[]> {
+    return await db.select().from(placements).where(eq(placements.hostEmployerId, hostEmployerId));
+  }
+
+  async createPlacement(insertPlacement: InsertPlacement): Promise<Placement> {
+    const [placement] = await db.insert(placements).values(insertPlacement).returning();
+    return placement;
+  }
+
+  async updatePlacement(id: number, placementData: Partial<InsertPlacement>): Promise<Placement | undefined> {
+    const [updatedPlacement] = await db.update(placements)
+      .set(placementData)
+      .where(eq(placements.id, id))
+      .returning();
+    return updatedPlacement || undefined;
+  }
+
+  async deletePlacement(id: number): Promise<boolean> {
+    const result = await db.delete(placements).where(eq(placements.id, id));
+    return result.count > 0;
+  }
+
+  // Documents
+  async getAllDocuments(): Promise<Document[]> {
+    return await db.select().from(documents);
+  }
+
+  async getDocument(id: number): Promise<Document | undefined> {
+    const [document] = await db.select().from(documents).where(eq(documents.id, id));
+    return document || undefined;
+  }
+
+  async getDocumentsByRelation(relatedTo: string, relatedId: number): Promise<Document[]> {
+    return await db.select().from(documents)
+      .where(and(
+        eq(documents.relatedTo, relatedTo),
+        eq(documents.relatedId, relatedId)
+      ));
+  }
+
+  async createDocument(insertDocument: InsertDocument): Promise<Document> {
+    const [document] = await db.insert(documents).values(insertDocument).returning();
+    return document;
+  }
+
+  async updateDocument(id: number, documentData: Partial<InsertDocument>): Promise<Document | undefined> {
+    const [updatedDocument] = await db.update(documents)
+      .set(documentData)
+      .where(eq(documents.id, id))
+      .returning();
+    return updatedDocument || undefined;
+  }
+
+  async deleteDocument(id: number): Promise<boolean> {
+    const result = await db.delete(documents).where(eq(documents.id, id));
+    return result.count > 0;
+  }
+
+  // Compliance Records
+  async getAllComplianceRecords(): Promise<ComplianceRecord[]> {
+    return await db.select().from(complianceRecords);
+  }
+
+  async getComplianceRecord(id: number): Promise<ComplianceRecord | undefined> {
+    const [record] = await db.select().from(complianceRecords).where(eq(complianceRecords.id, id));
+    return record || undefined;
+  }
+
+  async getComplianceRecordsByRelation(relatedTo: string, relatedId: number): Promise<ComplianceRecord[]> {
+    return await db.select().from(complianceRecords)
+      .where(and(
+        eq(complianceRecords.relatedTo, relatedTo),
+        eq(complianceRecords.relatedId, relatedId)
+      ));
+  }
+
+  async createComplianceRecord(insertRecord: InsertComplianceRecord): Promise<ComplianceRecord> {
+    const [record] = await db.insert(complianceRecords).values(insertRecord).returning();
+    return record;
+  }
+
+  async updateComplianceRecord(id: number, recordData: Partial<InsertComplianceRecord>): Promise<ComplianceRecord | undefined> {
+    const [updatedRecord] = await db.update(complianceRecords)
+      .set(recordData)
+      .where(eq(complianceRecords.id, id))
+      .returning();
+    return updatedRecord || undefined;
+  }
+
+  async deleteComplianceRecord(id: number): Promise<boolean> {
+    const result = await db.delete(complianceRecords).where(eq(complianceRecords.id, id));
+    return result.count > 0;
+  }
+
+  // Timesheets
+  async getAllTimesheets(): Promise<Timesheet[]> {
+    return await db.select().from(timesheets);
+  }
+
+  async getTimesheet(id: number): Promise<Timesheet | undefined> {
+    const [timesheet] = await db.select().from(timesheets).where(eq(timesheets.id, id));
+    return timesheet || undefined;
+  }
+
+  async getTimesheetsByApprentice(apprenticeId: number): Promise<Timesheet[]> {
+    return await db.select().from(timesheets).where(eq(timesheets.apprenticeId, apprenticeId));
+  }
+
+  async createTimesheet(insertTimesheet: InsertTimesheet): Promise<Timesheet> {
+    const [timesheet] = await db.insert(timesheets).values(insertTimesheet).returning();
+    return timesheet;
+  }
+
+  async updateTimesheet(id: number, timesheetData: Partial<InsertTimesheet>): Promise<Timesheet | undefined> {
+    const [updatedTimesheet] = await db.update(timesheets)
+      .set(timesheetData)
+      .where(eq(timesheets.id, id))
+      .returning();
+    return updatedTimesheet || undefined;
+  }
+
+  async deleteTimesheet(id: number): Promise<boolean> {
+    const result = await db.delete(timesheets).where(eq(timesheets.id, id));
+    return result.count > 0;
+  }
+
+  // Timesheet Details
+  async getTimesheetDetails(timesheetId: number): Promise<TimesheetDetail[]> {
+    return await db.select().from(timesheetDetails).where(eq(timesheetDetails.timesheetId, timesheetId));
+  }
+
+  async createTimesheetDetail(insertDetail: InsertTimesheetDetail): Promise<TimesheetDetail> {
+    const [detail] = await db.insert(timesheetDetails).values(insertDetail).returning();
+    return detail;
+  }
+
+  async updateTimesheetDetail(id: number, detailData: Partial<InsertTimesheetDetail>): Promise<TimesheetDetail | undefined> {
+    const [updatedDetail] = await db.update(timesheetDetails)
+      .set(detailData)
+      .where(eq(timesheetDetails.id, id))
+      .returning();
+    return updatedDetail || undefined;
+  }
+
+  async deleteTimesheetDetail(id: number): Promise<boolean> {
+    const result = await db.delete(timesheetDetails).where(eq(timesheetDetails.id, id));
+    return result.count > 0;
+  }
+
+  // Activity Logs
+  async getAllActivityLogs(): Promise<ActivityLog[]> {
+    return await db.select().from(activityLogs);
+  }
+
+  async getRecentActivityLogs(limit: number): Promise<ActivityLog[]> {
+    return await db.select().from(activityLogs)
+      .orderBy(desc(activityLogs.timestamp))
+      .limit(limit);
+  }
+
+  async createActivityLog(insertLog: InsertActivityLog): Promise<ActivityLog> {
+    const [log] = await db.insert(activityLogs).values(insertLog).returning();
+    return log;
+  }
+
+  // Tasks
+  async getAllTasks(): Promise<Task[]> {
+    return await db.select().from(tasks);
+  }
+
+  async getTask(id: number): Promise<Task | undefined> {
+    const [task] = await db.select().from(tasks).where(eq(tasks.id, id));
+    return task || undefined;
+  }
+
+  async getTasksByAssignee(userId: number): Promise<Task[]> {
+    return await db.select().from(tasks).where(eq(tasks.assignedTo, userId));
+  }
+
+  async createTask(insertTask: InsertTask): Promise<Task> {
+    const [task] = await db.insert(tasks).values(insertTask).returning();
+    return task;
+  }
+
+  async updateTask(id: number, taskData: Partial<InsertTask>): Promise<Task | undefined> {
+    const [updatedTask] = await db.update(tasks)
+      .set(taskData)
+      .where(eq(tasks.id, id))
+      .returning();
+    return updatedTask || undefined;
+  }
+
+  async deleteTask(id: number): Promise<boolean> {
+    const result = await db.delete(tasks).where(eq(tasks.id, id));
+    return result.count > 0;
+  }
+
+  async completeTask(id: number): Promise<Task | undefined> {
+    const [task] = await db.update(tasks)
+      .set({ status: "completed", completedAt: new Date() })
+      .where(eq(tasks.id, id))
+      .returning();
+    return task || undefined;
+  }
+}
+
+// Use DatabaseStorage for the app
+export const storage = new DatabaseStorage();
