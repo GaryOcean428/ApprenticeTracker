@@ -475,7 +475,12 @@ export default function RecordsManagement() {
                             <TableCell>{getStatusBadge(record.status)}</TableCell>
                             <TableCell>{record.owner}</TableCell>
                             <TableCell className="text-right">
-                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => toast({ title: "View document", description: "Document viewer coming soon" })}>
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                className="h-8 w-8 p-0" 
+                                onClick={() => navigate(`/gto-compliance/documents/${record.id}`)}
+                              >
                                 <FileText className="h-4 w-4" />
                                 <span className="sr-only">View</span>
                               </Button>

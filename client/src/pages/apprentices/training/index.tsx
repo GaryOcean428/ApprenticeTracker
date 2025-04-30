@@ -174,9 +174,14 @@ export default function ApprenticeTrainingPlans() {
                     <div className="ml-4 flex flex-col items-end">
                       <Badge>{plan.trade}</Badge>
                       <span className="text-xs mt-1">{plan.status}</span>
-                      <Button size="sm" variant="ghost" className="mt-2" onClick={() => {
-                        toast({ title: "Training Plan", description: `Viewing details for ${plan.name}` });
-                      }}>View</Button>
+                      <Button 
+                        size="sm" 
+                        variant="ghost" 
+                        className="mt-2" 
+                        onClick={() => navigate(`/apprentices/${plan.id}`)}
+                      >
+                        View
+                      </Button>
                     </div>
                   </div>
                 ))}

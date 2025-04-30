@@ -610,7 +610,7 @@ export default function TrainingPackagesList() {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => toast({ title: "View Details", description: "Viewing details for " + pkg.code })}>
+                              <DropdownMenuItem onClick={() => navigate(`/vet/training-packages/${pkg.id}`)}>
                                 <Eye className="mr-2 h-4 w-4" /> View Details
                               </DropdownMenuItem>
                               <DropdownMenuItem onClick={() => toast({ title: "Edit Package", description: "Edit functionality coming soon" })}>
