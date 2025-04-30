@@ -45,7 +45,7 @@ const SidebarItem = ({ icon, label, href, children, active }: SidebarItemProps) 
   return (
     <li className="relative px-6 py-2">
       {isActive && (
-        <span className="absolute inset-y-0 left-0 w-1 bg-primary rounded-tr-lg rounded-br-lg" aria-hidden="true"></span>
+        <span className="absolute inset-y-0 left-0 w-1 bg-[#0070F3] rounded-tr-lg rounded-br-lg" aria-hidden="true"></span>
       )}
       
       {hasChildren ? (
@@ -54,7 +54,7 @@ const SidebarItem = ({ icon, label, href, children, active }: SidebarItemProps) 
             onClick={handleToggle}
             className={cn(
               "inline-flex items-center justify-between w-full text-sm font-semibold transition-colors duration-150",
-              isActive ? "text-primary" : "hover:text-primary"
+              isActive ? "text-[#0070F3]" : "hover:text-[#0070F3]"
             )}
           >
             <span className="inline-flex items-center">
@@ -95,7 +95,7 @@ const SidebarItem = ({ icon, label, href, children, active }: SidebarItemProps) 
           href={href || '#'} 
           className={cn(
             "inline-flex items-center w-full text-sm font-semibold transition-colors duration-150",
-            isActive ? "text-primary" : "hover:text-primary"
+            isActive ? "text-[#0070F3]" : "hover:text-[#0070F3]"
           )}
         >
           {icon}
@@ -110,10 +110,10 @@ const Sidebar = () => {
   const [location] = useLocation();
   
   return (
-    <aside className="z-20 hidden w-64 overflow-y-auto bg-white dark:bg-sidebar md:block flex-shrink-0 border-r border-border">
+    <aside className="z-20 hidden w-64 overflow-y-auto bg-white dark:bg-[#111827] md:block flex-shrink-0 border-r border-border">
       <div className="py-4 max-h-screen overflow-y-auto">
         <div className="px-6 py-3">
-          <h2 className="text-2xl font-bold text-primary">CRM7</h2>
+          <h2 className="text-2xl font-bold text-[#0070F3]">CRM7</h2>
           <p className="text-xs text-muted-foreground">Workforce Management</p>
         </div>
         
