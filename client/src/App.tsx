@@ -83,6 +83,38 @@ function Router() {
       <Route path="/apprentices" component={ApprenticesList} />
       <Route path="/apprentices/create" component={CreateApprentice} />
       <Route path="/apprentices/:id" component={ApprenticeDetails} />
+      <Route path="/apprentices/recruitment" component={() => {
+        const ApprenticeRecruitment = lazy(() => import("./pages/apprentices/recruitment/index"));
+        return (
+          <Suspense fallback={<div>Loading...</div>}>
+            <ApprenticeRecruitment />
+          </Suspense>
+        );
+      }} />
+      <Route path="/apprentices/records" component={() => {
+        const ApprenticeRecords = lazy(() => import("./pages/apprentices/records/index"));
+        return (
+          <Suspense fallback={<div>Loading...</div>}>
+            <ApprenticeRecords />
+          </Suspense>
+        );
+      }} />
+      <Route path="/apprentices/training" component={() => {
+        const ApprenticeTraining = lazy(() => import("./pages/apprentices/training/index"));
+        return (
+          <Suspense fallback={<div>Loading...</div>}>
+            <ApprenticeTraining />
+          </Suspense>
+        );
+      }} />
+      <Route path="/apprentices/progress" component={() => {
+        const ApprenticeProgress = lazy(() => import("./pages/apprentices/progress/index"));
+        return (
+          <Suspense fallback={<div>Loading...</div>}>
+            <ApprenticeProgress />
+          </Suspense>
+        );
+      }} />
       
       {/* Host Routes */}
       <Route path="/hosts" component={HostsList} />
