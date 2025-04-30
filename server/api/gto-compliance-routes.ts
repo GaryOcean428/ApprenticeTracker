@@ -144,9 +144,8 @@ gtoComplianceRouter.get('/dashboard/:organizationId', async (req, res) => {
     
     // Get total standards count
     const totalStandards = await db
-      .select()
-      .from(gtoComplianceStandards)
-      .count();
+      .select({ count: db.fn.count() })
+      .from(gtoComplianceStandards);
     
     // Calculate compliance statistics
     const compliantAssessments = assessments.filter(a => a.assessment.status === 'compliant').length;
@@ -155,10 +154,18 @@ gtoComplianceRouter.get('/dashboard/:organizationId', async (req, res) => {
     const inProgressAssessments = assessments.filter(a => a.assessment.status === 'in_progress').length;
     
     // Get standards by category with assessment status
-    const complianceByCategory = {};
+    const complianceByCategory: Record<string, {
+      total: number;
+      compliant: number;
+      atRisk: number;
+      nonCompliant: number;
+      inProgress: number;
+    }> = {};
+    
     assessments.forEach(a => {
-      if (!complianceByCategory[a.standard.category]) {
-        complianceByCategory[a.standard.category] = {
+      const category = a.standard.category;
+      if (!complianceByCategory[category]) {
+        complianceByCategory[category] = {
           total: 0,
           compliant: 0,
           atRisk: 0,
@@ -167,16 +174,16 @@ gtoComplianceRouter.get('/dashboard/:organizationId', async (req, res) => {
         };
       }
       
-      complianceByCategory[a.standard.category].total++;
+      complianceByCategory[category].total++;
       
       if (a.assessment.status === 'compliant') {
-        complianceByCategory[a.standard.category].compliant++;
+        complianceByCategory[category].compliant++;
       } else if (a.assessment.status === 'at_risk') {
-        complianceByCategory[a.standard.category].atRisk++;
+        complianceByCategory[category].atRisk++;
       } else if (a.assessment.status === 'non_compliant') {
-        complianceByCategory[a.standard.category].nonCompliant++;
+        complianceByCategory[category].nonCompliant++;
       } else if (a.assessment.status === 'in_progress') {
-        complianceByCategory[a.standard.category].inProgress++;
+        complianceByCategory[category].inProgress++;
       }
     });
     

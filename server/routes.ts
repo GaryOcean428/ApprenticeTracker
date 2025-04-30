@@ -12,6 +12,7 @@ import {
   insertTaskSchema
 } from "@shared/schema";
 import { z } from "zod";
+import { gtoComplianceRouter } from "./api/gto-compliance-routes";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // API Routes - prefix all routes with /api
@@ -1049,6 +1050,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
   });
+  
+  // Register GTO Compliance routes
+  app.use("/api/gto-compliance", gtoComplianceRouter);
   
   const httpServer = createServer(app);
   return httpServer;
