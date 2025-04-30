@@ -29,21 +29,26 @@ export default function PortalPage() {
     if (adminVerificationStep) {
       // Simple check for organization and platform level admins
       // In a real app, this would be a secure API call
-      if (username && password) {
-        if (username === 'admin' && organization) {
+      if (username && password && organization && userRole) {
+        // Developer role has platform-level access (full access)
+        if (userRole === 'Developer' && username === 'dev' && organization === 'Braden Group') {
           toast({
-            title: 'Access Granted',
-            description: `Logging in as ${userRole} for ${organization}`,
+            title: 'Platform-Level Access Granted',
+            description: `Logging in as Developer with full platform access`,
           });
           
           // Route to the appropriate portal
-          switch(portal) {
-            case 'admin':
-              setLocation('/admin');
-              break;
-            default:
-              setLocation('/admin');
-          }
+          setLocation('/admin');
+        }
+        // Admin role has organization-level access (limited to their organization)
+        else if (userRole === 'Admin' && username === 'admin' && organization) {
+          toast({
+            title: 'Organization-Level Access Granted',
+            description: `Logging in as Admin for ${organization}`,
+          });
+          
+          // Route to the appropriate portal
+          setLocation('/admin');
         } else {
           toast({
             variant: 'destructive',
@@ -140,14 +145,31 @@ export default function PortalPage() {
                         </p>
                       </div>
                       
+                      <div className="bg-blue-50 p-3 rounded-md border border-blue-200 mb-4">
+                        <p className="text-sm text-blue-800 font-medium mb-1">
+                          <Users className="inline mr-2 h-4 w-4" />
+                          Access Level Information
+                        </p>
+                        <ul className="text-xs text-blue-700 list-disc list-inside space-y-1">
+                          <li>For <strong>Developer</strong> (platform-level) access: Use username <code className="bg-blue-100 px-1 rounded">dev</code> with organization <code className="bg-blue-100 px-1 rounded">Braden Group</code></li>
+                          <li>For <strong>Admin</strong> (organization-level) access: Use username <code className="bg-blue-100 px-1 rounded">admin</code> with your organization</li>
+                          <li>For testing purposes, you can use any password</li>
+                        </ul>
+                      </div>
+                      
                       <div className="space-y-2">
                         <Label htmlFor="organization">Organization</Label>
-                        <Input 
-                          id="organization" 
-                          placeholder="Enter your organization name" 
+                        <select
+                          id="organization"
+                          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                           value={organization}
                           onChange={(e) => setOrganization(e.target.value)}
-                        />
+                        >
+                          <option value="">Select organization</option>
+                          <option value="Braden Group">Braden Group/Praden Pty Ltd</option>
+                          <option value="ABC Training">ABC Training</option>
+                          <option value="Vocational Skills Institute">Vocational Skills Institute</option>
+                        </select>
                       </div>
                       
                       <div className="space-y-2">
@@ -159,8 +181,8 @@ export default function PortalPage() {
                           onChange={(e) => setUserRole(e.target.value)}
                         >
                           <option value="">Select role</option>
-                          <option value="Organization Admin">Organization Administrator</option>
-                          <option value="Platform Admin">Platform Administrator</option>
+                          <option value="Developer">Developer (Platform Level)</option>
+                          <option value="Admin">Organization Administrator</option>
                         </select>
                       </div>
                       
