@@ -187,7 +187,7 @@ export default function IncidentTracking() {
               </span>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Hosts</SelectItem>
+              <SelectItem value="all-hosts">All Hosts</SelectItem>
               {uniqueHosts.map((host) => (
                 <SelectItem key={host.id} value={host.id.toString()}>
                   {host.name}
@@ -207,7 +207,7 @@ export default function IncidentTracking() {
               </span>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Types</SelectItem>
+              <SelectItem value="all-types">All Types</SelectItem>
               {uniqueTypes.map((type) => (
                 <SelectItem key={type} value={type}>
                   {type}
@@ -227,7 +227,7 @@ export default function IncidentTracking() {
               </span>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Statuses</SelectItem>
+              <SelectItem value="all-statuses">All Statuses</SelectItem>
               {uniqueStatuses.map((status) => (
                 <SelectItem key={status} value={status}>
                   {status}

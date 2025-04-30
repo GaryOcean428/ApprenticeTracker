@@ -161,7 +161,7 @@ export default function CaseNotesLogs() {
               </span>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Apprentices</SelectItem>
+              <SelectItem value="all">All Apprentices</SelectItem>
               {uniqueApprentices.map((apprentice) => (
                 <SelectItem key={apprentice.id} value={apprentice.id.toString()}>
                   {apprentice.name}
@@ -181,7 +181,7 @@ export default function CaseNotesLogs() {
               </span>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Hosts</SelectItem>
+              <SelectItem value="all-hosts">All Hosts</SelectItem>
               {uniqueHosts.map((host) => (
                 <SelectItem key={host.id} value={host.id.toString()}>
                   {host.name}
@@ -201,7 +201,7 @@ export default function CaseNotesLogs() {
               </span>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Types</SelectItem>
+              <SelectItem value="all-types">All Types</SelectItem>
               {uniqueTypes.map((type) => (
                 <SelectItem key={type} value={type}>
                   {type}
@@ -221,7 +221,7 @@ export default function CaseNotesLogs() {
               </span>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Time</SelectItem>
+              <SelectItem value="all-time">All Time</SelectItem>
               <SelectItem value="today">Today</SelectItem>
               <SelectItem value="this-week">This Week</SelectItem>
               <SelectItem value="this-month">This Month</SelectItem>
