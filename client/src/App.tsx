@@ -47,6 +47,7 @@ import ServicesPage from "./pages/public/services";
 import FindApprenticeshipPage from "./pages/public/find-apprenticeship";
 import HostApprenticePage from "./pages/public/host-apprentice";
 import ContactPage from "./pages/public/contact";
+import PortalPage from "./pages/portal/index";
 
 function Router() {
   const [location] = useLocation();
@@ -56,7 +57,8 @@ function Router() {
     '/services',
     '/find-apprenticeship',
     '/host-apprentice',
-    '/contact'
+    '/contact',
+    '/portal'
   ].includes(location);
 
   // If on a public route, we don't need to wrap it in MainLayout
@@ -70,6 +72,7 @@ function Router() {
         <Route path="/find-apprenticeship" component={FindApprenticeshipPage} />
         <Route path="/host-apprentice" component={HostApprenticePage} />
         <Route path="/contact" component={ContactPage} />
+        <Route path="/portal" component={PortalPage} />
       </Switch>
     );
   }
@@ -433,7 +436,8 @@ function App() {
     '/services',
     '/find-apprenticeship',
     '/host-apprentice',
-    '/contact'
+    '/contact',
+    '/portal'
   ].includes(location);
 
   return (
