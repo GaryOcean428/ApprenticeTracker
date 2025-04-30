@@ -93,7 +93,7 @@ export function DataGrid<T>({
               <Input
                 type="search"
                 placeholder="Search..."
-                className="pl-8"
+                className="pl-8 dark:bg-[#1f2937] dark:border-[#374151]"
                 value={searchValue}
                 onChange={(e) => onSearch(e.target.value)}
               />
@@ -153,7 +153,7 @@ export function DataGrid<T>({
         
         /* Data table */
         : (
-          <div className="rounded-md border">
+          <div className="rounded-md border dark:border-[#374151]">
             <Table>
               <TableHeader>
                 <TableRow>

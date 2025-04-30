@@ -156,7 +156,7 @@ export default function FieldOfficerActivitiesPage() {
       title="Field Officer Activities"
       description="Manage and track field officer visits, site assessments, and follow-ups"
       actions={
-        <Button className="gap-2">
+        <Button className="gap-2 bg-[#0070F3] hover:bg-[#0058C1] dark:text-white">
           <Calendar className="h-4 w-4" />
           New Visit
         </Button>
@@ -183,7 +183,7 @@ export default function FieldOfficerActivitiesPage() {
             searchValue=""
             emptyMessage="No scheduled visits found."
             actions={
-              <Button size="sm" className="gap-2">
+              <Button size="sm" className="gap-2 bg-[#0070F3] hover:bg-[#0058C1] dark:text-white">
                 <Clock className="h-4 w-4" />
                 Calendar View
               </Button>
