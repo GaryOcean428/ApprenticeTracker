@@ -18,7 +18,9 @@ import {
   Briefcase,
   FileHeart,
   Network,
-  ExternalLink
+  ExternalLink,
+  Award,
+  ClipboardList
 } from "lucide-react";
 
 interface SidebarItemProps {
@@ -190,6 +192,20 @@ const Sidebar = () => {
               { label: "Standard 3 Requirements", href: "/compliance/standard-3" },
               { label: "Standard 4 Requirements", href: "/compliance/standard-4" },
               { label: "Audit Preparation", href: "/compliance/audit" }
+            ]} 
+          />
+          
+          <SidebarItem 
+            icon={<Award className="h-5 w-5" />} 
+            label="GTO Compliance" 
+            active={location.startsWith('/gto-compliance')}
+            children={[
+              { label: "Compliance Dashboard", href: "/gto-compliance" },
+              { label: "Standard Assessments", href: "/gto-compliance/standard-assessment" },
+              { label: "Complaints & Appeals", href: "/gto-compliance/complaints" },
+              { label: "Access & Equity", href: "/gto-compliance/access-equity" },
+              { label: "Records Management", href: "/gto-compliance/records" },
+              { label: "Risk Management", href: "/gto-compliance/risk" }
             ]} 
           />
           

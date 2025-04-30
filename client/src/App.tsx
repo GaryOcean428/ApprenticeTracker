@@ -28,6 +28,11 @@ import CreateAward from "./pages/awards/create";
 import FieldOfficerActivities from "./pages/field-officers";
 import SiteAssessment from "./pages/field-officers/site-assessment";
 
+// GTO Compliance Module
+import GtoComplianceDashboard from "./pages/gto-compliance/index";
+import StandardAssessment from "./pages/gto-compliance/standard-assessment";
+import ComplaintsManagement from "./pages/gto-compliance/complaints";
+
 // Public pages
 import HomePage from "./pages/public/home";
 import AboutPage from "./pages/public/about";
@@ -84,6 +89,11 @@ function Router() {
       {/* Field Officer Routes */}
       <Route path="/field-officers" component={FieldOfficerActivities} />
       <Route path="/field-officers/site-assessment" component={SiteAssessment} />
+      
+      {/* GTO Compliance Routes */}
+      <Route path="/gto-compliance" component={GtoComplianceDashboard} />
+      <Route path="/gto-compliance/standard-assessment" component={StandardAssessment} />
+      <Route path="/gto-compliance/complaints" component={ComplaintsManagement} />
       
       {/* Other Routes */}
       <Route path="/contracts" component={ContractsList} />
