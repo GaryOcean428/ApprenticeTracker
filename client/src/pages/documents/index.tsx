@@ -91,11 +91,14 @@ const DocumentsList = () => {
   // Get unique document types for the filter dropdown
   const documentTypes: string[] = [];
   if (documents) {
-    const typeSet = new Set<string>();
+    // Use a regular object as a map to track unique types
+    const typeMap: Record<string, boolean> = {};
     documents.forEach(doc => {
-      if (doc.type) typeSet.add(doc.type);
+      if (doc.type && !typeMap[doc.type]) {
+        typeMap[doc.type] = true;
+        documentTypes.push(doc.type);
+      }
     });
-    documentTypes.push(...typeSet);
   }
   
   const getStatusBadgeClass = (status: string) => {

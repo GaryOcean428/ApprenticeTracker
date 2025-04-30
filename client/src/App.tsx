@@ -3,6 +3,8 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import ErrorBoundary from "@/components/error-boundary";
+import { withIdValidation } from "@/components/route-parameter-validator";
 import NotFound from "@/pages/not-found";
 import MainLayout from "./layouts/main-layout";
 import Dashboard from "./pages/dashboard";
@@ -64,12 +66,12 @@ function Router() {
       {/* Apprentice Routes */}
       <Route path="/apprentices" component={ApprenticesList} />
       <Route path="/apprentices/create" component={CreateApprentice} />
-      <Route path="/apprentices/:id" component={ApprenticeDetails} />
+      <Route path="/apprentices/:id" component={withIdValidation(ApprenticeDetails, "/apprentices", "Invalid Apprentice ID")} />
       
       {/* Host Routes */}
       <Route path="/hosts" component={HostsList} />
       <Route path="/hosts/create" component={CreateHost} />
-      <Route path="/hosts/:id" component={HostDetails} />
+      <Route path="/hosts/:id" component={withIdValidation(HostDetails, "/hosts", "Invalid Host ID")} />
       
       {/* Fair Work Routes */}
       <Route path="/awards" component={AwardsList} />
@@ -102,18 +104,20 @@ function App() {
   ].includes(location);
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        {isPublicRoute ? (
-          <Router />
-        ) : (
-          <MainLayout>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <Toaster />
+          {isPublicRoute ? (
             <Router />
-          </MainLayout>
-        )}
-      </TooltipProvider>
-    </QueryClientProvider>
+          ) : (
+            <MainLayout>
+              <Router />
+            </MainLayout>
+          )}
+        </TooltipProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 }
 
