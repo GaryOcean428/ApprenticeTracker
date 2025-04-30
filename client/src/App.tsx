@@ -77,6 +77,10 @@ function Router() {
       <Route path="/awards" component={AwardsList} />
       <Route path="/awards/create" component={CreateAward} />
       
+      {/* Field Officer Routes */}
+      <Route path="/field-officers" component={lazy(() => import("./pages/field-officers"))} />
+      <Route path="/field-officers/site-assessment" component={lazy(() => import("./pages/field-officers/site-assessment"))} />
+      
       {/* Other Routes */}
       <Route path="/contracts" component={ContractsList} />
       <Route path="/placements" component={PlacementsList} />
