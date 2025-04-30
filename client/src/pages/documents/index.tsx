@@ -82,16 +82,21 @@ const DocumentsList = () => {
       filter.search === "" || 
       document.title.toLowerCase().includes(filter.search.toLowerCase());
     
-    const matchesType = filter.type === "" || document.type === filter.type;
-    const matchesStatus = filter.status === "" || document.status === filter.status;
+    const matchesType = filter.type === "all_types" || document.type === filter.type;
+    const matchesStatus = filter.status === "all_statuses" || document.status === filter.status;
     
     return matchesSearch && matchesType && matchesStatus;
   });
   
   // Get unique document types for the filter dropdown
-  const documentTypes = documents 
-    ? [...new Set(documents.map(doc => doc.type))]
-    : [];
+  const documentTypes: string[] = [];
+  if (documents) {
+    const typeSet = new Set<string>();
+    documents.forEach(doc => {
+      if (doc.type) typeSet.add(doc.type);
+    });
+    documentTypes.push(...typeSet);
+  }
   
   const getStatusBadgeClass = (status: string) => {
     switch(status) {
@@ -168,7 +173,7 @@ const DocumentsList = () => {
                     <SelectValue placeholder="Document Type" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Types</SelectItem>
+                    <SelectItem value="all_types">All Types</SelectItem>
                     {documentTypes.map((type) => (
                       <SelectItem key={type} value={type}>{type}</SelectItem>
                     ))}
@@ -185,7 +190,7 @@ const DocumentsList = () => {
                     <SelectValue placeholder="Status" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Statuses</SelectItem>
+                    <SelectItem value="all_statuses">All Statuses</SelectItem>
                     <SelectItem value="active">Active</SelectItem>
                     <SelectItem value="expired">Expired</SelectItem>
                     <SelectItem value="archived">Archived</SelectItem>

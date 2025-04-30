@@ -337,7 +337,7 @@ const PlacementsList = () => {
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
-                                {filter.apprenticeId === "" && (
+                                {filter.apprenticeId === "all_apprentices" && (
                                   <DropdownMenuItem asChild>
                                     <Link href={`/apprentices/${placement.apprenticeId}`}>
                                       <User className="mr-2 h-4 w-4" />
@@ -345,7 +345,7 @@ const PlacementsList = () => {
                                     </Link>
                                   </DropdownMenuItem>
                                 )}
-                                {filter.hostEmployerId === "" && (
+                                {filter.hostEmployerId === "all_hosts" && (
                                   <DropdownMenuItem asChild>
                                     <Link href={`/hosts/${placement.hostEmployerId}`}>
                                       <Building2 className="mr-2 h-4 w-4" />
