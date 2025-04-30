@@ -958,7 +958,14 @@ export class DatabaseStorage implements IStorage {
 
   // Apprentices
   async getAllApprentices(): Promise<Apprentice[]> {
-    return await db.select().from(apprentices);
+    try {
+      const results = await db.select().from(apprentices);
+      return results;
+    } catch (error) {
+      console.error("Error in getAllApprentices:", error);
+      // Return empty array instead of throwing to prevent application crashes
+      return [];
+    }
   }
 
   async getApprentice(id: number): Promise<Apprentice | undefined> {
@@ -986,7 +993,14 @@ export class DatabaseStorage implements IStorage {
 
   // Host Employers
   async getAllHostEmployers(): Promise<HostEmployer[]> {
-    return await db.select().from(hostEmployers);
+    try {
+      const results = await db.select().from(hostEmployers);
+      return results;
+    } catch (error) {
+      console.error("Error in getAllHostEmployers:", error);
+      // Return empty array instead of throwing to prevent application crashes
+      return [];
+    }
   }
 
   async getHostEmployer(id: number): Promise<HostEmployer | undefined> {

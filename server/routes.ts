@@ -125,7 +125,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const apprentices = await storage.getAllApprentices();
       res.json(apprentices);
     } catch (error) {
-      res.status(500).json({ message: "Error fetching apprentices" });
+      console.error("Error fetching apprentices:", error);
+      
+      // Return a more detailed error message for debugging
+      res.status(500).json({ 
+        message: "Error fetching apprentices", 
+        error: error instanceof Error ? error.message : String(error)
+      });
     }
   });
   
@@ -244,7 +250,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const hosts = await storage.getAllHostEmployers();
       res.json(hosts);
     } catch (error) {
-      res.status(500).json({ message: "Error fetching host employers" });
+      console.error("Error fetching host employers:", error);
+      
+      // Return a more detailed error message for debugging
+      res.status(500).json({
+        message: "Error fetching host employers",
+        error: error instanceof Error ? error.message : String(error)
+      });
     }
   });
   
