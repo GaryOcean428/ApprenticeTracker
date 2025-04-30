@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
-import { format } from "date-fns";
+import { format, isToday, isThisWeek, isThisMonth, differenceInDays } from "date-fns";
 import { PlusCircle, Search, AlertTriangle, Calendar, Filter, User, Building2, Tag, SlidersHorizontal, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -74,10 +74,10 @@ export default function CaseNotesLogs() {
     type: string;
     dateRange: string;
   }>({
-    apprenticeId: "",
-    hostId: "",
-    type: "",
-    dateRange: "",
+    apprenticeId: "all",
+    hostId: "all-hosts",
+    type: "all-types",
+    dateRange: "all-time",
   });
 
   const { data: caseNotes, isLoading, error } = useQuery<CaseNote[]>({
@@ -100,16 +100,21 @@ export default function CaseNotesLogs() {
       note.apprenticeName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       note.hostName.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchesApprentice = filter.apprenticeId
-      ? note.apprenticeId.toString() === filter.apprenticeId
-      : true;
-    const matchesHost = filter.hostId
-      ? note.hostId.toString() === filter.hostId
-      : true;
-    const matchesType = filter.type ? note.type === filter.type : true;
+    const matchesApprentice = filter.apprenticeId === "all" || 
+      note.apprenticeId.toString() === filter.apprenticeId;
+    const matchesHost = filter.hostId === "all-hosts" || 
+      note.hostId.toString() === filter.hostId;
+    const matchesType = filter.type === "all-types" || 
+      note.type === filter.type;
 
-    // Date filter logic would go here with date-fns
-    const matchesDateRange = true; // Placeholder
+    // Date filter logic
+    const matchesDateRange = filter.dateRange === "all-time" ? true : 
+      filter.dateRange === "today" ? isToday(new Date(note.timestamp)) :
+      filter.dateRange === "this-week" ? isThisWeek(new Date(note.timestamp)) :
+      filter.dateRange === "this-month" ? isThisMonth(new Date(note.timestamp)) :
+      filter.dateRange === "last-90-days" ? (
+        differenceInDays(new Date(), new Date(note.timestamp)) <= 90
+      ) : true;
 
     return matchesSearch && matchesApprentice && matchesHost && matchesType && matchesDateRange;
   });
@@ -235,10 +240,10 @@ export default function CaseNotesLogs() {
               variant="outline"
               onClick={() =>
                 setFilter({
-                  apprenticeId: "",
-                  hostId: "",
-                  type: "",
-                  dateRange: "",
+                  apprenticeId: "all",
+                  hostId: "all-hosts",
+                  type: "all-types",
+                  dateRange: "all-time",
                 })
               }
               className="flex gap-1 items-center"
