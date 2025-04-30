@@ -24,6 +24,10 @@ import ReportsList from "./pages/reports/index";
 import AwardsList from "./pages/awards/index";
 import CreateAward from "./pages/awards/create";
 
+// Dynamically imported components
+import FieldOfficerActivities from "./pages/field-officers";
+import SiteAssessment from "./pages/field-officers/site-assessment";
+
 // Public pages
 import HomePage from "./pages/public/home";
 import AboutPage from "./pages/public/about";
@@ -78,8 +82,8 @@ function Router() {
       <Route path="/awards/create" component={CreateAward} />
       
       {/* Field Officer Routes */}
-      <Route path="/field-officers" component={lazy(() => import("./pages/field-officers"))} />
-      <Route path="/field-officers/site-assessment" component={lazy(() => import("./pages/field-officers/site-assessment"))} />
+      <Route path="/field-officers" component={FieldOfficerActivities} />
+      <Route path="/field-officers/site-assessment" component={SiteAssessment} />
       
       {/* Other Routes */}
       <Route path="/contracts" component={ContractsList} />
