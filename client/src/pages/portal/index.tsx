@@ -10,25 +10,92 @@ import { useToast } from '@/hooks/use-toast';
 
 export default function PortalPage() {
   const [, setLocation] = useLocation();
+  const [userRole, setUserRole] = useState('');
+  const [organization, setOrganization] = useState('');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [adminVerificationStep, setAdminVerificationStep] = useState(false);
+  const { toast } = useToast();
 
-  // This simulates routing to the different portal views
+  // This handles role-based routing with proper access control
   const handlePortalAccess = (portal: string) => {
+    // For admin portal, extra verification is required
+    if (portal === 'admin' && !adminVerificationStep) {
+      setAdminVerificationStep(true);
+      return;
+    }
+
+    // If admin verification is shown and login is attempted
+    if (adminVerificationStep) {
+      // Simple check for organization and platform level admins
+      // In a real app, this would be a secure API call
+      if (username && password) {
+        if (username === 'admin' && organization) {
+          toast({
+            title: 'Access Granted',
+            description: `Logging in as ${userRole} for ${organization}`,
+          });
+          
+          // Route to the appropriate portal
+          switch(portal) {
+            case 'admin':
+              setLocation('/admin');
+              break;
+            default:
+              setLocation('/admin');
+          }
+        } else {
+          toast({
+            variant: 'destructive',
+            title: 'Access Denied',
+            description: 'Invalid credentials or insufficient permissions.',
+          });
+        }
+      } else {
+        toast({
+          variant: 'destructive',
+          title: 'Missing Information',
+          description: 'Please enter all required fields.',
+        });
+      }
+      return;
+    }
+    
+    // Handle regular portal access for non-admin roles
     switch(portal) {
       case 'apprentice':
+        toast({
+          title: 'Redirecting to Apprentice Portal',
+          description: 'Access to training records and timesheets.',
+        });
         setLocation('/apprentices');
         break;
       case 'host':
+        toast({
+          title: 'Redirecting to Host Employer Portal',
+          description: 'Access to placement management and timesheet approvals.',
+        });
         setLocation('/hosts');
         break;
-      case 'admin':
-        setLocation('/admin');
-        break;
       case 'field-officer':
+        toast({
+          title: 'Redirecting to Field Officer Portal',
+          description: 'Access to site visits and apprentice support.',
+        });
         setLocation('/field-officers');
         break;
       default:
         setLocation('/admin');
     }
+  };
+  
+  // Helper to reset the admin verification process
+  const resetAdminVerification = () => {
+    setAdminVerificationStep(false);
+    setUsername('');
+    setPassword('');
+    setOrganization('');
+    setUserRole('');
   };
 
   return (
@@ -52,35 +119,119 @@ export default function PortalPage() {
           <TabsContent value="main">
             <Card>
               <CardHeader>
-                <CardTitle>CRM7 Admin Portal</CardTitle>
+                <CardTitle className="flex items-center">
+                  <Shield className="mr-2 h-5 w-5" />
+                  CRM7 Admin Portal
+                  {adminVerificationStep && <ShieldAlert className="ml-2 h-5 w-5 text-amber-500" />}
+                </CardTitle>
                 <CardDescription>
                   Access the main administrative system for managing all aspects of apprenticeships, host employers, and compliance.
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                <p className="text-sm text-gray-600">
-                  This portal provides access to all system features including:
-                </p>
-                <ul className="list-disc list-inside mt-2 text-sm text-gray-600">
-                  <li>Apprentice management</li>
-                  <li>Host employer management</li>
-                  <li>Training and compliance tracking</li>
-                  <li>System administration</li>
-                  <li>Financial management</li>
-                </ul>
-              </CardContent>
-              <CardFooter>
-                <Button className="w-full" onClick={() => handlePortalAccess('admin')}>
-                  Access Admin Portal
-                </Button>
-              </CardFooter>
+              
+              {adminVerificationStep ? (
+                <>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="bg-amber-50 p-3 rounded-md border border-amber-200 mb-4">
+                        <p className="text-sm text-amber-800">
+                          <ShieldAlert className="inline mr-2 h-4 w-4" />
+                          CRM system access requires organization and platform-level administrator credentials.
+                        </p>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="organization">Organization</Label>
+                        <Input 
+                          id="organization" 
+                          placeholder="Enter your organization name" 
+                          value={organization}
+                          onChange={(e) => setOrganization(e.target.value)}
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="role">Administrator Role</Label>
+                        <select
+                          id="role"
+                          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                          value={userRole}
+                          onChange={(e) => setUserRole(e.target.value)}
+                        >
+                          <option value="">Select role</option>
+                          <option value="Organization Admin">Organization Administrator</option>
+                          <option value="Platform Admin">Platform Administrator</option>
+                        </select>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="username">Username</Label>
+                        <Input 
+                          id="username" 
+                          placeholder="Enter username" 
+                          value={username}
+                          onChange={(e) => setUsername(e.target.value)}
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="password">Password</Label>
+                        <Input 
+                          id="password" 
+                          type="password" 
+                          placeholder="Enter password" 
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                        />
+                      </div>
+                    </div>
+                  </CardContent>
+                  <CardFooter className="flex justify-between">
+                    <Button variant="outline" onClick={resetAdminVerification}>
+                      Back
+                    </Button>
+                    <Button onClick={() => handlePortalAccess('admin')}>
+                      Verify Access <ChevronRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </CardFooter>
+                </>
+              ) : (
+                <>
+                  <CardContent>
+                    <p className="text-sm text-gray-600">
+                      This portal provides access to all system features including:
+                    </p>
+                    <ul className="list-disc list-inside mt-2 text-sm text-gray-600">
+                      <li>Apprentice management</li>
+                      <li>Host employer management</li>
+                      <li>Training and compliance tracking</li>
+                      <li>System administration</li>
+                      <li>Financial management</li>
+                    </ul>
+                    <div className="bg-blue-50 p-3 rounded-md border border-blue-200 mt-4">
+                      <p className="text-sm text-blue-800">
+                        <Shield className="inline mr-2 h-4 w-4" />
+                        CRM access is restricted to authorized personnel only.
+                      </p>
+                    </div>
+                  </CardContent>
+                  <CardFooter>
+                    <Button className="w-full" onClick={() => handlePortalAccess('admin')}>
+                      Access Admin Portal
+                    </Button>
+                  </CardFooter>
+                </>
+              )}
             </Card>
           </TabsContent>
           
           <TabsContent value="apprentice">
             <Card>
               <CardHeader>
-                <CardTitle>Apprentice Portal</CardTitle>
+                <CardTitle className="flex items-center">
+                  <GraduationCap className="mr-2 h-5 w-5" />
+                  Apprentice Portal
+                </CardTitle>
                 <CardDescription>
                   Access your apprenticeship details, training progress, and scheduled activities.
                 </CardDescription>
@@ -96,10 +247,16 @@ export default function PortalPage() {
                   <li>Access learning resources</li>
                   <li>Contact your field officer</li>
                 </ul>
+                <div className="flex items-center gap-4 bg-gray-50 p-3 rounded-md border border-gray-200 mt-4">
+                  <div>
+                    <p className="text-sm font-medium">Personal portal</p>
+                    <p className="text-xs text-gray-500">Limited access to your own data</p>
+                  </div>
+                </div>
               </CardContent>
               <CardFooter>
                 <Button className="w-full" onClick={() => handlePortalAccess('apprentice')}>
-                  Access Apprentice Portal
+                  Access Apprentice Portal <ChevronRight className="ml-2 h-4 w-4" />
                 </Button>
               </CardFooter>
             </Card>
@@ -108,7 +265,10 @@ export default function PortalPage() {
           <TabsContent value="host">
             <Card>
               <CardHeader>
-                <CardTitle>Host Employer Portal</CardTitle>
+                <CardTitle className="flex items-center">
+                  <Building className="mr-2 h-5 w-5" />
+                  Host Employer Portal
+                </CardTitle>
                 <CardDescription>
                   Manage your apprentices, contracts, and workplace arrangements.
                 </CardDescription>
@@ -124,10 +284,16 @@ export default function PortalPage() {
                   <li>Request new apprentices</li>
                   <li>Access compliance resources</li>
                 </ul>
+                <div className="flex items-center gap-4 bg-gray-50 p-3 rounded-md border border-gray-200 mt-4">
+                  <div>
+                    <p className="text-sm font-medium">Employer portal</p>
+                    <p className="text-xs text-gray-500">Limited to your organization's placements</p>
+                  </div>
+                </div>
               </CardContent>
               <CardFooter>
                 <Button className="w-full" onClick={() => handlePortalAccess('host')}>
-                  Access Host Portal
+                  Access Host Portal <ChevronRight className="ml-2 h-4 w-4" />
                 </Button>
               </CardFooter>
             </Card>
@@ -136,7 +302,10 @@ export default function PortalPage() {
           <TabsContent value="field">
             <Card>
               <CardHeader>
-                <CardTitle>Field Officer Portal</CardTitle>
+                <CardTitle className="flex items-center">
+                  <Briefcase className="mr-2 h-5 w-5" />
+                  Field Officer Portal
+                </CardTitle>
                 <CardDescription>
                   Manage site visits, apprentice check-ins, and compliance activities.
                 </CardDescription>
@@ -152,10 +321,16 @@ export default function PortalPage() {
                   <li>Document compliance activities</li>
                   <li>Generate field reports</li>
                 </ul>
+                <div className="flex items-center gap-4 bg-gray-50 p-3 rounded-md border border-gray-200 mt-4">
+                  <div>
+                    <p className="text-sm font-medium">Field staff portal</p>
+                    <p className="text-xs text-gray-500">Limited to your assigned apprentices and employers</p>
+                  </div>
+                </div>
               </CardContent>
               <CardFooter>
                 <Button className="w-full" onClick={() => handlePortalAccess('field-officer')}>
-                  Access Field Officer Portal
+                  Access Field Officer Portal <ChevronRight className="ml-2 h-4 w-4" />
                 </Button>
               </CardFooter>
             </Card>
