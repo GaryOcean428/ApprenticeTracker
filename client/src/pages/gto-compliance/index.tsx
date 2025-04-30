@@ -100,8 +100,8 @@ export default function GtoComplianceDashboard() {
   };
 
   // Group standards by category
-  const standardsByCategory = standards
-    ? standards.reduce((acc, standard) => {
+  const standardsByCategory: Record<string, any[]> = standards
+    ? standards.reduce((acc: Record<string, any[]>, standard: any) => {
         const { category } = standard;
         if (!acc[category]) {
           acc[category] = [];
@@ -251,10 +251,10 @@ export default function GtoComplianceDashboard() {
               {Object.keys(standardsByCategory).map(category => (
                 <TabsContent key={category} value={category.toLowerCase()}>
                   <div className="space-y-4">
-                    {standardsByCategory[category].map(standard => {
+                    {standardsByCategory[category].map((standard: any) => {
                       // Find assessment for this standard if any
                       const assessment = dashboardData?.upcomingAssessments?.find(
-                        a => a.standard.id === standard.id
+                        (a: any) => a.standard.id === standard.id
                       );
                       
                       let statusColor = 'bg-gray-200';
@@ -301,7 +301,7 @@ export default function GtoComplianceDashboard() {
                             <div className="mt-3">
                               <h4 className="text-sm font-medium">Required Evidence:</h4>
                               <ul className="text-sm mt-1 list-disc pl-4">
-                                {standard.requiredEvidence.map((evidence, i) => (
+                                {standard.requiredEvidence.map((evidence: string, i: number) => (
                                   <li key={i}>{evidence}</li>
                                 ))}
                               </ul>

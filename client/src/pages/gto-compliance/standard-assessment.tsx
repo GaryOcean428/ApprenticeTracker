@@ -103,19 +103,21 @@ export default function StandardAssessment() {
         return null;
       }
     },
-    enabled: !!standardId && !!organizationId,
-    onSuccess: (data) => {
-      if (data) {
-        setAssessmentData({
-          status: data.status,
-          notes: data.notes || '',
-          evidenceDescription: data.evidenceDescription || '',
-          actionItems: data.actionItems || [],
-          dueDate: data.dueDate ? new Date(data.dueDate).toISOString().split('T')[0] : ''
-        });
-      }
-    }
+    enabled: !!standardId && !!organizationId
   });
+  
+  // Handle assessment data when it's loaded
+  React.useEffect(() => {
+    if (assessment) {
+      setAssessmentData({
+        status: assessment.status,
+        notes: assessment.notes || '',
+        evidenceDescription: assessment.evidenceDescription || '',
+        actionItems: assessment.actionItems || [],
+        dueDate: assessment.dueDate ? new Date(assessment.dueDate).toISOString().split('T')[0] : ''
+      });
+    }
+  }, [assessment]);
 
   // Create or update assessment mutation
   const saveAssessmentMutation = useMutation({
@@ -234,7 +236,7 @@ export default function StandardAssessment() {
                     <h3 className="text-lg font-semibold mb-2">Required Evidence</h3>
                     {standard.requiredEvidence && standard.requiredEvidence.length > 0 ? (
                       <ul className="list-disc pl-6 space-y-2">
-                        {standard.requiredEvidence.map((evidence, index) => (
+                        {standard.requiredEvidence.map((evidence: string, index: number) => (
                           <li key={index}>{evidence}</li>
                         ))}
                       </ul>
@@ -247,7 +249,7 @@ export default function StandardAssessment() {
                     <h3 className="text-lg font-semibold mb-2">Compliance Criteria</h3>
                     {standard.complianceCriteria && standard.complianceCriteria.length > 0 ? (
                       <ul className="list-disc pl-6 space-y-2">
-                        {standard.complianceCriteria.map((criteria, index) => (
+                        {standard.complianceCriteria.map((criteria: string, index: number) => (
                           <li key={index}>{criteria}</li>
                         ))}
                       </ul>
@@ -260,7 +262,7 @@ export default function StandardAssessment() {
                     <h3 className="text-lg font-semibold mb-2">Related Regulations</h3>
                     {standard.regulations && standard.regulations.length > 0 ? (
                       <ul className="list-disc pl-6 space-y-2">
-                        {standard.regulations.map((regulation, index) => (
+                        {standard.regulations.map((regulation: string, index: number) => (
                           <li key={index}>{regulation}</li>
                         ))}
                       </ul>
