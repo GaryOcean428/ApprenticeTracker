@@ -13,6 +13,7 @@ import {
 } from "@shared/schema";
 import { z } from "zod";
 import { gtoComplianceRouter } from "./api/gto-compliance-routes";
+import { vetRouter } from "./api/vet-routes";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // API Routes - prefix all routes with /api
@@ -1053,6 +1054,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Register GTO Compliance routes
   app.use("/api/gto-compliance", gtoComplianceRouter);
+  
+  // Register VET Training routes for Units of Competency and Qualifications
+  app.use("/api/vet", vetRouter);
   
   const httpServer = createServer(app);
   return httpServer;

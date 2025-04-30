@@ -5,6 +5,7 @@ import { seedDatabase } from "./seed-db";
 import { migrateFairWorkSchema } from "./migrate-db";
 import { migrateGtoComplianceSchema } from "./migrate-gto-compliance";
 import { seedGtoComplianceStandards } from "./seed-gto-compliance";
+import { migrateVetSchema } from "./migrate-vet";
 
 const app = express();
 app.use(express.json());
@@ -50,6 +51,10 @@ app.use((req, res, next) => {
     // Migrate GTO Compliance schema
     await migrateGtoComplianceSchema();
     log("GTO Compliance schema migration completed");
+    
+    // Migrate VET Training schema
+    await migrateVetSchema();
+    log("VET Training schema migration completed");
   } catch (error) {
     log("Error migrating database schema: " + error);
   }
