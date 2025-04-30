@@ -65,6 +65,7 @@ export function withRouteParameterValidation<P extends object>(
     
     // Merge validated params into the props to maintain type safety
     return <Component {...props} params={params} />;
+  };
 }
 
 /**
