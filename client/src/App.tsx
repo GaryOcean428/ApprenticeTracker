@@ -1,4 +1,5 @@
 import { Switch, Route, useLocation } from "wouter";
+import { lazy, Suspense } from "react";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -95,10 +96,38 @@ function Router() {
       {/* Field Officer Routes */}
       <Route path="/field-officers" component={FieldOfficerActivities} />
       <Route path="/field-officers/site-assessment" component={SiteAssessment} />
-      <Route path="/field-officers/case-notes" component={lazy(() => import("./pages/field-officers/case-notes/index"))} />
-      <Route path="/field-officers/competency" component={lazy(() => import("./pages/field-officers/competency/index"))} />
-      <Route path="/field-officers/incidents" component={lazy(() => import("./pages/field-officers/incidents/index"))} />
-      <Route path="/field-officers/actions" component={lazy(() => import("./pages/field-officers/actions/index"))} />
+      <Route path="/field-officers/case-notes" component={() => {
+        const CaseNotes = lazy(() => import("./pages/field-officers/case-notes/index"));
+        return (
+          <Suspense fallback={<div>Loading...</div>}>
+            <CaseNotes />
+          </Suspense>
+        );
+      }} />
+      <Route path="/field-officers/competency" component={() => {
+        const CompetencyReview = lazy(() => import("./pages/field-officers/competency/index"));
+        return (
+          <Suspense fallback={<div>Loading...</div>}>
+            <CompetencyReview />
+          </Suspense>
+        );
+      }} />
+      <Route path="/field-officers/incidents" component={() => {
+        const Incidents = lazy(() => import("./pages/field-officers/incidents/index"));
+        return (
+          <Suspense fallback={<div>Loading...</div>}>
+            <Incidents />
+          </Suspense>
+        );
+      }} />
+      <Route path="/field-officers/actions" component={() => {
+        const Actions = lazy(() => import("./pages/field-officers/actions/index"));
+        return (
+          <Suspense fallback={<div>Loading...</div>}>
+            <Actions />
+          </Suspense>
+        );
+      }} />
       
       {/* GTO Compliance Routes */}
       <Route path="/gto-compliance" component={GtoComplianceDashboard} />
@@ -108,6 +137,8 @@ function Router() {
       {/* VET Training Routes */}
       <Route path="/vet/units" component={UnitsOfCompetencyList} />
       <Route path="/vet/units/create" component={CreateUnitOfCompetency} />
+      <Route path="/vet/qualifications" component={QualificationsList} />
+      <Route path="/vet/qualifications/create" component={CreateQualification} />
       
       {/* Other Routes */}
       <Route path="/contracts" component={ContractsList} />

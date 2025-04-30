@@ -46,7 +46,7 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { toast } from "@/hooks/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 // Define interface for incidents
 interface Incident {
@@ -116,6 +116,8 @@ export default function IncidentTracking() {
     queryKey: ["/api/field-officers/incidents"],
   });
 
+  const { toast } = useToast();
+  
   if (error) {
     toast({
       variant: "destructive",

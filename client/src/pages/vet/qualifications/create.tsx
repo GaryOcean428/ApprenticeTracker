@@ -27,7 +27,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { toast } from "@/hooks/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 
 const createQualificationSchema = z.object({
@@ -61,6 +61,8 @@ export default function CreateQualification() {
       releases: [],
     },
   });
+
+  const { toast } = useToast();
 
   const createMutation = useMutation({
     mutationFn: async (data: z.infer<typeof createQualificationSchema>) => {

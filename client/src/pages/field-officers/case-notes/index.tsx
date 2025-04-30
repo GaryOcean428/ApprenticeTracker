@@ -47,7 +47,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
-import { toast } from "@/hooks/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 interface CaseNote {
   id: number;
@@ -83,6 +83,8 @@ export default function CaseNotesLogs() {
   const { data: caseNotes, isLoading, error } = useQuery<CaseNote[]>({
     queryKey: ["/api/field-officers/case-notes"],
   });
+
+  const { toast } = useToast();
 
   if (error) {
     toast({

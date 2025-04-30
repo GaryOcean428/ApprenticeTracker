@@ -46,7 +46,7 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { toast } from "@/hooks/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 // Define interface for action items
 interface ActionItem {
@@ -145,6 +145,8 @@ export default function ActionItemsReminders() {
   const { data: actionItems, isLoading, error } = useQuery<ActionItem[]>({
     queryKey: ["/api/field-officers/actions"],
   });
+
+  const { toast } = useToast();
 
   if (error) {
     toast({

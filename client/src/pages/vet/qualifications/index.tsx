@@ -39,7 +39,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { toast } from "@/hooks/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 interface Qualification {
   id: number;
@@ -64,6 +64,8 @@ export default function QualificationsList() {
   const { data: qualifications, isLoading, error } = useQuery<Qualification[]>({
     queryKey: ["/api/vet/qualifications"],
   });
+
+  const { toast } = useToast();
 
   if (error) {
     toast({

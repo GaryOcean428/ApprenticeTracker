@@ -44,7 +44,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress"; 
-import { toast } from "@/hooks/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 // Define interface for competency review
 interface CompetencyReview {
@@ -83,6 +83,8 @@ export default function CompetencyReview() {
   const { data: reviews, isLoading, error } = useQuery<CompetencyReview[]>({
     queryKey: ["/api/field-officers/competency-reviews"],
   });
+
+  const { toast } = useToast();
 
   if (error) {
     toast({
