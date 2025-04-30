@@ -1,0 +1,286 @@
+854-f2878fe431b810e9.js:1 Replit version d7ea523f, pid2 version 0.0.1245
+_app-b6cbc35f4bce2127.js:13 
+      /////////////////////
+   ///////////////////////////
+  ////////@@@@@@@//////////////
+  ////////@@@@@@@//////////////
+  ////////@@@@@@@//////////////        Curious and driven?
+  ///////////////@@@@@@@///////        Work with us!
+  ///////////////@@@@@@@///////
+  ///////////////@@@@@@@///////        https://join.replit.com/hack.with.us
+  ////////@@@@@@@//////////////
+  ////////@@@@@@@//////////////
+  ////////@@@@@@#//////////////
+   ///////////////////////////
+      /////////////////////
+      
+_app-b6cbc35f4bce2127.js:13 [LaunchDarkly] LaunchDarkly client initialized
+sw_iframe.html:1 Error in event handler: TypeError: Cannot set properties of undefined (setting 'isValidatingMasterPassword')
+    at chrome-extension://eiaeiblijfjekdanodkjadfinkhbfgcd/jsAndWasm/classifier.js:1:30384
+    at Array.forEach (<anonymous>)
+    at chrome-extension://eiaeiblijfjekdanodkjadfinkhbfgcd/jsAndWasm/classifier.js:1:30235
+    at produce (chrome-extension://eiaeiblijfjekdanodkjadfinkhbfgcd/jsAndWasm/classifier.js:1:7686)
+    at g (chrome-extension://eiaeiblijfjekdanodkjadfinkhbfgcd/jsAndWasm/classifier.js:1:30195)
+    at b (chrome-extension://eiaeiblijfjekdanodkjadfinkhbfgcd/jsAndWasm/classifier.js:1:21785)
+    at i.dispatch (chrome-extension://eiaeiblijfjekdanodkjadfinkhbfgcd/jsAndWasm/classifier.js:1:30648)
+    at x.handleMessage (chrome-extension://eiaeiblijfjekdanodkjadfinkhbfgcd/jsAndWasm/classifier.js:1:31409)
+    at chrome-extension://eiaeiblijfjekdanodkjadfinkhbfgcd/jsAndWasm/classifier.js:1:31244
+sw_iframe.html:1 Error in event handler: TypeError: Cannot set properties of undefined (setting 'givenAccessesIsLoading')
+    at chrome-extension://eiaeiblijfjekdanodkjadfinkhbfgcd/jsAndWasm/classifier.js:1:30384
+    at Array.forEach (<anonymous>)
+    at chrome-extension://eiaeiblijfjekdanodkjadfinkhbfgcd/jsAndWasm/classifier.js:1:30235
+    at produce (chrome-extension://eiaeiblijfjekdanodkjadfinkhbfgcd/jsAndWasm/classifier.js:1:7686)
+    at g (chrome-extension://eiaeiblijfjekdanodkjadfinkhbfgcd/jsAndWasm/classifier.js:1:30195)
+    at b (chrome-extension://eiaeiblijfjekdanodkjadfinkhbfgcd/jsAndWasm/classifier.js:1:21785)
+    at i.dispatch (chrome-extension://eiaeiblijfjekdanodkjadfinkhbfgcd/jsAndWasm/classifier.js:1:30648)
+    at x.handleMessage (chrome-extension://eiaeiblijfjekdanodkjadfinkhbfgcd/jsAndWasm/classifier.js:1:31409)
+    at chrome-extension://eiaeiblijfjekdanodkjadfinkhbfgcd/jsAndWasm/classifier.js:1:31244
+sw_iframe.html:1 Error in event handler: TypeError: Cannot set properties of undefined (setting 'receivedAccessesIsLoading')
+    at chrome-extension://eiaeiblijfjekdanodkjadfinkhbfgcd/jsAndWasm/classifier.js:1:30384
+    at Array.forEach (<anonymous>)
+    at chrome-extension://eiaeiblijfjekdanodkjadfinkhbfgcd/jsAndWasm/classifier.js:1:30235
+    at produce (chrome-extension://eiaeiblijfjekdanodkjadfinkhbfgcd/jsAndWasm/classifier.js:1:7686)
+    at g (chrome-extension://eiaeiblijfjekdanodkjadfinkhbfgcd/jsAndWasm/classifier.js:1:30195)
+    at b (chrome-extension://eiaeiblijfjekdanodkjadfinkhbfgcd/jsAndWasm/classifier.js:1:21785)
+    at i.dispatch (chrome-extension://eiaeiblijfjekdanodkjadfinkhbfgcd/jsAndWasm/classifier.js:1:30648)
+    at x.handleMessage (chrome-extension://eiaeiblijfjekdanodkjadfinkhbfgcd/jsAndWasm/classifier.js:1:31409)
+    at chrome-extension://eiaeiblijfjekdanodkjadfinkhbfgcd/jsAndWasm/classifier.js:1:31244
+sw_iframe.html:1 Error in event handler: TypeError: Cannot set properties of undefined (setting 'isLoading')
+    at chrome-extension://eiaeiblijfjekdanodkjadfinkhbfgcd/jsAndWasm/classifier.js:1:30384
+    at Array.forEach (<anonymous>)
+    at chrome-extension://eiaeiblijfjekdanodkjadfinkhbfgcd/jsAndWasm/classifier.js:1:30235
+    at produce (chrome-extension://eiaeiblijfjekdanodkjadfinkhbfgcd/jsAndWasm/classifier.js:1:7686)
+    at g (chrome-extension://eiaeiblijfjekdanodkjadfinkhbfgcd/jsAndWasm/classifier.js:1:30195)
+    at b (chrome-extension://eiaeiblijfjekdanodkjadfinkhbfgcd/jsAndWasm/classifier.js:1:21785)
+    at i.dispatch (chrome-extension://eiaeiblijfjekdanodkjadfinkhbfgcd/jsAndWasm/classifier.js:1:30648)
+    at x.handleMessage (chrome-extension://eiaeiblijfjekdanodkjadfinkhbfgcd/jsAndWasm/classifier.js:1:31409)
+    at chrome-extension://eiaeiblijfjekdanodkjadfinkhbfgcd/jsAndWasm/classifier.js:1:31244
+sw_iframe.html:1 Error in event handler: TypeError: Cannot read properties of undefined (reading 'mfaState')
+    at chrome-extension://eiaeiblijfjekdanodkjadfinkhbfgcd/jsAndWasm/classifier.js:1:30317
+    at Array.forEach (<anonymous>)
+    at chrome-extension://eiaeiblijfjekdanodkjadfinkhbfgcd/jsAndWasm/classifier.js:1:30235
+    at produce (chrome-extension://eiaeiblijfjekdanodkjadfinkhbfgcd/jsAndWasm/classifier.js:1:7686)
+    at g (chrome-extension://eiaeiblijfjekdanodkjadfinkhbfgcd/jsAndWasm/classifier.js:1:30195)
+    at b (chrome-extension://eiaeiblijfjekdanodkjadfinkhbfgcd/jsAndWasm/classifier.js:1:21785)
+    at i.dispatch (chrome-extension://eiaeiblijfjekdanodkjadfinkhbfgcd/jsAndWasm/classifier.js:1:30648)
+    at x.handleMessage (chrome-extension://eiaeiblijfjekdanodkjadfinkhbfgcd/jsAndWasm/classifier.js:1:31409)
+    at chrome-extension://eiaeiblijfjekdanodkjadfinkhbfgcd/jsAndWasm/classifier.js:1:31244
+sw_iframe.html:1 Error in event handler: TypeError: Cannot set properties of undefined (setting 'storageInfo')
+    at chrome-extension://eiaeiblijfjekdanodkjadfinkhbfgcd/jsAndWasm/classifier.js:1:30384
+    at Array.forEach (<anonymous>)
+    at chrome-extension://eiaeiblijfjekdanodkjadfinkhbfgcd/jsAndWasm/classifier.js:1:30235
+    at produce (chrome-extension://eiaeiblijfjekdanodkjadfinkhbfgcd/jsAndWasm/classifier.js:1:7686)
+    at g (chrome-extension://eiaeiblijfjekdanodkjadfinkhbfgcd/jsAndWasm/classifier.js:1:30195)
+    at b (chrome-extension://eiaeiblijfjekdanodkjadfinkhbfgcd/jsAndWasm/classifier.js:1:21785)
+    at i.dispatch (chrome-extension://eiaeiblijfjekdanodkjadfinkhbfgcd/jsAndWasm/classifier.js:1:30648)
+    at x.handleMessage (chrome-extension://eiaeiblijfjekdanodkjadfinkhbfgcd/jsAndWasm/classifier.js:1:31409)
+    at chrome-extension://eiaeiblijfjekdanodkjadfinkhbfgcd/jsAndWasm/classifier.js:1:31244
+ApprenticeTracker:1 Banner not shown: beforeinstallpromptevent.preventDefault() called. The page must call beforeinstallpromptevent.prompt() to show the banner.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+framework-8029cbe8b38bb8c1.js:1 Unrecognized feature: 'ambient-light-sensor'.
+_ @ framework-8029cbe8b38bb8c1.js:1
+framework-8029cbe8b38bb8c1.js:1 Unrecognized feature: 'battery'.
+_ @ framework-8029cbe8b38bb8c1.js:1
+framework-8029cbe8b38bb8c1.js:1 Unrecognized feature: 'execution-while-not-rendered'.
+_ @ framework-8029cbe8b38bb8c1.js:1
+framework-8029cbe8b38bb8c1.js:1 Unrecognized feature: 'execution-while-out-of-viewport'.
+_ @ framework-8029cbe8b38bb8c1.js:1
+framework-8029cbe8b38bb8c1.js:1 Unrecognized feature: 'layout-animations'.
+_ @ framework-8029cbe8b38bb8c1.js:1
+framework-8029cbe8b38bb8c1.js:1 Unrecognized feature: 'legacy-image-formats'.
+_ @ framework-8029cbe8b38bb8c1.js:1
+framework-8029cbe8b38bb8c1.js:1 Unrecognized feature: 'navigation-override'.
+_ @ framework-8029cbe8b38bb8c1.js:1
+framework-8029cbe8b38bb8c1.js:1 Unrecognized feature: 'oversized-images'.
+_ @ framework-8029cbe8b38bb8c1.js:1
+framework-8029cbe8b38bb8c1.js:1 Unrecognized feature: 'publickey-credentials'.
+_ @ framework-8029cbe8b38bb8c1.js:1
+framework-8029cbe8b38bb8c1.js:1 Unrecognized feature: 'speaker-selection'.
+_ @ framework-8029cbe8b38bb8c1.js:1
+framework-8029cbe8b38bb8c1.js:1 Unrecognized feature: 'unoptimized-images'.
+_ @ framework-8029cbe8b38bb8c1.js:1
+framework-8029cbe8b38bb8c1.js:1 Unrecognized feature: 'unsized-media'.
+_ @ framework-8029cbe8b38bb8c1.js:1
+framework-8029cbe8b38bb8c1.js:1 Unrecognized feature: 'web-share'.
+_ @ framework-8029cbe8b38bb8c1.js:1
+framework-8029cbe8b38bb8c1.js:1 Unrecognized feature: 'pointer-lock'.
+_ @ framework-8029cbe8b38bb8c1.js:1
+framework-8029cbe8b38bb8c1.js:1 Allow attribute will take precedence over 'allowfullscreen'.
+_ @ framework-8029cbe8b38bb8c1.js:1
+framework-8029cbe8b38bb8c1.js:1 Allow attribute will take precedence over 'allowpaymentrequest'.
+_ @ framework-8029cbe8b38bb8c1.js:1
+ [Report Only] Refused to compile or instantiate WebAssembly module because 'unsafe-eval' is not an allowed source of script in the following Content Security Policy directive: "script-src 'self'".
+
+ [Report Only] Refused to compile or instantiate WebAssembly module because 'unsafe-eval' is not an allowed source of script in the following Content Security Policy directive: "script-src 'self'".
+
+_app-b6cbc35f4bce2127.js:13 Adding extension: GPT-Replit - ChatGPT in your Repl. Object
+workspace_iframe.html:32 Unrecognized feature: 'ambient-light-sensor'.
+workspace_iframe.html:32 Unrecognized feature: 'battery'.
+workspace_iframe.html:32 Unrecognized feature: 'execution-while-not-rendered'.
+workspace_iframe.html:32 Unrecognized feature: 'execution-while-out-of-viewport'.
+workspace_iframe.html:32 Unrecognized feature: 'layout-animations'.
+workspace_iframe.html:32 Unrecognized feature: 'legacy-image-formats'.
+workspace_iframe.html:32 Unrecognized feature: 'navigation-override'.
+workspace_iframe.html:32 Unrecognized feature: 'oversized-images'.
+workspace_iframe.html:32 Unrecognized feature: 'publickey-credentials'.
+workspace_iframe.html:32 Unrecognized feature: 'speaker-selection'.
+workspace_iframe.html:32 Unrecognized feature: 'unoptimized-images'.
+workspace_iframe.html:32 Unrecognized feature: 'unsized-media'.
+workspace_iframe.html:32 Unrecognized feature: 'web-share'.
+workspace_iframe.html:32 Allow attribute will take precedence over 'allowfullscreen'.
+workspace_iframe.html:32 Allow attribute will take precedence over 'allowpaymentrequest'.
+_app-b6cbc35f4bce2127.js:13 Adding extension: Perplexity Object
+_app-b6cbc35f4bce2127.js:13 Adding extension: Javascript Commands Object
+hook.js:608 Command: hello has unrecognized contributions: editor-context-menu. Valid contributions are commandbar,filetree-context-menu,sidebar-search,editor-context-menu Object
+overrideMethod @ hook.js:608
+hook.js:608 Command: javascript-root-command has unrecognized contributions: commandbar. Valid contributions are commandbar,filetree-context-menu,sidebar-search,editor-context-menu Object
+overrideMethod @ hook.js:608
+ stallwart: failed ping 1
+ stallwart: failed ping 2
+ stallwart: failed ping 3
+ApprenticeTracker:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+ApprenticeTracker:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+ApprenticeTracker:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+ApprenticeTracker:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+ApprenticeTracker:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+ApprenticeTracker:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+ApprenticeTracker:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+ApprenticeTracker:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/api/apprentices:1 
+            
+            
+           Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/api/dashboard/metrics:1 
+            
+            
+           Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/api/gto-compliance/dashboard/1:1 
+            
+            
+           Failed to load resource: the server responded with a status of 404 (Not Found)
+684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/:1 
+            
+            
+           Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/field-officers/site-assessment:1 
+            
+            
+           Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/:1 
+            
+            
+           Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/field-officers/site-assessment:1 
+            
+            
+           Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/:1 
+            
+            
+           Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/field-officers/site-assessment:1 
+            
+            
+           Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+standard-assessment.tsx:171 
+            
+            
+           Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+index.tsx:87 
+            
+            
+           Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+complaints.tsx:231 
+            
+            
+           Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/:1 
+            
+            
+           Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/field-officers/site-assessment:1 
+            
+            
+           Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/:1 
+            
+            
+           Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/field-officers/site-assessment:1 
+            
+            
+           Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/:1 
+            
+            
+           Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/field-officers/site-assessment:1 
+            
+            
+           Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/:1 
+            
+            
+           Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/training/off-job:1 
+            
+            
+           Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/:1 
+            
+            
+           Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/training/off-job:1 
+            
+            
+           Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/:1 
+            
+            
+           Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/:1 
+            
+            
+           Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+index.tsx:117 
+            
+            
+           Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+create.tsx:98 
+            
+            
+           Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/:1 
+            
+            
+           Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+field-officers.tsx:103 
+            
+            
+           Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+site-assessment.tsx:110 
+            
+            
+           Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/:1 
+            
+            
+           Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+stallwart.build.js:1 stallwart: failed ping 1
+
+                
+          
+          
+          
+         Chrome is moving towards a new experience that allows users to choose to browse without third-party cookies.
+stallwart.build.js:1 stallwart: failed ping 1
+stallwart.build.js:1 stallwart: failed ping 2
+stallwart.build.js:1 stallwart: failed ping 3
