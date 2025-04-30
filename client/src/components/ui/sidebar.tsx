@@ -5,12 +5,20 @@ import {
   ChevronDown,
   LayoutDashboard,
   Users,
-  Building2,
+  Building2, 
   ShieldCheck,
   DollarSign,
   BarChart2,
   FileText,
-  Settings
+  Settings,
+  GraduationCap,
+  ClipboardCheck,
+  Calendar,
+  UserCog,
+  Briefcase,
+  FileHeart,
+  Network,
+  ExternalLink
 } from "lucide-react";
 
 interface SidebarItemProps {
@@ -35,7 +43,7 @@ const SidebarItem = ({ icon, label, href, children, active }: SidebarItemProps) 
   };
   
   return (
-    <li className="relative px-6 py-3">
+    <li className="relative px-6 py-2">
       {isActive && (
         <span className="absolute inset-y-0 left-0 w-1 bg-primary rounded-tr-lg rounded-br-lg" aria-hidden="true"></span>
       )}
@@ -62,7 +70,7 @@ const SidebarItem = ({ icon, label, href, children, active }: SidebarItemProps) 
           </button>
           
           {isOpen && (
-            <ul className="p-2 mt-2 space-y-2 overflow-hidden text-sm rounded-md">
+            <ul className="pl-2 pt-1 pb-1 mt-1 space-y-1 overflow-hidden text-xs rounded-md">
               {children?.map((child, index) => {
                 const childActive = location === child.href;
                 return (
@@ -103,7 +111,7 @@ const Sidebar = () => {
   
   return (
     <aside className="z-20 hidden w-64 overflow-y-auto bg-white dark:bg-sidebar md:block flex-shrink-0 border-r border-border">
-      <div className="py-4">
+      <div className="py-4 max-h-screen overflow-y-auto">
         <div className="px-6 py-3">
           <h2 className="text-2xl font-bold text-primary">CRM7</h2>
           <p className="text-xs text-muted-foreground">Workforce Management</p>
@@ -113,53 +121,116 @@ const Sidebar = () => {
           <SidebarItem 
             icon={<LayoutDashboard className="h-5 w-5" />} 
             label="Dashboard" 
-            href="/" 
-            active={location === '/'} 
+            href="/admin" 
+            active={location === '/admin'} 
           />
           
           <SidebarItem 
             icon={<Users className="h-5 w-5" />} 
-            label="Apprentice Management" 
+            label="Apprentices & Trainees" 
             active={location.startsWith('/apprentices')}
             children={[
               { label: "All Apprentices", href: "/apprentices" },
-              { label: "Training Contracts", href: "/contracts" },
-              { label: "Progress Monitoring", href: "/apprentices/progress" },
-              { label: "Performance Tracking", href: "/apprentices/performance" }
+              { label: "Recruitment", href: "/apprentices/recruitment" },
+              { label: "Employment Records", href: "/apprentices/records" },
+              { label: "Training Plans", href: "/apprentices/training" },
+              { label: "Progress Tracking", href: "/apprentices/progress" },
+              { label: "Rotations & Placements", href: "/placements" },
+              { label: "Completion", href: "/apprentices/completion" }
             ]} 
           />
           
           <SidebarItem 
             icon={<Building2 className="h-5 w-5" />} 
-            label="Host Management" 
+            label="Host Employers" 
             active={location.startsWith('/hosts')}
             children={[
-              { label: "All Hosts", href: "/hosts" },
-              { label: "Placements", href: "/placements" },
-              { label: "Safety Compliance", href: "/hosts/safety" },
-              { label: "Financial Arrangements", href: "/hosts/financial" }
+              { label: "Employer Directory", href: "/hosts" },
+              { label: "Agreements", href: "/hosts/agreements" },
+              { label: "Workplace Monitoring", href: "/hosts/monitoring" },
+              { label: "Vacancy Management", href: "/hosts/vacancies" },
+              { label: "Performance Reports", href: "/hosts/reports" }
+            ]} 
+          />
+          
+          <SidebarItem 
+            icon={<GraduationCap className="h-5 w-5" />} 
+            label="Training" 
+            active={location.startsWith('/training')}
+            children={[
+              { label: "Training Plans", href: "/training/plans" },
+              { label: "Qualification Progress", href: "/training/qualifications" },
+              { label: "RTO Management", href: "/training/rtos" },
+              { label: "Off-Job Training", href: "/training/off-job" },
+              { label: "Competency Records", href: "/training/competencies" }
+            ]} 
+          />
+          
+          <SidebarItem 
+            icon={<ClipboardCheck className="h-5 w-5" />} 
+            label="Timesheets & Payroll" 
+            active={location.startsWith('/timesheets')}
+            children={[
+              { label: "Timesheet Management", href: "/timesheets" },
+              { label: "Approval Workflow", href: "/timesheets/approvals" },
+              { label: "Pay Items & Awards", href: "/awards" },
+              { label: "Payroll Export", href: "/timesheets/payroll" },
+              { label: "Leave Management", href: "/timesheets/leave" }
             ]} 
           />
           
           <SidebarItem 
             icon={<ShieldCheck className="h-5 w-5" />} 
-            label="Compliance System" 
-            href="/compliance" 
-            active={location === '/compliance'} 
+            label="Compliance" 
+            active={location.startsWith('/compliance')}
+            children={[
+              { label: "Evidence Collection", href: "/compliance" },
+              { label: "Standard 1 Requirements", href: "/compliance/standard-1" },
+              { label: "Standard 2 Requirements", href: "/compliance/standard-2" },
+              { label: "Standard 3 Requirements", href: "/compliance/standard-3" },
+              { label: "Standard 4 Requirements", href: "/compliance/standard-4" },
+              { label: "Audit Preparation", href: "/compliance/audit" }
+            ]} 
           />
           
           <SidebarItem 
-            icon={<DollarSign className="h-5 w-5" />} 
-            label="Financial Operations" 
-            href="/timesheets" 
-            active={location === '/timesheets'} 
+            icon={<Calendar className="h-5 w-5" />} 
+            label="Field Officer Activities" 
+            active={location.startsWith('/field-officers')}
+            children={[
+              { label: "Visit Scheduler", href: "/field-officers" },
+              { label: "Site Assessment", href: "/field-officers/site-assessment" },
+              { label: "Case Notes & Logs", href: "/field-officers/case-notes" },
+              { label: "Competency Review", href: "/field-officers/competency" },
+              { label: "Incident Tracking", href: "/field-officers/incidents" },
+              { label: "Action Items", href: "/field-officers/actions" }
+            ]} 
+          />
+          
+          <SidebarItem 
+            icon={<Briefcase className="h-5 w-5" />} 
+            label="Governance" 
+            active={location.startsWith('/governance')}
+            children={[
+              { label: "Quality Assurance", href: "/governance/quality" },
+              { label: "Business Planning", href: "/governance/planning" },
+              { label: "Risk Management", href: "/governance/risk" },
+              { label: "Financial Viability", href: "/governance/financial" }
+            ]} 
           />
           
           <SidebarItem 
             icon={<BarChart2 className="h-5 w-5" />} 
-            label="Analytics & Reporting" 
-            href="/reports" 
-            active={location === '/reports'} 
+            label="Reports" 
+            active={location.startsWith('/reports')}
+            children={[
+              { label: "Compliance Reports", href: "/reports/compliance" },
+              { label: "Financial Reports", href: "/reports/financial" },
+              { label: "Apprentice Progress", href: "/reports/apprentice" },
+              { label: "Host Employer Reports", href: "/reports/host" },
+              { label: "Custom Reports", href: "/reports/custom" },
+              { label: "Export Options", href: "/reports/export" }
+            ]} 
           />
           
           <SidebarItem 
@@ -170,10 +241,16 @@ const Sidebar = () => {
           />
           
           <SidebarItem 
-            icon={<Settings className="h-5 w-5" />} 
+            icon={<UserCog className="h-5 w-5" />} 
             label="Settings" 
-            href="/settings" 
-            active={location === '/settings'} 
+            active={location.startsWith('/settings')}
+            children={[
+              { label: "User Management", href: "/settings/users" },
+              { label: "Permissions & Roles", href: "/settings/permissions" },
+              { label: "System Configuration", href: "/settings/configuration" },
+              { label: "Integrations", href: "/settings/integrations" },
+              { label: "Import/Export", href: "/settings/import-export" }
+            ]} 
           />
         </ul>
       </div>
