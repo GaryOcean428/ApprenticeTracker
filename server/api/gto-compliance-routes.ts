@@ -10,7 +10,7 @@ import {
   appeals,
   gtoOrganizations
 } from '@shared/schema';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, sql } from 'drizzle-orm';
 import { insertGtoComplianceStandardSchema, insertComplianceAssessmentSchema } from '@shared/schema';
 import { z } from 'zod';
 
@@ -143,9 +143,11 @@ gtoComplianceRouter.get('/dashboard/:organizationId', async (req, res) => {
       .groupBy(gtoComplianceStandards.category);
     
     // Get total standards count
-    const totalStandards = await db
-      .select({ count: db.fn.count() })
+    const standards = await db
+      .select()
       .from(gtoComplianceStandards);
+    
+    const totalStandardsCount = standards.length;
     
     // Calculate compliance statistics
     const compliantAssessments = assessments.filter(a => a.assessment.status === 'compliant').length;
@@ -227,7 +229,7 @@ gtoComplianceRouter.get('/dashboard/:organizationId', async (req, res) => {
         nonCompliant: nonCompliantAssessments,
         inProgress: inProgressAssessments,
         total: assessments.length,
-        totalStandards: totalStandards[0]?.count || 0
+        totalStandards: totalStandardsCount
       },
       complianceByCategory,
       upcomingAssessments,
