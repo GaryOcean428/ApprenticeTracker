@@ -108,9 +108,9 @@ const PlacementsList = () => {
       (apprentices && getApprenticeName(placement.apprenticeId).toLowerCase().includes(filter.search.toLowerCase())) ||
       (hosts && getHostName(placement.hostEmployerId).toLowerCase().includes(filter.search.toLowerCase()));
     
-    const matchesStatus = filter.status === "" || placement.status === filter.status;
-    const matchesApprentice = filter.apprenticeId === "" || placement.apprenticeId === parseInt(filter.apprenticeId);
-    const matchesHost = filter.hostEmployerId === "" || placement.hostEmployerId === parseInt(filter.hostEmployerId);
+    const matchesStatus = filter.status === "all_statuses" || placement.status === filter.status;
+    const matchesApprentice = filter.apprenticeId === "all_apprentices" || placement.apprenticeId === parseInt(filter.apprenticeId);
+    const matchesHost = filter.hostEmployerId === "all_hosts" || placement.hostEmployerId === parseInt(filter.hostEmployerId);
     
     return matchesSearch && matchesStatus && matchesApprentice && matchesHost;
   });
@@ -186,7 +186,7 @@ const PlacementsList = () => {
                     <SelectValue placeholder="Status" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Statuses</SelectItem>
+                    <SelectItem value="all_statuses">All Statuses</SelectItem>
                     <SelectItem value="active">Active</SelectItem>
                     <SelectItem value="completed">Completed</SelectItem>
                     <SelectItem value="on_hold">On Hold</SelectItem>
@@ -206,7 +206,7 @@ const PlacementsList = () => {
                       <SelectValue placeholder="Apprentice" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All Apprentices</SelectItem>
+                      <SelectItem value="all_apprentices">All Apprentices</SelectItem>
                       {apprentices?.map((apprentice) => (
                         <SelectItem key={apprentice.id} value={apprentice.id.toString()}>
                           {apprentice.firstName} {apprentice.lastName}
@@ -228,7 +228,7 @@ const PlacementsList = () => {
                       <SelectValue placeholder="Host Employer" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All Hosts</SelectItem>
+                      <SelectItem value="all_hosts">All Hosts</SelectItem>
                       {hosts?.map((host) => (
                         <SelectItem key={host.id} value={host.id.toString()}>
                           {host.name}

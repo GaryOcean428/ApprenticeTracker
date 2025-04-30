@@ -70,15 +70,17 @@ const ApprenticesList = () => {
       apprentice.email.toLowerCase().includes(filter.search.toLowerCase()) ||
       apprentice.trade.toLowerCase().includes(filter.search.toLowerCase());
     
-    const matchesStatus = filter.status === "" || apprentice.status === filter.status;
-    const matchesTrade = filter.trade === "" || apprentice.trade === filter.trade;
+    const matchesStatus = filter.status === "all_statuses" || apprentice.status === filter.status;
+    const matchesTrade = filter.trade === "all_trades" || apprentice.trade === filter.trade;
     
     return matchesSearch && matchesStatus && matchesTrade;
   });
   
   // Extract unique trades for filter dropdown
   const trades = apprentices 
-    ? [...new Set(apprentices.map(apprentice => apprentice.trade))]
+    ? apprentices
+        .map(apprentice => apprentice.trade)
+        .filter((trade, index, self) => self.indexOf(trade) === index)
     : [];
   
   const getStatusBadgeClass = (status: string) => {
