@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
-import { format } from "date-fns";
+import { format, isToday, isThisWeek, isThisMonth, differenceInDays } from "date-fns";
 import { AlertCircle, PlusCircle, Search, Filter, Calendar, User, Building2, Tag, SlidersHorizontal, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -106,10 +106,10 @@ export default function IncidentTracking() {
     status: string;
     dateRange: string;
   }>({
-    hostId: "",
-    type: "",
-    status: "",
-    dateRange: "",
+    hostId: "all-hosts",
+    type: "all-types",
+    status: "all-statuses",
+    dateRange: "all-time",
   });
 
   const { data: incidents, isLoading, error } = useQuery<Incident[]>({
@@ -132,12 +132,18 @@ export default function IncidentTracking() {
       incident.hostName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       incident.description.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchesHost = filter.hostId ? incident.hostId.toString() === filter.hostId : true;
-    const matchesType = filter.type ? incident.type === filter.type : true;
-    const matchesStatus = filter.status ? incident.status === filter.status : true;
+    const matchesHost = filter.hostId === "all-hosts" || incident.hostId.toString() === filter.hostId;
+    const matchesType = filter.type === "all-types" || incident.type === filter.type;
+    const matchesStatus = filter.status === "all-statuses" || incident.status === filter.status;
 
-    // Date filter logic would go here
-    const matchesDateRange = true; // Placeholder
+    // Date filter logic
+    const matchesDateRange = filter.dateRange === "all-time" ? true : 
+      filter.dateRange === "today" ? isToday(new Date(incident.date)) :
+      filter.dateRange === "this-week" ? isThisWeek(new Date(incident.date)) :
+      filter.dateRange === "this-month" ? isThisMonth(new Date(incident.date)) :
+      filter.dateRange === "last-90-days" ? (
+        differenceInDays(new Date(), new Date(incident.date)) <= 90
+      ) : true;
 
     return matchesSearch && matchesHost && matchesType && matchesStatus && matchesDateRange;
   });
@@ -247,7 +253,7 @@ export default function IncidentTracking() {
               </span>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Time</SelectItem>
+              <SelectItem value="all-time">All Time</SelectItem>
               <SelectItem value="today">Today</SelectItem>
               <SelectItem value="this-week">This Week</SelectItem>
               <SelectItem value="this-month">This Month</SelectItem>
@@ -261,10 +267,10 @@ export default function IncidentTracking() {
               variant="outline"
               onClick={() =>
                 setFilter({
-                  hostId: "",
-                  type: "",
-                  status: "",
-                  dateRange: "",
+                  hostId: "all-hosts",
+                  type: "all-types",
+                  status: "all-statuses",
+                  dateRange: "all-time",
                 })
               }
               className="flex gap-1 items-center"
