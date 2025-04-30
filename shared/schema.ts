@@ -719,3 +719,142 @@ export type InsertComplaint = z.infer<typeof insertComplaintSchema>;
 
 export type Appeal = typeof appeals.$inferSelect;
 export type InsertAppeal = z.infer<typeof insertAppealSchema>;
+
+// Units of Competency and Qualifications for Australian VET System
+
+// Units of Competency - the building blocks of all VET qualifications
+export const unitsOfCompetency = pgTable("units_of_competency", {
+  id: serial("id").primaryKey(),
+  unitCode: text("unit_code").notNull().unique(), // e.g., BSBTEC201
+  unitTitle: text("unit_title").notNull(),  // e.g., "Use business software applications"
+  unitDescription: text("unit_description"),
+  releaseNumber: text("release_number"), // e.g., "Release 1"
+  releaseDate: date("release_date"),
+  trainingPackage: text("training_package"), // e.g., "BSB" for Business Services
+  trainingPackageRelease: text("training_package_release"),
+  elementSummary: json("element_summary"), // Array of elements
+  performanceCriteria: json("performance_criteria"),
+  assessmentRequirements: json("assessment_requirements"),
+  nominalHours: integer("nominal_hours"),
+  isActive: boolean("is_active").default(true),
+  isImported: boolean("is_imported").default(false), // Flag for units imported from external packs
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertUnitOfCompetencySchema = createInsertSchema(unitsOfCompetency).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+// Qualifications - made up of multiple Units of Competency
+export const qualifications = pgTable("qualifications", {
+  id: serial("id").primaryKey(),
+  qualificationCode: text("qualification_code").notNull().unique(), // e.g., BSB20120
+  qualificationTitle: text("qualification_title").notNull(), // e.g., "Certificate II in Workplace Skills"
+  qualificationDescription: text("qualification_description"),
+  aqfLevel: text("aqf_level").notNull(), // e.g., "Certificate I, II, III, IV, Diploma, etc."
+  aqfLevelNumber: integer("aqf_level_number").notNull(), // 1 for Cert I, 2 for Cert II, etc.
+  trainingPackage: text("training_package"), // e.g., "BSB" for Business Services
+  trainingPackageRelease: text("training_package_release"),
+  totalUnits: integer("total_units").notNull(),
+  coreUnits: integer("core_units").notNull(),
+  electiveUnits: integer("elective_units").notNull(),
+  nominalHours: integer("nominal_hours"),
+  isActive: boolean("is_active").default(true),
+  isApprenticeshipQualification: boolean("is_apprenticeship_qualification").default(false),
+  isFundedQualification: boolean("is_funded_qualification").default(false),
+  fundingDetails: json("funding_details"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertQualificationSchema = createInsertSchema(qualifications).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+// Qualification Structure - connects Qualifications to Units of Competency
+export const qualificationStructure = pgTable("qualification_structure", {
+  id: serial("id").primaryKey(),
+  qualificationId: integer("qualification_id").references(() => qualifications.id).notNull(),
+  unitId: integer("unit_id").references(() => unitsOfCompetency.id).notNull(),
+  isCore: boolean("is_core").default(false), // false means elective
+  groupName: text("group_name"), // For grouping electives, e.g., "Group A", "Group B"
+  isMandatoryElective: boolean("is_mandatory_elective").default(false), // Some elective groups require a minimum number of units
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertQualificationStructureSchema = createInsertSchema(qualificationStructure).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+// Apprentice Unit Progress - tracks individual unit progression for apprentices
+export const apprenticeUnitProgress = pgTable("apprentice_unit_progress", {
+  id: serial("id").primaryKey(),
+  apprenticeId: integer("apprentice_id").references(() => apprentices.id).notNull(),
+  unitId: integer("unit_id").references(() => unitsOfCompetency.id).notNull(),
+  status: text("status").notNull().default("not_started"), // "not_started", "in_progress", "completed", "assessed"
+  startDate: date("start_date"),
+  completedDate: date("completed_date"), 
+  assessedDate: date("assessed_date"),
+  assessmentResult: text("assessment_result"), // "competent", "not_yet_competent"
+  assessorId: integer("assessor_id").references(() => users.id),
+  evidence: json("evidence"), // Links to evidence documents
+  notes: text("notes"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertApprenticeUnitProgressSchema = createInsertSchema(apprenticeUnitProgress).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+// Apprentice Qualification Enrollment - tracks which qualifications an apprentice is enrolled in
+export const apprenticeQualifications = pgTable("apprentice_qualifications", {
+  id: serial("id").primaryKey(),
+  apprenticeId: integer("apprentice_id").references(() => apprentices.id).notNull(),
+  qualificationId: integer("qualification_id").references(() => qualifications.id).notNull(),
+  enrollmentDate: date("enrollment_date").notNull(),
+  expectedCompletionDate: date("expected_completion_date"),
+  status: text("status").notNull().default("active"), // "active", "completed", "withdrawn"
+  completionDate: date("completion_date"),
+  certificateIssueDate: date("certificate_issue_date"),
+  certificateNumber: text("certificate_number"),
+  rtoId: integer("rto_id"), // Reference to RTO if not in-house
+  rtoName: text("rto_name"), // If external RTO
+  fundingSource: text("funding_source"), // Government funded, fee-for-service, etc.
+  fundingDetails: json("funding_details"),
+  trainingPlanDocumentId: integer("training_plan_document_id").references(() => documents.id),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertApprenticeQualificationSchema = createInsertSchema(apprenticeQualifications).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type UnitOfCompetency = typeof unitsOfCompetency.$inferSelect;
+export type InsertUnitOfCompetency = z.infer<typeof insertUnitOfCompetencySchema>;
+
+export type Qualification = typeof qualifications.$inferSelect;
+export type InsertQualification = z.infer<typeof insertQualificationSchema>;
+
+export type QualificationStructure = typeof qualificationStructure.$inferSelect;
+export type InsertQualificationStructure = z.infer<typeof insertQualificationStructureSchema>;
+
+export type ApprenticeUnitProgress = typeof apprenticeUnitProgress.$inferSelect;
+export type InsertApprenticeUnitProgress = z.infer<typeof insertApprenticeUnitProgressSchema>;
+
+export type ApprenticeQualification = typeof apprenticeQualifications.$inferSelect;
+export type InsertApprenticeQualification = z.infer<typeof insertApprenticeQualificationSchema>;
