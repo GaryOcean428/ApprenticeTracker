@@ -28,7 +28,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
       <div className="flex flex-col flex-1 w-full">
         <Header onMenuToggle={toggleMobileSidebar} />
         
-        <main className="h-full overflow-y-auto bg-dark-50">
+        <main className="h-full overflow-y-auto bg-white dark:bg-[#111827]">
           <div className="container px-6 mx-auto py-6">
             {children}
           </div>

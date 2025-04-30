@@ -25,7 +25,7 @@ const Header = ({ onMenuToggle }: HeaderProps) => {
   };
   
   return (
-    <header className="z-10 py-4 bg-white dark:bg-background shadow-sm">
+    <header className="z-10 py-4 bg-white dark:bg-[#111827] shadow-sm">
       <div className="flex items-center justify-between h-full px-6 mx-auto">
         {/* Mobile hamburger */}
         <Button 
@@ -46,7 +46,7 @@ const Header = ({ onMenuToggle }: HeaderProps) => {
             <Input
               type="text"
               placeholder="Search for apprentices, hosts, documents..."
-              className="w-full pl-10 pr-4 py-2 text-sm"
+              className="w-full pl-10 pr-4 py-2 text-sm dark:bg-[#1f2937] dark:border-[#374151]"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
