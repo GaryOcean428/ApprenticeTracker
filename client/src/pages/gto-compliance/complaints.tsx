@@ -136,8 +136,13 @@ export default function ComplaintsManagement() {
   });
 
   // Update complaint status mutation
-  const updateComplaintStatusMutation = useMutation({
-    mutationFn: async ({ id, status }) => {
+  type UpdateStatusParams = {
+    id: number;
+    status: string;
+  };
+  
+  const updateComplaintStatusMutation = useMutation<any, Error, UpdateStatusParams>({
+    mutationFn: async ({ id, status }: UpdateStatusParams) => {
       const response = await fetch(`/api/gto-compliance/complaints/${id}/status`, {
         method: 'PATCH',
         headers: {
@@ -168,7 +173,7 @@ export default function ComplaintsManagement() {
     },
   });
 
-  const handleNewComplaintChange = (e) => {
+  const handleNewComplaintChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setNewComplaint({
       ...newComplaint,
@@ -176,7 +181,7 @@ export default function ComplaintsManagement() {
     });
   };
 
-  const handleSelectChange = (name, value) => {
+  const handleSelectChange = (name: string, value: string) => {
     setNewComplaint({
       ...newComplaint,
       [name]: value,
@@ -187,13 +192,25 @@ export default function ComplaintsManagement() {
     createComplaintMutation.mutate();
   };
 
-  const handleUpdateStatus = (id, status) => {
+  const handleUpdateStatus = (id: number, status: string) => {
     updateComplaintStatusMutation.mutate({ id, status });
   };
 
+  // Define a basic complaint type
+  interface Complaint {
+    id: number;
+    title: string;
+    description: string;
+    submittedBy: string;
+    status: string;
+    category: string;
+    priority: string;
+    dateSubmitted: string;
+  }
+
   // Filter complaints based on search query and status filter
   const filteredComplaints = complaints
-    ? complaints.filter((complaint) => {
+    ? complaints.filter((complaint: Complaint) => {
         const matchesSearch = 
           complaint.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
           complaint.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -206,7 +223,7 @@ export default function ComplaintsManagement() {
     : [];
 
   // Status badge component
-  const StatusBadge = ({ status }) => {
+  const StatusBadge = ({ status }: { status: string }) => {
     switch (status) {
       case 'open':
         return (
@@ -232,7 +249,7 @@ export default function ComplaintsManagement() {
   };
 
   // Priority badge component
-  const PriorityBadge = ({ priority }) => {
+  const PriorityBadge = ({ priority }: { priority: string }) => {
     switch (priority) {
       case 'high':
         return (
@@ -456,7 +473,7 @@ export default function ComplaintsManagement() {
                           </TableCell>
                         </TableRow>
                       ) : (
-                        filteredComplaints.map((complaint) => (
+                        filteredComplaints.map((complaint: Complaint) => (
                           <TableRow key={complaint.id}>
                             <TableCell>
                               <div className="font-medium">{complaint.title}</div>
