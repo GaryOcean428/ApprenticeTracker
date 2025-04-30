@@ -21,23 +21,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get metrics for dashboard
   app.get("/api/dashboard/metrics", async (req, res) => {
     try {
-      const apprentices = await storage.getAllApprentices();
-      const hosts = await storage.getAllHostEmployers();
-      const complianceRecords = await storage.getAllComplianceRecords();
-      const pendingTasks = (await storage.getAllTasks()).filter(
-        task => task.status === "pending" && task.priority === "urgent"
-      );
-      
-      const metrics = {
-        totalApprentices: apprentices.length,
-        activeHosts: hosts.filter(host => host.status === "active").length,
-        complianceAlerts: complianceRecords.filter(record => record.status === "non-compliant").length,
-        pendingApprovals: pendingTasks.length
+      // Default metrics values in case of data retrieval issues
+      let metrics = {
+        totalApprentices: 0,
+        activeHosts: 0,
+        complianceAlerts: 0,
+        pendingApprovals: 0
       };
+      
+      try {
+        const apprentices = await storage.getAllApprentices();
+        metrics.totalApprentices = apprentices.length;
+      } catch (err) {
+        console.error("Error fetching apprentices for dashboard:", err);
+      }
+      
+      try {
+        const hosts = await storage.getAllHostEmployers();
+        metrics.activeHosts = hosts.filter(host => host.status === "active").length;
+      } catch (err) {
+        console.error("Error fetching hosts for dashboard:", err);
+      }
+      
+      try {
+        const complianceRecords = await storage.getAllComplianceRecords();
+        metrics.complianceAlerts = complianceRecords.filter(record => record.status === "non-compliant").length;
+      } catch (err) {
+        console.error("Error fetching compliance records for dashboard:", err);
+      }
+      
+      try {
+        const pendingTasks = (await storage.getAllTasks()).filter(
+          task => task.status === "pending" && task.priority === "urgent"
+        );
+        metrics.pendingApprovals = pendingTasks.length;
+      } catch (err) {
+        console.error("Error fetching tasks for dashboard:", err);
+      }
       
       res.json(metrics);
     } catch (error) {
-      res.status(500).json({ message: "Error fetching dashboard metrics" });
+      console.error("Error in dashboard metrics endpoint:", error);
+      res.status(500).json({ 
+        message: "Error fetching dashboard metrics",
+        error: error instanceof Error ? error.message : String(error)
+      });
     }
   });
   
