@@ -120,6 +120,38 @@ function Router() {
       <Route path="/hosts" component={HostsList} />
       <Route path="/hosts/create" component={CreateHost} />
       <Route path="/hosts/:id" component={HostDetails} />
+      <Route path="/hosts/agreements" component={() => {
+        return (
+          <div className="p-8">
+            <h1 className="text-2xl font-bold mb-4">Host Employer Agreements</h1>
+            <p className="text-muted-foreground mb-4">This page is currently under development.</p>
+          </div>
+        );
+      }} />
+      <Route path="/hosts/monitoring" component={() => {
+        return (
+          <div className="p-8">
+            <h1 className="text-2xl font-bold mb-4">Workplace Monitoring</h1>
+            <p className="text-muted-foreground mb-4">This page is currently under development.</p>
+          </div>
+        );
+      }} />
+      <Route path="/hosts/vacancies" component={() => {
+        return (
+          <div className="p-8">
+            <h1 className="text-2xl font-bold mb-4">Vacancy Management</h1>
+            <p className="text-muted-foreground mb-4">This page is currently under development.</p>
+          </div>
+        );
+      }} />
+      <Route path="/hosts/reports" component={() => {
+        return (
+          <div className="p-8">
+            <h1 className="text-2xl font-bold mb-4">Host Employer Reports</h1>
+            <p className="text-muted-foreground mb-4">This page is currently under development.</p>
+          </div>
+        );
+      }} />
       
       {/* Fair Work Routes */}
       <Route path="/awards" component={AwardsList} />
@@ -218,8 +250,166 @@ function Router() {
       <Route path="/documents" component={DocumentsList} />
       <Route path="/compliance" component={ComplianceList} />
       <Route path="/compliance/create" component={CreateComplianceRecord} />
+      <Route path="/compliance/standard-1" component={() => {
+        return (
+          <div className="p-8">
+            <h1 className="text-2xl font-bold mb-4">Standard 1 Requirements</h1>
+            <p className="text-muted-foreground mb-4">This page is currently under development.</p>
+          </div>
+        );
+      }} />
+      <Route path="/compliance/standard-2" component={() => {
+        return (
+          <div className="p-8">
+            <h1 className="text-2xl font-bold mb-4">Standard 2 Requirements</h1>
+            <p className="text-muted-foreground mb-4">This page is currently under development.</p>
+          </div>
+        );
+      }} />
+      <Route path="/compliance/standard-3" component={() => {
+        return (
+          <div className="p-8">
+            <h1 className="text-2xl font-bold mb-4">Standard 3 Requirements</h1>
+            <p className="text-muted-foreground mb-4">This page is currently under development.</p>
+          </div>
+        );
+      }} />
+      <Route path="/compliance/standard-4" component={() => {
+        return (
+          <div className="p-8">
+            <h1 className="text-2xl font-bold mb-4">Standard 4 Requirements</h1>
+            <p className="text-muted-foreground mb-4">This page is currently under development.</p>
+          </div>
+        );
+      }} />
+      <Route path="/compliance/audit" component={() => {
+        return (
+          <div className="p-8">
+            <h1 className="text-2xl font-bold mb-4">Audit Preparation</h1>
+            <p className="text-muted-foreground mb-4">This page is currently under development.</p>
+          </div>
+        );
+      }} />
+      
+      {/* Training Routes */}
+      <Route path="/training/plans" component={() => {
+        return (
+          <div className="p-8">
+            <h1 className="text-2xl font-bold mb-4">Training Plans</h1>
+            <p className="text-muted-foreground mb-4">This page is currently under development.</p>
+          </div>
+        );
+      }} />
+      <Route path="/training/qualifications" component={() => {
+        return (
+          <div className="p-8">
+            <h1 className="text-2xl font-bold mb-4">Qualification Progress</h1>
+            <p className="text-muted-foreground mb-4">This page is currently under development.</p>
+          </div>
+        );
+      }} />
+      <Route path="/training/rtos" component={() => {
+        return (
+          <div className="p-8">
+            <h1 className="text-2xl font-bold mb-4">RTO Management</h1>
+            <p className="text-muted-foreground mb-4">This page is currently under development.</p>
+          </div>
+        );
+      }} />
+      <Route path="/training/off-job" component={() => {
+        return (
+          <div className="p-8">
+            <h1 className="text-2xl font-bold mb-4">Off-Job Training</h1>
+            <p className="text-muted-foreground mb-4">This page is currently under development.</p>
+          </div>
+        );
+      }} />
+      <Route path="/training/competencies" component={() => {
+        return (
+          <div className="p-8">
+            <h1 className="text-2xl font-bold mb-4">Competency Records</h1>
+            <p className="text-muted-foreground mb-4">This page is currently under development.</p>
+          </div>
+        );
+      }} />
+      
+      {/* Timesheet Routes */}
       <Route path="/timesheets" component={TimesheetsList} />
+      <Route path="/timesheets/approvals" component={() => {
+        return (
+          <div className="p-8">
+            <h1 className="text-2xl font-bold mb-4">Timesheet Approvals</h1>
+            <p className="text-muted-foreground mb-4">This page is currently under development.</p>
+          </div>
+        );
+      }} />
+      <Route path="/timesheets/payroll" component={() => {
+        return (
+          <div className="p-8">
+            <h1 className="text-2xl font-bold mb-4">Payroll Export</h1>
+            <p className="text-muted-foreground mb-4">This page is currently under development.</p>
+          </div>
+        );
+      }} />
+      <Route path="/timesheets/leave" component={() => {
+        return (
+          <div className="p-8">
+            <h1 className="text-2xl font-bold mb-4">Leave Management</h1>
+            <p className="text-muted-foreground mb-4">This page is currently under development.</p>
+          </div>
+        );
+      }} />
+      
+      {/* Report Routes */}
       <Route path="/reports" component={ReportsList} />
+      <Route path="/reports/compliance" component={() => {
+        return (
+          <div className="p-8">
+            <h1 className="text-2xl font-bold mb-4">Compliance Reports</h1>
+            <p className="text-muted-foreground mb-4">This page is currently under development.</p>
+          </div>
+        );
+      }} />
+      <Route path="/reports/financial" component={() => {
+        return (
+          <div className="p-8">
+            <h1 className="text-2xl font-bold mb-4">Financial Reports</h1>
+            <p className="text-muted-foreground mb-4">This page is currently under development.</p>
+          </div>
+        );
+      }} />
+      <Route path="/reports/apprentice" component={() => {
+        return (
+          <div className="p-8">
+            <h1 className="text-2xl font-bold mb-4">Apprentice Progress Reports</h1>
+            <p className="text-muted-foreground mb-4">This page is currently under development.</p>
+          </div>
+        );
+      }} />
+      <Route path="/reports/host" component={() => {
+        return (
+          <div className="p-8">
+            <h1 className="text-2xl font-bold mb-4">Host Employer Reports</h1>
+            <p className="text-muted-foreground mb-4">This page is currently under development.</p>
+          </div>
+        );
+      }} />
+      <Route path="/reports/custom" component={() => {
+        return (
+          <div className="p-8">
+            <h1 className="text-2xl font-bold mb-4">Custom Reports</h1>
+            <p className="text-muted-foreground mb-4">This page is currently under development.</p>
+          </div>
+        );
+      }} />
+      <Route path="/reports/export" component={() => {
+        return (
+          <div className="p-8">
+            <h1 className="text-2xl font-bold mb-4">Export Options</h1>
+            <p className="text-muted-foreground mb-4">This page is currently under development.</p>
+          </div>
+        );
+      }} />
       
       {/* Fallback to 404 */}
       <Route component={NotFound} />
