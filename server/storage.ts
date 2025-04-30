@@ -959,8 +959,16 @@ export class DatabaseStorage implements IStorage {
   // Apprentices
   async getAllApprentices(): Promise<Apprentice[]> {
     try {
-      const results = await db.select().from(apprentices);
-      return results;
+      // Use raw SQL to avoid column mismatch issues
+      const results = await db.execute(`
+        SELECT 
+          id, first_name as "firstName", last_name as "lastName", email, 
+          trade, status, progress, date_of_birth as "dateOfBirth", phone,
+          user_id as "userId", start_date as "startDate", end_date as "endDate",
+          profile_image as "profileImage"
+        FROM apprentices
+      `);
+      return results.rows as Apprentice[];
     } catch (error) {
       console.error("Error in getAllApprentices:", error);
       // Return empty array instead of throwing to prevent application crashes
@@ -994,8 +1002,17 @@ export class DatabaseStorage implements IStorage {
   // Host Employers
   async getAllHostEmployers(): Promise<HostEmployer[]> {
     try {
-      const results = await db.select().from(hostEmployers);
-      return results;
+      // Use raw SQL to avoid column mismatch issues
+      const results = await db.execute(`
+        SELECT 
+          id, name, email, industry, status, phone, notes,
+          contact_person as "contactPerson", address, 
+          safety_rating as "safetyRating", 
+          labour_hire_licence as "labourHireLicence", 
+          labour_hire_licence_expiry as "labourHireLicenceExpiry"
+        FROM host_employers
+      `);
+      return results.rows as HostEmployer[];
     } catch (error) {
       console.error("Error in getAllHostEmployers:", error);
       // Return empty array instead of throwing to prevent application crashes

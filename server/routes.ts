@@ -236,6 +236,85 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Update apprentice status (transition between stages)
+  app.patch("/api/apprentices/:id/status", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { status, notes } = req.body;
+      
+      // Get the existing apprentice
+      const existingApprentice = await storage.getApprentice(id);
+      if (!existingApprentice) {
+        return res.status(404).json({ message: "Apprentice not found" });
+      }
+      
+      // Validate the status transition
+      const validStatuses = [
+        "applicant", 
+        "recruitment", 
+        "pre-commencement", 
+        "active", 
+        "suspended", 
+        "withdrawn", 
+        "completed"
+      ];
+      
+      if (!status || !validStatuses.includes(status)) {
+        return res.status(400).json({ 
+          message: "Invalid status",
+          validStatuses 
+        });
+      }
+      
+      // Apply status change and update notes if provided
+      const updateData: any = { status };
+      if (notes) {
+        updateData.notes = existingApprentice.notes 
+          ? `${existingApprentice.notes}\n\n${new Date().toISOString().split('T')[0]} - STATUS CHANGE to ${status}:\n${notes}`
+          : `${new Date().toISOString().split('T')[0]} - STATUS CHANGE to ${status}:\n${notes}`;
+      }
+      
+      // Add specific date flags based on status transitions
+      if (status === "active" && existingApprentice.status !== "active") {
+        // When transitioning to active, set start date if not already set
+        if (!existingApprentice.startDate) {
+          updateData.startDate = new Date().toISOString().split('T')[0];
+        }
+      } else if (status === "completed" && existingApprentice.status !== "completed") {
+        // When completing, set end date if not already set
+        if (!existingApprentice.endDate) {
+          updateData.endDate = new Date().toISOString().split('T')[0];
+        }
+      }
+      
+      // Update the apprentice
+      const apprentice = await storage.updateApprentice(id, updateData);
+      
+      // Create activity log
+      await storage.createActivityLog({
+        userId: 1, // Assuming admin user
+        action: "status-changed",
+        relatedTo: "apprentice",
+        relatedId: apprentice.id,
+        details: { 
+          message: `Apprentice ${apprentice.firstName} ${apprentice.lastName} status changed from ${existingApprentice.status} to ${status}`,
+          apprenticeId: apprentice.id,
+          previousStatus: existingApprentice.status,
+          newStatus: status,
+          notes: notes || null
+        }
+      });
+      
+      res.json(apprentice);
+    } catch (error) {
+      console.error("Error updating apprentice status:", error);
+      res.status(500).json({ 
+        message: "Error updating apprentice status",
+        error: error instanceof Error ? error.message : String(error)
+      });
+    }
+  });
+  
   // Delete apprentice
   app.delete("/api/apprentices/:id", async (req, res) => {
     try {
