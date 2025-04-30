@@ -4,7 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import ErrorBoundary from "@/components/error-boundary";
-import { withIdValidation } from "@/components/route-parameter-validator";
+import { withIdValidation } from "@/components/route-validator";
 import NotFound from "@/pages/not-found";
 import MainLayout from "./layouts/main-layout";
 import Dashboard from "./pages/dashboard";

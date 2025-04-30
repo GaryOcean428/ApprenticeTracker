@@ -1,5 +1,5 @@
 import React, { ComponentType } from 'react';
-import { useRoute, Redirect } from 'wouter';
+import { useRoute } from 'wouter';
 import { z } from 'zod';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -20,19 +20,21 @@ interface ValidationOptions {
   errorMessage?: string;
 }
 
+type RouteParams = Record<string, string>;
+
 /**
  * Higher-order component that validates route parameters
  * using a Zod schema before rendering the wrapped component
  */
-export function withRouteParameterValidation<P extends object>(
+export function withRouteValidation<P extends object>(
   Component: ComponentType<P>,
   options: ValidationOptions
 ): ComponentType<P> {
   const { schema, redirectTo, errorMessage } = options;
   
-  return function ValidatedRoute(props: P) {
-    // Explicitly type useRoute with default generic type params to avoid TypeScript errors
-    const [, params] = useRoute<Record<string, string>>(window.location.pathname);
+  function ValidatedRoute(props: P) {
+    // Get route parameters
+    const [, params] = useRoute<RouteParams>(window.location.pathname);
     
     // If params is undefined, provide an empty object to avoid runtime errors
     const paramsToValidate = params || {};
@@ -63,8 +65,15 @@ export function withRouteParameterValidation<P extends object>(
       );
     }
     
-    // Merge validated params into the props to maintain type safety
+    // Merge validated params with props and pass to the component
     return <Component {...props} params={params} />;
+  }
+
+  // Set display name for debugging
+  const displayName = Component.displayName || Component.name || 'Component';
+  ValidatedRoute.displayName = `WithRouteValidation(${displayName})`;
+  
+  return ValidatedRoute;
 }
 
 /**
@@ -96,7 +105,7 @@ export function withIdValidation<P extends object>(
   redirectTo: string = "/",
   errorMessage?: string
 ): ComponentType<P> {
-  return withRouteParameterValidation(Component, {
+  return withRouteValidation(Component, {
     schema: idParamSchema,
     redirectTo,
     errorMessage
@@ -111,7 +120,7 @@ export function withOptionalIdValidation<P extends object>(
   redirectTo: string = "/",
   errorMessage?: string
 ): ComponentType<P> {
-  return withRouteParameterValidation(Component, {
+  return withRouteValidation(Component, {
     schema: optionalIdParamSchema,
     redirectTo,
     errorMessage
