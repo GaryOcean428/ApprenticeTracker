@@ -965,7 +965,21 @@ export class DatabaseStorage implements IStorage {
           id, first_name as "firstName", last_name as "lastName", email, 
           trade, status, progress, date_of_birth as "dateOfBirth", phone,
           user_id as "userId", start_date as "startDate", end_date as "endDate",
-          profile_image as "profileImage"
+          profile_image as "profileImage", notes,
+          client_identifier_apprenticeships as "clientIdentifierApprenticeships",
+          unique_student_identifier as "uniqueStudentIdentifier",
+          highest_school_level_completed as "highestSchoolLevelCompleted",
+          indigenous_status as "indigenousStatus",
+          language_identifier as "languageIdentifier",
+          country_of_birth as "countryOfBirth", 
+          disability_flag as "disabilityFlag",
+          aqf_level as "aqfLevel",
+          apprenticeship_year as "apprenticeshipYear",
+          gto_enrolled as "gtoEnrolled",
+          gto_id as "gtoId",
+          at_school_flag as "atSchoolFlag",
+          school_level_identifier as "schoolLevelIdentifier",
+          school_based_flag as "schoolBasedFlag"
         FROM apprentices
       `);
       return results.rows as Apprentice[];
@@ -1008,7 +1022,8 @@ export class DatabaseStorage implements IStorage {
           id, name, email, industry, status, phone, notes,
           contact_person as "contactPerson", address, 
           safety_rating as "safetyRating", 
-          labour_hire_licence as "labourHireLicence", 
+          compliance_status as "complianceStatus",
+          labour_hire_licence_no as "labourHireLicenceNo", 
           labour_hire_licence_expiry as "labourHireLicenceExpiry"
         FROM host_employers
       `);
