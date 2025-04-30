@@ -36,6 +36,8 @@ import ComplaintsManagement from "./pages/gto-compliance/complaints";
 // VET Training Module
 import UnitsOfCompetencyList from "./pages/vet/units/index";
 import CreateUnitOfCompetency from "./pages/vet/units/create";
+import QualificationsList from "./pages/vet/qualifications/index";
+import CreateQualification from "./pages/vet/qualifications/create";
 
 // Public pages
 import HomePage from "./pages/public/home";
@@ -93,6 +95,10 @@ function Router() {
       {/* Field Officer Routes */}
       <Route path="/field-officers" component={FieldOfficerActivities} />
       <Route path="/field-officers/site-assessment" component={SiteAssessment} />
+      <Route path="/field-officers/case-notes" component={lazy(() => import("./pages/field-officers/case-notes/index"))} />
+      <Route path="/field-officers/competency" component={lazy(() => import("./pages/field-officers/competency/index"))} />
+      <Route path="/field-officers/incidents" component={lazy(() => import("./pages/field-officers/incidents/index"))} />
+      <Route path="/field-officers/actions" component={lazy(() => import("./pages/field-officers/actions/index"))} />
       
       {/* GTO Compliance Routes */}
       <Route path="/gto-compliance" component={GtoComplianceDashboard} />
