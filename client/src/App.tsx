@@ -114,6 +114,14 @@ function Router() {
           </Suspense>
         );
       }} />
+      <Route path="/apprentices/completion" component={() => {
+        return (
+          <div className="p-8">
+            <h1 className="text-2xl font-bold mb-4">Apprentice Completion</h1>
+            <p className="text-muted-foreground mb-4">This page is currently under development.</p>
+          </div>
+        );
+      }} />
       <Route path="/apprentices/:id" component={ApprenticeDetails} />
       
       {/* Host Routes */}
