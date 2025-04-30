@@ -99,7 +99,7 @@ const TimesheetsList = () => {
       filter.search === "" || 
       weekStartingStr.includes(filter.search);
     
-    const matchesStatus = filter.status === "" || timesheet.status === filter.status;
+    const matchesStatus = filter.status === "all_statuses" || timesheet.status === filter.status;
     
     return matchesSearch && matchesStatus;
   });
@@ -180,7 +180,7 @@ const TimesheetsList = () => {
                     <SelectValue placeholder="Status" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Statuses</SelectItem>
+                    <SelectItem value="all_statuses">All Statuses</SelectItem>
                     <SelectItem value="pending">Pending</SelectItem>
                     <SelectItem value="approved">Approved</SelectItem>
                     <SelectItem value="rejected">Rejected</SelectItem>
@@ -199,7 +199,7 @@ const TimesheetsList = () => {
                       <SelectValue placeholder="Apprentice" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All Apprentices</SelectItem>
+                      <SelectItem value="all_apprentices">All Apprentices</SelectItem>
                       {apprentices?.map((apprentice) => (
                         <SelectItem key={apprentice.id} value={apprentice.id.toString()}>
                           {apprentice.firstName} {apprentice.lastName}
