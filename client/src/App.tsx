@@ -33,6 +33,10 @@ import GtoComplianceDashboard from "./pages/gto-compliance/index";
 import StandardAssessment from "./pages/gto-compliance/standard-assessment";
 import ComplaintsManagement from "./pages/gto-compliance/complaints";
 
+// VET Training Module
+import UnitsOfCompetencyList from "./pages/vet/units/index";
+import CreateUnitOfCompetency from "./pages/vet/units/create";
+
 // Public pages
 import HomePage from "./pages/public/home";
 import AboutPage from "./pages/public/about";
@@ -94,6 +98,10 @@ function Router() {
       <Route path="/gto-compliance" component={GtoComplianceDashboard} />
       <Route path="/gto-compliance/standard-assessment" component={StandardAssessment} />
       <Route path="/gto-compliance/complaints" component={ComplaintsManagement} />
+      
+      {/* VET Training Routes */}
+      <Route path="/vet/units" component={UnitsOfCompetencyList} />
+      <Route path="/vet/units/create" component={CreateUnitOfCompetency} />
       
       {/* Other Routes */}
       <Route path="/contracts" component={ContractsList} />

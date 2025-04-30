@@ -20,7 +20,10 @@ import {
   Network,
   ExternalLink,
   Award,
-  ClipboardList
+  ClipboardList,
+  BookOpen,
+  GanttChart,
+  Medal
 } from "lucide-react";
 
 interface SidebarItemProps {
@@ -206,6 +209,19 @@ const Sidebar = () => {
               { label: "Access & Equity", href: "/gto-compliance/access-equity" },
               { label: "Records Management", href: "/gto-compliance/records" },
               { label: "Risk Management", href: "/gto-compliance/risk" }
+            ]} 
+          />
+          
+          <SidebarItem 
+            icon={<BookOpen className="h-5 w-5" />} 
+            label="VET Training" 
+            active={location.startsWith('/vet')}
+            children={[
+              { label: "Units of Competency", href: "/vet/units" },
+              { label: "Qualifications", href: "/vet/qualifications" },
+              { label: "Training Packages", href: "/vet/packages" },
+              { label: "Progress Tracking", href: "/vet/progress" },
+              { label: "Assessment Records", href: "/vet/assessments" }
             ]} 
           />
           
