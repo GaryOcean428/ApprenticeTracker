@@ -3,6 +3,8 @@ import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { seedDatabase } from "./seed-db";
 import { migrateFairWorkSchema } from "./migrate-db";
+import { migrateGtoComplianceSchema } from "./migrate-gto-compliance";
+import { seedGtoComplianceStandards } from "./seed-gto-compliance";
 
 const app = express();
 app.use(express.json());
@@ -39,10 +41,28 @@ app.use((req, res, next) => {
 });
 
 (async () => {
+  // Perform database migrations if needed
+  try {
+    // Migrate Fair Work schema
+    await migrateFairWorkSchema();
+    log("Fair Work schema migration completed");
+
+    // Migrate GTO Compliance schema
+    await migrateGtoComplianceSchema();
+    log("GTO Compliance schema migration completed");
+  } catch (error) {
+    log("Error migrating database schema: " + error);
+  }
+
   // Seed the database with initial data if needed
   try {
+    // Seed main database tables
     await seedDatabase();
     log("Database seeded successfully");
+    
+    // Seed GTO Compliance Standards
+    await seedGtoComplianceStandards();
+    log("GTO Compliance Standards seeded successfully");
   } catch (error) {
     log("Error seeding database: " + error);
   }

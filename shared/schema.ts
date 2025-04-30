@@ -413,6 +413,14 @@ export const gtoOrganizations = pgTable("gto_organizations", {
   phone: text("phone"),
   address: text("address"),
   status: text("status").default("active"),
+  // GTO Compliance Fields
+  registrationStatus: text("registration_status").default("pending"), // "registered", "pending", "revoked"
+  registrationNumber: text("registration_number"),  // GTO registration number with authorities
+  registrationDate: date("registration_date"),
+  registrationExpiryDate: date("registration_expiry_date"),
+  lastComplianceAudit: date("last_compliance_audit"),
+  nextComplianceAudit: date("next_compliance_audit"),
+  complianceRating: integer("compliance_rating"), // 1-5 scale of compliance
   notes: text("notes"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
@@ -532,3 +540,182 @@ export type InsertGtoOrganization = z.infer<typeof insertGtoOrganizationSchema>;
 
 export type ExternalPortal = typeof externalPortals.$inferSelect;
 export type InsertExternalPortal = z.infer<typeof insertExternalPortalSchema>;
+
+// GTO Compliance Module
+export const gtoComplianceStandards = pgTable("gto_compliance_standards", {
+  id: serial("id").primaryKey(),
+  standardNumber: text("standard_number").notNull(),
+  standardName: text("standard_name").notNull(),
+  standardDescription: text("standard_description").notNull(),
+  category: text("category").notNull(), // Recruitment/Monitoring/Governance
+  requiredEvidence: text("required_evidence").array(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertGtoComplianceStandardSchema = createInsertSchema(gtoComplianceStandards).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const complianceAssessments = pgTable("compliance_assessments", {
+  id: serial("id").primaryKey(),
+  standardId: integer("standard_id").references(() => gtoComplianceStandards.id),
+  organizationId: integer("organization_id").references(() => gtoOrganizations.id),
+  status: text("status").notNull(), // "compliant", "non-compliant", "at_risk", "in_progress"
+  assessmentDate: timestamp("assessment_date").notNull(),
+  assessedBy: integer("assessed_by").references(() => users.id),
+  evidence: json("evidence"),
+  notes: text("notes"),
+  dueDate: timestamp("due_date"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertComplianceAssessmentSchema = createInsertSchema(complianceAssessments).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const apprenticeRecruitment = pgTable("apprentice_recruitment", {
+  id: serial("id").primaryKey(),
+  apprenticeId: integer("apprentice_id").references(() => apprentices.id),
+  informationDisclosure: boolean("information_disclosure").default(false),
+  informationDisclosureDate: timestamp("information_disclosure_date"),
+  informationDisclosureEvidence: json("information_disclosure_evidence"),
+  suitabilityAssessment: boolean("suitability_assessment").default(false),
+  suitabilityAssessmentDate: timestamp("suitability_assessment_date"),
+  suitabilityAssessmentScore: integer("suitability_assessment_score"),
+  llnAssessment: boolean("lln_assessment").default(false),
+  llnAssessmentDate: timestamp("lln_assessment_date"),
+  llnAssessmentResults: json("lln_assessment_results"),
+  specialNeeds: boolean("special_needs").default(false),
+  specialNeedsDetails: json("special_needs_details"),
+  guardianInformed: boolean("guardian_informed").default(false),
+  guardianInformedDate: timestamp("guardian_informed_date"),
+  guardianDetails: json("guardian_details"),
+  signedAcknowledgment: boolean("signed_acknowledgment").default(false),
+  signedAcknowledgmentDate: timestamp("signed_acknowledgment_date"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertApprenticeRecruitmentSchema = createInsertSchema(apprenticeRecruitment).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const hostEmployerAgreements = pgTable("host_employer_agreements", {
+  id: serial("id").primaryKey(),
+  hostEmployerId: integer("host_employer_id").references(() => hostEmployers.id),
+  agreementDate: timestamp("agreement_date").notNull(),
+  expiryDate: timestamp("expiry_date").notNull(),
+  inductionProvided: boolean("induction_provided").default(false),
+  inductionDate: timestamp("induction_date"),
+  whsCompliance: text("whs_compliance").notNull(), // "compliant", "review_required", "non_compliant"
+  whsAuditDate: timestamp("whs_audit_date"),
+  agreementDocument: json("agreement_document"),
+  supervisionCapacity: boolean("supervision_capacity").default(false),
+  trainingCapacity: boolean("training_capacity").default(false),
+  facilityCapacity: boolean("facility_capacity").default(false),
+  reviewNotes: text("review_notes"),
+  reviewedBy: integer("reviewed_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertHostEmployerAgreementSchema = createInsertSchema(hostEmployerAgreements).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const apprenticeInduction = pgTable("apprentice_induction", {
+  id: serial("id").primaryKey(),
+  apprenticeId: integer("apprentice_id").references(() => apprentices.id),
+  inductionCompleted: boolean("induction_completed").default(false),
+  inductionDate: timestamp("induction_date"),
+  inductionContent: json("induction_content"),
+  responsibilitiesExplained: boolean("responsibilities_explained").default(false),
+  workplaceOperations: boolean("workplace_operations").default(false),
+  industrialRelations: boolean("industrial_relations").default(false),
+  whsRights: boolean("whs_rights").default(false),
+  supportMechanisms: boolean("support_mechanisms").default(false),
+  signOffBy: integer("sign_off_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertApprenticeInductionSchema = createInsertSchema(apprenticeInduction).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const complaints = pgTable("complaints", {
+  id: serial("id").primaryKey(),
+  complainantType: text("complainant_type").notNull(), // "apprentice", "host_employer", "rto"
+  complainantId: integer("complainant_id"), // FK to appropriate table
+  complaintType: text("complaint_type").notNull(), // "training", "payment", "quality", etc.
+  openedDate: timestamp("opened_date").notNull(),
+  status: text("status").notNull(), // "open", "under_review", "closed"
+  description: text("description").notNull(),
+  actionTaken: text("action_taken"),
+  resolvedDate: timestamp("resolved_date"),
+  resolvedBy: integer("resolved_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertComplaintSchema = createInsertSchema(complaints).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const appeals = pgTable("appeals", {
+  id: serial("id").primaryKey(),
+  appellantType: text("appellant_type").notNull(), // "apprentice", "host_employer"
+  appellantId: integer("appellant_id"), // FK to appropriate table
+  appealType: text("appeal_type").notNull(), // "dismissal", "contract_breach", "extension"
+  openedDate: timestamp("opened_date").notNull(),
+  status: text("status").notNull(), // "pending", "referred", "approved", "rejected"
+  description: text("description").notNull(),
+  decisionDetails: text("decision_details"),
+  decisionDate: timestamp("decision_date"),
+  decidedBy: integer("decided_by").references(() => users.id),
+  externalReferral: boolean("external_referral").default(false),
+  referralDetails: json("referral_details"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertAppealSchema = createInsertSchema(appeals).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type GtoComplianceStandard = typeof gtoComplianceStandards.$inferSelect;
+export type InsertGtoComplianceStandard = z.infer<typeof insertGtoComplianceStandardSchema>;
+
+export type ComplianceAssessment = typeof complianceAssessments.$inferSelect;
+export type InsertComplianceAssessment = z.infer<typeof insertComplianceAssessmentSchema>;
+
+export type ApprenticeRecruitment = typeof apprenticeRecruitment.$inferSelect;
+export type InsertApprenticeRecruitment = z.infer<typeof insertApprenticeRecruitmentSchema>;
+
+export type HostEmployerAgreement = typeof hostEmployerAgreements.$inferSelect;
+export type InsertHostEmployerAgreement = z.infer<typeof insertHostEmployerAgreementSchema>;
+
+export type ApprenticeInduction = typeof apprenticeInduction.$inferSelect;
+export type InsertApprenticeInduction = z.infer<typeof insertApprenticeInductionSchema>;
+
+export type Complaint = typeof complaints.$inferSelect;
+export type InsertComplaint = z.infer<typeof insertComplaintSchema>;
+
+export type Appeal = typeof appeals.$inferSelect;
+export type InsertAppeal = z.infer<typeof insertAppealSchema>;
