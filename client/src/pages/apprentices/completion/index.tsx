@@ -1,4 +1,5 @@
 import React from "react";
+import { useLocation } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -35,6 +36,7 @@ import { useToast } from "@/hooks/use-toast";
 
 export default function ApprenticeCompletion() {
   const { toast } = useToast();
+  const [_, navigate] = useLocation();
   
   // Mock completions data for development
   const completionRecords = [
@@ -386,7 +388,13 @@ export default function ApprenticeCompletion() {
                         )}
                       </TableCell>
                       <TableCell>
-                        <Button variant="outline" size="sm">View Details</Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => navigate(`/apprentices/${record.id}`)}
+                        >
+                          View Details
+                        </Button>
                       </TableCell>
                     </TableRow>
                   ))}
