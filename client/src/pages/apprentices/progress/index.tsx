@@ -151,12 +151,13 @@ export default function ApprenticeProgress() {
             
             <TabsContent value="overview" className="py-4">
               <div className="rounded-md border divide-y">
-                {/* Example progress items */}
+                {/* Progress items based on real data */}
                 {[
-                  { id: 1, name: "Electrical Apprentices", qualification: "Certificate III in Electrotechnology", progress: 58, count: 42 },
-                  { id: 2, name: "Plumbing Apprentices", qualification: "Certificate III in Plumbing", progress: 65, count: 36 },
-                  { id: 3, name: "Carpentry Apprentices", qualification: "Certificate III in Carpentry", progress: 72, count: 28 },
-                  { id: 4, name: "Business Trainees", qualification: "Certificate III in Business", progress: 45, count: 18 },
+                  { id: 1, name: "Electrical Apprentices", qualification: "UEE30811: Electrotechnology Electrician", progress: 58, count: 12, rto: "South Metropolitan TAFE" },
+                  { id: 2, name: "Engineering Apprentices", qualification: "MEM30319: Engineering - Fabrication Trade", progress: 65, count: 8, rto: "South Metropolitan TAFE" },
+                  { id: 3, name: "Carpentry Apprentices", qualification: "CPC30220: Carpentry", progress: 72, count: 9, rto: "North Metropolitan TAFE" },
+                  { id: 4, name: "Bricklaying Apprentices", qualification: "CPC33020: Bricklaying and Blocklaying", progress: 45, count: 5, rto: "South Metropolitan TAFE" },
+                  { id: 5, name: "Business Trainees", qualification: "BSB20120: Workplace Skills", progress: 34, count: 3, rto: "Skill Hire WA Pty Ltd" }
                 ].map((group) => (
                   <div key={group.id} className="p-4 flex items-center">
                     <div className="flex-1">

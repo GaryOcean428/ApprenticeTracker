@@ -117,14 +117,42 @@ export default function ApprenticeRecruitment() {
             </div>
             
             <TabsContent value="applicants" className="py-4">
-              <div className="text-center py-8">
-                <h3 className="text-lg font-medium">Coming Soon</h3>
-                <p className="text-muted-foreground mt-2">
-                  The apprentice recruitment module is currently under development.
-                </p>
-                <Button variant="outline" className="mt-4" onClick={() => navigate("/apprentices")}>
-                  View Apprentice List
-                </Button>
+              <div className="rounded-md border divide-y">
+                {/* Actual applicant data from CSV */}
+                {[
+                  { id: 11971, name: "Brock James Abbiss", qualification: "Apprentice Metal Fabricator", contact: "0405 905 691", date: "28/03/2002", employer: "Civmec Construction and Engineering Pty Ltd", status: "New" },
+                  { id: 11382, name: "Tamir Abfahr", qualification: "Electrician", contact: "0415 952 046", date: "17/04/2002", employer: "Mayvis Electrical", status: "Shortlisted" },
+                  { id: 11512, name: "Laith Abfahr", qualification: "Apprentice Electrician", contact: "0420 478 545", date: "14/09/2000", employer: "Nilsen (WA) Pty Ltd", status: "Interview" },
+                  { id: 7929, name: "Zachary James Adami", qualification: "Apprentice Carpenter", contact: "0401 599 799", date: "14/07/2000", employer: "Skill Hire", status: "New" },
+                  { id: 11681, name: "Lucius Arthur Henri Adams", qualification: "Apprentice Bricklayer", contact: "0423 218 445", date: "13/12/2004", employer: "Pumping Perfect Bricks", status: "Interview" },
+                  { id: 9716, name: "Abdullahi Ali Mohamed", qualification: "Apprentice Electrician", contact: "0423 337 066", date: "02/06/2003", employer: "Curtin University", status: "Shortlisted" }
+                ].map((applicant) => (
+                  <div key={applicant.id} className="p-4 flex items-center justify-between">
+                    <div className="flex-1">
+                      <h3 className="font-medium">{applicant.name}</h3>
+                      <p className="text-sm text-muted-foreground">{applicant.qualification}</p>
+                      <div className="flex items-center mt-1 text-sm text-muted-foreground">
+                        <span className="mr-3">📱 {applicant.contact}</span>
+                        <span>🗓️ {applicant.date}</span>
+                      </div>
+                    </div>
+                    <div className="ml-4 flex flex-col items-end">
+                      <span className="text-sm text-muted-foreground">{applicant.employer}</span>
+                      <div className="mt-2 flex items-center space-x-2">
+                        <span className={`text-xs font-medium inline-block px-2 py-1 rounded-full ${
+                          applicant.status === 'New' 
+                            ? 'bg-blue-100 text-blue-800' 
+                            : applicant.status === 'Interview' 
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-yellow-100 text-yellow-800'
+                        }`}>{applicant.status}</span>
+                        <Button size="sm" variant="ghost" onClick={() => {
+                          toast({ title: "Application details", description: `Viewing details for ${applicant.name}` });
+                        }}>View</Button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             </TabsContent>
             

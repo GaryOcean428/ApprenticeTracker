@@ -150,17 +150,22 @@ export default function ApprenticeTrainingPlans() {
             
             <TabsContent value="active" className="py-4">
               <div className="rounded-md border divide-y">
-                {/* Example training plan items */}
+                {/* Training plan items from real data */}
                 {[
-                  { id: 1, name: "John Smith", qualification: "Certificate III in Electrotechnology", progress: 45, trade: "Electrical" },
-                  { id: 2, name: "Sarah Johnson", qualification: "Certificate III in Plumbing", progress: 68, trade: "Plumbing" },
-                  { id: 3, name: "Michael Brown", qualification: "Certificate III in Carpentry", progress: 72, trade: "Carpentry" },
-                  { id: 4, name: "Emily Davis", qualification: "Certificate III in Business", progress: 34, trade: "Business" },
+                  { id: 1150540, name: "Abdullah Mohamed Osman Dihishi", qualification: "UEE30811: Electrotechnology Electrician", progress: 65, trade: "Electrical", start: "01/10/2021", end: "02/07/2026", status: "Active" },
+                  { id: 1139497, name: "Billy Douglas Carlton", qualification: "CPC33020: Bricklaying and Blocklaying", progress: 42, trade: "Construction", start: "04/10/2021", end: "04/10/2024", status: "Active" },
+                  { id: 479044, name: "Sheldon Douglas Taylor", qualification: "MEM30319: Engineering - Fabrication Trade", progress: 78, trade: "Engineering", start: "30/09/2021", end: "27/02/2027", status: "Active" },
+                  { id: 1143049, name: "Aaron Glen Ford", qualification: "UEE30811: Electrotechnology Electrician", progress: 52, trade: "Electrical", start: "06/09/2021", end: "06/09/2025", status: "Active" },
+                  { id: 447528, name: "Kyle Thomas Baker", qualification: "CPC30220: Carpentry", progress: 84, trade: "Carpentry", start: "20/09/2021", end: "20/09/2025", status: "Active" },
+                  { id: 1196048, name: "Shanae Olivia-Anne Miller", qualification: "BSB20120: Workplace Skills", progress: 15, trade: "Business", start: "22/02/2024", end: "22/08/2025", status: "Active" },
                 ].map((plan) => (
                   <div key={plan.id} className="p-4 flex items-center">
                     <div className="flex-1">
                       <h3 className="font-medium">{plan.name}</h3>
                       <p className="text-sm text-muted-foreground">{plan.qualification}</p>
+                      <div className="text-xs text-muted-foreground mt-1 mb-1">
+                        <span>Start: {plan.start} • End: {plan.end}</span>
+                      </div>
                       <div className="flex items-center space-x-2 mt-2">
                         <Progress value={plan.progress} className="h-2 flex-1" />
                         <span className="text-xs text-muted-foreground">{plan.progress}%</span>
@@ -168,8 +173,9 @@ export default function ApprenticeTrainingPlans() {
                     </div>
                     <div className="ml-4 flex flex-col items-end">
                       <Badge>{plan.trade}</Badge>
+                      <span className="text-xs mt-1">{plan.status}</span>
                       <Button size="sm" variant="ghost" className="mt-2" onClick={() => {
-                        toast({ title: "Coming Soon", description: "Training plan details coming soon" });
+                        toast({ title: "Training Plan", description: `Viewing details for ${plan.name}` });
                       }}>View</Button>
                     </div>
                   </div>
