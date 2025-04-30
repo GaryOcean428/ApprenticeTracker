@@ -146,9 +146,13 @@ export default function ApprenticeRecruitment() {
                             ? 'bg-green-100 text-green-800'
                             : 'bg-yellow-100 text-yellow-800'
                         }`}>{applicant.status}</span>
-                        <Button size="sm" variant="ghost" onClick={() => {
-                          toast({ title: "Application details", description: `Viewing details for ${applicant.name}` });
-                        }}>View</Button>
+                        <Button 
+                          size="sm" 
+                          variant="ghost" 
+                          onClick={() => navigate(`/apprentices/${applicant.id}`)}
+                        >
+                          View
+                        </Button>
                       </div>
                     </div>
                   </div>
