@@ -31,7 +31,7 @@ export function PageHeader({
   backUrl,
   backDisabled = false,
 }: PageHeaderProps) {
-  const [_, navigate] = useRoute();
+  const [_, navigate] = useRoute('/dummy');
 
   const handleBack = () => {
     if (backUrl) {

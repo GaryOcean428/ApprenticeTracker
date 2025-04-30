@@ -66,12 +66,12 @@ function Router() {
       {/* Apprentice Routes */}
       <Route path="/apprentices" component={ApprenticesList} />
       <Route path="/apprentices/create" component={CreateApprentice} />
-      <Route path="/apprentices/:id" component={withIdValidation(ApprenticeDetails, "/apprentices", "Invalid Apprentice ID")} />
+      <Route path="/apprentices/:id" component={ApprenticeDetails} />
       
       {/* Host Routes */}
       <Route path="/hosts" component={HostsList} />
       <Route path="/hosts/create" component={CreateHost} />
-      <Route path="/hosts/:id" component={withIdValidation(HostDetails, "/hosts", "Invalid Host ID")} />
+      <Route path="/hosts/:id" component={HostDetails} />
       
       {/* Fair Work Routes */}
       <Route path="/awards" component={AwardsList} />

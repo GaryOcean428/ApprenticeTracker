@@ -81,7 +81,7 @@ export function useOptimizedQuery<TData>(
     retry: errorConfig.retry ? 2 : false,
     ...queryOptions,
     queryFn: getQueryFn({ 
-      on401: queryOptions.onError ? "throw" : "returnNull"
+      on401: "returnNull"
     }),
   });
   
