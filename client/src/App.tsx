@@ -82,7 +82,6 @@ function Router() {
       {/* Apprentice Routes */}
       <Route path="/apprentices" component={ApprenticesList} />
       <Route path="/apprentices/create" component={CreateApprentice} />
-      <Route path="/apprentices/:id" component={ApprenticeDetails} />
       <Route path="/apprentices/recruitment" component={() => {
         const ApprenticeRecruitment = lazy(() => import("./pages/apprentices/recruitment/index"));
         return (
@@ -115,11 +114,11 @@ function Router() {
           </Suspense>
         );
       }} />
+      <Route path="/apprentices/:id" component={ApprenticeDetails} />
       
       {/* Host Routes */}
       <Route path="/hosts" component={HostsList} />
       <Route path="/hosts/create" component={CreateHost} />
-      <Route path="/hosts/:id" component={HostDetails} />
       <Route path="/hosts/agreements" component={() => {
         return (
           <div className="p-8">
@@ -152,6 +151,7 @@ function Router() {
           </div>
         );
       }} />
+      <Route path="/hosts/:id" component={HostDetails} />
       
       {/* Fair Work Routes */}
       <Route path="/awards" component={AwardsList} />
