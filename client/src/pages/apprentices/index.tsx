@@ -133,7 +133,7 @@ const ApprenticesList = () => {
                     <SelectValue placeholder="Status" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Statuses</SelectItem>
+                    <SelectItem value="all_statuses">All Statuses</SelectItem>
                     <SelectItem value="active">Active</SelectItem>
                     <SelectItem value="on_hold">On Hold</SelectItem>
                     <SelectItem value="completed">Completed</SelectItem>
@@ -150,7 +150,7 @@ const ApprenticesList = () => {
                     <SelectValue placeholder="Trade" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Trades</SelectItem>
+                    <SelectItem value="all_trades">All Trades</SelectItem>
                     {trades.map((trade) => (
                       <SelectItem key={trade} value={trade}>{trade}</SelectItem>
                     ))}

@@ -70,15 +70,16 @@ const HostsList = () => {
       host.email.toLowerCase().includes(filter.search.toLowerCase()) ||
       host.industry.toLowerCase().includes(filter.search.toLowerCase());
     
-    const matchesStatus = filter.status === "" || host.status === filter.status;
-    const matchesIndustry = filter.industry === "" || host.industry === filter.industry;
+    const matchesStatus = filter.status === "all_statuses" || host.status === filter.status;
+    const matchesIndustry = filter.industry === "all_industries" || host.industry === filter.industry;
     
     return matchesSearch && matchesStatus && matchesIndustry;
   });
   
   // Extract unique industries for filter dropdown
   const industries = hosts 
-    ? [...new Set(hosts.map(host => host.industry))]
+    ? hosts.map(host => host.industry)
+      .filter((industry, index, self) => self.indexOf(industry) === index)
     : [];
   
   const getStatusBadgeClass = (status: string) => {
@@ -144,7 +145,7 @@ const HostsList = () => {
                     <SelectValue placeholder="Status" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Statuses</SelectItem>
+                    <SelectItem value="all_statuses">All Statuses</SelectItem>
                     <SelectItem value="active">Active</SelectItem>
                     <SelectItem value="inactive">Inactive</SelectItem>
                   </SelectContent>
@@ -160,7 +161,7 @@ const HostsList = () => {
                     <SelectValue placeholder="Industry" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Industries</SelectItem>
+                    <SelectItem value="all_industries">All Industries</SelectItem>
                     {industries.map((industry) => (
                       <SelectItem key={industry} value={industry}>{industry}</SelectItem>
                     ))}
