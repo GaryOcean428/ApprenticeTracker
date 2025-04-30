@@ -160,7 +160,7 @@ export default function CreateUnitOfCompetency() {
                     <FormItem>
                       <FormLabel>Release Number</FormLabel>
                       <FormControl>
-                        <Input placeholder="e.g. Release 1" {...field} />
+                        <Input placeholder="e.g. Release 1" {...field} value={field.value || ""} />
                       </FormControl>
                       <FormDescription>
                         The release number of this unit of competency.
@@ -178,7 +178,7 @@ export default function CreateUnitOfCompetency() {
                   <FormItem>
                     <FormLabel>Unit Title</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g. Use business software applications" {...field} />
+                      <Input placeholder="e.g. Use business software applications" {...field} value={field.value || ""} />
                     </FormControl>
                     <FormDescription>
                       The official title of this unit of competency.
@@ -199,6 +199,7 @@ export default function CreateUnitOfCompetency() {
                         placeholder="Enter a detailed description of the unit..."
                         className="min-h-32"
                         {...field}
+                        value={field.value || ""}
                       />
                     </FormControl>
                     <FormDescription>
@@ -217,7 +218,7 @@ export default function CreateUnitOfCompetency() {
                     <FormItem>
                       <FormLabel>Training Package</FormLabel>
                       <FormControl>
-                        <Input placeholder="e.g. BSB" {...field} />
+                        <Input placeholder="e.g. BSB" {...field} value={field.value || ""} />
                       </FormControl>
                       <FormDescription>
                         The training package this unit belongs to.
@@ -234,7 +235,7 @@ export default function CreateUnitOfCompetency() {
                     <FormItem>
                       <FormLabel>Training Package Release</FormLabel>
                       <FormControl>
-                        <Input placeholder="e.g. 7.0" {...field} />
+                        <Input placeholder="e.g. 7.0" {...field} value={field.value || ""} />
                       </FormControl>
                       <FormDescription>
                         The release version of the training package.
@@ -257,6 +258,7 @@ export default function CreateUnitOfCompetency() {
                         min="0"
                         placeholder="e.g. 40"
                         {...field}
+                        value={field.value ?? 0}
                         onChange={(e) => {
                           field.onChange(e.target.value === '' ? 0 : parseInt(e.target.value));
                         }}
@@ -278,7 +280,7 @@ export default function CreateUnitOfCompetency() {
                     <FormItem className="flex flex-row items-start space-x-3 space-y-0 p-4 border rounded-md">
                       <FormControl>
                         <Checkbox
-                          checked={field.value}
+                          checked={field.value || false}
                           onCheckedChange={field.onChange}
                         />
                       </FormControl>
@@ -299,7 +301,7 @@ export default function CreateUnitOfCompetency() {
                     <FormItem className="flex flex-row items-start space-x-3 space-y-0 p-4 border rounded-md">
                       <FormControl>
                         <Checkbox
-                          checked={field.value}
+                          checked={field.value || false}
                           onCheckedChange={field.onChange}
                         />
                       </FormControl>
