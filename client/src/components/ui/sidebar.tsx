@@ -207,8 +207,8 @@ const Sidebar = () => {
               { label: "Standard Assessments", href: "/gto-compliance/standard-assessment" },
               { label: "Complaints & Appeals", href: "/gto-compliance/complaints" },
               { label: "Access & Equity", href: "/gto-compliance/access-equity" },
-              { label: "Records Management", href: "/gto-compliance/records" },
-              { label: "Risk Management", href: "/gto-compliance/risk" }
+              { label: "Records Management", href: "/gto-compliance/records-management" },
+              { label: "Risk Management", href: "/gto-compliance/risk-management" }
             ]} 
           />
           
@@ -219,7 +219,7 @@ const Sidebar = () => {
             children={[
               { label: "Units of Competency", href: "/vet/units" },
               { label: "Qualifications", href: "/vet/qualifications" },
-              { label: "Training Packages", href: "/vet/packages" },
+              { label: "Training Packages", href: "/vet/training-packages" },
               { label: "Progress Tracking", href: "/vet/progress" },
               { label: "Assessment Records", href: "/vet/assessments" }
             ]} 
