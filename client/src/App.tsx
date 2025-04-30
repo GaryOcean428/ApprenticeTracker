@@ -133,12 +133,52 @@ function Router() {
       <Route path="/gto-compliance" component={GtoComplianceDashboard} />
       <Route path="/gto-compliance/standard-assessment" component={StandardAssessment} />
       <Route path="/gto-compliance/complaints" component={ComplaintsManagement} />
+      <Route path="/gto-compliance/access-equity" component={() => {
+        const AccessEquity = lazy(() => import("./pages/gto-compliance/access-equity"));
+        return (
+          <Suspense fallback={<div>Loading...</div>}>
+            <AccessEquity />
+          </Suspense>
+        );
+      }} />
+      <Route path="/gto-compliance/records-management" component={() => {
+        const RecordsManagement = lazy(() => import("./pages/gto-compliance/records-management"));
+        return (
+          <Suspense fallback={<div>Loading...</div>}>
+            <RecordsManagement />
+          </Suspense>
+        );
+      }} />
+      <Route path="/gto-compliance/risk-management" component={() => {
+        const RiskManagement = lazy(() => import("./pages/gto-compliance/risk-management"));
+        return (
+          <Suspense fallback={<div>Loading...</div>}>
+            <RiskManagement />
+          </Suspense>
+        );
+      }} />
       
       {/* VET Training Routes */}
       <Route path="/vet/units" component={UnitsOfCompetencyList} />
       <Route path="/vet/units/create" component={CreateUnitOfCompetency} />
       <Route path="/vet/qualifications" component={QualificationsList} />
       <Route path="/vet/qualifications/create" component={CreateQualification} />
+      <Route path="/vet/training-packages" component={() => {
+        const TrainingPackages = lazy(() => import("./pages/vet/training-packages/index"));
+        return (
+          <Suspense fallback={<div>Loading...</div>}>
+            <TrainingPackages />
+          </Suspense>
+        );
+      }} />
+      <Route path="/vet/assessments" component={() => {
+        const AssessmentRecords = lazy(() => import("./pages/vet/assessments/index"));
+        return (
+          <Suspense fallback={<div>Loading...</div>}>
+            <AssessmentRecords />
+          </Suspense>
+        );
+      }} />
       
       {/* Other Routes */}
       <Route path="/contracts" component={ContractsList} />
