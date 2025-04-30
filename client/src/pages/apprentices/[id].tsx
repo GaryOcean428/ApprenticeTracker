@@ -29,6 +29,7 @@ import {
   ClipboardList
 } from "lucide-react";
 import { Apprentice, TrainingContract, Placement } from "@shared/schema";
+import { ApprenticeStatusChange } from "@/components/apprentices/ApprenticeStatusChange";
 
 const ApprenticeDetails = () => {
   const [, params] = useLocation();
@@ -142,10 +143,19 @@ const ApprenticeDetails = () => {
     switch(status) {
       case "active":
         return "bg-success text-success-foreground";
+      case "suspended":
       case "on_hold":
         return "bg-destructive text-destructive-foreground";
       case "completed":
         return "bg-info text-info-foreground";
+      case "applicant":
+        return "bg-slate-500 text-slate-50";
+      case "recruitment":
+        return "bg-orange-500 text-orange-50";
+      case "pre-commencement":
+        return "bg-purple-500 text-purple-50";
+      case "withdrawn":
+        return "bg-gray-500 text-gray-50";
       default:
         return "bg-muted text-muted-foreground";
     }
@@ -163,12 +173,19 @@ const ApprenticeDetails = () => {
           </Button>
           <h2 className="text-2xl font-semibold text-foreground">Apprentice Details</h2>
         </div>
-        <Button asChild>
-          <WouterLink href={`/apprentices/${apprenticeId}/edit`}>
-            <Edit className="h-4 w-4 mr-2" />
-            Edit
-          </WouterLink>
-        </Button>
+        <div className="flex space-x-3">
+          <ApprenticeStatusChange 
+            apprenticeId={apprenticeId} 
+            currentStatus={apprentice.status} 
+            apprenticeName={`${apprentice.firstName} ${apprentice.lastName}`}
+          />
+          <Button asChild>
+            <WouterLink href={`/apprentices/${apprenticeId}/edit`}>
+              <Edit className="h-4 w-4 mr-2" />
+              Edit
+            </WouterLink>
+          </Button>
+        </div>
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
