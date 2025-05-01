@@ -133,10 +133,38 @@ function Router() {
       {/* Host Routes */}
       <Route path="/hosts" component={HostsList} />
       <Route path="/hosts/create" component={CreateHost} />
-      <Route path="/hosts/agreements" component={lazy(() => import("./pages/hosts/agreements"))} />
-      <Route path="/hosts/monitoring" component={lazy(() => import("./pages/hosts/monitoring"))} />
-      <Route path="/hosts/vacancies" component={lazy(() => import("./pages/hosts/vacancies"))} />
-      <Route path="/hosts/reports" component={lazy(() => import("./pages/hosts/reports"))} />
+      <Route path="/hosts/agreements" component={() => {
+        const HostAgreements = lazy(() => import("./pages/hosts/agreements"));
+        return (
+          <Suspense fallback={<div className="p-8 flex items-center justify-center"><div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"/></div>}>
+            <HostAgreements />
+          </Suspense>
+        );
+      }} />
+      <Route path="/hosts/monitoring" component={() => {
+        const HostMonitoring = lazy(() => import("./pages/hosts/monitoring"));
+        return (
+          <Suspense fallback={<div className="p-8 flex items-center justify-center"><div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"/></div>}>
+            <HostMonitoring />
+          </Suspense>
+        );
+      }} />
+      <Route path="/hosts/vacancies" component={() => {
+        const HostVacancies = lazy(() => import("./pages/hosts/vacancies"));
+        return (
+          <Suspense fallback={<div className="p-8 flex items-center justify-center"><div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"/></div>}>
+            <HostVacancies />
+          </Suspense>
+        );
+      }} />
+      <Route path="/hosts/reports" component={() => {
+        const HostReports = lazy(() => import("./pages/hosts/reports"));
+        return (
+          <Suspense fallback={<div className="p-8 flex items-center justify-center"><div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"/></div>}>
+            <HostReports />
+          </Suspense>
+        );
+      }} />
       <Route path="/hosts/:id" component={HostDetails} />
       
       {/* Fair Work Routes */}
