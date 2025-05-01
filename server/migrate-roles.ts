@@ -65,30 +65,40 @@ export async function migrateRolesSchema() {
     `);
     console.log("Created subscription_plans table");
 
-    // Add columns to users table if they don't exist
-    // Check if role_id column exists
-    const roleIdColumnExists = await db.execute(sql`
-      SELECT column_name FROM information_schema.columns 
-      WHERE table_name='users' AND column_name='role_id';
-    `);
-
-    if (roleIdColumnExists.rows.length === 0) {
-      await db.execute(sql`
-        ALTER TABLE users 
-        ADD COLUMN role_id INTEGER REFERENCES roles(id),
-        ADD COLUMN organization_id INTEGER,
-        ADD COLUMN stripe_customer_id TEXT,
-        ADD COLUMN stripe_subscription_id TEXT,
-        ADD COLUMN subscription_plan_id INTEGER REFERENCES subscription_plans(id),
-        ADD COLUMN subscription_starts_at TIMESTAMP WITH TIME ZONE,
-        ADD COLUMN subscription_ends_at TIMESTAMP WITH TIME ZONE,
-        ADD COLUMN last_login TIMESTAMP WITH TIME ZONE,
-        ADD COLUMN created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-        ADD COLUMN updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
-      `);
-      console.log("Added role and subscription columns to users table");
-    } else {
-      console.log("Role and subscription columns already exist in users table");
+    // Add columns to users table if they don't exist - but do it one by one to handle partial migrations
+    console.log("Checking and adding missing columns to users table...");
+    
+    // Array of columns to check and add if missing
+    const columnsToAdd = [
+      { name: 'role_id', definition: 'INTEGER REFERENCES roles(id)' },
+      { name: 'organization_id', definition: 'INTEGER' },
+      { name: 'stripe_customer_id', definition: 'TEXT' },
+      { name: 'stripe_subscription_id', definition: 'TEXT' },
+      { name: 'subscription_plan_id', definition: 'INTEGER REFERENCES subscription_plans(id)' },
+      { name: 'subscription_starts_at', definition: 'TIMESTAMP WITH TIME ZONE' },
+      { name: 'subscription_ends_at', definition: 'TIMESTAMP WITH TIME ZONE' },
+      { name: 'last_login', definition: 'TIMESTAMP WITH TIME ZONE' },
+      { name: 'created_at', definition: 'TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()' },
+      { name: 'updated_at', definition: 'TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()' }
+    ];
+    
+    // Check and add each column individually
+    for (const column of columnsToAdd) {
+      try {
+        const columnExists = await db.execute(sql`
+          SELECT column_name FROM information_schema.columns 
+          WHERE table_name='users' AND column_name=${column.name};
+        `);
+        
+        if (columnExists.rows.length === 0) {
+          await db.execute(sql.raw(`ALTER TABLE users ADD COLUMN ${column.name} ${column.definition};`));
+          console.log(`Added ${column.name} column to users table`);
+        } else {
+          console.log(`Column ${column.name} already exists in users table`);
+        }
+      } catch (error) {
+        console.error(`Error adding column ${column.name}:`, error);
+      }
     }
 
     console.log("Role Management schema migration completed successfully!");

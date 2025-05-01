@@ -21,6 +21,7 @@ export interface IStorage {
   // Roles
   getAllRoles(): Promise<Role[]>;
   getRole(id: number): Promise<Role | undefined>;
+  getRoleByName(name: string): Promise<Role | undefined>;
   createRole(role: InsertRole): Promise<Role>;
   updateRole(id: number, role: Partial<InsertRole>): Promise<Role | undefined>;
   deleteRole(id: number): Promise<boolean>;

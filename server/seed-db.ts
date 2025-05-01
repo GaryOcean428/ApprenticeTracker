@@ -13,6 +13,59 @@ export async function seedDatabase() {
   try {
     console.log("Seeding database with sample data...");
     
+    // Create default roles if they don't exist
+    console.log("Creating default roles...");
+    let adminRoleId = 0;
+    try {
+      const existingAdminRole = await storage.getRoleByName("admin");
+      if (existingAdminRole) {
+        adminRoleId = existingAdminRole.id;
+        console.log("Admin role already exists with ID:", adminRoleId);
+      } else {
+        const adminRole = await storage.createRole({
+          name: "admin",
+          description: "System administrator with full access",
+          isSystem: true
+        });
+        adminRoleId = adminRole.id;
+        console.log("Created admin role with ID:", adminRoleId);
+      }
+
+      // Create developer role if it doesn't exist
+      const existingDevRole = await storage.getRoleByName("developer");
+      if (!existingDevRole) {
+        const devRole = await storage.createRole({
+          name: "developer",
+          description: "Platform-level developer with access to all organizations",
+          isSystem: true
+        });
+        console.log("Created developer role with ID:", devRole.id);
+      } else {
+        console.log("Developer role already exists with ID:", existingDevRole.id);
+      }
+      
+      // Other default roles
+      const defaultRoles = [
+        { name: "organization_admin", description: "Organization administrator", isSystem: true },
+        { name: "field_officer", description: "Field officer for apprentice management", isSystem: true },
+        { name: "host_employer", description: "Host employer representative", isSystem: true },
+        { name: "apprentice", description: "Apprentice or trainee", isSystem: true },
+        { name: "rto_admin", description: "RTO/TAFE administrator", isSystem: true }
+      ];
+      
+      for (const roleData of defaultRoles) {
+        const existingRole = await storage.getRoleByName(roleData.name);
+        if (!existingRole) {
+          const role = await storage.createRole(roleData);
+          console.log(`Created ${roleData.name} role with ID:`, role.id);
+        } else {
+          console.log(`${roleData.name} role already exists with ID:`, existingRole.id);
+        }
+      }
+    } catch (error) {
+      console.error("Error creating default roles:", error);
+    }
+    
     // Add admin user
     const adminUser: InsertUser = {
       username: "admin",
@@ -21,6 +74,7 @@ export async function seedDatabase() {
       firstName: "Admin",
       lastName: "User",
       role: "admin",
+      roleId: adminRoleId, // Use the admin role ID
       profileImage: "https://images.unsplash.com/photo-1531427186611-ecfd6d936c79?ixlib=rb-1.2.1&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=200&fit=max&ixid=eyJhcHBfaWQiOjE3Nzg0fQ"
     };
     
