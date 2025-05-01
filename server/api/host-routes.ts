@@ -21,6 +21,34 @@ import {
 import { z } from "zod";
 
 export function registerHostRoutes(app: Express) {
+  // Get all host employers
+  app.get("/api/hosts", async (req, res) => {
+    try {
+      const hosts = await storage.getAllHostEmployers();
+      res.json(hosts);
+    } catch (error) {
+      console.error("Error fetching host employers:", error);
+      res.status(500).json({ message: "Error fetching host employers" });
+    }
+  });
+
+  // Get a specific host employer by ID
+  app.get("/api/hosts/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const host = await storage.getHostEmployer(id);
+      
+      if (!host) {
+        return res.status(404).json({ message: "Host employer not found" });
+      }
+      
+      res.json(host);
+    } catch (error) {
+      console.error("Error fetching host employer:", error);
+      res.status(500).json({ message: "Error fetching host employer" });
+    }
+  });
+  
   // Host Employer Agreements
   
   // Get all agreements for a host employer
@@ -467,12 +495,87 @@ export function registerHostRoutes(app: Express) {
   });
 
   // Host Vacancies API Endpoints
+  // Get all vacancies
+  app.get("/api/vacancies", async (req, res) => {
+    try {
+      // Get all vacancies from the database
+      const vacancies = await db
+        .select()
+        .from(hostEmployers)
+        .leftJoin(placements, eq(placements.hostEmployerId, hostEmployers.id))
+        .orderBy(desc(placements.startDate));
+      
+      res.json(vacancies);
+    } catch (error) {
+      console.error("Error fetching vacancies:", error);
+      res.status(500).json({ message: "Error fetching vacancies" });
+    }
+  });
+  
+  // Create a new vacancy
+  app.post("/api/vacancies", async (req, res) => {
+    try {
+      const vacancyData = req.body;
+      
+      // Validate the vacancy data
+      if (!vacancyData.hostEmployerId) {
+        return res.status(400).json({ message: "Host employer ID is required" });
+      }
+      
+      // Check if host employer exists
+      const host = await storage.getHostEmployer(parseInt(vacancyData.hostEmployerId));
+      if (!host) {
+        return res.status(404).json({ message: "Host employer not found" });
+      }
+      
+      // Creating a placement record for the vacancy
+      // In a real application, this might be a separate vacancies table
+      const [vacancy] = await db
+        .insert(placements)
+        .values({
+          hostEmployerId: parseInt(vacancyData.hostEmployerId),
+          title: vacancyData.title,
+          location: vacancyData.location,
+          startDate: new Date(vacancyData.startDate),
+          status: "open",
+          positionCount: vacancyData.numberOfPositions || 1,
+          description: vacancyData.description,
+          requirements: vacancyData.requirements || "",
+          specialRequirements: vacancyData.specialRequirements || "",
+          isRemote: vacancyData.isRemote || false,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        })
+        .returning();
+      
+      res.status(201).json(vacancy);
+    } catch (error) {
+      console.error("Error creating vacancy:", error);
+      res.status(500).json({ 
+        message: "Error creating vacancy",
+        details: error instanceof Error ? error.message : String(error)
+      });
+    }
+  });
+  
   // Get vacancies for a host
   app.get("/api/host-vacancies/:hostId", async (req, res) => {
     try {
-      // We'd implement this endpoint to fetch vacancies
-      // Since we haven't created this table/schema yet, returning empty array
-      res.json([]);
+      const hostId = parseInt(req.params.hostId);
+      
+      // Get all vacancies (placements with no apprentice) for this host
+      const vacancies = await db
+        .select()
+        .from(placements)
+        .where(
+          and(
+            eq(placements.hostEmployerId, hostId),
+            isNull(placements.apprenticeId),
+            eq(placements.status, "open")
+          )
+        );
+      
+      res.json(vacancies);
     } catch (error) {
       console.error("Error fetching host vacancies:", error);
       res.status(500).json({ message: "Error fetching host vacancies" });
