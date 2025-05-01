@@ -84,6 +84,15 @@ export interface IStorage {
   updateTrainingContract(id: number, contract: Partial<InsertTrainingContract>): Promise<TrainingContract | undefined>;
   deleteTrainingContract(id: number): Promise<boolean>;
 
+  // Placement methods
+  getPlacement(id: number): Promise<Placement | undefined>;
+  getAllPlacements(): Promise<Placement[]>;
+  getPlacementsByApprentice(apprenticeId: number): Promise<Placement[]>;
+  getPlacementsByHost(hostEmployerId: number): Promise<Placement[]>;
+  createPlacement(placement: InsertPlacement): Promise<Placement>;
+  updatePlacement(id: number, placement: Partial<InsertPlacement>): Promise<Placement | undefined>;
+  deletePlacement(id: number): Promise<boolean>;
+
   // Activity Log methods
   createActivityLog(log: InsertActivityLog): Promise<ActivityLog>;
   getActivityLogs(options?: { userId?: number, relatedTo?: string, relatedId?: number, limit?: number }): Promise<ActivityLog[]>;

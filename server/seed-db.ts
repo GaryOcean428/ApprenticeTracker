@@ -1,5 +1,5 @@
 import { storage } from "./storage";
-import { InsertUser, InsertApprentice, InsertHostEmployer, InsertTrainingContract, InsertPlacement, InsertDocument, InsertComplianceRecord, InsertTask, InsertActivityLog, apprentices } from "@shared/schema";
+import { InsertUser, InsertApprentice, InsertHostEmployer, InsertTrainingContract, InsertPlacement, InsertDocument, InsertComplianceRecord, InsertTask, InsertActivityLog, apprentices, trainingContracts } from "@shared/schema";
 import { db } from "./db";
 import { eq } from "drizzle-orm";
 
@@ -333,9 +333,24 @@ export async function seedDatabase() {
     
     const createdContracts = [];
     for (const contract of contracts) {
-      const created = await storage.createTrainingContract(contract);
-      createdContracts.push(created);
-      console.log("Training contract created:", created.id);
+      try {
+        // Check if contract with this number already exists
+        const existingContracts = await db
+          .select()
+          .from(trainingContracts)
+          .where(eq(trainingContracts.contractNumber, contract.contractNumber));
+        
+        if (existingContracts.length > 0) {
+          console.log(`Training contract with number ${contract.contractNumber} already exists with ID: ${existingContracts[0].id}`);
+          createdContracts.push(existingContracts[0]);
+        } else {
+          const created = await storage.createTrainingContract(contract);
+          createdContracts.push(created);
+          console.log("Training contract created:", created.id);
+        }
+      } catch (error) {
+        console.error(`Error creating training contract ${contract.contractNumber}:`, error.message);
+      }
     }
     
     // Add sample placements
