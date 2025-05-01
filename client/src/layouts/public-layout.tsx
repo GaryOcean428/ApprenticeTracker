@@ -49,7 +49,7 @@ export default function PublicLayout({ children }: PublicLayoutProps) {
             </nav>
           </div>
           <div className="flex items-center gap-4">
-            <Link href="/auth">
+            <Link href="/portal">
               <Button variant="outline">Log In</Button>
             </Link>
             <Link href="/portal">
