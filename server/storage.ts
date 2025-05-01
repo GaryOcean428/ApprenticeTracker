@@ -40,6 +40,14 @@ export interface IStorage {
   updateUser(id: number, user: Partial<InsertUser>): Promise<User | undefined>;
   deleteUser(id: number): Promise<boolean>;
 
+  // Apprentice methods
+  getApprentice(id: number): Promise<Apprentice | undefined>;
+  getApprenticeByEmail(email: string): Promise<Apprentice | undefined>;
+  getAllApprentices(): Promise<Apprentice[]>;
+  createApprentice(apprentice: InsertApprentice): Promise<Apprentice>;
+  updateApprentice(id: number, apprentice: Partial<InsertApprentice>): Promise<Apprentice | undefined>;
+  deleteApprentice(id: number): Promise<boolean>;
+
   // Role methods
   getRole(id: number): Promise<Role | undefined>;
   getAllRoles(): Promise<Role[]>;
@@ -67,6 +75,14 @@ export interface IStorage {
   createHostEmployer(employer: InsertHostEmployer): Promise<HostEmployer>;
   updateHostEmployer(id: number, employer: Partial<InsertHostEmployer>): Promise<HostEmployer | undefined>;
   deleteHostEmployer(id: number): Promise<boolean>;
+
+  // Training Contract methods
+  getTrainingContract(id: number): Promise<TrainingContract | undefined>;
+  getAllTrainingContracts(): Promise<TrainingContract[]>;
+  getTrainingContractsByApprentice(apprenticeId: number): Promise<TrainingContract[]>;
+  createTrainingContract(contract: InsertTrainingContract): Promise<TrainingContract>;
+  updateTrainingContract(id: number, contract: Partial<InsertTrainingContract>): Promise<TrainingContract | undefined>;
+  deleteTrainingContract(id: number): Promise<boolean>;
 
   // Activity Log methods
   createActivityLog(log: InsertActivityLog): Promise<ActivityLog>;
@@ -399,6 +415,73 @@ export class DatabaseStorage implements IStorage {
 
   async deleteHostEmployer(id: number): Promise<boolean> {
     const result = await db.delete(hostEmployers).where(eq(hostEmployers.id, id));
+    return result.rowCount > 0;
+  }
+
+  // Apprentice methods
+  async getApprentice(id: number): Promise<Apprentice | undefined> {
+    const [apprentice] = await db.select().from(apprentices).where(eq(apprentices.id, id));
+    return apprentice;
+  }
+
+  async getApprenticeByEmail(email: string): Promise<Apprentice | undefined> {
+    const [apprentice] = await db.select().from(apprentices).where(eq(apprentices.email, email));
+    return apprentice;
+  }
+
+  async getAllApprentices(): Promise<Apprentice[]> {
+    return await db.select().from(apprentices);
+  }
+
+  async createApprentice(apprentice: InsertApprentice): Promise<Apprentice> {
+    const [createdApprentice] = await db.insert(apprentices).values(apprentice).returning();
+    return createdApprentice;
+  }
+
+  async updateApprentice(id: number, apprentice: Partial<InsertApprentice>): Promise<Apprentice | undefined> {
+    const [updatedApprentice] = await db
+      .update(apprentices)
+      .set(apprentice)
+      .where(eq(apprentices.id, id))
+      .returning();
+    return updatedApprentice;
+  }
+
+  async deleteApprentice(id: number): Promise<boolean> {
+    const result = await db.delete(apprentices).where(eq(apprentices.id, id));
+    return result.rowCount > 0;
+  }
+
+  // Training Contract methods
+  async getTrainingContract(id: number): Promise<TrainingContract | undefined> {
+    const [contract] = await db.select().from(trainingContracts).where(eq(trainingContracts.id, id));
+    return contract;
+  }
+
+  async getAllTrainingContracts(): Promise<TrainingContract[]> {
+    return await db.select().from(trainingContracts);
+  }
+
+  async getTrainingContractsByApprentice(apprenticeId: number): Promise<TrainingContract[]> {
+    return await db.select().from(trainingContracts).where(eq(trainingContracts.apprenticeId, apprenticeId));
+  }
+
+  async createTrainingContract(contract: InsertTrainingContract): Promise<TrainingContract> {
+    const [createdContract] = await db.insert(trainingContracts).values(contract).returning();
+    return createdContract;
+  }
+
+  async updateTrainingContract(id: number, contract: Partial<InsertTrainingContract>): Promise<TrainingContract | undefined> {
+    const [updatedContract] = await db
+      .update(trainingContracts)
+      .set(contract)
+      .where(eq(trainingContracts.id, id))
+      .returning();
+    return updatedContract;
+  }
+
+  async deleteTrainingContract(id: number): Promise<boolean> {
+    const result = await db.delete(trainingContracts).where(eq(trainingContracts.id, id));
     return result.rowCount > 0;
   }
 
