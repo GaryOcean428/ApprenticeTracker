@@ -18,7 +18,7 @@ export default function PortalPage() {
   const { toast } = useToast();
 
   // This handles role-based routing with proper access control
-  const handlePortalAccess = (portal: string) => {
+  const handlePortalAccess = async (portal: string) => {
     // For admin portal, extra verification is required
     if (portal === 'admin' && !adminVerificationStep) {
       setAdminVerificationStep(true);
@@ -27,33 +27,61 @@ export default function PortalPage() {
 
     // If admin verification is shown and login is attempted
     if (adminVerificationStep) {
-      // Simple check for organization and platform level admins
-      // In a real app, this would be a secure API call
+      // Validate form fields
       if (username && password && organization && userRole) {
-        // Developer role has platform-level access (full access)
-        if (userRole === 'Developer' && username === 'dev' && organization === 'Braden Group') {
+        try {
+          // Show loading toast
           toast({
-            title: 'Platform-Level Access Granted',
-            description: `Logging in as Developer with full platform access`,
+            title: 'Verifying credentials',
+            description: 'Please wait while we verify your access...',
           });
           
-          // Route to the appropriate portal
-          setLocation('/admin');
-        }
-        // Admin role has organization-level access (limited to their organization)
-        else if (userRole === 'Admin' && username === 'admin' && organization) {
-          toast({
-            title: 'Organization-Level Access Granted',
-            description: `Logging in as Admin for ${organization}`,
+          // Call API to verify access
+          const response = await fetch('/api/verify-access', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              username,
+              password,
+              organization,
+              role: userRole,
+            }),
           });
           
-          // Route to the appropriate portal
-          setLocation('/admin');
-        } else {
+          const data = await response.json();
+          
+          if (data.success) {
+            // Successful login
+            if (data.user.role === 'Developer') {
+              toast({
+                title: 'Platform-Level Access Granted',
+                description: `Logging in as Developer with full platform access`,
+              });
+            } else {
+              toast({
+                title: 'Organization-Level Access Granted',
+                description: `Logging in as ${data.user.role} for ${data.user.organization.name}`,
+              });
+            }
+            
+            // Route to the appropriate portal
+            setLocation('/admin');
+          } else {
+            // Failed login
+            toast({
+              variant: 'destructive',
+              title: 'Access Denied',
+              description: data.message || 'Invalid credentials or insufficient permissions.',
+            });
+          }
+        } catch (error) {
+          console.error('Error during authentication:', error);
           toast({
             variant: 'destructive',
-            title: 'Access Denied',
-            description: 'Invalid credentials or insufficient permissions.',
+            title: 'Authentication Error',
+            description: 'An error occurred during authentication. Please try again.',
           });
         }
       } else {
