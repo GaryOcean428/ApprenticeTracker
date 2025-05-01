@@ -440,7 +440,7 @@ const NewVacancyPage = () => {
                             <FormItem>
                               <FormLabel>Qualification</FormLabel>
                               <Select
-                                value={field.value?.toString() || ""}
+                                value={field.value?.toString() || undefined}
                                 onValueChange={field.onChange}
                               >
                                 <FormControl>
@@ -468,7 +468,7 @@ const NewVacancyPage = () => {
                             <FormItem>
                               <FormLabel>AQF Level</FormLabel>
                               <Select
-                                value={field.value?.toString() || ""}
+                                value={field.value?.toString() || undefined}
                                 onValueChange={field.onChange}
                               >
                                 <FormControl>
@@ -560,7 +560,7 @@ const NewVacancyPage = () => {
                           <FormItem>
                             <FormLabel>Classification</FormLabel>
                             <Select
-                              value={field.value?.toString() || ""}
+                              value={field.value?.toString() || undefined}
                               onValueChange={field.onChange}
                               disabled={!selectedAward || (classifications?.length || 0) === 0}
                             >
