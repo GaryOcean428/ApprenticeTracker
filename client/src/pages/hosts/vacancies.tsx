@@ -147,10 +147,12 @@ const HostVacanciesPage = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">Vacancy Management</h1>
-        <Button>
-          <Plus className="mr-2 h-4 w-4" />
-          Post New Vacancy
-        </Button>
+        <Link href="/hosts/vacancies/new">
+          <Button>
+            <Plus className="mr-2 h-4 w-4" />
+            Post New Vacancy
+          </Button>
+        </Link>
       </div>
 
       <Card>
@@ -282,9 +284,11 @@ const HostVacanciesPage = () => {
                   ? "Try changing your search or filter criteria"
                   : "Get started by creating a new vacancy"}
               </p>
-              <Button className="mt-4">
-                <Plus className="mr-2 h-4 w-4" /> Post New Vacancy
-              </Button>
+              <Link href="/hosts/vacancies/new">
+                <Button className="mt-4">
+                  <Plus className="mr-2 h-4 w-4" /> Post New Vacancy
+                </Button>
+              </Link>
             </div>
           )}
         </CardContent>
