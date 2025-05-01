@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import {
@@ -14,7 +13,6 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle
 } from "@/components/ui/card";
@@ -28,32 +26,36 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Switch } from "@/components/ui/switch";
 import { DatePicker } from "@/components/ui/date-picker";
+import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "@/hooks/use-toast";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { addDays, format } from "date-fns";
-import { ArrowLeft, CheckCircle, MapPin, Briefcase } from "lucide-react";
+import { ArrowLeft, BriefcaseBusiness, MapPin, GraduationCap, Briefcase } from "lucide-react";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 
 // Define the form schema
 const vacancyFormSchema = z.object({
   hostEmployerId: z.string().min(1, "Host employer is required"),
-  title: z.string().min(3, "Title must be at least 3 characters").max(100, "Title must be less than 100 characters"),
+  title: z.string().min(3, "Job title is required"),
   location: z.string().min(3, "Location is required"),
-  trade: z.string().min(1, "Trade or qualification is required"),
-  description: z.string().min(20, "Please provide a detailed description"),
-  requirements: z.string().min(10, "Please list the key requirements"),
-  isHighPriority: z.boolean().default(false),
-  status: z.enum(["open", "filled", "closed"]),
-  postedDate: z.date({
-    required_error: "Posted date is required",
+  trade: z.string().min(1, "Trade is required"),
+  description: z.string().min(10, "Job description is required"),
+  startDate: z.date({
+    required_error: "Start date is required",
   }),
-  closingDate: z.date({
-    required_error: "Closing date is required",
-  }).nullable(),
+  numberOfPositions: z.coerce.number().min(1, "At least one position is required"),
+  status: z.enum(["draft", "open", "filled", "closed"]),
+  requirements: z.string().optional(),
+  specialRequirements: z.string().optional(),
+  isRemote: z.boolean().default(false),
+  isApprenticeshipEligible: z.boolean().default(true),
+  isPublic: z.boolean().default(true),
+  minWage: z.coerce.number().min(0, "Minimum wage must be 0 or more"),
+  maxWage: z.coerce.number().min(0, "Maximum wage must be 0 or more"),
 });
 
 type VacancyFormValues = z.infer<typeof vacancyFormSchema>;
@@ -66,16 +68,52 @@ interface HostEmployer {
 
 // Trade options
 const tradeOptions = [
-  { value: "carpentry", label: "Carpentry" },
-  { value: "electrical", label: "Electrical" },
-  { value: "plumbing", label: "Plumbing" },
-  { value: "automotive", label: "Automotive" },
-  { value: "hairdressing", label: "Hairdressing" },
-  { value: "commercial_cookery", label: "Commercial Cookery" },
-  { value: "it_support", label: "IT Support" },
-  { value: "business_admin", label: "Business Administration" },
-  { value: "horticulture", label: "Horticulture" },
-  { value: "other", label: "Other" }
+  "Carpentry",
+  "Electrical",
+  "Plumbing",
+  "Automotive",
+  "Commercial Cookery",
+  "Hairdressing",
+  "Information Technology",
+  "Business Administration",
+  "Childcare",
+  "Engineering",
+  "Horticulture",
+  "Hospitality",
+  "Retail",
+  "Construction",
+  "Healthcare",
+  "Other"
+];
+
+// Location options
+const locationOptions = [
+  "Sydney CBD",
+  "Sydney - Inner West",
+  "Sydney - Western Suburbs",
+  "Sydney - Northern Beaches",
+  "Sydney - Eastern Suburbs",
+  "Sydney - South",
+  "Melbourne CBD",
+  "Melbourne - Inner Suburbs",
+  "Melbourne - Eastern Suburbs",
+  "Melbourne - Western Suburbs",
+  "Brisbane CBD",
+  "Brisbane - Inner Suburbs",
+  "Gold Coast",
+  "Perth Metropolitan",
+  "Adelaide Metropolitan",
+  "Canberra",
+  "Hobart",
+  "Darwin",
+  "Regional NSW",
+  "Regional VIC",
+  "Regional QLD",
+  "Regional SA",
+  "Regional WA",
+  "Regional TAS",
+  "Regional NT",
+  "Remote"
 ];
 
 const NewVacancyPage = () => {
@@ -87,8 +125,7 @@ const NewVacancyPage = () => {
     queryFn: async () => {
       const res = await fetch("/api/hosts");
       if (!res.ok) {
-        // Return mock data if API not available yet
-        console.warn("API endpoint for hosts not available");
+        // API not available yet
         return [];
       }
       return res.json() as Promise<HostEmployer[]>;
@@ -104,11 +141,16 @@ const NewVacancyPage = () => {
       location: "",
       trade: "",
       description: "",
+      startDate: addDays(new Date(), 14), // Default to 2 weeks from now
+      numberOfPositions: 1,
+      status: "draft",
       requirements: "",
-      isHighPriority: false,
-      status: "open",
-      postedDate: new Date(),
-      closingDate: addDays(new Date(), 30), // Default to 30 days from now
+      specialRequirements: "",
+      isRemote: false,
+      isApprenticeshipEligible: true,
+      isPublic: true,
+      minWage: 0,
+      maxWage: 0,
     },
   });
 
@@ -117,14 +159,13 @@ const NewVacancyPage = () => {
     mutationFn: async (data: VacancyFormValues) => {
       return apiRequest("POST", "/api/vacancies", {
         ...data,
-        postedDate: format(data.postedDate, "yyyy-MM-dd"),
-        closingDate: data.closingDate ? format(data.closingDate, "yyyy-MM-dd") : null,
+        startDate: format(data.startDate, "yyyy-MM-dd"),
       });
     },
     onSuccess: () => {
       toast({
         title: "Vacancy created",
-        description: "The apprenticeship vacancy has been posted successfully",
+        description: "The job vacancy has been created successfully",
         variant: "default",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/vacancies"] });
@@ -134,7 +175,7 @@ const NewVacancyPage = () => {
       console.error("Failed to create vacancy:", error);
       toast({
         title: "Failed to create vacancy",
-        description: "There was an error posting the vacancy. Please try again.",
+        description: "There was an error creating the vacancy. Please try again.",
         variant: "destructive",
       });
     },
@@ -155,14 +196,14 @@ const NewVacancyPage = () => {
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back
         </Button>
-        <h1 className="text-2xl font-bold">Post New Apprenticeship Vacancy</h1>
+        <h1 className="text-2xl font-bold">Create New Vacancy</h1>
       </div>
 
       <Card>
         <CardHeader>
           <CardTitle>Vacancy Details</CardTitle>
           <CardDescription>
-            Enter the details of the new apprenticeship vacancy
+            Create a new job vacancy for host employers to fill with apprentices
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -198,7 +239,7 @@ const NewVacancyPage = () => {
                         </SelectContent>
                       </Select>
                       <FormDescription>
-                        Select the host employer offering this vacancy
+                        Select the host employer for this vacancy
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -210,12 +251,43 @@ const NewVacancyPage = () => {
                   name="title"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Vacancy Title</FormLabel>
+                      <FormLabel>Job Title</FormLabel>
                       <FormControl>
-                        <Input placeholder="e.g. Apprentice Carpenter" {...field} />
+                        <Input placeholder="e.g. Apprentice Electrician" {...field} />
                       </FormControl>
                       <FormDescription>
-                        The title should clearly indicate the apprenticeship role
+                        The title of the position
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="trade"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Trade/Occupation</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select trade or occupation" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {tradeOptions.map((trade) => (
+                            <SelectItem key={trade} value={trade}>
+                              {trade}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormDescription>
+                        The trade or occupation category
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -228,48 +300,25 @@ const NewVacancyPage = () => {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Location</FormLabel>
-                      <FormControl>
-                        <div className="flex">
-                          <MapPin className="h-4 w-4 mr-2 mt-3 text-muted-foreground" />
-                          <Input 
-                            placeholder="e.g. Melbourne CBD, Victoria" 
-                            {...field} 
-                          />
-                        </div>
-                      </FormControl>
-                      <FormDescription>
-                        The location where the apprentice will work
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="trade"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Trade or Qualification</FormLabel>
                       <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}
                       >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select a trade or qualification" />
+                            <SelectValue placeholder="Select location" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {tradeOptions.map((option) => (
-                            <SelectItem key={option.value} value={option.value}>
-                              {option.label}
+                          {locationOptions.map((location) => (
+                            <SelectItem key={location} value={location}>
+                              {location}
                             </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
                       <FormDescription>
-                        Select the relevant trade or qualification for this vacancy
+                        The primary work location
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -278,16 +327,16 @@ const NewVacancyPage = () => {
 
                 <FormField
                   control={form.control}
-                  name="postedDate"
+                  name="startDate"
                   render={({ field }) => (
                     <FormItem className="flex flex-col">
-                      <FormLabel>Posted Date</FormLabel>
+                      <FormLabel>Start Date</FormLabel>
                       <DatePicker
                         date={field.value}
                         setDate={field.onChange}
                       />
                       <FormDescription>
-                        The date when this vacancy will be published
+                        When the position is expected to start
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -296,16 +345,15 @@ const NewVacancyPage = () => {
 
                 <FormField
                   control={form.control}
-                  name="closingDate"
+                  name="numberOfPositions"
                   render={({ field }) => (
-                    <FormItem className="flex flex-col">
-                      <FormLabel>Closing Date</FormLabel>
-                      <DatePicker
-                        date={field.value}
-                        setDate={field.onChange}
-                      />
+                    <FormItem>
+                      <FormLabel>Number of Positions</FormLabel>
+                      <FormControl>
+                        <Input type="number" {...field} />
+                      </FormControl>
                       <FormDescription>
-                        The date when this vacancy will close for applications
+                        How many identical positions are available
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -324,46 +372,130 @@ const NewVacancyPage = () => {
                       >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select status" />
+                            <SelectValue placeholder="Select vacancy status" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
+                          <SelectItem value="draft">Draft</SelectItem>
                           <SelectItem value="open">Open</SelectItem>
                           <SelectItem value="filled">Filled</SelectItem>
                           <SelectItem value="closed">Closed</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormDescription>
-                        The current status of this vacancy
+                        Current status of the vacancy
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
 
-                <FormField
-                  control={form.control}
-                  name="isHighPriority"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                      <FormControl>
-                        <Checkbox
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                      <div className="space-y-1 leading-none">
-                        <FormLabel className="text-sm font-medium">
-                          High Priority Vacancy
-                        </FormLabel>
+                <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <FormField
+                    control={form.control}
+                    name="minWage"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Minimum Wage ($)</FormLabel>
+                        <FormControl>
+                          <Input type="number" step="0.01" {...field} />
+                        </FormControl>
                         <FormDescription>
-                          Mark this vacancy as high priority if it needs immediate attention
+                          Minimum hourly wage rate
                         </FormDescription>
-                      </div>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="maxWage"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Maximum Wage ($)</FormLabel>
+                        <FormControl>
+                          <Input type="number" step="0.01" {...field} />
+                        </FormControl>
+                        <FormDescription>
+                          Maximum hourly wage rate
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="md:col-span-2 space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="isRemote"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                        <FormControl>
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                        <div className="space-y-1 leading-none">
+                          <FormLabel>
+                            Remote Work Available
+                          </FormLabel>
+                          <FormDescription>
+                            Position is eligible for remote or work-from-home arrangements
+                          </FormDescription>
+                        </div>
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="isApprenticeshipEligible"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                        <FormControl>
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                        <div className="space-y-1 leading-none">
+                          <FormLabel>
+                            Apprenticeship Eligible
+                          </FormLabel>
+                          <FormDescription>
+                            Position is eligible for formal apprenticeship or traineeship arrangement
+                          </FormDescription>
+                        </div>
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="isPublic"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                        <FormControl>
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                        <div className="space-y-1 leading-none">
+                          <FormLabel>
+                            Publicly Visible
+                          </FormLabel>
+                          <FormDescription>
+                            Show this vacancy on the public job board and allow direct applications
+                          </FormDescription>
+                        </div>
+                      </FormItem>
+                    )}
+                  />
+                </div>
               </div>
 
               <FormField
@@ -371,16 +503,16 @@ const NewVacancyPage = () => {
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Vacancy Description</FormLabel>
+                    <FormLabel>Job Description</FormLabel>
                     <FormControl>
                       <Textarea
-                        placeholder="Provide a detailed description of the vacancy, including the role, responsibilities, and what the apprentice will learn"
-                        className="h-32"
+                        placeholder="Enter a detailed job description..."
+                        className="min-h-[150px]"
                         {...field}
                       />
                     </FormControl>
                     <FormDescription>
-                      A comprehensive description will attract better candidates
+                      Detailed description of the job responsibilities and daily tasks
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -392,16 +524,37 @@ const NewVacancyPage = () => {
                 name="requirements"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Requirements</FormLabel>
+                    <FormLabel>Requirements (Optional)</FormLabel>
                     <FormControl>
                       <Textarea
-                        placeholder="List the key requirements for this vacancy (e.g., qualifications, skills, personal attributes)"
-                        className="h-32"
+                        placeholder="Enter job requirements and qualifications..."
+                        className="min-h-[100px]"
                         {...field}
                       />
                     </FormControl>
                     <FormDescription>
-                      Specify what qualities and skills you're looking for in candidates
+                      Required qualifications, certifications, skills, or experience
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="specialRequirements"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Special Requirements (Optional)</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Enter any special requirements or notes..."
+                        className="min-h-[100px]"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Any special requirements, conditions, benefits, or additional information
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -430,7 +583,7 @@ const NewVacancyPage = () => {
                     </span>
                   ) : (
                     <span className="flex items-center">
-                      <Briefcase className="mr-2 h-4 w-4" /> Post Vacancy
+                      <BriefcaseBusiness className="mr-2 h-4 w-4" /> Create Vacancy
                     </span>
                   )}
                 </Button>

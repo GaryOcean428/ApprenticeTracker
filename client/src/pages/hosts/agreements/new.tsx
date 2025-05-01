@@ -28,34 +28,32 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Switch } from "@/components/ui/switch";
 import { DatePicker } from "@/components/ui/date-picker";
 import { toast } from "@/hooks/use-toast";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeft, CheckCircle, FileText, Upload } from "lucide-react";
+import { addDays, format } from "date-fns";
+import { ArrowLeft, FileText, Building2 } from "lucide-react";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import { format, addYears } from "date-fns";
 
 // Define the form schema
 const agreementFormSchema = z.object({
   hostEmployerId: z.string().min(1, "Host employer is required"),
-  agreementDate: z.date({
-    required_error: "Agreement date is required",
+  agreementNumber: z.string().min(3, "Agreement number is required"),
+  startDate: z.date({
+    required_error: "Start date is required",
   }),
-  expiryDate: z.date({
-    required_error: "Expiry date is required",
+  endDate: z.date({
+    required_error: "End date is required",
   }),
-  status: z.enum(["current", "pending", "expired"]),
-  whsCompliance: z.enum(["compliant", "review_required", "non_compliant"]),
-  termsAccepted: z.boolean().refine(val => val === true, {
-    message: "You must accept the terms and conditions",
-  }),
-  notes: z.string().optional(),
-  // In a real app, you would handle file uploads differently
-  // This is a placeholder for the form structure
-  document: z.string().optional(),
+  totalPositions: z.coerce.number().min(1, "At least one position is required"),
+  termsAndConditions: z.string().min(10, "Terms and conditions are required"),
+  status: z.enum(["draft", "active", "expired", "terminated"]),
+  specialRequirements: z.string().optional(),
+  autoRenew: z.boolean().default(false),
+  approvedBy: z.string().min(1, "Approver's name is required"),
 });
 
 type AgreementFormValues = z.infer<typeof agreementFormSchema>;
@@ -75,8 +73,7 @@ const NewAgreementPage = () => {
     queryFn: async () => {
       const res = await fetch("/api/hosts");
       if (!res.ok) {
-        // Return mock data if API not available yet
-        console.warn("API endpoint for hosts not available");
+        // API not available yet
         return [];
       }
       return res.json() as Promise<HostEmployer[]>;
@@ -88,39 +85,41 @@ const NewAgreementPage = () => {
     resolver: zodResolver(agreementFormSchema),
     defaultValues: {
       hostEmployerId: "",
-      agreementDate: new Date(),
-      expiryDate: addYears(new Date(), 1), // Default to 1 year from now
-      status: "pending",
-      whsCompliance: "review_required",
-      termsAccepted: false,
-      notes: "",
-      document: "",
+      agreementNumber: `AGR-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 1000)).padStart(3, '0')}`,
+      startDate: new Date(),
+      endDate: addDays(new Date(), 365), // Default to 1 year
+      totalPositions: 1,
+      termsAndConditions: "",
+      status: "draft",
+      specialRequirements: "",
+      autoRenew: false,
+      approvedBy: "",
     },
   });
 
   // Mutation for creating agreement
   const createAgreementMutation = useMutation({
     mutationFn: async (data: AgreementFormValues) => {
-      return apiRequest("POST", "/api/host-agreements", {
+      return apiRequest("POST", "/api/agreements", {
         ...data,
-        agreementDate: format(data.agreementDate, "yyyy-MM-dd"),
-        expiryDate: format(data.expiryDate, "yyyy-MM-dd"),
+        startDate: format(data.startDate, "yyyy-MM-dd"),
+        endDate: format(data.endDate, "yyyy-MM-dd"),
       });
     },
     onSuccess: () => {
       toast({
         title: "Agreement created",
-        description: "Host employer agreement has been created successfully",
+        description: "The host employer agreement has been created successfully",
         variant: "default",
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/host-agreements"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/agreements"] });
       navigate("/hosts/agreements");
     },
     onError: (error) => {
       console.error("Failed to create agreement:", error);
       toast({
         title: "Failed to create agreement",
-        description: "There was an error creating the host employer agreement. Please try again.",
+        description: "There was an error creating the agreement. Please try again.",
         variant: "destructive",
       });
     },
@@ -148,7 +147,7 @@ const NewAgreementPage = () => {
         <CardHeader>
           <CardTitle>Agreement Details</CardTitle>
           <CardDescription>
-            Enter the details of the new host employer agreement
+            Create a new formal agreement between your GTO and a host employer
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -193,6 +192,76 @@ const NewAgreementPage = () => {
 
                 <FormField
                   control={form.control}
+                  name="agreementNumber"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Agreement Number</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormDescription>
+                        A unique identifier for this agreement
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="startDate"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col">
+                      <FormLabel>Start Date</FormLabel>
+                      <DatePicker
+                        date={field.value}
+                        setDate={field.onChange}
+                      />
+                      <FormDescription>
+                        When this agreement becomes active
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="endDate"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col">
+                      <FormLabel>End Date</FormLabel>
+                      <DatePicker
+                        date={field.value}
+                        setDate={field.onChange}
+                      />
+                      <FormDescription>
+                        When this agreement expires
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="totalPositions"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Total Positions</FormLabel>
+                      <FormControl>
+                        <Input type="number" {...field} />
+                      </FormControl>
+                      <FormDescription>
+                        Maximum number of apprentices that can be placed with this employer
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
                   name="status"
                   render={({ field }) => (
                     <FormItem>
@@ -203,17 +272,18 @@ const NewAgreementPage = () => {
                       >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select status" />
+                            <SelectValue placeholder="Select agreement status" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="pending">Pending</SelectItem>
-                          <SelectItem value="current">Current</SelectItem>
+                          <SelectItem value="draft">Draft</SelectItem>
+                          <SelectItem value="active">Active</SelectItem>
                           <SelectItem value="expired">Expired</SelectItem>
+                          <SelectItem value="terminated">Terminated</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormDescription>
-                        The current status of this agreement
+                        Current status of the agreement
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -222,97 +292,40 @@ const NewAgreementPage = () => {
 
                 <FormField
                   control={form.control}
-                  name="agreementDate"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-col">
-                      <FormLabel>Agreement Date</FormLabel>
-                      <DatePicker
-                        date={field.value}
-                        setDate={field.onChange}
-                      />
-                      <FormDescription>
-                        The date when the agreement was signed
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="expiryDate"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-col">
-                      <FormLabel>Expiry Date</FormLabel>
-                      <DatePicker
-                        date={field.value}
-                        setDate={field.onChange}
-                      />
-                      <FormDescription>
-                        The date when the agreement expires
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="whsCompliance"
+                  name="approvedBy"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>WHS Compliance Status</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select compliance status" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="compliant">Compliant</SelectItem>
-                          <SelectItem value="review_required">Review Required</SelectItem>
-                          <SelectItem value="non_compliant">Non-Compliant</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormDescription>
-                        Workplace Health and Safety compliance status
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="document"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Upload Agreement Document</FormLabel>
+                      <FormLabel>Approved By</FormLabel>
                       <FormControl>
-                        <div className="flex items-center gap-2">
-                          <Input
-                            type="file"
-                            accept=".pdf,.doc,.docx"
-                            onChange={(e) => {
-                              const file = e.target.files?.[0];
-                              if (file) {
-                                // In real app, you'd upload the file and set the file URL/path
-                                field.onChange(file.name); // For demo just store the name
-                              }
-                            }}
-                          />
-                          <Button type="button" variant="outline" size="sm">
-                            <Upload className="h-4 w-4 mr-2" /> Upload
-                          </Button>
-                        </div>
+                        <Input {...field} />
                       </FormControl>
                       <FormDescription>
-                        Upload the signed agreement document (PDF or Word)
+                        Name of the person who approved this agreement
                       </FormDescription>
                       <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="autoRenew"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                      <div className="space-y-0.5">
+                        <FormLabel className="text-base">
+                          Auto Renewal
+                        </FormLabel>
+                        <FormDescription>
+                          Automatically renew this agreement when it expires
+                        </FormDescription>
+                      </div>
+                      <FormControl>
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
                     </FormItem>
                   )}
                 />
@@ -320,19 +333,19 @@ const NewAgreementPage = () => {
 
               <FormField
                 control={form.control}
-                name="notes"
+                name="termsAndConditions"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Notes</FormLabel>
+                    <FormLabel>Terms and Conditions</FormLabel>
                     <FormControl>
                       <Textarea
-                        placeholder="Enter any additional notes about this agreement"
-                        className="h-20"
+                        placeholder="Enter the terms and conditions of this agreement..."
+                        className="min-h-[150px]"
                         {...field}
                       />
                     </FormControl>
                     <FormDescription>
-                      Optional notes or comments about this agreement
+                      The legally binding terms of this agreement
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -341,23 +354,20 @@ const NewAgreementPage = () => {
 
               <FormField
                 control={form.control}
-                name="termsAccepted"
+                name="specialRequirements"
                 render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                  <FormItem>
+                    <FormLabel>Special Requirements (Optional)</FormLabel>
                     <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
+                      <Textarea
+                        placeholder="Enter any special requirements or notes..."
+                        className="min-h-[100px]"
+                        {...field}
                       />
                     </FormControl>
-                    <div className="space-y-1 leading-none">
-                      <FormLabel className="text-sm font-medium">
-                        I confirm that all information provided is accurate and that the host employer has agreed to the terms
-                      </FormLabel>
-                      <FormDescription>
-                        By checking this box, you confirm that the host employer has been informed of all responsibilities and obligations.
-                      </FormDescription>
-                    </div>
+                    <FormDescription>
+                      Any special requirements, conditions, or notes for this agreement
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -385,7 +395,7 @@ const NewAgreementPage = () => {
                     </span>
                   ) : (
                     <span className="flex items-center">
-                      <CheckCircle className="mr-2 h-4 w-4" /> Create Agreement
+                      <FileText className="mr-2 h-4 w-4" /> Create Agreement
                     </span>
                   )}
                 </Button>
