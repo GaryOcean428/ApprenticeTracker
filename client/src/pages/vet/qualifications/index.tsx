@@ -77,12 +77,12 @@ export default function QualificationsList() {
 
   const filteredQualifications = qualifications?.filter((qualification) => {
     const matchesSearch = searchTerm ? (
-      (qualification.code?.toLowerCase() || '').includes(searchTerm.toLowerCase()) || 
-      (qualification.title?.toLowerCase() || '').includes(searchTerm.toLowerCase())
+      (qualification.qualificationCode?.toLowerCase() || '').includes(searchTerm.toLowerCase()) || 
+      (qualification.qualificationTitle?.toLowerCase() || '').includes(searchTerm.toLowerCase())
     ) : true;
     
-    const matchesLevel = filter.level ? qualification.level === filter.level : true;
-    const matchesIndustry = filter.industryArea ? qualification.industryArea === filter.industryArea : true;
+    const matchesLevel = filter.level ? qualification.aqfLevel === filter.level : true;
+    const matchesIndustry = filter.industryArea ? qualification.trainingPackage === filter.industryArea : true;
     
     return matchesSearch && matchesLevel && matchesIndustry;
   });
@@ -214,10 +214,10 @@ export default function QualificationsList() {
                 
                 {!isLoading && filteredQualifications?.map((qualification) => (
                   <TableRow key={qualification.id}>
-                    <TableCell className="font-medium">{qualification.code}</TableCell>
-                    <TableCell>{qualification.title}</TableCell>
-                    <TableCell>{qualification.level}</TableCell>
-                    <TableCell>{qualification.industryArea}</TableCell>
+                    <TableCell className="font-medium">{qualification.qualificationCode}</TableCell>
+                    <TableCell>{qualification.qualificationTitle}</TableCell>
+                    <TableCell>{qualification.aqfLevel}</TableCell>
+                    <TableCell>{qualification.trainingPackage}</TableCell>
                     <TableCell>
                       <Badge variant={qualification.isActive ? "default" : "outline"}>
                         {qualification.isActive ? "Active" : "Inactive"}
