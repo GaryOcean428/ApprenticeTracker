@@ -139,10 +139,12 @@ const HostAgreementsPage = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">Host Employer Agreements</h1>
-        <Button>
-          <Plus className="mr-2 h-4 w-4" />
-          New Agreement
-        </Button>
+        <Link href="/hosts/agreements/new">
+          <Button>
+            <Plus className="mr-2 h-4 w-4" />
+            New Agreement
+          </Button>
+        </Link>
       </div>
 
       <Card>
@@ -251,9 +253,11 @@ const HostAgreementsPage = () => {
                   ? "Try changing your search or filter criteria"
                   : "Get started by creating your first host employer agreement"}
               </p>
-              <Button className="mt-4">
-                <Plus className="mr-2 h-4 w-4" /> New Agreement
-              </Button>
+              <Link href="/hosts/agreements/new">
+                <Button className="mt-4">
+                  <Plus className="mr-2 h-4 w-4" /> New Agreement
+                </Button>
+              </Link>
             </div>
           )}
         </CardContent>

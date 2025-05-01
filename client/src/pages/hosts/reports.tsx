@@ -38,6 +38,7 @@ import {
   Cell
 } from "recharts";
 import {
+  AlertTriangle,
   BarChart3,
   CalendarCheck,
   ChevronDown,

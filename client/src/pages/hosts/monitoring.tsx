@@ -235,14 +235,14 @@ const HostMonitoringPage = () => {
 
       <Card>
         <CardHeader>
+          <CardTitle>Host Employer Monitoring</CardTitle>
+        </CardHeader>
+        <CardContent>
           <Tabs defaultValue="placements" value={activeTab} onValueChange={setActiveTab}>
-            <TabsList>
+            <TabsList className="mb-4">
               <TabsTrigger value="placements">Current Placements</TabsTrigger>
               <TabsTrigger value="monitoring">Monitoring History</TabsTrigger>
             </TabsList>
-          </Tabs>
-        </CardHeader>
-        <CardContent>
           <TabsContent value="placements" className="mt-0">
             {placements && placements.length > 0 ? (
               <Table>
@@ -410,6 +410,7 @@ const HostMonitoringPage = () => {
               </div>
             )}
           </TabsContent>
+          </Tabs>
         </CardContent>
       </Card>
     </div>
