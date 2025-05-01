@@ -75,7 +75,8 @@ export async function seedDatabase() {
       lastName: "User",
       role: "admin",
       roleId: adminRoleId, // Use the admin role ID
-      profileImage: "https://images.unsplash.com/photo-1531427186611-ecfd6d936c79?ixlib=rb-1.2.1&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=200&fit=max&ixid=eyJhcHBfaWQiOjE3Nzg0fQ"
+      profileImage: "https://images.unsplash.com/photo-1531427186611-ecfd6d936c79?ixlib=rb-1.2.1&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=200&fit=max&ixid=eyJhcHBfaWQiOjE3Nzg0fQ",
+      isActive: true
     };
     
     const admin = await storage.createUser(adminUser);

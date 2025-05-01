@@ -699,6 +699,16 @@ export class MemStorage implements IStorage {
   async getRole(id: number): Promise<Role | undefined> {
     return this.roles.get(id);
   }
+  
+  async getRoleByName(name: string): Promise<Role | undefined> {
+    // Find a role by name
+    for (const role of this.roles.values()) {
+      if (role.name === name) {
+        return role;
+      }
+    }
+    return undefined;
+  }
 
   async createRole(role: InsertRole): Promise<Role> {
     const id = this.roleIdCounter++;
@@ -882,7 +892,19 @@ export class MemStorage implements IStorage {
   
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = this.userIdCounter++;
-    const user: User = { ...insertUser, id };
+    const timestamp = new Date();
+    const user: User = { 
+      ...insertUser, 
+      id,
+      createdAt: timestamp,
+      updatedAt: timestamp,
+      lastLogin: null,
+      stripeCustomerId: null,
+      stripeSubscriptionId: null,
+      subscriptionStatus: null,
+      subscriptionPlanId: null,
+      subscriptionEndsAt: null
+    };
     this.users.set(id, user);
     return user;
   }
@@ -1257,6 +1279,145 @@ import { and, eq, desc } from "drizzle-orm";
 
 // DatabaseStorage implementation using PostgreSQL
 export class DatabaseStorage implements IStorage {
+  // Roles
+  async getAllRoles(): Promise<Role[]> {
+    return await db.select().from(roles);
+  }
+
+  async getRole(id: number): Promise<Role | undefined> {
+    const [role] = await db.select().from(roles).where(eq(roles.id, id));
+    return role || undefined;
+  }
+  
+  async getRoleByName(name: string): Promise<Role | undefined> {
+    const [role] = await db.select().from(roles).where(eq(roles.name, name));
+    return role || undefined;
+  }
+  
+  async createRole(role: InsertRole): Promise<Role> {
+    const [newRole] = await db.insert(roles).values(role).returning();
+    return newRole;
+  }
+  
+  async updateRole(id: number, roleData: Partial<InsertRole>): Promise<Role | undefined> {
+    const [updatedRole] = await db.update(roles)
+      .set(roleData)
+      .where(eq(roles.id, id))
+      .returning();
+    return updatedRole || undefined;
+  }
+  
+  async deleteRole(id: number): Promise<boolean> {
+    await db.delete(roles).where(eq(roles.id, id));
+    return true;
+  }
+  
+  // Permissions
+  async getAllPermissions(): Promise<Permission[]> {
+    return await db.select().from(permissions);
+  }
+  
+  async getPermission(id: number): Promise<Permission | undefined> {
+    const [permission] = await db.select().from(permissions).where(eq(permissions.id, id));
+    return permission || undefined;
+  }
+  
+  async createPermission(permission: InsertPermission): Promise<Permission> {
+    const [newPermission] = await db.insert(permissions).values(permission).returning();
+    return newPermission;
+  }
+  
+  async updatePermission(id: number, permissionData: Partial<InsertPermission>): Promise<Permission | undefined> {
+    const [updatedPermission] = await db.update(permissions)
+      .set(permissionData)
+      .where(eq(permissions.id, id))
+      .returning();
+    return updatedPermission || undefined;
+  }
+  
+  async deletePermission(id: number): Promise<boolean> {
+    await db.delete(permissions).where(eq(permissions.id, id));
+    return true;
+  }
+  
+  // Role Permissions
+  async getRolePermissions(roleId: number): Promise<Permission[]> {
+    const results = await db
+      .select({ permission: permissions })
+      .from(rolePermissions)
+      .innerJoin(permissions, eq(rolePermissions.permissionId, permissions.id))
+      .where(eq(rolePermissions.roleId, roleId));
+    
+    return results.map(row => row.permission);
+  }
+  
+  async assignPermissionToRole(rolePermission: InsertRolePermission): Promise<RolePermission> {
+    const [newRolePermission] = await db.insert(rolePermissions).values(rolePermission).returning();
+    return newRolePermission;
+  }
+  
+  async removePermissionFromRole(roleId: number, permissionId: number): Promise<boolean> {
+    await db.delete(rolePermissions)
+      .where(
+        and(
+          eq(rolePermissions.roleId, roleId),
+          eq(rolePermissions.permissionId, permissionId)
+        )
+      );
+    return true;
+  }
+  
+  // Subscription Plans
+  async getAllSubscriptionPlans(): Promise<SubscriptionPlan[]> {
+    return await db.select().from(subscriptionPlans);
+  }
+  
+  async getSubscriptionPlan(id: number): Promise<SubscriptionPlan | undefined> {
+    const [plan] = await db.select().from(subscriptionPlans).where(eq(subscriptionPlans.id, id));
+    return plan || undefined;
+  }
+  
+  async createSubscriptionPlan(plan: InsertSubscriptionPlan): Promise<SubscriptionPlan> {
+    const [newPlan] = await db.insert(subscriptionPlans).values(plan).returning();
+    return newPlan;
+  }
+  
+  async updateSubscriptionPlan(id: number, planData: Partial<InsertSubscriptionPlan>): Promise<SubscriptionPlan | undefined> {
+    const [updatedPlan] = await db.update(subscriptionPlans)
+      .set(planData)
+      .where(eq(subscriptionPlans.id, id))
+      .returning();
+    return updatedPlan || undefined;
+  }
+  
+  async deleteSubscriptionPlan(id: number): Promise<boolean> {
+    await db.delete(subscriptionPlans).where(eq(subscriptionPlans.id, id));
+    return true;
+  }
+  
+  // User extended methods
+  async getAllUsers(): Promise<User[]> {
+    return await db.select().from(users);
+  }
+  
+  async getUsersByRole(role: string): Promise<User[]> {
+    return await db.select().from(users).where(eq(users.role, role));
+  }
+  
+  async getUsersByOrganization(organizationId: number): Promise<User[]> {
+    return await db.select().from(users).where(eq(users.organizationId, organizationId));
+  }
+  
+  async updateUserStripeInfo(userId: number, stripeInfo: { customerId: string, subscriptionId: string }): Promise<User | undefined> {
+    const [updatedUser] = await db.update(users)
+      .set({
+        stripeCustomerId: stripeInfo.customerId,
+        stripeSubscriptionId: stripeInfo.subscriptionId,
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    return updatedUser || undefined;
+  }
   // Users
   async getUser(id: number): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.id, id));
