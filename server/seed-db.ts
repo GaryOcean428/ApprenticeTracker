@@ -1,5 +1,7 @@
 import { storage } from "./storage";
-import { InsertUser, InsertApprentice, InsertHostEmployer, InsertTrainingContract, InsertPlacement, InsertDocument, InsertComplianceRecord, InsertTask, InsertActivityLog } from "@shared/schema";
+import { InsertUser, InsertApprentice, InsertHostEmployer, InsertTrainingContract, InsertPlacement, InsertDocument, InsertComplianceRecord, InsertTask, InsertActivityLog, apprentices } from "@shared/schema";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 
 // Helper function to convert JavaScript Date to ISO string (date part only)
 function formatDate(date: Date): string {
@@ -204,18 +206,13 @@ export async function seedDatabase() {
     const createdApprentices = [];
     for (const apprentice of apprentices) {
       try {
-        // Try to find existing apprentice by email
-        const existingApprentices = await db.execute(`
-          SELECT id FROM apprentices WHERE email = $1
-        `, [apprentice.email]);
+        // Try to find existing apprentice by email using storage instead of direct db access
+        // This is more consistent with the rest of the codebase
+        const apprenticesByEmail = await storage.getApprenticeByEmail(apprentice.email);
         
-        if (existingApprentices.rows.length > 0) {
-          console.log(`Apprentice with email ${apprentice.email} already exists with ID:`, existingApprentices.rows[0].id);
-          const existingId = existingApprentices.rows[0].id;
-          
-          // Retrieve the full apprentice data
-          const [existingApprentice] = await db.select().from(apprentices).where(eq(apprentices.id, existingId));
-          createdApprentices.push(existingApprentice);
+        if (apprenticesByEmail) {
+          console.log(`Apprentice with email ${apprentice.email} already exists with ID:`, apprenticesByEmail.id);
+          createdApprentices.push(apprenticesByEmail);
         } else {
           const created = await storage.createApprentice(apprentice);
           createdApprentices.push(created);
