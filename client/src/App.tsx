@@ -133,14 +133,7 @@ function Router() {
       {/* Host Routes */}
       <Route path="/hosts" component={HostsList} />
       <Route path="/hosts/create" component={CreateHost} />
-      <Route path="/hosts/agreements" component={() => {
-        return (
-          <div className="p-8">
-            <h1 className="text-2xl font-bold mb-4">Host Employer Agreements</h1>
-            <p className="text-muted-foreground mb-4">This page is currently under development.</p>
-          </div>
-        );
-      }} />
+      <Route path="/hosts/agreements" component={lazy(() => import("./pages/hosts/agreements"))} />
       <Route path="/hosts/monitoring" component={() => {
         return (
           <div className="p-8">

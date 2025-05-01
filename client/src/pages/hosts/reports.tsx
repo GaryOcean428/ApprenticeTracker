@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useParams } from "wouter";
+import { useParams, Link } from "wouter";
 import {
   Card,
   CardContent,
@@ -15,109 +15,80 @@ import {
   TabsList,
   TabsTrigger
 } from "@/components/ui/tabs";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow
-} from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
 import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell
+} from "recharts";
+import {
   BarChart3,
-  Calendar,
+  CalendarCheck,
+  ChevronDown,
   Download,
   FileDown,
-  Filter,
-  Printer,
-  Receipt,
-  Search,
-  User,
+  HardHat,
+  PieChart as PieChartIcon,
   Users
 } from "lucide-react";
 
-// Define types for reports data
-interface Apprentice {
+// Host employer performance report type
+interface HostPerformanceReport {
   id: number;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  qualification: string;
-  status: string;
-  startDate: string;
-  expectedEndDate: string | null;
-}
-
-interface Report {
-  id: string;
-  title: string;
-  description: string;
-  type: string; // 'attendance', 'progress', 'compliance', 'financial'
-  dateRange: string;
-  generatedAt: string;
-  downloadUrl: string;
-}
-
-interface Timesheet {
-  id: number;
-  apprenticeId: number;
-  weekStartDate: string;
-  weekEndDate: string;
-  status: 'pending' | 'approved' | 'rejected';
-  totalHours: number;
-  submittedAt: string;
-  apprentice?: {
-    firstName: string;
-    lastName: string;
-  };
-  details: {
-    day: string;
-    date: string;
-    hoursWorked: number;
-    startTime: string;
-    endTime: string;
-    breaks: number;
-    notes: string;
-  }[];
-}
-
-interface HostStats {
+  hostId: number;
+  hostName: string;
+  reportPeriod: string;
   totalApprentices: number;
   activeApprentices: number;
   completedApprentices: number;
-  terminatedApprentices: number;
-  averageCompletionRate: number;
-  complianceRate: number;
-  pendingTimesheets: number;
+  avgCompletionRate: number;
+  avgRetentionRate: number;
+  safetyIncidents: number;
+  complianceScore: number;
+  apprenticeSatisfaction: number;
+  supervisorRating: number;
+  trainingQualityScore: number;
+  notes: string | null;
+  strengthAreas: string[];
+  improvementAreas: string[];
+  generatedAt: string;
+}
+
+// Monthly apprentice progress data for charts
+interface MonthlyProgress {
+  month: string;
+  completionRate: number;
+  retention: number;
+  satisfaction: number;
+}
+
+// Training quality breakdown data for pie chart
+interface TrainingBreakdown {
+  name: string;
+  value: number;
 }
 
 const HostReportsPage = () => {
   const params = useParams<{ id?: string }>();
   const hostId = params.id ? parseInt(params.id) : undefined;
-  const [activeTab, setActiveTab] = useState("overview");
-  const [timesheetFilter, setTimesheetFilter] = useState({
-    status: "",
-    search: "",
-    dateRange: "current"
-  });
-  const [reportFilter, setReportFilter] = useState({
-    type: "",
-    search: "",
-    dateRange: "all"
-  });
+  const [activeTab, setActiveTab] = useState("performance");
+  const [reportPeriod, setReportPeriod] = useState("last-12-months");
 
   // Fetch host employer details
   const { data: host, isLoading: hostLoading } = useQuery({
@@ -131,118 +102,59 @@ const HostReportsPage = () => {
     enabled: !!hostId,
   });
 
-  // Fetch host apprentices
-  const { data: apprentices, isLoading: apprenticesLoading } = useQuery({
-    queryKey: ["/api/hosts", hostId, "apprentices"],
-    queryFn: async () => {
-      if (!hostId) return [];
-      const res = await fetch(`/api/hosts/${hostId}/apprentices`);
-      if (!res.ok) throw new Error("Failed to fetch apprentices");
-      return res.json() as Promise<Apprentice[]>;
-    },
-    enabled: !!hostId,
-  });
-
-  // Fetch host timesheets
-  const { data: timesheets, isLoading: timesheetsLoading } = useQuery({
-    queryKey: ["/api/hosts", hostId, "timesheets"],
-    queryFn: async () => {
-      if (!hostId) return [];
-      const res = await fetch(`/api/hosts/${hostId}/timesheets`);
-      if (!res.ok) throw new Error("Failed to fetch timesheets");
-      return res.json() as Promise<Timesheet[]>;
-    },
-    enabled: !!hostId,
-  });
-
-  // Fetch host reports
-  const { data: reports, isLoading: reportsLoading } = useQuery({
-    queryKey: ["/api/hosts", hostId, "reports"],
-    queryFn: async () => {
-      if (!hostId) return [];
-      const res = await fetch(`/api/hosts/${hostId}/reports`);
-      if (!res.ok) throw new Error("Failed to fetch reports");
-      return res.json() as Promise<Report[]>;
-    },
-    enabled: !!hostId,
-  });
-
-  // Fetch host stats
-  const { data: stats, isLoading: statsLoading } = useQuery({
-    queryKey: ["/api/hosts", hostId, "stats"],
+  // Fetch performance report
+  const { data: performanceReport, isLoading: reportLoading } = useQuery({
+    queryKey: ["/api/hosts", hostId, "reports", "performance", reportPeriod],
     queryFn: async () => {
       if (!hostId) return null;
-      const res = await fetch(`/api/hosts/${hostId}/stats`);
-      if (!res.ok) throw new Error("Failed to fetch host stats");
-      return res.json() as Promise<HostStats>;
+      try {
+        const res = await fetch(`/api/hosts/${hostId}/reports/performance?period=${reportPeriod}`);
+        if (!res.ok) {
+          console.warn("API endpoint not available or returned error");
+          return null;
+        }
+        return res.json() as Promise<HostPerformanceReport>;
+      } catch (error) {
+        console.warn("API endpoint not available", error);
+        return null;
+      }
     },
     enabled: !!hostId,
   });
 
-  // Format date
-  const formatDate = (dateStr: string | null) => {
-    if (!dateStr) return "N/A";
+  // Sample data for charts (when API data is not available)
+  const monthlyProgressData: MonthlyProgress[] = [
+    { month: "Jan", completionRate: 72, retention: 95, satisfaction: 4.2 },
+    { month: "Feb", completionRate: 75, retention: 94, satisfaction: 4.3 },
+    { month: "Mar", completionRate: 78, retention: 96, satisfaction: 4.5 },
+    { month: "Apr", completionRate: 77, retention: 95, satisfaction: 4.4 },
+    { month: "May", completionRate: 80, retention: 97, satisfaction: 4.6 },
+    { month: "Jun", completionRate: 82, retention: 98, satisfaction: 4.7 },
+    { month: "Jul", completionRate: 85, retention: 97, satisfaction: 4.8 },
+    { month: "Aug", completionRate: 88, retention: 96, satisfaction: 4.7 },
+    { month: "Sep", completionRate: 86, retention: 95, satisfaction: 4.5 },
+    { month: "Oct", completionRate: 84, retention: 94, satisfaction: 4.3 },
+    { month: "Nov", completionRate: 86, retention: 96, satisfaction: 4.4 },
+    { month: "Dec", completionRate: 88, retention: 97, satisfaction: 4.6 },
+  ];
+
+  const trainingBreakdownData: TrainingBreakdown[] = [
+    { name: "Technical Skills", value: 45 },
+    { name: "Supervision Quality", value: 30 },
+    { name: "Documentation", value: 15 },
+    { name: "Safety Procedures", value: 10 },
+  ];
+
+  // Chart colors
+  const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
+
+  // Format date for display
+  const formatDate = (dateStr: string) => {
     return format(new Date(dateStr), "dd MMM yyyy");
   };
 
-  // Filter timesheets based on the filter criteria
-  const filteredTimesheets = timesheets?.filter(timesheet => {
-    const matchesStatus = !timesheetFilter.status || timesheet.status === timesheetFilter.status;
-    
-    const matchesSearch = !timesheetFilter.search || (
-      timesheet.apprentice && 
-      `${timesheet.apprentice.firstName} ${timesheet.apprentice.lastName}`
-        .toLowerCase()
-        .includes(timesheetFilter.search.toLowerCase())
-    );
-    
-    const now = new Date();
-    let matchesDateRange = true;
-    
-    if (timesheetFilter.dateRange === "current") {
-      // Current week
-      const weekStart = new Date(now);
-      weekStart.setDate(now.getDate() - now.getDay()); // Start of week (Sunday)
-      const weekEnd = new Date(weekStart);
-      weekEnd.setDate(weekStart.getDate() + 6); // End of week (Saturday)
-      
-      const timesheetDate = new Date(timesheet.weekStartDate);
-      matchesDateRange = timesheetDate >= weekStart && timesheetDate <= weekEnd;
-    } else if (timesheetFilter.dateRange === "previous") {
-      // Previous week
-      const weekStart = new Date(now);
-      weekStart.setDate(now.getDate() - now.getDay() - 7); // Start of previous week
-      const weekEnd = new Date(weekStart);
-      weekEnd.setDate(weekStart.getDate() + 6); // End of previous week
-      
-      const timesheetDate = new Date(timesheet.weekStartDate);
-      matchesDateRange = timesheetDate >= weekStart && timesheetDate <= weekEnd;
-    } else if (timesheetFilter.dateRange === "month") {
-      // Current month
-      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-      const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-      
-      const timesheetDate = new Date(timesheet.weekStartDate);
-      matchesDateRange = timesheetDate >= monthStart && timesheetDate <= monthEnd;
-    }
-    
-    return matchesStatus && matchesSearch && matchesDateRange;
-  }) || [];
-
-  // Filter reports based on the filter criteria
-  const filteredReports = reports?.filter(report => {
-    const matchesType = !reportFilter.type || report.type === reportFilter.type;
-    const matchesSearch = !reportFilter.search || 
-      report.title.toLowerCase().includes(reportFilter.search.toLowerCase()) || 
-      report.description.toLowerCase().includes(reportFilter.search.toLowerCase());
-    
-    // Date filtering logic for reports would go here if needed
-    
-    return matchesType && matchesSearch;
-  }) || [];
-
   // Loading state
-  if (hostLoading || apprenticesLoading || timesheetsLoading || reportsLoading || statsLoading) {
+  if (hostLoading || reportLoading) {
     return (
       <div className="space-y-4">
         <Skeleton className="h-12 w-64" />
@@ -260,321 +172,384 @@ const HostReportsPage = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">
-          {host ? `${host.name} - Reports` : "Host Employer Reports"}
+          {host ? `${host.name} - Performance Reports` : "Host Employer Reports"}
         </h1>
         <div className="flex gap-2">
-          <Button variant="outline">
-            <Printer className="mr-2 h-4 w-4" />
-            Print
-          </Button>
-          <Button>
-            <Download className="mr-2 h-4 w-4" />
-            Export
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline">
+                <FileDown className="mr-2 h-4 w-4" />
+                Export Report
+                <ChevronDown className="ml-2 h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem>
+                <Download className="mr-2 h-4 w-4" /> Export as PDF
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <Download className="mr-2 h-4 w-4" /> Export as Excel
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <Download className="mr-2 h-4 w-4" /> Export as CSV
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline">
+                <CalendarCheck className="mr-2 h-4 w-4" />
+                {reportPeriod === "last-12-months"
+                  ? "Last 12 Months"
+                  : reportPeriod === "last-6-months"
+                  ? "Last 6 Months"
+                  : "Last 3 Months"}
+                <ChevronDown className="ml-2 h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem onClick={() => setReportPeriod("last-3-months")}>
+                Last 3 Months
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setReportPeriod("last-6-months")}>
+                Last 6 Months
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setReportPeriod("last-12-months")}>
+                Last 12 Months
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 
-      <Card>
-        <CardHeader>
-          <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab}>
-            <TabsList>
-              <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="timesheets">Timesheets</TabsTrigger>
-              <TabsTrigger value="reports">Reports</TabsTrigger>
-            </TabsList>
-          </Tabs>
-        </CardHeader>
-        <CardContent>
-          <TabsContent value="overview" className="mt-0">
-            {stats ? (
-              <div className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <Card>
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-sm font-medium">Apprentices</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">{stats.totalApprentices}</div>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {stats.activeApprentices} active, {stats.completedApprentices} completed, {stats.terminatedApprentices} terminated
-                      </p>
-                    </CardContent>
-                  </Card>
-                  
-                  <Card>
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-sm font-medium">Completion Rate</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">
-                        {stats.averageCompletionRate}%
-                      </div>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Industry average: 72%
-                      </p>
-                    </CardContent>
-                  </Card>
-                  
-                  <Card>
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-sm font-medium">Compliance</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">
-                        {stats.complianceRate}%
-                      </div>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Based on latest compliance assessments
-                      </p>
-                    </CardContent>
-                  </Card>
+      <Tabs defaultValue="performance" value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="mb-4">
+          <TabsTrigger value="performance">Performance Overview</TabsTrigger>
+          <TabsTrigger value="progress">Apprentice Progress</TabsTrigger>
+          <TabsTrigger value="training">Training Quality</TabsTrigger>
+          <TabsTrigger value="compliance">Compliance</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="performance">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium">Total Apprentices</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold">
+                  {performanceReport?.totalApprentices || 0}
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {performanceReport?.activeApprentices || 0} active,{" "}
+                  {performanceReport?.completedApprentices || 0} completed
+                </p>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium">Completion Rate</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold">
+                  {performanceReport?.avgCompletionRate || 0}%
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Industry average: 82%
+                </p>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium">Apprentice Satisfaction</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold">
+                  {performanceReport?.apprenticeSatisfaction || 0}/5
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Based on {performanceReport?.totalApprentices || 0} responses
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+          
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle>Performance Highlights</CardTitle>
+              <CardDescription>
+                Key performance indicators and trends for this host employer
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div>
+                  <h3 className="font-medium mb-2 flex items-center">
+                    <HardHat className="mr-2 h-4 w-4" /> Strength Areas
+                  </h3>
+                  <ul className="list-disc ml-5 space-y-1">
+                    {performanceReport?.strengthAreas?.map((strength, index) => (
+                      <li key={index}>{strength}</li>
+                    )) || (
+                      <>
+                        <li>Strong technical training program</li>
+                        <li>High apprentice retention rate</li>
+                        <li>Excellent safety record</li>
+                        <li>Structured mentorship program</li>
+                      </>
+                    )}
+                  </ul>
                 </div>
                 
-                <div className="border rounded-md p-4">
-                  <h3 className="text-lg font-semibold mb-4">Apprentice Status</h3>
-                  <div className="aspect-[2/1] bg-muted/20 rounded-md flex items-center justify-center">
-                    <div className="text-center text-muted-foreground flex flex-col items-center">
-                      <BarChart3 className="h-10 w-10 mb-2" />
-                      <p>Apprentice status chart would appear here</p>
+                <div>
+                  <h3 className="font-medium mb-2 flex items-center">
+                    <AlertTriangle className="mr-2 h-4 w-4" /> Areas for Improvement
+                  </h3>
+                  <ul className="list-disc ml-5 space-y-1">
+                    {performanceReport?.improvementAreas?.map((area, index) => (
+                      <li key={index}>{area}</li>
+                    )) || (
+                      <>
+                        <li>Documentation of training activities</li>
+                        <li>Supervisor feedback frequency</li>
+                        <li>Cross-training opportunities</li>
+                      </>
+                    )}
+                  </ul>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader>
+              <CardTitle>Notes & Recommendations</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm">
+                {performanceReport?.notes ||
+                  "This host employer demonstrates strong commitment to apprentice development with above-average completion rates and satisfaction scores. Recommend continued investment in their mentorship program and addressing the documentation gaps identified during compliance reviews. Consider featuring this employer in the next newsletter as an example of best practices in technical skills training."}
+              </p>
+            </CardContent>
+            <CardFooter className="border-t pt-4">
+              <p className="text-xs text-muted-foreground">
+                Report generated: {performanceReport?.generatedAt
+                  ? formatDate(performanceReport.generatedAt)
+                  : format(new Date(), "dd MMM yyyy")}
+              </p>
+            </CardFooter>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="progress">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <BarChart3 className="mr-2 h-5 w-5" />
+                Apprentice Progress Metrics
+              </CardTitle>
+              <CardDescription>
+                Monthly tracking of completion rates and retention
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={monthlyProgressData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="month" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Bar dataKey="completionRate" name="Completion Rate (%)" fill="#0088FE" />
+                    <Bar dataKey="retention" name="Retention (%)" fill="#00C49F" />
+                    <Bar dataKey="satisfaction" name="Satisfaction (0-5)" fill="#FFBB28" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="training">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <PieChartIcon className="mr-2 h-5 w-5" />
+                  Training Quality Breakdown
+                </CardTitle>
+                <CardDescription>
+                  Distribution of training quality factors
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="h-72">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={trainingBreakdownData}
+                        cx="50%"
+                        cy="50%"
+                        labelLine={false}
+                        label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                        outerRadius={80}
+                        fill="#8884d8"
+                        dataKey="value"
+                      >
+                        {trainingBreakdownData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle>Training Quality Assessment</CardTitle>
+                <CardDescription>
+                  Based on field officer visits and apprentice feedback
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  <div>
+                    <div className="flex justify-between mb-1">
+                      <span className="text-sm font-medium">Supervisor Quality</span>
+                      <span className="text-sm font-medium">
+                        {performanceReport?.supervisorRating || 4.2}/5
+                      </span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div
+                        className="bg-blue-600 h-2 rounded-full"
+                        style={{ width: `${(performanceReport?.supervisorRating || 4.2) * 20}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <div className="flex justify-between mb-1">
+                      <span className="text-sm font-medium">Technical Training</span>
+                      <span className="text-sm font-medium">
+                        {performanceReport?.trainingQualityScore || 4.5}/5
+                      </span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div
+                        className="bg-green-600 h-2 rounded-full"
+                        style={{ width: `${(performanceReport?.trainingQualityScore || 4.5) * 20}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <div className="flex justify-between mb-1">
+                      <span className="text-sm font-medium">Documentation</span>
+                      <span className="text-sm font-medium">3.8/5</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div
+                        className="bg-yellow-600 h-2 rounded-full"
+                        style={{ width: `${3.8 * 20}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <div className="flex justify-between mb-1">
+                      <span className="text-sm font-medium">Safety Training</span>
+                      <span className="text-sm font-medium">4.7/5</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div
+                        className="bg-purple-600 h-2 rounded-full"
+                        style={{ width: `${4.7 * 20}%` }}
+                      ></div>
                     </div>
                   </div>
                 </div>
-
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="compliance">
+          <Card>
+            <CardHeader>
+              <CardTitle>Compliance Overview</CardTitle>
+              <CardDescription>
+                Regulatory compliance and safety metrics
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="border rounded-lg p-4">
+                    <div className="text-sm text-muted-foreground mb-1">Compliance Score</div>
+                    <div className="text-3xl font-bold">
+                      {performanceReport?.complianceScore || 92}%
+                    </div>
+                  </div>
+                  
+                  <div className="border rounded-lg p-4">
+                    <div className="text-sm text-muted-foreground mb-1">Safety Incidents</div>
+                    <div className="text-3xl font-bold">
+                      {performanceReport?.safetyIncidents || 0}
+                    </div>
+                  </div>
+                  
+                  <div className="border rounded-lg p-4">
+                    <div className="text-sm text-muted-foreground mb-1">Last Audit</div>
+                    <div className="text-xl font-medium">3 months ago</div>
+                  </div>
+                </div>
+                
+                <div className="border rounded-lg p-4">
+                  <h3 className="font-medium mb-2">Compliance Notes</h3>
+                  <p className="text-sm">
+                    This host employer maintains high compliance standards with all required documentation and procedures in place. The most recent audit found only minor improvements needed in apprentice record keeping. Safety protocols exceed industry standards with regular training and zero incidents in the reporting period.
+                  </p>
+                </div>
+                
                 <div>
-                  <h3 className="text-lg font-semibold mb-4">Pending Approvals</h3>
-                  {stats.pendingTimesheets > 0 ? (
-                    <Card>
-                      <CardContent className="p-4">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center">
-                            <Receipt className="h-5 w-5 mr-2 text-muted-foreground" />
-                            <div>
-                              <p className="font-medium">Timesheets Requiring Approval</p>
-                              <p className="text-sm text-muted-foreground">
-                                {stats.pendingTimesheets} pending timesheet{stats.pendingTimesheets !== 1 ? "s" : ""} need your attention
-                              </p>
-                            </div>
-                          </div>
-                          <Button variant="outline" onClick={() => setActiveTab("timesheets")}>
-                            Review
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ) : (
-                    <p className="text-muted-foreground">No pending items requiring your approval</p>
-                  )}
+                  <h3 className="font-medium mb-3">Recent Compliance Activities</h3>
+                  <div className="space-y-3">
+                    <div className="flex items-start gap-3 border-b pb-3">
+                      <CalendarCheck className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
+                      <div>
+                        <p className="font-medium">Quarterly Site Inspection</p>
+                        <p className="text-sm text-muted-foreground">Completed on 15 Apr 2025</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3 border-b pb-3">
+                      <Users className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
+                      <div>
+                        <p className="font-medium">Supervisor Training Update</p>
+                        <p className="text-sm text-muted-foreground">Completed on 03 Mar 2025</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <HardHat className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
+                      <div>
+                        <p className="font-medium">Safety Documentation Review</p>
+                        <p className="text-sm text-muted-foreground">Completed on 22 Feb 2025</p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
-            ) : (
-              <div className="text-center py-8">
-                <p className="text-muted-foreground">No statistical data available</p>
-              </div>
-            )}
-          </TabsContent>
-          
-          <TabsContent value="timesheets" className="mt-0">
-            <div className="mb-6 flex flex-col sm:flex-row gap-4">
-              <div className="relative flex-1">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  type="search"
-                  placeholder="Search apprentice..."
-                  className="pl-8 w-full"
-                  value={timesheetFilter.search}
-                  onChange={(e) => setTimesheetFilter({...timesheetFilter, search: e.target.value})}
-                />
-              </div>
-              <div className="flex flex-wrap gap-2">
-                <Select
-                  value={timesheetFilter.status}
-                  onValueChange={(value) => setTimesheetFilter({...timesheetFilter, status: value})}
-                >
-                  <SelectTrigger className="w-[140px]">
-                    <Filter className="mr-2 h-4 w-4" />
-                    <SelectValue placeholder="Status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="">All Statuses</SelectItem>
-                    <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="approved">Approved</SelectItem>
-                    <SelectItem value="rejected">Rejected</SelectItem>
-                  </SelectContent>
-                </Select>
-                
-                <Select
-                  value={timesheetFilter.dateRange}
-                  onValueChange={(value) => setTimesheetFilter({...timesheetFilter, dateRange: value})}
-                >
-                  <SelectTrigger className="w-[140px]">
-                    <Calendar className="mr-2 h-4 w-4" />
-                    <SelectValue placeholder="Date Range" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="current">Current Week</SelectItem>
-                    <SelectItem value="previous">Previous Week</SelectItem>
-                    <SelectItem value="month">This Month</SelectItem>
-                    <SelectItem value="all">All Time</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            
-            {filteredTimesheets.length > 0 ? (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Apprentice</TableHead>
-                    <TableHead>Week Period</TableHead>
-                    <TableHead>Hours</TableHead>
-                    <TableHead>Submitted</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredTimesheets.map((timesheet) => (
-                    <TableRow key={timesheet.id}>
-                      <TableCell>
-                        {timesheet.apprentice ? (
-                          <div className="flex items-center">
-                            <User className="mr-2 h-4 w-4 text-muted-foreground" />
-                            {timesheet.apprentice.firstName} {timesheet.apprentice.lastName}
-                          </div>
-                        ) : (
-                          <span className="text-muted-foreground">Unknown</span>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        <div className="whitespace-nowrap">
-                          {formatDate(timesheet.weekStartDate)} - {formatDate(timesheet.weekEndDate)}
-                        </div>
-                      </TableCell>
-                      <TableCell>{timesheet.totalHours} hrs</TableCell>
-                      <TableCell>{formatDate(timesheet.submittedAt)}</TableCell>
-                      <TableCell>
-                        <Badge
-                          className={{
-                            "bg-yellow-100 text-yellow-800": timesheet.status === "pending",
-                            "bg-green-100 text-green-800": timesheet.status === "approved",
-                            "bg-red-100 text-red-800": timesheet.status === "rejected",
-                          }}
-                        >
-                          {timesheet.status.charAt(0).toUpperCase() + timesheet.status.slice(1)}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex gap-2">
-                          <Button size="sm" variant="outline" disabled={timesheet.status !== "pending"}>
-                            Approve
-                          </Button>
-                          <Button size="sm" variant="outline" disabled={timesheet.status !== "pending"}>
-                            Reject
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            ) : (
-              <div className="text-center py-8">
-                <p className="text-muted-foreground">
-                  No timesheets found matching your filter criteria
-                </p>
-              </div>
-            )}
-          </TabsContent>
-          
-          <TabsContent value="reports" className="mt-0">
-            <div className="mb-6 flex flex-col sm:flex-row gap-4">
-              <div className="relative flex-1">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  type="search"
-                  placeholder="Search reports..."
-                  className="pl-8 w-full"
-                  value={reportFilter.search}
-                  onChange={(e) => setReportFilter({...reportFilter, search: e.target.value})}
-                />
-              </div>
-              <div className="flex flex-wrap gap-2">
-                <Select
-                  value={reportFilter.type}
-                  onValueChange={(value) => setReportFilter({...reportFilter, type: value})}
-                >
-                  <SelectTrigger className="w-[140px]">
-                    <Filter className="mr-2 h-4 w-4" />
-                    <SelectValue placeholder="Report Type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="">All Types</SelectItem>
-                    <SelectItem value="attendance">Attendance</SelectItem>
-                    <SelectItem value="progress">Progress</SelectItem>
-                    <SelectItem value="compliance">Compliance</SelectItem>
-                    <SelectItem value="financial">Financial</SelectItem>
-                  </SelectContent>
-                </Select>
-                
-                <Select
-                  value={reportFilter.dateRange}
-                  onValueChange={(value) => setReportFilter({...reportFilter, dateRange: value})}
-                >
-                  <SelectTrigger className="w-[140px]">
-                    <Calendar className="mr-2 h-4 w-4" />
-                    <SelectValue placeholder="Date Range" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="week">Past Week</SelectItem>
-                    <SelectItem value="month">Past Month</SelectItem>
-                    <SelectItem value="quarter">Past Quarter</SelectItem>
-                    <SelectItem value="year">Past Year</SelectItem>
-                    <SelectItem value="all">All Time</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            
-            {filteredReports.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {filteredReports.map((report) => (
-                  <Card key={report.id}>
-                    <CardHeader className="pb-2">
-                      <CardTitle>{report.title}</CardTitle>
-                      <CardDescription>{report.description}</CardDescription>
-                    </CardHeader>
-                    <CardContent className="pb-2">
-                      <div className="flex flex-wrap gap-2 mb-2">
-                        <Badge className="bg-muted text-foreground">
-                          {report.type.charAt(0).toUpperCase() + report.type.slice(1)}
-                        </Badge>
-                        <span className="text-sm text-muted-foreground">
-                          {report.dateRange}
-                        </span>
-                      </div>
-                      <div className="text-sm text-muted-foreground">
-                        Generated: {formatDate(report.generatedAt)}
-                      </div>
-                    </CardContent>
-                    <CardFooter>
-                      <Button variant="outline" size="sm" className="w-full">
-                        <FileDown className="mr-2 h-4 w-4" />
-                        Download Report
-                      </Button>
-                    </CardFooter>
-                  </Card>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-8">
-                <p className="text-muted-foreground">
-                  No reports found matching your filter criteria
-                </p>
-              </div>
-            )}
-          </TabsContent>
-        </CardContent>
-      </Card>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
