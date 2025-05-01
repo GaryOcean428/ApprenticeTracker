@@ -119,7 +119,6 @@ export async function seedDatabase() {
         profileImage: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-1.2.1&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=200&fit=max",
         isActive: true,
         subscriptionStatus: "expired", // Note: expired status but still active due to role
-        subscriptionStartsAt: new Date(pastDate.setMonth(pastDate.getMonth() - 3)), // 5 months ago
         subscriptionEndsAt: pastDate // 2 months ago - expired!
       };
       

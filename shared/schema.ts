@@ -106,7 +106,11 @@ export const insertUserSchema = createInsertSchema(users).pick({
   organizationId: true,
   profileImage: true,
   isActive: true,
-  subscriptionPlanId: true
+  subscriptionPlanId: true,
+  subscriptionStatus: true,
+  subscriptionEndsAt: true,
+  stripeCustomerId: true,
+  stripeSubscriptionId: true
 });
 
 // Apprentices

@@ -488,7 +488,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         stripeSubscriptionId: stripeSubscriptionId || null,
         subscriptionStatus: isActive ? 'active' : 'expired',
         isActive: isActive,
-        ...(startDate && { subscriptionStartsAt: new Date(startDate) }),
+        // subscriptionStartsAt is not in the schema, so we're not updating it
         ...(endDate && { subscriptionEndsAt: new Date(endDate) }),
       });
       
