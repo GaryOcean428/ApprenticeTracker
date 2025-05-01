@@ -6,6 +6,7 @@ import { migrateFairWorkSchema } from "./migrate-db";
 import { migrateGtoComplianceSchema } from "./migrate-gto-compliance";
 import { seedGtoComplianceStandards } from "./seed-gto-compliance";
 import { migrateVetSchema } from "./migrate-vet";
+import { migrateRolesSchema } from "./migrate-roles";
 
 const app = express();
 app.use(express.json());
@@ -44,6 +45,10 @@ app.use((req, res, next) => {
 (async () => {
   // Perform database migrations if needed
   try {
+    // Migrate Role Management schema
+    await migrateRolesSchema();
+    log("Role Management schema migration completed");
+    
     // Migrate Fair Work schema
     await migrateFairWorkSchema();
     log("Fair Work schema migration completed");

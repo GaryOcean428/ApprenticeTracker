@@ -2,6 +2,11 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { 
+  insertUserSchema,
+  insertRoleSchema,
+  insertPermissionSchema,
+  insertRolePermissionSchema,
+  insertSubscriptionPlanSchema,
   insertApprenticeSchema, 
   insertHostEmployerSchema, 
   insertTrainingContractSchema,
@@ -20,6 +25,411 @@ import { users, gtoOrganizations } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // API Routes - prefix all routes with /api
+
+  // User Management Routes
+  // Get all users
+  app.get("/api/users", async (req, res) => {
+    try {
+      const users = await storage.getAllUsers();
+      res.json(users);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      res.status(500).json({ 
+        message: "Error fetching users", 
+        error: error instanceof Error ? error.message : String(error)
+      });
+    }
+  });
+
+  // Get user by ID
+  app.get("/api/users/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const user = await storage.getUser(id);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      res.json(user);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching user" });
+    }
+  });
+
+  // Create user
+  app.post("/api/users", async (req, res) => {
+    try {
+      const userData = insertUserSchema.parse(req.body);
+      const user = await storage.createUser(userData);
+      
+      // Create activity log
+      await storage.createActivityLog({
+        userId: 1, // Assuming admin user
+        action: "created",
+        relatedTo: "user",
+        relatedId: user.id,
+        details: { 
+          message: `New user ${user.username} (${user.firstName} ${user.lastName}) created with role ${user.role}`,
+          userId: user.id
+        }
+      });
+      
+      res.status(201).json(user);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ message: "Invalid user data", errors: error.errors });
+      } else {
+        console.error("Error creating user:", error);
+        res.status(500).json({ 
+          message: "Error creating user",
+          error: error instanceof Error ? error.message : String(error)
+        });
+      }
+    }
+  });
+
+  // Update user
+  app.patch("/api/users/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const userData = req.body;
+      const user = await storage.updateUser(id, userData);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Create activity log
+      await storage.createActivityLog({
+        userId: 1, // Assuming admin user
+        action: "updated",
+        relatedTo: "user",
+        relatedId: user.id,
+        details: { 
+          message: `User ${user.username} (${user.firstName} ${user.lastName}) updated`,
+          userId: user.id
+        }
+      });
+      
+      res.json(user);
+    } catch (error) {
+      console.error("Error updating user:", error);
+      res.status(500).json({ 
+        message: "Error updating user",
+        error: error instanceof Error ? error.message : String(error) 
+      });
+    }
+  });
+
+  // Delete user
+  app.delete("/api/users/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const user = await storage.getUser(id);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      const success = await storage.deleteUser(id);
+      
+      if (success) {
+        // Create activity log
+        await storage.createActivityLog({
+          userId: 1, // Assuming admin user
+          action: "deleted",
+          relatedTo: "user",
+          relatedId: id,
+          details: { 
+            message: `User ${user.username} (${user.firstName} ${user.lastName}) deleted`,
+            userId: id
+          }
+        });
+        
+        res.status(204).end();
+      } else {
+        res.status(500).json({ message: "Error deleting user" });
+      }
+    } catch (error) {
+      res.status(500).json({ message: "Error deleting user" });
+    }
+  });
+
+  // Get users by role
+  app.get("/api/users/role/:role", async (req, res) => {
+    try {
+      const role = req.params.role;
+      const users = await storage.getUsersByRole(role);
+      res.json(users);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching users by role" });
+    }
+  });
+
+  // Get users by organization
+  app.get("/api/users/organization/:organizationId", async (req, res) => {
+    try {
+      const organizationId = parseInt(req.params.organizationId);
+      const users = await storage.getUsersByOrganization(organizationId);
+      res.json(users);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching users by organization" });
+    }
+  });
+
+  // Role Management Routes
+  // Get all roles
+  app.get("/api/roles", async (req, res) => {
+    try {
+      const roles = await storage.getAllRoles();
+      res.json(roles);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching roles" });
+    }
+  });
+
+  // Get role by ID
+  app.get("/api/roles/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const role = await storage.getRole(id);
+      
+      if (!role) {
+        return res.status(404).json({ message: "Role not found" });
+      }
+      
+      res.json(role);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching role" });
+    }
+  });
+
+  // Create role
+  app.post("/api/roles", async (req, res) => {
+    try {
+      const roleData = insertRoleSchema.parse(req.body);
+      const role = await storage.createRole(roleData);
+      res.status(201).json(role);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ message: "Invalid role data", errors: error.errors });
+      } else {
+        res.status(500).json({ message: "Error creating role" });
+      }
+    }
+  });
+
+  // Update role
+  app.patch("/api/roles/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const roleData = req.body;
+      const role = await storage.updateRole(id, roleData);
+      
+      if (!role) {
+        return res.status(404).json({ message: "Role not found" });
+      }
+      
+      res.json(role);
+    } catch (error) {
+      res.status(500).json({ message: "Error updating role" });
+    }
+  });
+
+  // Delete role
+  app.delete("/api/roles/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const role = await storage.getRole(id);
+      
+      if (!role) {
+        return res.status(404).json({ message: "Role not found" });
+      }
+      
+      if (role.isSystem) {
+        return res.status(403).json({ message: "System roles cannot be deleted" });
+      }
+      
+      const success = await storage.deleteRole(id);
+      
+      if (success) {
+        res.status(204).end();
+      } else {
+        res.status(500).json({ message: "Error deleting role" });
+      }
+    } catch (error) {
+      res.status(500).json({ message: "Error deleting role" });
+    }
+  });
+
+  // Permission Management Routes
+  // Get all permissions
+  app.get("/api/permissions", async (req, res) => {
+    try {
+      const permissions = await storage.getAllPermissions();
+      res.json(permissions);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching permissions" });
+    }
+  });
+
+  // Get permissions for a role
+  app.get("/api/roles/:roleId/permissions", async (req, res) => {
+    try {
+      const roleId = parseInt(req.params.roleId);
+      const role = await storage.getRole(roleId);
+      
+      if (!role) {
+        return res.status(404).json({ message: "Role not found" });
+      }
+      
+      const permissions = await storage.getRolePermissions(roleId);
+      res.json(permissions);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching role permissions" });
+    }
+  });
+
+  // Assign permission to role
+  app.post("/api/roles/:roleId/permissions", async (req, res) => {
+    try {
+      const roleId = parseInt(req.params.roleId);
+      const { permissionId } = req.body;
+      
+      if (!permissionId) {
+        return res.status(400).json({ message: "Permission ID is required" });
+      }
+      
+      const role = await storage.getRole(roleId);
+      if (!role) {
+        return res.status(404).json({ message: "Role not found" });
+      }
+      
+      const permission = await storage.getPermission(permissionId);
+      if (!permission) {
+        return res.status(404).json({ message: "Permission not found" });
+      }
+      
+      const rolePermission = await storage.assignPermissionToRole({
+        roleId,
+        permissionId
+      });
+      
+      res.status(201).json(rolePermission);
+    } catch (error) {
+      res.status(500).json({ message: "Error assigning permission to role" });
+    }
+  });
+
+  // Remove permission from role
+  app.delete("/api/roles/:roleId/permissions/:permissionId", async (req, res) => {
+    try {
+      const roleId = parseInt(req.params.roleId);
+      const permissionId = parseInt(req.params.permissionId);
+      
+      const role = await storage.getRole(roleId);
+      if (!role) {
+        return res.status(404).json({ message: "Role not found" });
+      }
+      
+      const permission = await storage.getPermission(permissionId);
+      if (!permission) {
+        return res.status(404).json({ message: "Permission not found" });
+      }
+      
+      const success = await storage.removePermissionFromRole(roleId, permissionId);
+      
+      if (success) {
+        res.status(204).end();
+      } else {
+        res.status(404).json({ message: "Permission not assigned to this role" });
+      }
+    } catch (error) {
+      res.status(500).json({ message: "Error removing permission from role" });
+    }
+  });
+
+  // Subscription Plan Routes
+  // Get all subscription plans
+  app.get("/api/subscription-plans", async (req, res) => {
+    try {
+      const plans = await storage.getAllSubscriptionPlans();
+      res.json(plans);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching subscription plans" });
+    }
+  });
+
+  // Get subscription plan by ID
+  app.get("/api/subscription-plans/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const plan = await storage.getSubscriptionPlan(id);
+      
+      if (!plan) {
+        return res.status(404).json({ message: "Subscription plan not found" });
+      }
+      
+      res.json(plan);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching subscription plan" });
+    }
+  });
+
+  // Create subscription plan
+  app.post("/api/subscription-plans", async (req, res) => {
+    try {
+      const planData = insertSubscriptionPlanSchema.parse(req.body);
+      const plan = await storage.createSubscriptionPlan(planData);
+      res.status(201).json(plan);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ message: "Invalid subscription plan data", errors: error.errors });
+      } else {
+        res.status(500).json({ message: "Error creating subscription plan" });
+      }
+    }
+  });
+
+  // Update subscription plan
+  app.patch("/api/subscription-plans/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const planData = req.body;
+      const plan = await storage.updateSubscriptionPlan(id, planData);
+      
+      if (!plan) {
+        return res.status(404).json({ message: "Subscription plan not found" });
+      }
+      
+      res.json(plan);
+    } catch (error) {
+      res.status(500).json({ message: "Error updating subscription plan" });
+    }
+  });
+
+  // Delete subscription plan
+  app.delete("/api/subscription-plans/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const plan = await storage.getSubscriptionPlan(id);
+      
+      if (!plan) {
+        return res.status(404).json({ message: "Subscription plan not found" });
+      }
+      
+      const success = await storage.deleteSubscriptionPlan(id);
+      
+      if (success) {
+        res.status(204).end();
+      } else {
+        res.status(500).json({ message: "Error deleting subscription plan" });
+      }
+    } catch (error) {
+      res.status(500).json({ message: "Error deleting subscription plan" });
+    }
+  });
   
   // Get metrics for dashboard
   app.get("/api/dashboard/metrics", async (req, res) => {
