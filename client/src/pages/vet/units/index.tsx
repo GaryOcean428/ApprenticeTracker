@@ -145,7 +145,7 @@ export default function UnitsOfCompetencyList() {
                   <SelectValue placeholder="Training Package" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Training Packages</SelectItem>
+                  <SelectItem value="all-packages">All Training Packages</SelectItem>
                   {trainingPackages?.map(tp => (
                     <SelectItem key={tp} value={tp}>
                       {tp}
@@ -162,7 +162,7 @@ export default function UnitsOfCompetencyList() {
                   <SelectValue placeholder="Status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Statuses</SelectItem>
+                  <SelectItem value="all-statuses">All Statuses</SelectItem>
                   <SelectItem value="active">Active</SelectItem>
                   <SelectItem value="inactive">Inactive</SelectItem>
                 </SelectContent>

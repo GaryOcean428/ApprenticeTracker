@@ -198,7 +198,7 @@ export default function PortalPage() {
                           value={organization}
                           onChange={(e) => setOrganization(e.target.value)}
                         >
-                          <option value="">Select organization</option>
+                          <option value="select-org">Select organization</option>
                           <option value="Braden Group">Braden Group/Braden Pty Ltd</option>
                           <option value="ABC Training">ABC Training</option>
                           <option value="Vocational Skills Institute">Vocational Skills Institute</option>
@@ -213,7 +213,7 @@ export default function PortalPage() {
                           value={userRole}
                           onChange={(e) => setUserRole(e.target.value)}
                         >
-                          <option value="">Select role</option>
+                          <option value="select-role">Select role</option>
                           <option value="developer">Developer (Platform Level)</option>
                           <option value="admin">Organization Administrator</option>
                         </select>

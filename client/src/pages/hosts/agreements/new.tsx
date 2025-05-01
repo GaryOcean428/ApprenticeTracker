@@ -177,7 +177,7 @@ const NewAgreementPage = () => {
                               {host.name}
                             </SelectItem>
                           )) || (
-                            <SelectItem value="" disabled>
+                            <SelectItem value="no-host" disabled>
                               No host employers available
                             </SelectItem>
                           )}

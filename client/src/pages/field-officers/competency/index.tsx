@@ -216,7 +216,7 @@ export default function CompetencyReview() {
             </span>
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Hosts</SelectItem>
+            <SelectItem value="all-hosts">All Hosts</SelectItem>
             {uniqueHosts.map((host) => (
               <SelectItem key={host.id} value={host.id.toString()}>
                 {host.name}

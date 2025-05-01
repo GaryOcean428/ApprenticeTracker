@@ -230,7 +230,7 @@ export default function ActionItemsReminders() {
               </span>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Staff</SelectItem>
+              <SelectItem value="all-staff">All Staff</SelectItem>
               {uniqueStaff.map((staff) => (
                 <SelectItem key={staff.id} value={staff.id.toString()}>
                   {staff.name}
@@ -250,7 +250,7 @@ export default function ActionItemsReminders() {
               </span>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Statuses</SelectItem>
+              <SelectItem value="all-statuses">All Statuses</SelectItem>
               {uniqueStatuses.map((status) => (
                 <SelectItem key={status} value={status}>
                   {status}
@@ -270,7 +270,7 @@ export default function ActionItemsReminders() {
               </span>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Dates</SelectItem>
+              <SelectItem value="all-dates">All Dates</SelectItem>
               <SelectItem value="overdue">Overdue</SelectItem>
               <SelectItem value="today">Due Today</SelectItem>
               <SelectItem value="this-week">This Week</SelectItem>

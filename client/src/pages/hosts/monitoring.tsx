@@ -314,7 +314,7 @@ const HostMonitoringPage = () => {
                     <SelectValue placeholder="Visit Type" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Types</SelectItem>
+                    <SelectItem value="all-types">All Types</SelectItem>
                     <SelectItem value="field_visit">Field Visit</SelectItem>
                     <SelectItem value="phone_call">Phone Call</SelectItem>
                     <SelectItem value="email">Email</SelectItem>

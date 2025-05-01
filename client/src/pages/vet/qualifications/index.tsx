@@ -127,7 +127,7 @@ export default function QualificationsList() {
               </span>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Levels</SelectItem>
+              <SelectItem value="all-levels">All Levels</SelectItem>
               {uniqueLevels.map((level) => (
                 <SelectItem key={level} value={level}>
                   {level}
@@ -147,7 +147,7 @@ export default function QualificationsList() {
               </span>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Industries</SelectItem>
+              <SelectItem value="all-industries">All Industries</SelectItem>
               {uniqueIndustries.map((industry) => (
                 <SelectItem key={industry} value={industry}>
                   {industry}
