@@ -125,11 +125,26 @@ export function registerTGARoutes(app: Express) {
   });
   
   /**
-   * Get a specific qualification from our database
+   * Get a specific qualification from our database by ID
    */
   app.get("/api/qualifications/:id", async (req, res) => {
     try {
-      const id = parseInt(req.params.id);
+      if(req.params.id === "search") {
+        return res.redirect("/api/qualifications/search" + (req.query.q ? `?q=${req.query.q}` : ''));
+      }
+      
+      // Safely parse the ID, ensuring it's a valid number or returning NaN
+      const idParam = req.params.id;
+      const id = parseInt(idParam);
+      
+      // Check if id is a valid number
+      if (isNaN(id)) {
+        return res.status(400).json({
+          message: `Invalid qualification ID: '${idParam}' is not a number`
+        });
+      }
+      
+      console.log(`Fetching qualification with ID: ${id}`);
       
       // Get the qualification
       const [qualification] = await db
@@ -146,7 +161,7 @@ export function registerTGARoutes(app: Express) {
       // Get the qualification structure (units)
       const structure = await db
         .select({
-          unitType: qualificationStructure.unitType,
+          isCore: qualificationStructure.isCore,
           unit: unitsOfCompetency
         })
         .from(qualificationStructure)
@@ -158,12 +173,14 @@ export function registerTGARoutes(app: Express) {
       
       // Organize units by core and elective
       const coreUnits = structure
-        .filter(item => item.unitType === "core")
+        .filter(item => item.isCore === true)
         .map(item => item.unit);
       
       const electiveUnits = structure
-        .filter(item => item.unitType === "elective")
+        .filter(item => item.isCore === false)
         .map(item => item.unit);
+      
+      console.log(`Found ${coreUnits.length} core units and ${electiveUnits.length} elective units`);
       
       res.json({
         ...qualification,
@@ -226,6 +243,73 @@ export function registerTGARoutes(app: Express) {
     }
   });
 
+  app.get("/api/qualifications/by-id/:id", async (req, res) => {
+    try {
+      // Safely parse the ID, ensuring it's a valid number or returning NaN
+      const idParam = req.params.id;
+      const id = parseInt(idParam);
+      
+      // Check if id is a valid number
+      if (isNaN(id)) {
+        return res.status(400).json({
+          message: `Invalid qualification ID: '${idParam}' is not a number`
+        });
+      }
+      
+      console.log(`Fetching qualification with ID: ${id}`);
+      
+      // Get the qualification
+      const [qualification] = await db
+        .select()
+        .from(qualifications)
+        .where(eq(qualifications.id, id));
+      
+      if (!qualification) {
+        return res.status(404).json({
+          message: `Qualification with ID ${id} not found`
+        });
+      }
+      
+      // Get the qualification structure (units)
+      const structure = await db
+        .select({
+          isCore: qualificationStructure.isCore,
+          unit: unitsOfCompetency
+        })
+        .from(qualificationStructure)
+        .innerJoin(
+          unitsOfCompetency,
+          eq(qualificationStructure.unitId, unitsOfCompetency.id)
+        )
+        .where(eq(qualificationStructure.qualificationId, id));
+      
+      // Organize units by core and elective
+      const coreUnits = structure
+        .filter(item => item.isCore === true)
+        .map(item => item.unit);
+      
+      const electiveUnits = structure
+        .filter(item => item.isCore === false)
+        .map(item => item.unit);
+      
+      console.log(`Found ${coreUnits.length} core units and ${electiveUnits.length} elective units`);
+      
+      res.json({
+        ...qualification,
+        units: {
+          core: coreUnits,
+          elective: electiveUnits
+        }
+      });
+    } catch (error) {
+      console.error(`Error fetching qualification ${req.params.id}:`, error);
+      res.status(500).json({
+        message: "Error fetching qualification details",
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }  
+  });
+
   /**
    * Search qualifications in our database
    */
@@ -257,24 +341,12 @@ export function registerTGARoutes(app: Express) {
       } catch (searchError) {
         console.error(`Database error in qualifications search:`, searchError);
         
-        // Return some helpful mock data for development
-        if (process.env.NODE_ENV === 'development') {
-          console.log('Returning mock qualification data for development');
-          res.json([
-            {
-              id: 1,
-              qualificationCode: "CPC30220",
-              qualificationTitle: "Certificate III in Carpentry",
-              aqfLevel: "Certificate III",
-              aqfLevelNumber: 3,
-              isActive: true,
-              createdAt: new Date(),
-              updatedAt: new Date()
-            }
-          ]);
-        } else {
-          throw searchError;
-        }
+        // For development, return a helpful error response with more details
+        res.status(500).json({
+          message: "Database error while searching qualifications",
+          details: searchError instanceof Error ? searchError.message : 'Unknown error',
+          query: query
+        });
       }
       
     } catch (error) {
