@@ -23,13 +23,26 @@ export function registerTGARoutes(app: Express) {
       console.log(`Searching qualifications with query: ${query}`);
       
       try {
+        // Make search more effective by handling common cases
+        const searchTerm = query.trim();
+        
+        console.log(`Processing search term: '${searchTerm}'`);
+        
         const searchResults = await db
           .select()
           .from(qualifications)
           .where(
             or(
-              like(qualifications.qualificationCode, `%${query}%`),
-              like(qualifications.qualificationTitle, `%${query}%`)
+              // Search by code (usually uppercase)
+              like(qualifications.qualificationCode, `%${searchTerm.toUpperCase()}%`),
+              
+              // Case-insensitive search on title
+              like(db.sql`UPPER(${qualifications.qualificationTitle})`, `%${searchTerm.toUpperCase()}%`),
+              
+              // Search for terms within the description
+              searchTerm.length > 3 
+                ? like(db.sql`UPPER(${qualifications.qualificationDescription})`, `%${searchTerm.toUpperCase()}%`)
+                : db.sql`1=0`
             )
           );
         
