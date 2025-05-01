@@ -141,6 +141,14 @@ function Router() {
           </Suspense>
         );
       }} />
+      <Route path="/hosts/agreements/new" component={() => {
+        const NewAgreement = lazy(() => import("./pages/hosts/agreements/new"));
+        return (
+          <Suspense fallback={<div className="p-8 flex items-center justify-center"><div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"/></div>}>
+            <NewAgreement />
+          </Suspense>
+        );
+      }} />
       <Route path="/hosts/monitoring" component={() => {
         const HostMonitoring = lazy(() => import("./pages/hosts/monitoring"));
         return (
@@ -154,6 +162,14 @@ function Router() {
         return (
           <Suspense fallback={<div className="p-8 flex items-center justify-center"><div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"/></div>}>
             <HostVacancies />
+          </Suspense>
+        );
+      }} />
+      <Route path="/hosts/vacancies/new" component={() => {
+        const NewVacancy = lazy(() => import("./pages/hosts/vacancies/new"));
+        return (
+          <Suspense fallback={<div className="p-8 flex items-center justify-center"><div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"/></div>}>
+            <NewVacancy />
           </Suspense>
         );
       }} />
