@@ -834,6 +834,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Update the apprentice
       const apprentice = await storage.updateApprentice(id, updateData);
       
+      if (!apprentice) {
+        return res.status(404).json({ message: "Apprentice not found or could not be updated" });
+      }
+      
       // Create activity log
       await storage.createActivityLog({
         userId: 1, // Assuming admin user
