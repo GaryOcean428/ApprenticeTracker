@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { tgaService } from "../services/tga-service";
 import { db } from "../db";
 import { qualifications, unitsOfCompetency, qualificationStructure } from "@shared/schema";
-import { eq, and, desc, asc, like, or } from "drizzle-orm";
+import { eq, and, desc, asc, like, or, count } from "drizzle-orm";
 
 export function registerTGARoutes(app: Express) {
   // Register specific routes before parameterized routes to prevent conflicts
@@ -279,19 +279,43 @@ export function registerTGARoutes(app: Express) {
    * Get status of TGA integration
    */
   app.get('/api/tga/status', (req, res) => {
+    // Set content type to ensure it's treated as JSON
+    res.setHeader('Content-Type', 'application/json');
+    
     const nextSyncDate = new Date();
     nextSyncDate.setHours(nextSyncDate.getHours() + 14); // Same as scheduled task
     
-    res.json({
-      status: 'operational',
-      lastSync: new Date(),
-      nextScheduledSync: nextSyncDate,
-      importedQualifications: 2,
-      importedUnits: 4,
-      apiIntegration: {
-        status: 'using demo data',
-        message: 'To use the real TGA API, configure API credentials'
-      }
+    // Get actual counts from database
+    Promise.all([
+      db.select({ count: count() }).from(qualifications),
+      db.select({ count: count() }).from(unitsOfCompetency)
+    ])
+    .then(([qualCount, unitCount]) => {
+      res.json({
+        status: 'operational',
+        lastSync: new Date(),
+        nextScheduledSync: nextSyncDate,
+        importedQualifications: qualCount[0]?.count || 0,
+        importedUnits: unitCount[0]?.count || 0,
+        apiIntegration: {
+          status: 'using demo data',
+          message: 'To use the real TGA API, configure API credentials'
+        }
+      });
+    })
+    .catch(error => {
+      res.json({
+        status: 'operational',
+        lastSync: new Date(),
+        nextScheduledSync: nextSyncDate,
+        importedQualifications: 2,
+        importedUnits: 4,
+        apiIntegration: {
+          status: 'using demo data',
+          message: 'To use the real TGA API, configure API credentials'
+        },
+        databaseError: error instanceof Error ? error.message : 'Unknown error'
+      });
     });
   });
   
