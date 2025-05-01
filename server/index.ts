@@ -107,5 +107,9 @@ app.use((req, res, next) => {
     reusePort: true,
   }, () => {
     log(`serving on port ${port}`);
+    
+    // Initialize scheduled tasks
+    initializeScheduledTasks();
+    log("Scheduled tasks initialized");
   });
 })();

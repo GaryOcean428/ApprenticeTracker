@@ -112,8 +112,7 @@ export function registerTGARoutes(app: Express) {
     try {
       const allQualifications = await db
         .select()
-        .from(qualifications)
-        .orderBy(asc(qualifications.code));
+        .from(qualifications);
       
       res.json(allQualifications);
     } catch (error) {
@@ -203,8 +202,7 @@ export function registerTGARoutes(app: Express) {
             like(qualifications.code, `%${query}%`),
             like(qualifications.name, `%${query}%`)
           )
-        )
-        .orderBy(asc(qualifications.code));
+        );
       
       res.json(searchResults);
     } catch (error) {
