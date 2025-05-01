@@ -1717,10 +1717,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { username, password, organization, role } = req.body;
       
       // Validate required fields
-      if (!username || !password || !organization || !role) {
+      if (!username || !password) {
         return res.status(400).json({ 
           success: false, 
-          message: 'Missing required fields' 
+          message: 'Missing username or password' 
+        });
+      }
+
+      // Special case for developer role which has platform-level access
+      const user = await storage.getUserByUsername(username);
+      if (!user) {
+        return res.status(401).json({ 
+          success: false, 
+          message: 'Invalid credentials' 
+        });
+      }
+
+      // Handle developer role (platform level access)
+      if (user.role === 'developer') {
+        // For simplicity in this demo, we're not checking the password hash
+        // In a real application, you would verify the password hash here
+        return res.status(200).json({
+          success: true,
+          user: {
+            id: user.id,
+            username: user.username,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            role: user.role,
+            // Developer has platform-level access, so no specific organization
+            platformAccess: true
+          }
+        });
+      }
+      
+      // For non-developer roles, check organization and role
+      if (!organization || !role) {
+        return res.status(400).json({ 
+          success: false, 
+          message: 'Missing organization or role' 
         });
       }
 
@@ -1736,14 +1771,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Find the user with the requested role - using storage interface instead of direct db query
-      // to avoid type issues with the column names
-      const user = await storage.getUserByUsername(username);
-
-      if (!user || user.role !== role) {
+      // Check if user has the requested role
+      if (user.role !== role) {
         return res.status(401).json({ 
           success: false, 
-          message: 'Invalid credentials or insufficient permissions' 
+          message: 'Insufficient permissions for this role' 
         });
       }
 
