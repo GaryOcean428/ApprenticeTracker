@@ -182,6 +182,36 @@ export function registerTGARoutes(app: Express) {
   });
   
   /**
+   * Manually trigger a qualification sync
+   */
+  app.post("/api/tga/sync", async (req, res) => {
+    try {
+      const { query, limit } = req.body;
+      
+      if (!query) {
+        return res.status(400).json({
+          message: "Query parameter is required"
+        });
+      }
+      
+      // No minimum length for sync queries
+      
+      const importedCount = await tgaService.syncQualifications(query, limit || 10);
+      
+      res.json({
+        message: `Successfully synchronized ${importedCount} qualifications for query '${query}'`,
+        count: importedCount
+      });
+    } catch (error) {
+      console.error(`Error syncing qualifications:`, error);
+      res.status(500).json({
+        message: "Error syncing qualifications",
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  /**
    * Search qualifications in our database
    */
   app.get("/api/qualifications/search", async (req, res) => {
