@@ -5,6 +5,56 @@ import { qualifications, unitsOfCompetency, qualificationStructure } from "@shar
 import { eq, and, desc, asc, like, or } from "drizzle-orm";
 
 export function registerTGARoutes(app: Express) {
+  // Register specific routes before parameterized routes to prevent conflicts
+  
+  /**
+   * Search qualifications in our database
+   */
+  app.get("/api/qualifications/search", async (req, res) => {
+    try {
+      const query = req.query.q as string;
+      
+      if (!query || query.length < 2) {
+        return res.status(400).json({
+          message: "Search query must be at least 2 characters"
+        });
+      }
+      
+      console.log(`Searching qualifications with query: ${query}`);
+      
+      try {
+        const searchResults = await db
+          .select()
+          .from(qualifications)
+          .where(
+            or(
+              like(qualifications.qualificationCode, `%${query}%`),
+              like(qualifications.qualificationTitle, `%${query}%`)
+            )
+          );
+        
+        console.log(`Found ${searchResults.length} qualifications matching '${query}'`);
+        return res.json(searchResults);
+      } catch (searchError) {
+        console.error(`Database error in qualifications search:`, searchError);
+        
+        // For development, return a helpful error response with more details
+        return res.status(500).json({
+          message: "Database error while searching qualifications",
+          details: searchError instanceof Error ? searchError.message : 'Unknown error',
+          query: query
+        });
+      }
+      
+    } catch (error) {
+      console.error(`Error searching qualifications:`, error);
+      return res.status(500).json({
+        message: "Error searching qualifications",
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+  
   /**
    * Search for qualifications in the Training.gov.au system
    */
@@ -99,7 +149,11 @@ export function registerTGARoutes(app: Express) {
    */
   app.post("/api/tga/sync", async (req, res) => {
     try {
-      const { searchQuery, limit } = req.body;
+      // Support both parameter formats for compatibility
+      const searchQuery = req.body.searchQuery || req.body.query;
+      const limit = req.body.limit || 20;
+      
+      console.log(`API: Syncing qualifications with query: '${searchQuery}'`);
       
       if (!searchQuery || searchQuery.length < 3) {
         return res.status(400).json({
@@ -107,7 +161,7 @@ export function registerTGARoutes(app: Express) {
         });
       }
       
-      const syncCount = await tgaService.syncQualifications(searchQuery, limit || 20);
+      const syncCount = await tgaService.syncQualifications(searchQuery, limit);
       
       res.json({
         message: `Synced ${syncCount} qualifications for search "${searchQuery}"`,
@@ -146,10 +200,6 @@ export function registerTGARoutes(app: Express) {
    */
   app.get("/api/qualifications/:id", async (req, res) => {
     try {
-      if(req.params.id === "search") {
-        return res.redirect("/api/qualifications/search" + (req.query.q ? `?q=${req.query.q}` : ''));
-      }
-      
       // Safely parse the ID, ensuring it's a valid number or returning NaN
       const idParam = req.params.id;
       const id = parseInt(idParam);
@@ -215,163 +265,8 @@ export function registerTGARoutes(app: Express) {
     }
   });
   
-  /**
-   * Manually trigger a qualification sync
-   */
-  app.post("/api/tga/sync", async (req, res) => {
-    try {
-      const { query, limit } = req.body;
-      
-      if (!query) {
-        return res.status(400).json({
-          message: "Query parameter is required"
-        });
-      }
-      
-      // Add debugging info
-      console.log(`Syncing qualifications with query: '${query}'`);
-      
-      try {
-        const importedCount = await tgaService.syncQualifications(query, limit || 10);
-        
-        res.json({
-          message: `Successfully synchronized ${importedCount} qualifications for query '${query}'`,
-          count: importedCount
-        });
-      } catch (syncError) {
-        console.error(`Error in syncQualifications:`, syncError);
-        
-        // For search query validation error, return a 400 status
-        if (syncError instanceof Error && syncError.message.includes("Search query must be at least 3 characters")) {
-          return res.status(400).json({
-            message: syncError.message
-          });
-        }
-        
-        // For other errors, return a 500 status
-        throw syncError;
-      }
-    } catch (error) {
-      console.error(`Error syncing qualifications:`, error);
-      res.status(500).json({
-        message: "Error syncing qualifications",
-        error: error instanceof Error ? error.message : 'Unknown error'
-      });
-    }
-  });
+  // Duplicate sync route removed - handled by the other /api/tga/sync endpoint
 
-  app.get("/api/qualifications/by-id/:id", async (req, res) => {
-    try {
-      // Safely parse the ID, ensuring it's a valid number or returning NaN
-      const idParam = req.params.id;
-      const id = parseInt(idParam);
-      
-      // Check if id is a valid number
-      if (isNaN(id)) {
-        return res.status(400).json({
-          message: `Invalid qualification ID: '${idParam}' is not a number`
-        });
-      }
-      
-      console.log(`Fetching qualification with ID: ${id}`);
-      
-      // Get the qualification
-      const [qualification] = await db
-        .select()
-        .from(qualifications)
-        .where(eq(qualifications.id, id));
-      
-      if (!qualification) {
-        return res.status(404).json({
-          message: `Qualification with ID ${id} not found`
-        });
-      }
-      
-      // Get the qualification structure (units)
-      const structure = await db
-        .select({
-          isCore: qualificationStructure.isCore,
-          unit: unitsOfCompetency
-        })
-        .from(qualificationStructure)
-        .innerJoin(
-          unitsOfCompetency,
-          eq(qualificationStructure.unitId, unitsOfCompetency.id)
-        )
-        .where(eq(qualificationStructure.qualificationId, id));
-      
-      // Organize units by core and elective
-      const coreUnits = structure
-        .filter(item => item.isCore === true)
-        .map(item => item.unit);
-      
-      const electiveUnits = structure
-        .filter(item => item.isCore === false)
-        .map(item => item.unit);
-      
-      console.log(`Found ${coreUnits.length} core units and ${electiveUnits.length} elective units`);
-      
-      res.json({
-        ...qualification,
-        units: {
-          core: coreUnits,
-          elective: electiveUnits
-        }
-      });
-    } catch (error) {
-      console.error(`Error fetching qualification ${req.params.id}:`, error);
-      res.status(500).json({
-        message: "Error fetching qualification details",
-        error: error instanceof Error ? error.message : 'Unknown error'
-      });
-    }  
-  });
+  // Removed duplicate route
 
-  /**
-   * Search qualifications in our database
-   */
-  app.get("/api/qualifications/search", async (req, res) => {
-    try {
-      const query = req.query.q as string;
-      
-      if (!query || query.length < 2) {
-        return res.status(400).json({
-          message: "Search query must be at least 2 characters"
-        });
-      }
-      
-      console.log(`Searching qualifications with query: ${query}`);
-      
-      try {
-        const searchResults = await db
-          .select()
-          .from(qualifications)
-          .where(
-            or(
-              like(qualifications.qualificationCode, `%${query}%`),
-              like(qualifications.qualificationTitle, `%${query}%`)
-            )
-          );
-        
-        console.log(`Found ${searchResults.length} qualifications matching '${query}'`);
-        res.json(searchResults);
-      } catch (searchError) {
-        console.error(`Database error in qualifications search:`, searchError);
-        
-        // For development, return a helpful error response with more details
-        res.status(500).json({
-          message: "Database error while searching qualifications",
-          details: searchError instanceof Error ? searchError.message : 'Unknown error',
-          query: query
-        });
-      }
-      
-    } catch (error) {
-      console.error(`Error searching qualifications:`, error);
-      res.status(500).json({
-        message: "Error searching qualifications",
-        error: error instanceof Error ? error.message : 'Unknown error'
-      });
-    }
-  });
 }
