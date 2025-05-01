@@ -92,6 +92,20 @@ export interface IStorage {
   createPlacement(placement: InsertPlacement): Promise<Placement>;
   updatePlacement(id: number, placement: Partial<InsertPlacement>): Promise<Placement | undefined>;
   deletePlacement(id: number): Promise<boolean>;
+  
+  // Document methods
+  getDocument(id: number): Promise<Document | undefined>;
+  getAllDocuments(): Promise<Document[]>;
+  getDocumentsByRelation(relatedTo: string, relatedId: number): Promise<Document[]>;
+  createDocument(document: InsertDocument): Promise<Document>;
+  updateDocument(id: number, document: Partial<InsertDocument>): Promise<Document | undefined>;
+  deleteDocument(id: number): Promise<boolean>;
+  
+  // Compliance Record methods
+  getAllComplianceRecords(): Promise<ComplianceRecord[]>;
+  getComplianceRecordsByRelation(relatedTo: string, relatedId: number): Promise<ComplianceRecord[]>;
+  createComplianceRecord(record: InsertComplianceRecord): Promise<ComplianceRecord>;
+  updateComplianceRecord(id: number, record: Partial<InsertComplianceRecord>): Promise<ComplianceRecord | undefined>;
 
   // Activity Log methods
   createActivityLog(log: InsertActivityLog): Promise<ActivityLog>;
@@ -494,6 +508,111 @@ export class DatabaseStorage implements IStorage {
     return result.rowCount > 0;
   }
 
+  // Placement methods
+  async getPlacement(id: number): Promise<Placement | undefined> {
+    const [placement] = await db.select().from(placements).where(eq(placements.id, id));
+    return placement;
+  }
+
+  async getAllPlacements(): Promise<Placement[]> {
+    return await db.select().from(placements);
+  }
+
+  async getPlacementsByApprentice(apprenticeId: number): Promise<Placement[]> {
+    return await db.select().from(placements).where(eq(placements.apprenticeId, apprenticeId));
+  }
+
+  async getPlacementsByHost(hostEmployerId: number): Promise<Placement[]> {
+    return await db.select().from(placements).where(eq(placements.hostEmployerId, hostEmployerId));
+  }
+
+  async createPlacement(placement: InsertPlacement): Promise<Placement> {
+    const [createdPlacement] = await db.insert(placements).values(placement).returning();
+    return createdPlacement;
+  }
+
+  async updatePlacement(id: number, placement: Partial<InsertPlacement>): Promise<Placement | undefined> {
+    const [updatedPlacement] = await db
+      .update(placements)
+      .set(placement)
+      .where(eq(placements.id, id))
+      .returning();
+    return updatedPlacement;
+  }
+
+  async deletePlacement(id: number): Promise<boolean> {
+    const result = await db.delete(placements).where(eq(placements.id, id));
+    return result.rowCount > 0;
+  }
+  
+  // Document methods
+  async getDocument(id: number): Promise<Document | undefined> {
+    const [document] = await db.select().from(documents).where(eq(documents.id, id));
+    return document;
+  }
+
+  async getAllDocuments(): Promise<Document[]> {
+    return await db.select().from(documents);
+  }
+
+  async getDocumentsByRelation(relatedTo: string, relatedId: number): Promise<Document[]> {
+    return await db.select().from(documents)
+      .where(
+        and(
+          eq(documents.relatedTo, relatedTo),
+          eq(documents.relatedId, relatedId)
+        )
+      );
+  }
+
+  async createDocument(document: InsertDocument): Promise<Document> {
+    const [createdDocument] = await db.insert(documents).values(document).returning();
+    return createdDocument;
+  }
+
+  async updateDocument(id: number, document: Partial<InsertDocument>): Promise<Document | undefined> {
+    const [updatedDocument] = await db
+      .update(documents)
+      .set(document)
+      .where(eq(documents.id, id))
+      .returning();
+    return updatedDocument;
+  }
+
+  async deleteDocument(id: number): Promise<boolean> {
+    const result = await db.delete(documents).where(eq(documents.id, id));
+    return result.rowCount > 0;
+  }
+  
+  // Compliance Record methods
+  async getAllComplianceRecords(): Promise<ComplianceRecord[]> {
+    return await db.select().from(complianceRecords);
+  }
+
+  async getComplianceRecordsByRelation(relatedTo: string, relatedId: number): Promise<ComplianceRecord[]> {
+    return await db.select().from(complianceRecords)
+      .where(
+        and(
+          eq(complianceRecords.relatedTo, relatedTo),
+          eq(complianceRecords.relatedId, relatedId)
+        )
+      );
+  }
+
+  async createComplianceRecord(record: InsertComplianceRecord): Promise<ComplianceRecord> {
+    const [createdRecord] = await db.insert(complianceRecords).values(record).returning();
+    return createdRecord;
+  }
+
+  async updateComplianceRecord(id: number, record: Partial<InsertComplianceRecord>): Promise<ComplianceRecord | undefined> {
+    const [updatedRecord] = await db
+      .update(complianceRecords)
+      .set(record)
+      .where(eq(complianceRecords.id, id))
+      .returning();
+    return updatedRecord;
+  }
+  
   // Activity Log methods
   async createActivityLog(log: InsertActivityLog): Promise<ActivityLog> {
     const [createdLog] = await db.insert(activityLogs).values(log).returning();
