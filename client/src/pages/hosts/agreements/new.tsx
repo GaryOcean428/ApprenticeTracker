@@ -30,7 +30,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { DatePicker } from "@/components/ui/date-picker";
-import { toast } from "@/hooks/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -66,6 +66,7 @@ interface HostEmployer {
 
 const NewAgreementPage = () => {
   const [, navigate] = useLocation();
+  const { toast } = useToast();
   
   // Fetch host employers for the dropdown
   const { data: hostEmployers, isLoading: loadingHosts } = useQuery({

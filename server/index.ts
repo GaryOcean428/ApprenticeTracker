@@ -7,6 +7,7 @@ import { migrateGtoComplianceSchema } from "./migrate-gto-compliance";
 import { seedGtoComplianceStandards } from "./seed-gto-compliance";
 import { migrateVetSchema } from "./migrate-vet";
 import { migrateRolesSchema } from "./migrate-roles";
+import { initializeScheduledTasks } from "./scheduled-tasks";
 
 const app = express();
 app.use(express.json());
