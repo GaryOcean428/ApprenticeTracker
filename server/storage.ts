@@ -1,5 +1,9 @@
 import {
   users, User, InsertUser,
+  roles, Role, InsertRole,
+  permissions, Permission, InsertPermission,
+  rolePermissions, RolePermission, InsertRolePermission,
+  subscriptionPlans, SubscriptionPlan, InsertSubscriptionPlan,
   apprentices, Apprentice, InsertApprentice,
   hostEmployers, HostEmployer, InsertHostEmployer,
   trainingContracts, TrainingContract, InsertTrainingContract,
@@ -14,12 +18,42 @@ import {
 
 // Storage interface with CRUD operations
 export interface IStorage {
+  // Roles
+  getAllRoles(): Promise<Role[]>;
+  getRole(id: number): Promise<Role | undefined>;
+  createRole(role: InsertRole): Promise<Role>;
+  updateRole(id: number, role: Partial<InsertRole>): Promise<Role | undefined>;
+  deleteRole(id: number): Promise<boolean>;
+
+  // Permissions
+  getAllPermissions(): Promise<Permission[]>;
+  getPermission(id: number): Promise<Permission | undefined>;
+  createPermission(permission: InsertPermission): Promise<Permission>;
+  updatePermission(id: number, permission: Partial<InsertPermission>): Promise<Permission | undefined>;
+  deletePermission(id: number): Promise<boolean>;
+
+  // Role Permissions
+  getRolePermissions(roleId: number): Promise<Permission[]>;
+  assignPermissionToRole(rolePermission: InsertRolePermission): Promise<RolePermission>;
+  removePermissionFromRole(roleId: number, permissionId: number): Promise<boolean>;
+  
+  // Subscription Plans
+  getAllSubscriptionPlans(): Promise<SubscriptionPlan[]>;
+  getSubscriptionPlan(id: number): Promise<SubscriptionPlan | undefined>;
+  createSubscriptionPlan(plan: InsertSubscriptionPlan): Promise<SubscriptionPlan>;
+  updateSubscriptionPlan(id: number, plan: Partial<InsertSubscriptionPlan>): Promise<SubscriptionPlan | undefined>;
+  deleteSubscriptionPlan(id: number): Promise<boolean>;
+  
   // Users
+  getAllUsers(): Promise<User[]>;
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
+  getUsersByRole(role: string): Promise<User[]>;
+  getUsersByOrganization(organizationId: number): Promise<User[]>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: number, user: Partial<InsertUser>): Promise<User | undefined>;
   deleteUser(id: number): Promise<boolean>;
+  updateUserStripeInfo(userId: number, stripeInfo: { customerId: string, subscriptionId: string }): Promise<User | undefined>;
   
   // Apprentices
   getAllApprentices(): Promise<Apprentice[]>;
@@ -98,6 +132,11 @@ export interface IStorage {
 }
 
 export class MemStorage implements IStorage {
+  // Core data stores
+  private roles: Map<number, Role>;
+  private permissions: Map<number, Permission>;
+  private rolePermissions: Map<number, RolePermission>;
+  private subscriptionPlans: Map<number, SubscriptionPlan>;
   private users: Map<number, User>;
   private apprentices: Map<number, Apprentice>;
   private hostEmployers: Map<number, HostEmployer>;
@@ -111,6 +150,10 @@ export class MemStorage implements IStorage {
   private tasks: Map<number, Task>;
   
   // ID counters
+  private roleIdCounter: number;
+  private permissionIdCounter: number;
+  private rolePermissionIdCounter: number;
+  private subscriptionPlanIdCounter: number;
   private userIdCounter: number;
   private apprenticeIdCounter: number;
   private hostEmployerIdCounter: number;
@@ -124,6 +167,11 @@ export class MemStorage implements IStorage {
   private taskIdCounter: number;
   
   constructor() {
+    // Initialize data stores
+    this.roles = new Map();
+    this.permissions = new Map();
+    this.rolePermissions = new Map();
+    this.subscriptionPlans = new Map();
     this.users = new Map();
     this.apprentices = new Map();
     this.hostEmployers = new Map();
@@ -136,6 +184,11 @@ export class MemStorage implements IStorage {
     this.activityLogs = new Map();
     this.tasks = new Map();
     
+    // Initialize ID counters
+    this.roleIdCounter = 1;
+    this.permissionIdCounter = 1;
+    this.rolePermissionIdCounter = 1;
+    this.subscriptionPlanIdCounter = 1;
     this.userIdCounter = 1;
     this.apprenticeIdCounter = 1;
     this.hostEmployerIdCounter = 1;
@@ -153,6 +206,103 @@ export class MemStorage implements IStorage {
   }
   
   private initSampleData() {
+    // Initialize sample roles and permissions
+    const developerRole: InsertRole = {
+      name: 'developer',
+      description: 'Platform-level access to all organizations and data',
+      isSystem: true
+    };
+    
+    const adminRole: InsertRole = {
+      name: 'admin',
+      description: 'Organization-level administrator access',
+      isSystem: true
+    };
+    
+    const fieldOfficerRole: InsertRole = {
+      name: 'field_officer',
+      description: 'Manages host employers and apprentices',
+      isSystem: true
+    };
+    
+    const hostEmployerRole: InsertRole = {
+      name: 'host_employer',
+      description: 'Access to manage assigned apprentices',
+      isSystem: true
+    };
+    
+    const apprenticeRole: InsertRole = {
+      name: 'apprentice',
+      description: 'Limited access to own profile and training',
+      isSystem: true
+    };
+    
+    const rtoRole: InsertRole = {
+      name: 'rto',
+      description: 'Access to update training results',
+      isSystem: true
+    };
+    
+    const developerRoleId = this.createRole(developerRole).id;
+    const adminRoleId = this.createRole(adminRole).id;
+    this.createRole(fieldOfficerRole);
+    this.createRole(hostEmployerRole);
+    this.createRole(apprenticeRole);
+    this.createRole(rtoRole);
+    
+    // Initialize permissions
+    // Define common CRUD permissions
+    const resources = ['user', 'role', 'permission', 'apprentice', 'host_employer', 'contract', 'placement', 'document', 'timesheet', 'task'];
+    const actions = ['create', 'read', 'update', 'delete'];
+    
+    for (const resource of resources) {
+      for (const action of actions) {
+        const permission: InsertPermission = {
+          name: `${action}_${resource}`,
+          description: `Can ${action} ${resource.replace('_', ' ')}s`,
+          category: resource,
+          action,
+          resource
+        };
+        this.createPermission(permission);
+      }
+    }
+    
+    // Add sample subscription plan
+    const basicPlan: InsertSubscriptionPlan = {
+      name: "Basic Plan",
+      description: "Basic access for small organizations",
+      price: 29.99,
+      billingCycle: "monthly",
+      features: { maxUsers: 5, maxApprentices: 20 },
+      isActive: true,
+      stripePriceId: "price_basic_monthly"
+    };
+    
+    const standardPlan: InsertSubscriptionPlan = {
+      name: "Standard Plan",
+      description: "Standard access for medium organizations",
+      price: 99.99,
+      billingCycle: "monthly",
+      features: { maxUsers: 20, maxApprentices: 100 },
+      isActive: true,
+      stripePriceId: "price_standard_monthly"
+    };
+    
+    const premiumPlan: InsertSubscriptionPlan = {
+      name: "Premium Plan",
+      description: "Premium access for large organizations",
+      price: 299.99,
+      billingCycle: "monthly",
+      features: { maxUsers: -1, maxApprentices: -1 },
+      isActive: true,
+      stripePriceId: "price_premium_monthly"
+    };
+    
+    this.createSubscriptionPlan(basicPlan);
+    this.createSubscriptionPlan(standardPlan);
+    this.createSubscriptionPlan(premiumPlan);
+
     // Add sample users
     const adminUser: InsertUser = {
       username: "admin",
@@ -540,8 +690,187 @@ export class MemStorage implements IStorage {
   }
   
   // User methods
+    // Role management methods
+  async getAllRoles(): Promise<Role[]> {
+    return Array.from(this.roles.values());
+  }
+
+  async getRole(id: number): Promise<Role | undefined> {
+    return this.roles.get(id);
+  }
+
+  async createRole(role: InsertRole): Promise<Role> {
+    const id = this.roleIdCounter++;
+    const timestamp = new Date();
+    const newRole: Role = {
+      id,
+      createdAt: timestamp,
+      updatedAt: timestamp,
+      ...role,
+    };
+    this.roles.set(id, newRole);
+    return newRole;
+  }
+
+  async updateRole(id: number, roleData: Partial<InsertRole>): Promise<Role | undefined> {
+    const role = this.roles.get(id);
+    if (!role) return undefined;
+
+    const updatedRole: Role = {
+      ...role,
+      ...roleData,
+      updatedAt: new Date(),
+    };
+    this.roles.set(id, updatedRole);
+    return updatedRole;
+  }
+
+  async deleteRole(id: number): Promise<boolean> {
+    return this.roles.delete(id);
+  }
+
+  // Permission management methods
+  async getAllPermissions(): Promise<Permission[]> {
+    return Array.from(this.permissions.values());
+  }
+
+  async getPermission(id: number): Promise<Permission | undefined> {
+    return this.permissions.get(id);
+  }
+
+  async createPermission(permission: InsertPermission): Promise<Permission> {
+    const id = this.permissionIdCounter++;
+    const timestamp = new Date();
+    const newPermission: Permission = {
+      id,
+      createdAt: timestamp,
+      updatedAt: timestamp,
+      ...permission,
+    };
+    this.permissions.set(id, newPermission);
+    return newPermission;
+  }
+
+  async updatePermission(id: number, permissionData: Partial<InsertPermission>): Promise<Permission | undefined> {
+    const permission = this.permissions.get(id);
+    if (!permission) return undefined;
+
+    const updatedPermission: Permission = {
+      ...permission,
+      ...permissionData,
+      updatedAt: new Date(),
+    };
+    this.permissions.set(id, updatedPermission);
+    return updatedPermission;
+  }
+
+  async deletePermission(id: number): Promise<boolean> {
+    return this.permissions.delete(id);
+  }
+
+  // Role-Permission associations
+  async getRolePermissions(roleId: number): Promise<Permission[]> {
+    const rolePermissions = Array.from(this.rolePermissions.values())
+      .filter(rp => rp.roleId === roleId);
+    
+    return rolePermissions.map(rp => {
+      const permission = this.permissions.get(rp.permissionId);
+      if (!permission) throw new Error(`Permission ${rp.permissionId} not found`);
+      return permission;
+    });
+  }
+
+  async assignPermissionToRole(rolePermission: InsertRolePermission): Promise<RolePermission> {
+    const id = this.rolePermissionIdCounter++;
+    const timestamp = new Date();
+    const newRolePermission: RolePermission = {
+      id,
+      createdAt: timestamp,
+      ...rolePermission,
+    };
+    this.rolePermissions.set(id, newRolePermission);
+    return newRolePermission;
+  }
+
+  async removePermissionFromRole(roleId: number, permissionId: number): Promise<boolean> {
+    const rolePermission = Array.from(this.rolePermissions.values())
+      .find(rp => rp.roleId === roleId && rp.permissionId === permissionId);
+    
+    if (!rolePermission) return false;
+    return this.rolePermissions.delete(rolePermission.id);
+  }
+
+  // Subscription plans
+  async getAllSubscriptionPlans(): Promise<SubscriptionPlan[]> {
+    return Array.from(this.subscriptionPlans.values());
+  }
+
+  async getSubscriptionPlan(id: number): Promise<SubscriptionPlan | undefined> {
+    return this.subscriptionPlans.get(id);
+  }
+
+  async createSubscriptionPlan(plan: InsertSubscriptionPlan): Promise<SubscriptionPlan> {
+    const id = this.subscriptionPlanIdCounter++;
+    const timestamp = new Date();
+    const newPlan: SubscriptionPlan = {
+      id,
+      createdAt: timestamp,
+      updatedAt: timestamp,
+      ...plan,
+    };
+    this.subscriptionPlans.set(id, newPlan);
+    return newPlan;
+  }
+
+  async updateSubscriptionPlan(id: number, planData: Partial<InsertSubscriptionPlan>): Promise<SubscriptionPlan | undefined> {
+    const plan = this.subscriptionPlans.get(id);
+    if (!plan) return undefined;
+
+    const updatedPlan: SubscriptionPlan = {
+      ...plan,
+      ...planData,
+      updatedAt: new Date(),
+    };
+    this.subscriptionPlans.set(id, updatedPlan);
+    return updatedPlan;
+  }
+
+  async deleteSubscriptionPlan(id: number): Promise<boolean> {
+    return this.subscriptionPlans.delete(id);
+  }
+
+  // Extended user methods
+  async getAllUsers(): Promise<User[]> {
+    return Array.from(this.users.values());
+  }
+
+  async getUsersByRole(role: string): Promise<User[]> {
+    return Array.from(this.users.values())
+      .filter(user => user.role === role);
+  }
+
+  async getUsersByOrganization(organizationId: number): Promise<User[]> {
+    return Array.from(this.users.values())
+      .filter(user => user.organizationId === organizationId);
+  }
+  
   async getUser(id: number): Promise<User | undefined> {
     return this.users.get(id);
+  }
+
+  async updateUserStripeInfo(userId: number, stripeInfo: { customerId: string, subscriptionId: string }): Promise<User | undefined> {
+    const user = await this.getUser(userId);
+    if (!user) return undefined;
+
+    const updatedUser: User = {
+      ...user,
+      stripeCustomerId: stripeInfo.customerId,
+      stripeSubscriptionId: stripeInfo.subscriptionId,
+      updatedAt: new Date(),
+    };
+    
+    this.users.set(userId, updatedUser);
+    return updatedUser;
   }
   
   async getUserByUsername(username: string): Promise<User | undefined> {
