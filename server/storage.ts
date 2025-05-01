@@ -161,6 +161,11 @@ export class DatabaseStorage implements IStorage {
     return role;
   }
 
+  async getRoleByName(name: string): Promise<Role | undefined> {
+    const [role] = await db.select().from(roles).where(eq(roles.name, name));
+    return role;
+  }
+
   async getAllRoles(): Promise<Role[]> {
     return await db.select().from(roles);
   }
@@ -272,78 +277,85 @@ export class DatabaseStorage implements IStorage {
 
   // Host Employer methods
   async getHostEmployer(id: number): Promise<HostEmployer | undefined> {
-    const query = `
-      SELECT 
-        id, name, industry, contact_person as "contactPerson", 
-        email, phone, address, status, 
-        safety_rating as "safetyRating", 
-        compliance_status as "complianceStatus", 
-        notes, is_gto as "isGto", 
-        labour_hire_licence_no as "labourHireLicenceNo"
-      FROM host_employers
-      WHERE id = $1
-    `;
+    const [hostEmployer] = await db
+      .select({
+        id: hostEmployers.id,
+        name: hostEmployers.name,
+        industry: hostEmployers.industry,
+        contactPerson: sql<string>`contact_person`,
+        email: hostEmployers.email,
+        phone: hostEmployers.phone,
+        address: hostEmployers.address,
+        status: hostEmployers.status,
+        safetyRating: sql<number>`safety_rating`,
+        complianceStatus: sql<string>`compliance_status`,
+        notes: hostEmployers.notes,
+        isGto: sql<boolean>`is_gto`,
+        labourHireLicenceNo: sql<string>`labour_hire_licence_no`
+      })
+      .from(hostEmployers)
+      .where(eq(hostEmployers.id, id));
     
-    const result = await db.execute(sql`${sql.raw(query)}`, [id]);
-    return result.rows.length > 0 ? result.rows[0] as HostEmployer : undefined;
+    return hostEmployer as HostEmployer | undefined;
   }
 
   async getAllHostEmployers(): Promise<HostEmployer[]> {
-    const query = `
-      SELECT 
-        id, name, industry, contact_person as "contactPerson", 
-        email, phone, address, status, 
-        safety_rating as "safetyRating", 
-        compliance_status as "complianceStatus", 
-        notes, is_gto as "isGto", 
-        labour_hire_licence_no as "labourHireLicenceNo"
-      FROM host_employers
-      ORDER BY name ASC
-    `;
+    const employers = await db
+      .select({
+        id: hostEmployers.id,
+        name: hostEmployers.name,
+        industry: hostEmployers.industry,
+        contactPerson: sql<string>`contact_person`,
+        email: hostEmployers.email,
+        phone: hostEmployers.phone,
+        address: hostEmployers.address,
+        status: hostEmployers.status,
+        safetyRating: sql<number>`safety_rating`,
+        complianceStatus: sql<string>`compliance_status`,
+        notes: hostEmployers.notes,
+        isGto: sql<boolean>`is_gto`,
+        labourHireLicenceNo: sql<string>`labour_hire_licence_no`
+      })
+      .from(hostEmployers)
+      .orderBy(hostEmployers.name);
     
-    const result = await db.execute(sql`${sql.raw(query)}`);
-    return result.rows as HostEmployer[];
+    return employers as HostEmployer[];
   }
 
   async createHostEmployer(employer: InsertHostEmployer): Promise<HostEmployer> {
-    const mapped = {
-      name: employer.name,
-      industry: employer.industry,
-      contact_person: employer.contactPerson,
-      email: employer.email,
-      phone: employer.phone,
-      address: employer.address,
-      status: employer.status,
-      safety_rating: employer.safetyRating,
-      compliance_status: employer.complianceStatus,
-      notes: employer.notes,
-      is_gto: employer.isGto,
-      labour_hire_licence_no: employer.labourHireLicenceNo
-    };
+    const [newEmployer] = await db
+      .insert(hostEmployers)
+      .values({
+        name: employer.name,
+        industry: employer.industry,
+        contactPerson: sql<string>`contact_person`,
+        email: employer.email,
+        phone: employer.phone,
+        address: employer.address,
+        status: employer.status,
+        safetyRating: sql<number>`safety_rating`,
+        complianceStatus: sql<string>`compliance_status`,
+        notes: employer.notes,
+        isGto: sql<boolean>`is_gto`,
+        labourHireLicenceNo: sql<string>`labour_hire_licence_no`
+      })
+      .returning({
+        id: hostEmployers.id,
+        name: hostEmployers.name,
+        industry: hostEmployers.industry,
+        contactPerson: sql<string>`contact_person`,
+        email: hostEmployers.email,
+        phone: hostEmployers.phone,
+        address: hostEmployers.address,
+        status: hostEmployers.status,
+        safetyRating: sql<number>`safety_rating`,
+        complianceStatus: sql<string>`compliance_status`,
+        notes: hostEmployers.notes,
+        isGto: sql<boolean>`is_gto`,
+        labourHireLicenceNo: sql<string>`labour_hire_licence_no`
+      });
     
-    const query = `
-      INSERT INTO host_employers (
-        name, industry, contact_person, email, phone, address, 
-        status, safety_rating, compliance_status, notes, is_gto, labour_hire_licence_no
-      ) VALUES (
-        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12
-      ) RETURNING 
-        id, name, industry, contact_person as "contactPerson", 
-        email, phone, address, status, 
-        safety_rating as "safetyRating", 
-        compliance_status as "complianceStatus", 
-        notes, is_gto as "isGto", 
-        labour_hire_licence_no as "labourHireLicenceNo"
-    `;
-    
-    const values = [
-      mapped.name, mapped.industry, mapped.contact_person, mapped.email, 
-      mapped.phone, mapped.address, mapped.status, mapped.safety_rating, 
-      mapped.compliance_status, mapped.notes, mapped.is_gto, mapped.labour_hire_licence_no
-    ];
-    
-    const result = await db.execute(sql`${sql.raw(query)}`, values);
-    return result.rows[0] as HostEmployer;
+    return newEmployer as HostEmployer;
   }
 
   async updateHostEmployer(id: number, employer: Partial<InsertHostEmployer>): Promise<HostEmployer | undefined> {
