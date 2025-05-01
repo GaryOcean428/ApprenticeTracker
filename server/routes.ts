@@ -20,6 +20,7 @@ import { z } from "zod";
 import { gtoComplianceRouter } from "./api/gto-compliance-routes";
 import { vetRouter } from "./api/vet-routes";
 import { settingsRouter } from "./api/settings-routes";
+import { registerHostRoutes } from "./api/host-routes";
 import { eq, and } from "drizzle-orm";
 import { db } from "./db"; // Assuming db connection is defined here
 import { users, gtoOrganizations } from "@shared/schema";
@@ -31,6 +32,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/api/gto-compliance', gtoComplianceRouter);
   app.use('/api/vet', vetRouter);
   app.use('/api/settings', settingsRouter);
+  
+  // Register host employer routes
+  registerHostRoutes(app);
 
   // User Management Routes
   // Get all users
