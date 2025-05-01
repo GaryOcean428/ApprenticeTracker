@@ -61,6 +61,13 @@ export interface IStorage {
   updateSubscriptionPlan(id: number, plan: Partial<InsertSubscriptionPlan>): Promise<SubscriptionPlan | undefined>;
   deleteSubscriptionPlan(id: number): Promise<boolean>;
 
+  // Host Employer methods
+  getHostEmployer(id: number): Promise<HostEmployer | undefined>;
+  getAllHostEmployers(): Promise<HostEmployer[]>;
+  createHostEmployer(employer: InsertHostEmployer): Promise<HostEmployer>;
+  updateHostEmployer(id: number, employer: Partial<InsertHostEmployer>): Promise<HostEmployer | undefined>;
+  deleteHostEmployer(id: number): Promise<boolean>;
+
   // Activity Log methods
   createActivityLog(log: InsertActivityLog): Promise<ActivityLog>;
   getActivityLogs(options?: { userId?: number, relatedTo?: string, relatedId?: number, limit?: number }): Promise<ActivityLog[]>;
@@ -260,6 +267,35 @@ export class DatabaseStorage implements IStorage {
 
   async deleteSubscriptionPlan(id: number): Promise<boolean> {
     const result = await db.delete(subscriptionPlans).where(eq(subscriptionPlans.id, id));
+    return result.rowCount > 0;
+  }
+
+  // Host Employer methods
+  async getHostEmployer(id: number): Promise<HostEmployer | undefined> {
+    const [employer] = await db.select().from(hostEmployers).where(eq(hostEmployers.id, id));
+    return employer;
+  }
+
+  async getAllHostEmployers(): Promise<HostEmployer[]> {
+    return await db.select().from(hostEmployers).orderBy(asc(hostEmployers.name));
+  }
+
+  async createHostEmployer(employer: InsertHostEmployer): Promise<HostEmployer> {
+    const [createdEmployer] = await db.insert(hostEmployers).values(employer).returning();
+    return createdEmployer;
+  }
+
+  async updateHostEmployer(id: number, employer: Partial<InsertHostEmployer>): Promise<HostEmployer | undefined> {
+    const [updatedEmployer] = await db
+      .update(hostEmployers)
+      .set({ ...employer, updatedAt: new Date() })
+      .where(eq(hostEmployers.id, id))
+      .returning();
+    return updatedEmployer;
+  }
+
+  async deleteHostEmployer(id: number): Promise<boolean> {
+    const result = await db.delete(hostEmployers).where(eq(hostEmployers.id, id));
     return result.rowCount > 0;
   }
 
