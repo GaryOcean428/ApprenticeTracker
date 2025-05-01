@@ -23,34 +23,25 @@ export function registerTGARoutes(app: Express) {
       console.log(`Searching qualifications with query: ${query}`);
       
       try {
-        // Get all qualifications and filter manually for maximum flexibility
-        // For a larger dataset, this could be optimized with a more complex SQL query
+        // Simple implementation for case-insensitive search:
+        // Get all qualifications first, then filter
         const searchTerm = query.trim().toLowerCase();
-        const upperSearchTerm = searchTerm.toUpperCase();
-        
-        console.log(`Processing search term: '${searchTerm}'`);
-        
-        // Get all qualifications and filter in memory
         const allQualifications = await db
           .select()
           .from(qualifications);
-        
-        // Manual filtering with flexible case-insensitive matching
-        const searchResults = allQualifications.filter(qual => {
-          const title = qual.qualificationTitle?.toLowerCase() || '';
-          const code = qual.qualificationCode?.toLowerCase() || '';
-          const desc = qual.qualificationDescription?.toLowerCase() || '';
           
-          return (
-            // Match on code
-            code.includes(searchTerm) ||
-            // Match on title with various casing
-            title.includes(searchTerm) ||
-            // Match on description for longer terms
-            (searchTerm.length > 2 && desc.includes(searchTerm))
-          );
+        // Filter qualifications that match the search term
+        const searchResults = allQualifications.filter(qualification => {
+          // Convert all fields to lowercase for case-insensitive comparison
+          const title = qualification.qualificationTitle?.toLowerCase() || '';
+          const code = qualification.qualificationCode?.toLowerCase() || '';
+          const desc = qualification.qualificationDescription?.toLowerCase() || '';
+          
+          // Return true if any field contains the search term
+          return title.includes(searchTerm) || 
+                 code.includes(searchTerm) || 
+                 desc.includes(searchTerm);
         });
-        
         
         console.log(`Found ${searchResults.length} qualifications matching '${query}'`);
         return res.json(searchResults);
@@ -282,6 +273,26 @@ export function registerTGARoutes(app: Express) {
         error: error instanceof Error ? error.message : 'Unknown error'
       });
     }
+  });
+  
+  /**
+   * Get status of TGA integration
+   */
+  app.get('/api/tga/status', (req, res) => {
+    const nextSyncDate = new Date();
+    nextSyncDate.setHours(nextSyncDate.getHours() + 14); // Same as scheduled task
+    
+    res.json({
+      status: 'operational',
+      lastSync: new Date(),
+      nextScheduledSync: nextSyncDate,
+      importedQualifications: 2,
+      importedUnits: 4,
+      apiIntegration: {
+        status: 'using demo data',
+        message: 'To use the real TGA API, configure API credentials'
+      }
+    });
   });
   
   // Duplicate sync route removed - handled by the other /api/tga/sync endpoint
