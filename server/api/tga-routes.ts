@@ -23,28 +23,34 @@ export function registerTGARoutes(app: Express) {
       console.log(`Searching qualifications with query: ${query}`);
       
       try {
-        // Make search more effective by handling common cases
-        const searchTerm = query.trim();
+        // Get all qualifications and filter manually for maximum flexibility
+        // For a larger dataset, this could be optimized with a more complex SQL query
+        const searchTerm = query.trim().toLowerCase();
+        const upperSearchTerm = searchTerm.toUpperCase();
         
         console.log(`Processing search term: '${searchTerm}'`);
         
-        const searchResults = await db
+        // Get all qualifications and filter in memory
+        const allQualifications = await db
           .select()
-          .from(qualifications)
-          .where(
-            or(
-              // Search by code (usually uppercase)
-              like(qualifications.qualificationCode, `%${searchTerm.toUpperCase()}%`),
-              
-              // Case-insensitive search on title
-              like(db.sql`UPPER(${qualifications.qualificationTitle})`, `%${searchTerm.toUpperCase()}%`),
-              
-              // Search for terms within the description
-              searchTerm.length > 3 
-                ? like(db.sql`UPPER(${qualifications.qualificationDescription})`, `%${searchTerm.toUpperCase()}%`)
-                : db.sql`1=0`
-            )
+          .from(qualifications);
+        
+        // Manual filtering with flexible case-insensitive matching
+        const searchResults = allQualifications.filter(qual => {
+          const title = qual.qualificationTitle?.toLowerCase() || '';
+          const code = qual.qualificationCode?.toLowerCase() || '';
+          const desc = qual.qualificationDescription?.toLowerCase() || '';
+          
+          return (
+            // Match on code
+            code.includes(searchTerm) ||
+            // Match on title with various casing
+            title.includes(searchTerm) ||
+            // Match on description for longer terms
+            (searchTerm.length > 2 && desc.includes(searchTerm))
           );
+        });
+        
         
         console.log(`Found ${searchResults.length} qualifications matching '${query}'`);
         return res.json(searchResults);
