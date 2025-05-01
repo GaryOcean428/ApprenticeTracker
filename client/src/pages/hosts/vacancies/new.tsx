@@ -235,7 +235,7 @@ const NewVacancyPage = () => {
                         <FormItem>
                           <FormLabel>Host Employer <span className="text-destructive">*</span></FormLabel>
                           <Select
-                            value={field.value?.toString() || ""}
+                            value={field.value?.toString() || undefined}
                             onValueChange={field.onChange}
                           >
                             <FormControl>
@@ -537,7 +537,7 @@ const NewVacancyPage = () => {
                       <div>
                         <FormLabel>Award</FormLabel>
                         <Select
-                          value={selectedAward?.toString() || ""}
+                          value={selectedAward?.toString() || undefined}
                           onValueChange={(value) => setSelectedAward(Number(value))}
                         >
                           <SelectTrigger>
