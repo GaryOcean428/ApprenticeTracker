@@ -323,82 +323,77 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createHostEmployer(employer: InsertHostEmployer): Promise<HostEmployer> {
-    const [newEmployer] = await db
-      .insert(hostEmployers)
-      .values({
-        name: employer.name,
-        industry: employer.industry,
-        contactPerson: sql<string>`contact_person`,
-        email: employer.email,
-        phone: employer.phone,
-        address: employer.address,
-        status: employer.status,
-        safetyRating: sql<number>`safety_rating`,
-        complianceStatus: sql<string>`compliance_status`,
-        notes: employer.notes,
-        isGto: sql<boolean>`is_gto`,
-        labourHireLicenceNo: sql<string>`labour_hire_licence_no`
-      })
-      .returning({
-        id: hostEmployers.id,
-        name: hostEmployers.name,
-        industry: hostEmployers.industry,
-        contactPerson: sql<string>`contact_person`,
-        email: hostEmployers.email,
-        phone: hostEmployers.phone,
-        address: hostEmployers.address,
-        status: hostEmployers.status,
-        safetyRating: sql<number>`safety_rating`,
-        complianceStatus: sql<string>`compliance_status`,
-        notes: hostEmployers.notes,
-        isGto: sql<boolean>`is_gto`,
-        labourHireLicenceNo: sql<string>`labour_hire_licence_no`
-      });
-    
-    return newEmployer as HostEmployer;
-  }
-
-  async updateHostEmployer(id: number, employer: Partial<InsertHostEmployer>): Promise<HostEmployer | undefined> {
-    // Map the camelCase properties to snake_case for the database
-    const updateMap: Record<string, any> = {};
-    
-    if (employer.name !== undefined) updateMap.name = employer.name;
-    if (employer.industry !== undefined) updateMap.industry = employer.industry;
-    if (employer.contactPerson !== undefined) updateMap.contact_person = employer.contactPerson;
-    if (employer.email !== undefined) updateMap.email = employer.email;
-    if (employer.phone !== undefined) updateMap.phone = employer.phone;
-    if (employer.address !== undefined) updateMap.address = employer.address;
-    if (employer.status !== undefined) updateMap.status = employer.status;
-    if (employer.safetyRating !== undefined) updateMap.safety_rating = employer.safetyRating;
-    if (employer.complianceStatus !== undefined) updateMap.compliance_status = employer.complianceStatus;
-    if (employer.notes !== undefined) updateMap.notes = employer.notes;
-    if (employer.isGto !== undefined) updateMap.is_gto = employer.isGto;
-    if (employer.labourHireLicenceNo !== undefined) updateMap.labour_hire_licence_no = employer.labourHireLicenceNo;
-    
-    // If no fields to update, return the existing record
-    if (Object.keys(updateMap).length === 0) {
-      return await this.getHostEmployer(id);
-    }
-    
-    // Build the SET clause for the SQL query
-    const setClauses = Object.keys(updateMap).map((key, index) => `${key} = $${index + 2}`);
-    
-    const query = `
-      UPDATE host_employers
-      SET ${setClauses.join(', ')}
-      WHERE id = $1
-      RETURNING 
+    // Use SQL template literals for safer parameter handling
+    const result = await db.execute(sql`
+      INSERT INTO host_employers (
+        name, industry, contact_person, email, phone, address, 
+        status, safety_rating, compliance_status, notes
+      ) VALUES (
+        ${employer.name}, 
+        ${employer.industry}, 
+        ${employer.contactPerson}, 
+        ${employer.email}, 
+        ${employer.phone || null}, 
+        ${employer.address || null}, 
+        ${employer.status || 'active'}, 
+        ${employer.safetyRating || null}, 
+        ${employer.complianceStatus || 'pending'}, 
+        ${employer.notes || null}
+      ) RETURNING 
         id, name, industry, contact_person as "contactPerson", 
         email, phone, address, status, 
         safety_rating as "safetyRating", 
         compliance_status as "complianceStatus", 
         notes, is_gto as "isGto", 
         labour_hire_licence_no as "labourHireLicenceNo"
-    `;
+    `);
     
-    const values = [id, ...Object.values(updateMap)];
+    if (result.rows.length === 0) {
+      throw new Error('Failed to create host employer');
+    }
+    return result.rows[0] as HostEmployer;
+  }
+
+  async updateHostEmployer(id: number, employer: Partial<InsertHostEmployer>): Promise<HostEmployer | undefined> {
+    // If no fields to update, return the existing record
+    if (Object.keys(employer).length === 0) {
+      return await this.getHostEmployer(id);
+    }
     
-    const result = await db.execute(sql`${sql.raw(query)}`, values);
+    // Build a dynamic SQL query with included fields
+    let query = sql`UPDATE host_employers SET `;
+    let setClauses: SQL[] = [];
+    
+    if (employer.name !== undefined) setClauses.push(sql`name = ${employer.name}`);
+    if (employer.industry !== undefined) setClauses.push(sql`industry = ${employer.industry}`);
+    if (employer.contactPerson !== undefined) setClauses.push(sql`contact_person = ${employer.contactPerson}`);
+    if (employer.email !== undefined) setClauses.push(sql`email = ${employer.email}`);
+    if (employer.phone !== undefined) setClauses.push(sql`phone = ${employer.phone}`);
+    if (employer.address !== undefined) setClauses.push(sql`address = ${employer.address}`);
+    if (employer.status !== undefined) setClauses.push(sql`status = ${employer.status}`);
+    if (employer.safetyRating !== undefined) setClauses.push(sql`safety_rating = ${employer.safetyRating}`);
+    if (employer.complianceStatus !== undefined) setClauses.push(sql`compliance_status = ${employer.complianceStatus}`);
+    if (employer.notes !== undefined) setClauses.push(sql`notes = ${employer.notes}`);
+    if (employer.isGto !== undefined) setClauses.push(sql`is_gto = ${employer.isGto}`);
+    if (employer.labourHireLicenceNo !== undefined) setClauses.push(sql`labour_hire_licence_no = ${employer.labourHireLicenceNo}`);
+    
+    // Join the SET clauses
+    for (let i = 0; i < setClauses.length; i++) {
+      query = sql`${query}${setClauses[i]}`;
+      if (i < setClauses.length - 1) {
+        query = sql`${query}, `;
+      }
+    }
+    
+    query = sql`${query} WHERE id = ${id} RETURNING 
+      id, name, industry, contact_person as "contactPerson", 
+      email, phone, address, status, 
+      safety_rating as "safetyRating", 
+      compliance_status as "complianceStatus", 
+      notes, is_gto as "isGto", 
+      labour_hire_licence_no as "labourHireLicenceNo"`;
+    
+    const result = await db.execute(query);
     return result.rows.length > 0 ? result.rows[0] as HostEmployer : undefined;
   }
 
