@@ -141,12 +141,9 @@ export async function seedDatabase() {
         startDate: formatDate(new Date("2023-01-15")),
         endDate: formatDate(new Date("2026-01-15")),
         notes: "Excellent progress in technical skills",
-        // Australian-specific fields
         aqfLevel: "Certificate III",
         apprenticeshipYear: 2,
-        gtoEnrolled: true,
-        uniqueStudentIdentifier: "USI123456789",
-        atSchoolFlag: false
+        gtoEnrolled: true
       },
       {
         userId: null,
@@ -162,12 +159,9 @@ export async function seedDatabase() {
         startDate: formatDate(new Date("2023-03-10")),
         endDate: formatDate(new Date("2026-03-10")),
         notes: "Needs improvement in time management",
-        // Australian-specific fields
         aqfLevel: "Certificate III",
         apprenticeshipYear: 1,
-        gtoEnrolled: true,
-        uniqueStudentIdentifier: "USI987654321",
-        atSchoolFlag: false
+        gtoEnrolled: true
       },
       {
         userId: null,
@@ -183,12 +177,9 @@ export async function seedDatabase() {
         startDate: formatDate(new Date("2022-09-05")),
         endDate: formatDate(new Date("2025-09-05")),
         notes: "Excellent technical skills",
-        // Australian-specific fields
         aqfLevel: "Certificate IV",
         apprenticeshipYear: 3,
-        gtoEnrolled: true,
-        uniqueStudentIdentifier: "USI555555555",
-        atSchoolFlag: false
+        gtoEnrolled: true
       },
       {
         userId: null,
@@ -204,20 +195,36 @@ export async function seedDatabase() {
         startDate: formatDate(new Date("2023-02-20")),
         endDate: formatDate(new Date("2026-02-20")),
         notes: "Currently on hold due to personal reasons",
-        // Australian-specific fields
         aqfLevel: "Certificate III",
         apprenticeshipYear: 1,
-        gtoEnrolled: false,
-        uniqueStudentIdentifier: "USI777777777",
-        atSchoolFlag: true
+        gtoEnrolled: false
       }
     ];
     
     const createdApprentices = [];
     for (const apprentice of apprentices) {
-      const created = await storage.createApprentice(apprentice);
-      createdApprentices.push(created);
-      console.log("Apprentice created:", created.id);
+      try {
+        // Try to find existing apprentice by email
+        const existingApprentices = await db.execute(`
+          SELECT id FROM apprentices WHERE email = $1
+        `, [apprentice.email]);
+        
+        if (existingApprentices.rows.length > 0) {
+          console.log(`Apprentice with email ${apprentice.email} already exists with ID:`, existingApprentices.rows[0].id);
+          const existingId = existingApprentices.rows[0].id;
+          
+          // Retrieve the full apprentice data
+          const [existingApprentice] = await db.select().from(apprentices).where(eq(apprentices.id, existingId));
+          createdApprentices.push(existingApprentice);
+        } else {
+          const created = await storage.createApprentice(apprentice);
+          createdApprentices.push(created);
+          console.log("Apprentice created:", created.id);
+        }
+      } catch (error) {
+        console.error("Error creating apprentice:", error);
+        // Continue with the next apprentice even if this one fails
+      }
     }
     
     // Add sample host employers

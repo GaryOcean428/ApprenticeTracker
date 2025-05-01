@@ -124,22 +124,11 @@ export const apprentices = pgTable("apprentices", {
   startDate: date("start_date"),
   endDate: date("end_date"),
   notes: text("notes"),
-  // AVETMISS & Fair Work Fields
-  clientIdentifierApprenticeships: text("client_identifier_apprenticeships").unique(),  // AVETMISS unique identifier
-  uniqueStudentIdentifier: text("unique_student_identifier"),      // USI for VET tracking
-  highestSchoolLevelCompleted: text("highest_school_level_completed"), // e.g. 'Year 12'
-  indigenousStatus: text("indigenous_status"),                    // For demographic reporting
-  languageIdentifier: text("language_identifier"),                // Based on ASCL standards
-  countryOfBirth: text("country_of_birth"),                       // Based on SACC standards
-  disabilityFlag: boolean("disability_flag").default(false),      // For support requirements
   // AQF & GTO fields
   aqfLevel: text("aqf_level"),                                   // e.g. 'Certificate III', 'Diploma'
   apprenticeshipYear: integer("apprenticeship_year"),            // Tracks which year of apprenticeship
   gtoEnrolled: boolean("gto_enrolled").default(false),           // Flag if placed via a GTO
   gtoId: integer("gto_id"),                                      // Reference to GTO organization
-  atSchoolFlag: boolean("at_school_flag").default(false),        // Indicates if still at school
-  schoolLevelIdentifier: text("school_level_identifier"),        // Current school level if applicable
-  schoolBasedFlag: boolean("school_based_flag").default(false),  // Indicates school-based apprenticeship
 });
 
 export const insertApprenticeSchema = createInsertSchema(apprentices).omit({

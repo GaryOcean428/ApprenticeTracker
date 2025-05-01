@@ -266,6 +266,8 @@ const UserManagement = () => {
                     <TableHead>Name</TableHead>
                     <TableHead>Email</TableHead>
                     <TableHead>Role</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Subscription</TableHead>
                     <TableHead>Organization</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
@@ -273,7 +275,7 @@ const UserManagement = () => {
                 <TableBody>
                   {isLoadingUsers ? (
                     <TableRow>
-                      <TableCell colSpan={6} className="text-center py-8">
+                      <TableCell colSpan={8} className="text-center py-8">
                         Loading users...
                       </TableCell>
                     </TableRow>
@@ -288,7 +290,7 @@ const UserManagement = () => {
                     ))
                   ) : (
                     <TableRow>
-                      <TableCell colSpan={6} className="text-center py-8">
+                      <TableCell colSpan={8} className="text-center py-8">
                         No users found. Add a new user to get started.
                       </TableCell>
                     </TableRow>
