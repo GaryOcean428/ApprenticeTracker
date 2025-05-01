@@ -48,6 +48,12 @@ interface UserRowProps {
 }
 
 const UserRow = ({ user, onEdit, onDelete }: UserRowProps) => {
+  // Format subscription end date if available
+  const formatDate = (dateString?: string | Date | null) => {
+    if (!dateString) return 'N/A';
+    return new Date(dateString).toLocaleDateString();
+  };
+
   return (
     <TableRow key={user.id}>
       <TableCell className="font-medium">{user.username}</TableCell>
@@ -59,6 +65,38 @@ const UserRow = ({ user, onEdit, onDelete }: UserRowProps) => {
                'outline'}>
           {user.role}
         </Badge>
+      </TableCell>
+      <TableCell>
+        {user.isActive ? (
+          <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
+            Active
+          </Badge>
+        ) : (
+          <Badge variant="destructive">
+            Inactive
+          </Badge>
+        )}
+      </TableCell>
+      <TableCell>
+        {user.role === 'developer' ? (
+          <div className="flex flex-col">
+            <span className="text-sm font-medium">Always Active</span>
+            <span className="text-xs text-muted-foreground">Developer Account</span>
+          </div>
+        ) : user.subscriptionStatus ? (
+          <div className="flex flex-col">
+            <span className={`text-sm font-medium ${user.subscriptionStatus === 'active' ? 'text-green-600' : 'text-amber-600'}`}>
+              {user.subscriptionStatus.charAt(0).toUpperCase() + user.subscriptionStatus.slice(1)}
+            </span>
+            {user.subscriptionEndsAt && (
+              <span className="text-xs text-muted-foreground">
+                {user.subscriptionStatus === 'active' ? 'Expires' : 'Expired'}: {formatDate(user.subscriptionEndsAt)}
+              </span>
+            )}
+          </div>
+        ) : (
+          <span className="text-sm text-muted-foreground">No subscription</span>
+        )}
       </TableCell>
       <TableCell>
         {user.organizationId ? user.organizationId : 'Platform-wide'}
