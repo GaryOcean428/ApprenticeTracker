@@ -1,1797 +1,519 @@
-import {
-  users, User, InsertUser,
-  roles, Role, InsertRole,
-  permissions, Permission, InsertPermission,
-  rolePermissions, RolePermission, InsertRolePermission,
-  subscriptionPlans, SubscriptionPlan, InsertSubscriptionPlan,
-  apprentices, Apprentice, InsertApprentice,
-  hostEmployers, HostEmployer, InsertHostEmployer,
-  trainingContracts, TrainingContract, InsertTrainingContract,
-  placements, Placement, InsertPlacement,
-  documents, Document, InsertDocument,
-  complianceRecords, ComplianceRecord, InsertComplianceRecord,
-  timesheets, Timesheet, InsertTimesheet,
-  timesheetDetails, TimesheetDetail, InsertTimesheetDetail,
-  activityLogs, ActivityLog, InsertActivityLog,
-  tasks, Task, InsertTask
+import { 
+  roles, permissions, rolePermissions, subscriptionPlans, users, 
+  apprentices, hostEmployers, trainingContracts, placements, 
+  documents, complianceRecords, timesheets, timesheetDetails, 
+  activityLogs, tasks,
+  type Role, type InsertRole,
+  type Permission, type InsertPermission,
+  type RolePermission, type InsertRolePermission,
+  type User, type InsertUser,
+  type SubscriptionPlan, type InsertSubscriptionPlan,
+  type Apprentice, type InsertApprentice,
+  type HostEmployer, type InsertHostEmployer,
+  type TrainingContract, type InsertTrainingContract,
+  type Placement, type InsertPlacement,
+  type Document, type InsertDocument,
+  type ComplianceRecord, type InsertComplianceRecord,
+  type Timesheet, type InsertTimesheet,
+  type TimesheetDetail, type InsertTimesheetDetail,
+  type ActivityLog, type InsertActivityLog,
+  type Task, type InsertTask
 } from "@shared/schema";
+import { db } from "./db";
+import { eq, and, or, desc, asc, sql } from "drizzle-orm";
+import session from "express-session";
+import memorystore from "memorystore";
 
-// Storage interface with CRUD operations
+const MemoryStore = memorystore(session);
+
 export interface IStorage {
-  // Roles
-  getAllRoles(): Promise<Role[]>;
-  getRole(id: number): Promise<Role | undefined>;
-  getRoleByName(name: string): Promise<Role | undefined>;
-  createRole(role: InsertRole): Promise<Role>;
-  updateRole(id: number, role: Partial<InsertRole>): Promise<Role | undefined>;
-  deleteRole(id: number): Promise<boolean>;
+  // Session store
+  sessionStore: session.Store;
 
-  // Permissions
-  getAllPermissions(): Promise<Permission[]>;
-  getPermission(id: number): Promise<Permission | undefined>;
-  createPermission(permission: InsertPermission): Promise<Permission>;
-  updatePermission(id: number, permission: Partial<InsertPermission>): Promise<Permission | undefined>;
-  deletePermission(id: number): Promise<boolean>;
-
-  // Role Permissions
-  getRolePermissions(roleId: number): Promise<Permission[]>;
-  assignPermissionToRole(rolePermission: InsertRolePermission): Promise<RolePermission>;
-  removePermissionFromRole(roleId: number, permissionId: number): Promise<boolean>;
-  
-  // Subscription Plans
-  getAllSubscriptionPlans(): Promise<SubscriptionPlan[]>;
-  getSubscriptionPlan(id: number): Promise<SubscriptionPlan | undefined>;
-  createSubscriptionPlan(plan: InsertSubscriptionPlan): Promise<SubscriptionPlan>;
-  updateSubscriptionPlan(id: number, plan: Partial<InsertSubscriptionPlan>): Promise<SubscriptionPlan | undefined>;
-  deleteSubscriptionPlan(id: number): Promise<boolean>;
-  
-  // Users
-  getAllUsers(): Promise<User[]>;
+  // User methods
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
+  getAllUsers(): Promise<User[]>;
   getUsersByRole(role: string): Promise<User[]>;
   getUsersByOrganization(organizationId: number): Promise<User[]>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: number, user: Partial<InsertUser>): Promise<User | undefined>;
   deleteUser(id: number): Promise<boolean>;
-  updateUserStripeInfo(userId: number, stripeInfo: { customerId: string, subscriptionId: string }): Promise<User | undefined>;
-  
-  // Apprentices
-  getAllApprentices(): Promise<Apprentice[]>;
-  getApprentice(id: number): Promise<Apprentice | undefined>;
-  createApprentice(apprentice: InsertApprentice): Promise<Apprentice>;
-  updateApprentice(id: number, apprentice: Partial<InsertApprentice>): Promise<Apprentice | undefined>;
-  deleteApprentice(id: number): Promise<boolean>;
-  
-  // Host Employers
-  getAllHostEmployers(): Promise<HostEmployer[]>;
-  getHostEmployer(id: number): Promise<HostEmployer | undefined>;
-  createHostEmployer(hostEmployer: InsertHostEmployer): Promise<HostEmployer>;
-  updateHostEmployer(id: number, hostEmployer: Partial<InsertHostEmployer>): Promise<HostEmployer | undefined>;
-  deleteHostEmployer(id: number): Promise<boolean>;
-  
-  // Training Contracts
-  getAllTrainingContracts(): Promise<TrainingContract[]>;
-  getTrainingContract(id: number): Promise<TrainingContract | undefined>;
-  getTrainingContractsByApprentice(apprenticeId: number): Promise<TrainingContract[]>;
-  createTrainingContract(contract: InsertTrainingContract): Promise<TrainingContract>;
-  updateTrainingContract(id: number, contract: Partial<InsertTrainingContract>): Promise<TrainingContract | undefined>;
-  deleteTrainingContract(id: number): Promise<boolean>;
-  
-  // Placements
-  getAllPlacements(): Promise<Placement[]>;
-  getPlacement(id: number): Promise<Placement | undefined>;
-  getPlacementsByApprentice(apprenticeId: number): Promise<Placement[]>;
-  getPlacementsByHost(hostEmployerId: number): Promise<Placement[]>;
-  createPlacement(placement: InsertPlacement): Promise<Placement>;
-  updatePlacement(id: number, placement: Partial<InsertPlacement>): Promise<Placement | undefined>;
-  deletePlacement(id: number): Promise<boolean>;
-  
-  // Documents
-  getAllDocuments(): Promise<Document[]>;
-  getDocument(id: number): Promise<Document | undefined>;
-  getDocumentsByRelation(relatedTo: string, relatedId: number): Promise<Document[]>;
-  createDocument(document: InsertDocument): Promise<Document>;
-  updateDocument(id: number, document: Partial<InsertDocument>): Promise<Document | undefined>;
-  deleteDocument(id: number): Promise<boolean>;
-  
-  // Compliance Records
-  getAllComplianceRecords(): Promise<ComplianceRecord[]>;
-  getComplianceRecord(id: number): Promise<ComplianceRecord | undefined>;
-  getComplianceRecordsByRelation(relatedTo: string, relatedId: number): Promise<ComplianceRecord[]>;
-  createComplianceRecord(record: InsertComplianceRecord): Promise<ComplianceRecord>;
-  updateComplianceRecord(id: number, record: Partial<InsertComplianceRecord>): Promise<ComplianceRecord | undefined>;
-  deleteComplianceRecord(id: number): Promise<boolean>;
-  
-  // Timesheets
-  getAllTimesheets(): Promise<Timesheet[]>;
-  getTimesheet(id: number): Promise<Timesheet | undefined>;
-  getTimesheetsByApprentice(apprenticeId: number): Promise<Timesheet[]>;
-  createTimesheet(timesheet: InsertTimesheet): Promise<Timesheet>;
-  updateTimesheet(id: number, timesheet: Partial<InsertTimesheet>): Promise<Timesheet | undefined>;
-  deleteTimesheet(id: number): Promise<boolean>;
-  
-  // Timesheet Details
-  getTimesheetDetails(timesheetId: number): Promise<TimesheetDetail[]>;
-  createTimesheetDetail(detail: InsertTimesheetDetail): Promise<TimesheetDetail>;
-  updateTimesheetDetail(id: number, detail: Partial<InsertTimesheetDetail>): Promise<TimesheetDetail | undefined>;
-  deleteTimesheetDetail(id: number): Promise<boolean>;
-  
-  // Activity Logs
-  getAllActivityLogs(): Promise<ActivityLog[]>;
-  getRecentActivityLogs(limit: number): Promise<ActivityLog[]>;
+
+  // Role methods
+  getRole(id: number): Promise<Role | undefined>;
+  getAllRoles(): Promise<Role[]>;
+  createRole(role: InsertRole): Promise<Role>;
+  updateRole(id: number, role: Partial<InsertRole>): Promise<Role | undefined>;
+  deleteRole(id: number): Promise<boolean>;
+
+  // Permission methods
+  getPermission(id: number): Promise<Permission | undefined>;
+  getAllPermissions(): Promise<Permission[]>;
+  getRolePermissions(roleId: number): Promise<Permission[]>;
+  assignPermissionToRole(rolePermission: InsertRolePermission): Promise<RolePermission>;
+  removePermissionFromRole(roleId: number, permissionId: number): Promise<boolean>;
+
+  // Subscription Plan methods
+  getSubscriptionPlan(id: number): Promise<SubscriptionPlan | undefined>;
+  getAllSubscriptionPlans(): Promise<SubscriptionPlan[]>;
+  createSubscriptionPlan(plan: InsertSubscriptionPlan): Promise<SubscriptionPlan>;
+  updateSubscriptionPlan(id: number, plan: Partial<InsertSubscriptionPlan>): Promise<SubscriptionPlan | undefined>;
+  deleteSubscriptionPlan(id: number): Promise<boolean>;
+
+  // Activity Log methods
   createActivityLog(log: InsertActivityLog): Promise<ActivityLog>;
-  
-  // Tasks
-  getAllTasks(): Promise<Task[]>;
-  getTask(id: number): Promise<Task | undefined>;
-  getTasksByAssignee(userId: number): Promise<Task[]>;
-  createTask(task: InsertTask): Promise<Task>;
-  updateTask(id: number, task: Partial<InsertTask>): Promise<Task | undefined>;
-  deleteTask(id: number): Promise<boolean>;
-  completeTask(id: number): Promise<Task | undefined>;
+  getActivityLogs(options?: { userId?: number, relatedTo?: string, relatedId?: number, limit?: number }): Promise<ActivityLog[]>;
+
+  // System Config methods - temporarily removed until schema is updated
+  // getSystemConfig(key: string): Promise<any | undefined>;
+  // getAllSystemConfigs(): Promise<any[]>;
+  // getSystemConfigsByCategory(category: string): Promise<any[]>;
+  // setSystemConfig(config: any): Promise<any>;
+  // deleteSystemConfig(key: string): Promise<boolean>;
+
+  // Integration methods - temporarily removed until schema is updated
+  // getIntegration(id: number): Promise<any | undefined>;
+  // getIntegrationByProvider(provider: string): Promise<any | undefined>;
+  // getAllIntegrations(): Promise<any[]>;
+  // createIntegration(integration: any): Promise<any>;
+  // updateIntegration(id: number, integration: any): Promise<any | undefined>;
+  // deleteIntegration(id: number): Promise<boolean>;
+  // testIntegrationConnection(id: number): Promise<{ success: boolean, message: string }>;
+  // syncIntegration(id: number): Promise<boolean>;
+
+  // Import/Export methods - temporarily removed until schema is updated
+  // getDataJob(id: number): Promise<any | undefined>;
+  // getAllDataJobs(options?: { type?: string, status?: string, limit?: number }): Promise<any[]>;
+  // createDataJob(job: any): Promise<any>;
+  // updateDataJobStatus(id: number, status: string, options?: { recordsProcessed?: number, errors?: any[] }): Promise<any | undefined>;
+  // deleteDataJob(id: number): Promise<boolean>;
+
+  // Custom Data View methods - temporarily removed until schema is updated
+  // getDataView(id: number): Promise<any | undefined>;
+  // getAllDataViews(userId?: number): Promise<any[]>;
+  // createDataView(view: any): Promise<any>;
+  // updateDataView(id: number, view: any): Promise<any | undefined>;
+  // deleteDataView(id: number): Promise<boolean>;
 }
 
-export class MemStorage implements IStorage {
-  // Core data stores
-  private roles: Map<number, Role>;
-  private permissions: Map<number, Permission>;
-  private rolePermissions: Map<number, RolePermission>;
-  private subscriptionPlans: Map<number, SubscriptionPlan>;
-  private users: Map<number, User>;
-  private apprentices: Map<number, Apprentice>;
-  private hostEmployers: Map<number, HostEmployer>;
-  private trainingContracts: Map<number, TrainingContract>;
-  private placements: Map<number, Placement>;
-  private documents: Map<number, Document>;
-  private complianceRecords: Map<number, ComplianceRecord>;
-  private timesheets: Map<number, Timesheet>;
-  private timesheetDetails: Map<number, TimesheetDetail>;
-  private activityLogs: Map<number, ActivityLog>;
-  private tasks: Map<number, Task>;
-  
-  // ID counters
-  private roleIdCounter: number;
-  private permissionIdCounter: number;
-  private rolePermissionIdCounter: number;
-  private subscriptionPlanIdCounter: number;
-  private userIdCounter: number;
-  private apprenticeIdCounter: number;
-  private hostEmployerIdCounter: number;
-  private contractIdCounter: number;
-  private placementIdCounter: number;
-  private documentIdCounter: number;
-  private complianceRecordIdCounter: number;
-  private timesheetIdCounter: number;
-  private timesheetDetailIdCounter: number;
-  private activityLogIdCounter: number;
-  private taskIdCounter: number;
-  
+export class DatabaseStorage implements IStorage {
+  sessionStore: session.Store;
+
   constructor() {
-    // Initialize data stores
-    this.roles = new Map();
-    this.permissions = new Map();
-    this.rolePermissions = new Map();
-    this.subscriptionPlans = new Map();
-    this.users = new Map();
-    this.apprentices = new Map();
-    this.hostEmployers = new Map();
-    this.trainingContracts = new Map();
-    this.placements = new Map();
-    this.documents = new Map();
-    this.complianceRecords = new Map();
-    this.timesheets = new Map();
-    this.timesheetDetails = new Map();
-    this.activityLogs = new Map();
-    this.tasks = new Map();
-    
-    // Initialize ID counters
-    this.roleIdCounter = 1;
-    this.permissionIdCounter = 1;
-    this.rolePermissionIdCounter = 1;
-    this.subscriptionPlanIdCounter = 1;
-    this.userIdCounter = 1;
-    this.apprenticeIdCounter = 1;
-    this.hostEmployerIdCounter = 1;
-    this.contractIdCounter = 1;
-    this.placementIdCounter = 1;
-    this.documentIdCounter = 1;
-    this.complianceRecordIdCounter = 1;
-    this.timesheetIdCounter = 1;
-    this.timesheetDetailIdCounter = 1;
-    this.activityLogIdCounter = 1;
-    this.taskIdCounter = 1;
-    
-    // Initialize with some sample data
-    this.initSampleData();
-  }
-  
-  private initSampleData() {
-    // Initialize sample roles and permissions
-    const developerRole: InsertRole = {
-      name: 'developer',
-      description: 'Platform-level access to all organizations and data',
-      isSystem: true
-    };
-    
-    const adminRole: InsertRole = {
-      name: 'admin',
-      description: 'Organization-level administrator access',
-      isSystem: true
-    };
-    
-    const fieldOfficerRole: InsertRole = {
-      name: 'field_officer',
-      description: 'Manages host employers and apprentices',
-      isSystem: true
-    };
-    
-    const hostEmployerRole: InsertRole = {
-      name: 'host_employer',
-      description: 'Access to manage assigned apprentices',
-      isSystem: true
-    };
-    
-    const apprenticeRole: InsertRole = {
-      name: 'apprentice',
-      description: 'Limited access to own profile and training',
-      isSystem: true
-    };
-    
-    const rtoRole: InsertRole = {
-      name: 'rto',
-      description: 'Access to update training results',
-      isSystem: true
-    };
-    
-    const developerRoleId = this.createRole(developerRole).id;
-    const adminRoleId = this.createRole(adminRole).id;
-    this.createRole(fieldOfficerRole);
-    this.createRole(hostEmployerRole);
-    this.createRole(apprenticeRole);
-    this.createRole(rtoRole);
-    
-    // Initialize permissions
-    // Define common CRUD permissions
-    const resources = ['user', 'role', 'permission', 'apprentice', 'host_employer', 'contract', 'placement', 'document', 'timesheet', 'task'];
-    const actions = ['create', 'read', 'update', 'delete'];
-    
-    for (const resource of resources) {
-      for (const action of actions) {
-        const permission: InsertPermission = {
-          name: `${action}_${resource}`,
-          description: `Can ${action} ${resource.replace('_', ' ')}s`,
-          category: resource,
-          action,
-          resource
-        };
-        this.createPermission(permission);
-      }
-    }
-    
-    // Add sample subscription plan
-    const basicPlan: InsertSubscriptionPlan = {
-      name: "Basic Plan",
-      description: "Basic access for small organizations",
-      price: 29.99,
-      billingCycle: "monthly",
-      features: { maxUsers: 5, maxApprentices: 20 },
-      isActive: true,
-      stripePriceId: "price_basic_monthly"
-    };
-    
-    const standardPlan: InsertSubscriptionPlan = {
-      name: "Standard Plan",
-      description: "Standard access for medium organizations",
-      price: 99.99,
-      billingCycle: "monthly",
-      features: { maxUsers: 20, maxApprentices: 100 },
-      isActive: true,
-      stripePriceId: "price_standard_monthly"
-    };
-    
-    const premiumPlan: InsertSubscriptionPlan = {
-      name: "Premium Plan",
-      description: "Premium access for large organizations",
-      price: 299.99,
-      billingCycle: "monthly",
-      features: { maxUsers: -1, maxApprentices: -1 },
-      isActive: true,
-      stripePriceId: "price_premium_monthly"
-    };
-    
-    this.createSubscriptionPlan(basicPlan);
-    this.createSubscriptionPlan(standardPlan);
-    this.createSubscriptionPlan(premiumPlan);
-
-    // Add sample users
-    const adminUser: InsertUser = {
-      username: "admin",
-      password: "admin123", // In a real app, this would be hashed
-      email: "admin@crm7.com",
-      firstName: "Admin",
-      lastName: "User",
-      role: "admin",
-      profileImage: "https://images.unsplash.com/photo-1531427186611-ecfd6d936c79?ixlib=rb-1.2.1&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=200&fit=max&ixid=eyJhcHBfaWQiOjE3Nzg0fQ"
-    };
-    this.createUser(adminUser);
-    
-    // Add sample apprentices
-    const apprentices: InsertApprentice[] = [
-      {
-        userId: 1,
-        firstName: "John",
-        lastName: "Smith",
-        email: "john.smith@example.com",
-        phone: "123-456-7890",
-        dateOfBirth: new Date("1995-05-15"),
-        trade: "Electrical",
-        status: "active",
-        profileImage: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80",
-        progress: 75,
-        startDate: new Date("2023-01-15"),
-        endDate: new Date("2026-01-15"),
-        notes: "Excellent progress in technical skills",
-      },
-      {
-        userId: null,
-        firstName: "Sarah",
-        lastName: "Johnson",
-        email: "sarah.j@example.com",
-        phone: "123-456-7891",
-        dateOfBirth: new Date("1998-08-22"),
-        trade: "Carpentry",
-        status: "active",
-        profileImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80",
-        progress: 45,
-        startDate: new Date("2023-03-10"),
-        endDate: new Date("2026-03-10"),
-        notes: "Needs improvement in time management",
-      },
-      {
-        userId: null,
-        firstName: "Michael",
-        lastName: "Chen",
-        email: "m.chen@example.com",
-        phone: "123-456-7892",
-        dateOfBirth: new Date("1997-11-30"),
-        trade: "IT Support",
-        status: "active",
-        profileImage: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80",
-        progress: 90,
-        startDate: new Date("2022-09-05"),
-        endDate: new Date("2025-09-05"),
-        notes: "Excellent technical skills",
-      },
-      {
-        userId: null,
-        firstName: "David",
-        lastName: "Wilson",
-        email: "d.wilson@example.com",
-        phone: "123-456-7893",
-        dateOfBirth: new Date("1996-04-12"),
-        trade: "Plumbing",
-        status: "on_hold",
-        profileImage: "https://images.unsplash.com/photo-1552374196-c4e7ffc6e126?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80",
-        progress: 30,
-        startDate: new Date("2023-02-20"),
-        endDate: new Date("2026-02-20"),
-        notes: "Currently on hold due to personal reasons",
-      }
-    ];
-    
-    apprentices.forEach(apprentice => this.createApprentice(apprentice));
-    
-    // Add sample host employers
-    const hostEmployers: InsertHostEmployer[] = [
-      {
-        name: "PowerTech Industries",
-        industry: "Electrical",
-        contactPerson: "James Wilson",
-        email: "j.wilson@powertech.com",
-        phone: "123-456-7894",
-        address: "123 Power Ave, Metropolis",
-        status: "active",
-        safetyRating: 9,
-        complianceStatus: "compliant",
-        notes: "Long-standing partner with excellent safety record",
-      },
-      {
-        name: "BuildWell Construction",
-        industry: "Construction",
-        contactPerson: "Emma Roberts",
-        email: "e.roberts@buildwell.com",
-        phone: "123-456-7895",
-        address: "456 Builder St, Constructown",
-        status: "active",
-        safetyRating: 8,
-        complianceStatus: "compliant",
-        notes: "Multiple apprentice placements annually",
-      },
-      {
-        name: "TechSolutions Inc.",
-        industry: "Information Technology",
-        contactPerson: "Alex Chen",
-        email: "a.chen@techsolutions.com",
-        phone: "123-456-7896",
-        address: "789 Tech Blvd, Silicon Valley",
-        status: "active",
-        safetyRating: 10,
-        complianceStatus: "compliant",
-        notes: "Excellent mentoring program for IT apprentices",
-      },
-      {
-        name: "FlowMasters Ltd.",
-        industry: "Plumbing",
-        contactPerson: "Robert Johnson",
-        email: "r.johnson@flowmasters.com",
-        phone: "123-456-7897",
-        address: "101 Plumber Lane, Watertown",
-        status: "active",
-        safetyRating: 7,
-        complianceStatus: "pending",
-        notes: "Safety compliance review in progress",
-      }
-    ];
-    
-    hostEmployers.forEach(host => this.createHostEmployer(host));
-    
-    // Add sample training contracts
-    const contracts: InsertTrainingContract[] = [
-      {
-        apprenticeId: 1,
-        contractNumber: "TC-2023-001",
-        startDate: new Date("2023-01-15"),
-        endDate: new Date("2026-01-15"),
-        status: "active",
-        documentUrl: "/documents/contracts/TC-2023-001.pdf",
-        terms: {},
-        approvedBy: "HR Manager",
-        approvalDate: new Date("2023-01-10"),
-      },
-      {
-        apprenticeId: 2,
-        contractNumber: "TC-2023-002",
-        startDate: new Date("2023-03-10"),
-        endDate: new Date("2026-03-10"),
-        status: "active",
-        documentUrl: "/documents/contracts/TC-2023-002.pdf",
-        terms: {},
-        approvedBy: "HR Manager",
-        approvalDate: new Date("2023-03-05"),
-      },
-      {
-        apprenticeId: 3,
-        contractNumber: "TC-2022-015",
-        startDate: new Date("2022-09-05"),
-        endDate: new Date("2025-09-05"),
-        status: "active",
-        documentUrl: "/documents/contracts/TC-2022-015.pdf",
-        terms: {},
-        approvedBy: "HR Manager",
-        approvalDate: new Date("2022-09-01"),
-      },
-      {
-        apprenticeId: 4,
-        contractNumber: "TC-2023-003",
-        startDate: new Date("2023-02-20"),
-        endDate: new Date("2026-02-20"),
-        status: "on_hold",
-        documentUrl: "/documents/contracts/TC-2023-003.pdf",
-        terms: {},
-        approvedBy: "HR Manager",
-        approvalDate: new Date("2023-02-15"),
-      }
-    ];
-    
-    contracts.forEach(contract => this.createTrainingContract(contract));
-    
-    // Add sample placements
-    const placements: InsertPlacement[] = [
-      {
-        apprenticeId: 1,
-        hostEmployerId: 1,
-        startDate: new Date("2023-01-20"),
-        endDate: new Date("2023-07-20"),
-        status: "active",
-        position: "Electrical Apprentice",
-        supervisor: "Thomas Edison",
-        supervisorContact: "t.edison@powertech.com",
-        notes: "Performing well in all areas",
-      },
-      {
-        apprenticeId: 2,
-        hostEmployerId: 2,
-        startDate: new Date("2023-03-15"),
-        endDate: new Date("2023-09-15"),
-        status: "active",
-        position: "Carpentry Apprentice",
-        supervisor: "Bob Builder",
-        supervisorContact: "b.builder@buildwell.com",
-        notes: "Needs more practice with advanced techniques",
-      },
-      {
-        apprenticeId: 3,
-        hostEmployerId: 3,
-        startDate: new Date("2022-09-10"),
-        endDate: new Date("2023-03-10"),
-        status: "completed",
-        position: "IT Support Apprentice",
-        supervisor: "Ada Lovelace",
-        supervisorContact: "a.lovelace@techsolutions.com",
-        notes: "Excellent technical skills, completed ahead of schedule",
-      },
-      {
-        apprenticeId: 3,
-        hostEmployerId: 3,
-        startDate: new Date("2023-04-01"),
-        endDate: new Date("2023-10-01"),
-        status: "active",
-        position: "IT Support Apprentice - Advanced",
-        supervisor: "Ada Lovelace",
-        supervisorContact: "a.lovelace@techsolutions.com",
-        notes: "Second placement with increased responsibilities",
-      },
-      {
-        apprenticeId: 4,
-        hostEmployerId: 4,
-        startDate: new Date("2023-02-25"),
-        endDate: new Date("2023-08-25"),
-        status: "on_hold",
-        position: "Plumbing Apprentice",
-        supervisor: "Joe Plumber",
-        supervisorContact: "j.plumber@flowmasters.com",
-        notes: "Placement on hold due to apprentice personal circumstances",
-      }
-    ];
-    
-    placements.forEach(placement => this.createPlacement(placement));
-    
-    // Add sample documents
-    const documents: InsertDocument[] = [
-      {
-        title: "Safety Manual v2.3",
-        type: "safety",
-        url: "/documents/safety/manual_v2.3.pdf",
-        uploadedBy: 1,
-        relatedTo: "system",
-        relatedId: 0,
-        expiryDate: null,
-        status: "active",
-      },
-      {
-        title: "Monthly Progress Report",
-        type: "report",
-        url: "/documents/reports/progress_report_202305.xlsx",
-        uploadedBy: 1,
-        relatedTo: "system",
-        relatedId: 0,
-        expiryDate: null,
-        status: "active",
-      },
-      {
-        title: "Contract Template",
-        type: "template",
-        url: "/documents/templates/contract_template.docx",
-        uploadedBy: 1,
-        relatedTo: "system",
-        relatedId: 0,
-        expiryDate: null,
-        status: "active",
-      },
-      {
-        title: "Training Guidelines",
-        type: "guidelines",
-        url: "/documents/guidelines/training_guidelines.pdf",
-        uploadedBy: 1,
-        relatedTo: "system",
-        relatedId: 0,
-        expiryDate: null,
-        status: "active",
-      }
-    ];
-    
-    documents.forEach(doc => this.createDocument(doc));
-    
-    // Add sample activity logs
-    const activities: InsertActivityLog[] = [
-      {
-        userId: 1,
-        action: "created",
-        relatedTo: "apprentice",
-        relatedId: 1,
-        details: { message: "New apprentice John Doe registered" },
-      },
-      {
-        userId: 1,
-        action: "approved",
-        relatedTo: "contract",
-        relatedId: 1,
-        details: { message: "Contract #45928 approved by HR" },
-      },
-      {
-        userId: 1,
-        action: "warning",
-        relatedTo: "host",
-        relatedId: 4,
-        details: { message: "Safety compliance warning for WorkSafe Construction" },
-      },
-      {
-        userId: 1,
-        action: "completed",
-        relatedTo: "training",
-        relatedId: 0,
-        details: { message: "Training module completed by 15 apprentices" },
-      }
-    ];
-    
-    activities.forEach(activity => this.createActivityLog(activity));
-    
-    // Add sample tasks
-    const tasks: InsertTask[] = [
-      {
-        title: "Review new apprentice applications",
-        description: "Review and process 5 new apprentice applications",
-        assignedTo: 1,
-        dueDate: new Date(Date.now() + 24 * 60 * 60 * 1000), // tomorrow
-        priority: "urgent",
-        status: "pending",
-        relatedTo: "apprentice",
-        relatedId: null,
-        createdBy: 1,
-      },
-      {
-        title: "Prepare monthly compliance report",
-        description: "Compile and submit the monthly compliance report",
-        assignedTo: 1,
-        dueDate: new Date(Date.now() + 24 * 60 * 60 * 1000), // tomorrow
-        priority: "high",
-        status: "pending",
-        relatedTo: "compliance",
-        relatedId: null,
-        createdBy: 1,
-      },
-      {
-        title: "Follow up with TechWorks regarding placement openings",
-        description: "Call TechWorks to confirm available placement slots for next quarter",
-        assignedTo: 1,
-        dueDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000), // 2 days from now
-        priority: "medium",
-        status: "pending",
-        relatedTo: "placement",
-        relatedId: null,
-        createdBy: 1,
-      },
-      {
-        title: "Update training materials for electrical apprentices",
-        description: "Review and update electrical apprentice training materials with new safety procedures",
-        assignedTo: 1,
-        dueDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
-        priority: "medium",
-        status: "completed",
-        relatedTo: "training",
-        relatedId: null,
-        createdBy: 1,
-        completedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), // 1 day ago
-      },
-      {
-        title: "Schedule quarterly review meeting with hosts",
-        description: "Set up the quarterly review meeting with all active host employers",
-        assignedTo: 1,
-        dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 1 week from now
-        priority: "medium",
-        status: "pending",
-        relatedTo: "host",
-        relatedId: null,
-        createdBy: 1,
-      }
-    ];
-    
-    tasks.forEach(task => this.createTask(task));
-  }
-  
-  // User methods
-    // Role management methods
-  async getAllRoles(): Promise<Role[]> {
-    return Array.from(this.roles.values());
-  }
-
-  async getRole(id: number): Promise<Role | undefined> {
-    return this.roles.get(id);
-  }
-  
-  async getRoleByName(name: string): Promise<Role | undefined> {
-    // Find a role by name
-    for (const role of this.roles.values()) {
-      if (role.name === name) {
-        return role;
-      }
-    }
-    return undefined;
-  }
-
-  async createRole(role: InsertRole): Promise<Role> {
-    const id = this.roleIdCounter++;
-    const timestamp = new Date();
-    const newRole: Role = {
-      id,
-      createdAt: timestamp,
-      updatedAt: timestamp,
-      ...role,
-    };
-    this.roles.set(id, newRole);
-    return newRole;
-  }
-
-  async updateRole(id: number, roleData: Partial<InsertRole>): Promise<Role | undefined> {
-    const role = this.roles.get(id);
-    if (!role) return undefined;
-
-    const updatedRole: Role = {
-      ...role,
-      ...roleData,
-      updatedAt: new Date(),
-    };
-    this.roles.set(id, updatedRole);
-    return updatedRole;
-  }
-
-  async deleteRole(id: number): Promise<boolean> {
-    return this.roles.delete(id);
-  }
-
-  // Permission management methods
-  async getAllPermissions(): Promise<Permission[]> {
-    return Array.from(this.permissions.values());
-  }
-
-  async getPermission(id: number): Promise<Permission | undefined> {
-    return this.permissions.get(id);
-  }
-
-  async createPermission(permission: InsertPermission): Promise<Permission> {
-    const id = this.permissionIdCounter++;
-    const timestamp = new Date();
-    const newPermission: Permission = {
-      id,
-      createdAt: timestamp,
-      updatedAt: timestamp,
-      ...permission,
-    };
-    this.permissions.set(id, newPermission);
-    return newPermission;
-  }
-
-  async updatePermission(id: number, permissionData: Partial<InsertPermission>): Promise<Permission | undefined> {
-    const permission = this.permissions.get(id);
-    if (!permission) return undefined;
-
-    const updatedPermission: Permission = {
-      ...permission,
-      ...permissionData,
-      updatedAt: new Date(),
-    };
-    this.permissions.set(id, updatedPermission);
-    return updatedPermission;
-  }
-
-  async deletePermission(id: number): Promise<boolean> {
-    return this.permissions.delete(id);
-  }
-
-  // Role-Permission associations
-  async getRolePermissions(roleId: number): Promise<Permission[]> {
-    const rolePermissions = Array.from(this.rolePermissions.values())
-      .filter(rp => rp.roleId === roleId);
-    
-    return rolePermissions.map(rp => {
-      const permission = this.permissions.get(rp.permissionId);
-      if (!permission) throw new Error(`Permission ${rp.permissionId} not found`);
-      return permission;
+    this.sessionStore = new MemoryStore({
+      checkPeriod: 86400000, // 24 hours
     });
   }
 
-  async assignPermissionToRole(rolePermission: InsertRolePermission): Promise<RolePermission> {
-    const id = this.rolePermissionIdCounter++;
-    const timestamp = new Date();
-    const newRolePermission: RolePermission = {
-      id,
-      createdAt: timestamp,
-      ...rolePermission,
-    };
-    this.rolePermissions.set(id, newRolePermission);
-    return newRolePermission;
+  // User methods
+  async getUser(id: number): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user;
   }
 
-  async removePermissionFromRole(roleId: number, permissionId: number): Promise<boolean> {
-    const rolePermission = Array.from(this.rolePermissions.values())
-      .find(rp => rp.roleId === roleId && rp.permissionId === permissionId);
-    
-    if (!rolePermission) return false;
-    return this.rolePermissions.delete(rolePermission.id);
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user;
   }
 
-  // Subscription plans
-  async getAllSubscriptionPlans(): Promise<SubscriptionPlan[]> {
-    return Array.from(this.subscriptionPlans.values());
-  }
-
-  async getSubscriptionPlan(id: number): Promise<SubscriptionPlan | undefined> {
-    return this.subscriptionPlans.get(id);
-  }
-
-  async createSubscriptionPlan(plan: InsertSubscriptionPlan): Promise<SubscriptionPlan> {
-    const id = this.subscriptionPlanIdCounter++;
-    const timestamp = new Date();
-    const newPlan: SubscriptionPlan = {
-      id,
-      createdAt: timestamp,
-      updatedAt: timestamp,
-      ...plan,
-    };
-    this.subscriptionPlans.set(id, newPlan);
-    return newPlan;
-  }
-
-  async updateSubscriptionPlan(id: number, planData: Partial<InsertSubscriptionPlan>): Promise<SubscriptionPlan | undefined> {
-    const plan = this.subscriptionPlans.get(id);
-    if (!plan) return undefined;
-
-    const updatedPlan: SubscriptionPlan = {
-      ...plan,
-      ...planData,
-      updatedAt: new Date(),
-    };
-    this.subscriptionPlans.set(id, updatedPlan);
-    return updatedPlan;
-  }
-
-  async deleteSubscriptionPlan(id: number): Promise<boolean> {
-    return this.subscriptionPlans.delete(id);
-  }
-
-  // Extended user methods
   async getAllUsers(): Promise<User[]> {
-    return Array.from(this.users.values());
+    return await db.select().from(users);
   }
 
   async getUsersByRole(role: string): Promise<User[]> {
-    return Array.from(this.users.values())
-      .filter(user => user.role === role);
+    return await db.select().from(users).where(eq(users.role, role));
   }
 
   async getUsersByOrganization(organizationId: number): Promise<User[]> {
-    return Array.from(this.users.values())
-      .filter(user => user.organizationId === organizationId);
-  }
-  
-  async getUser(id: number): Promise<User | undefined> {
-    return this.users.get(id);
+    return await db.select().from(users).where(eq(users.organizationId, organizationId));
   }
 
-  async updateUserStripeInfo(userId: number, stripeInfo: { customerId: string, subscriptionId: string }): Promise<User | undefined> {
-    const user = await this.getUser(userId);
-    if (!user) return undefined;
+  async createUser(user: InsertUser): Promise<User> {
+    const [createdUser] = await db.insert(users).values(user).returning();
+    return createdUser;
+  }
 
-    const updatedUser: User = {
-      ...user,
-      stripeCustomerId: stripeInfo.customerId,
-      stripeSubscriptionId: stripeInfo.subscriptionId,
-      updatedAt: new Date(),
-    };
-    
-    this.users.set(userId, updatedUser);
+  async updateUser(id: number, user: Partial<InsertUser>): Promise<User | undefined> {
+    const [updatedUser] = await db
+      .update(users)
+      .set({ ...user, updatedAt: new Date() })
+      .where(eq(users.id, id))
+      .returning();
     return updatedUser;
   }
-  
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
-  }
-  
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const id = this.userIdCounter++;
-    const timestamp = new Date();
-    const user: User = { 
-      ...insertUser, 
-      id,
-      createdAt: timestamp,
-      updatedAt: timestamp,
-      lastLogin: null,
-      stripeCustomerId: null,
-      stripeSubscriptionId: null,
-      subscriptionStatus: null,
-      subscriptionPlanId: null,
-      subscriptionEndsAt: null
-    };
-    this.users.set(id, user);
-    return user;
-  }
-  
-  async updateUser(id: number, userData: Partial<InsertUser>): Promise<User | undefined> {
-    const user = this.users.get(id);
-    if (!user) return undefined;
-    
-    const updatedUser: User = { ...user, ...userData };
-    this.users.set(id, updatedUser);
-    return updatedUser;
-  }
-  
+
   async deleteUser(id: number): Promise<boolean> {
-    return this.users.delete(id);
+    const result = await db.delete(users).where(eq(users.id, id));
+    return result.rowCount > 0;
   }
-  
-  // Apprentice methods
-  async getAllApprentices(): Promise<Apprentice[]> {
-    return Array.from(this.apprentices.values());
-  }
-  
-  async getApprentice(id: number): Promise<Apprentice | undefined> {
-    return this.apprentices.get(id);
-  }
-  
-  async createApprentice(insertApprentice: InsertApprentice): Promise<Apprentice> {
-    const id = this.apprenticeIdCounter++;
-    const apprentice: Apprentice = { ...insertApprentice, id };
-    this.apprentices.set(id, apprentice);
-    return apprentice;
-  }
-  
-  async updateApprentice(id: number, apprenticeData: Partial<InsertApprentice>): Promise<Apprentice | undefined> {
-    const apprentice = this.apprentices.get(id);
-    if (!apprentice) return undefined;
-    
-    const updatedApprentice: Apprentice = { ...apprentice, ...apprenticeData };
-    this.apprentices.set(id, updatedApprentice);
-    return updatedApprentice;
-  }
-  
-  async deleteApprentice(id: number): Promise<boolean> {
-    return this.apprentices.delete(id);
-  }
-  
-  // Host Employer methods
-  async getAllHostEmployers(): Promise<HostEmployer[]> {
-    return Array.from(this.hostEmployers.values());
-  }
-  
-  async getHostEmployer(id: number): Promise<HostEmployer | undefined> {
-    return this.hostEmployers.get(id);
-  }
-  
-  async createHostEmployer(insertHostEmployer: InsertHostEmployer): Promise<HostEmployer> {
-    const id = this.hostEmployerIdCounter++;
-    const hostEmployer: HostEmployer = { ...insertHostEmployer, id };
-    this.hostEmployers.set(id, hostEmployer);
-    return hostEmployer;
-  }
-  
-  async updateHostEmployer(id: number, hostEmployerData: Partial<InsertHostEmployer>): Promise<HostEmployer | undefined> {
-    const hostEmployer = this.hostEmployers.get(id);
-    if (!hostEmployer) return undefined;
-    
-    const updatedHostEmployer: HostEmployer = { ...hostEmployer, ...hostEmployerData };
-    this.hostEmployers.set(id, updatedHostEmployer);
-    return updatedHostEmployer;
-  }
-  
-  async deleteHostEmployer(id: number): Promise<boolean> {
-    return this.hostEmployers.delete(id);
-  }
-  
-  // Training Contract methods
-  async getAllTrainingContracts(): Promise<TrainingContract[]> {
-    return Array.from(this.trainingContracts.values());
-  }
-  
-  async getTrainingContract(id: number): Promise<TrainingContract | undefined> {
-    return this.trainingContracts.get(id);
-  }
-  
-  async getTrainingContractsByApprentice(apprenticeId: number): Promise<TrainingContract[]> {
-    return Array.from(this.trainingContracts.values()).filter(
-      contract => contract.apprenticeId === apprenticeId
-    );
-  }
-  
-  async createTrainingContract(insertContract: InsertTrainingContract): Promise<TrainingContract> {
-    const id = this.contractIdCounter++;
-    const contract: TrainingContract = { ...insertContract, id };
-    this.trainingContracts.set(id, contract);
-    return contract;
-  }
-  
-  async updateTrainingContract(id: number, contractData: Partial<InsertTrainingContract>): Promise<TrainingContract | undefined> {
-    const contract = this.trainingContracts.get(id);
-    if (!contract) return undefined;
-    
-    const updatedContract: TrainingContract = { ...contract, ...contractData };
-    this.trainingContracts.set(id, updatedContract);
-    return updatedContract;
-  }
-  
-  async deleteTrainingContract(id: number): Promise<boolean> {
-    return this.trainingContracts.delete(id);
-  }
-  
-  // Placement methods
-  async getAllPlacements(): Promise<Placement[]> {
-    return Array.from(this.placements.values());
-  }
-  
-  async getPlacement(id: number): Promise<Placement | undefined> {
-    return this.placements.get(id);
-  }
-  
-  async getPlacementsByApprentice(apprenticeId: number): Promise<Placement[]> {
-    return Array.from(this.placements.values()).filter(
-      placement => placement.apprenticeId === apprenticeId
-    );
-  }
-  
-  async getPlacementsByHost(hostEmployerId: number): Promise<Placement[]> {
-    return Array.from(this.placements.values()).filter(
-      placement => placement.hostEmployerId === hostEmployerId
-    );
-  }
-  
-  async createPlacement(insertPlacement: InsertPlacement): Promise<Placement> {
-    const id = this.placementIdCounter++;
-    const placement: Placement = { ...insertPlacement, id };
-    this.placements.set(id, placement);
-    return placement;
-  }
-  
-  async updatePlacement(id: number, placementData: Partial<InsertPlacement>): Promise<Placement | undefined> {
-    const placement = this.placements.get(id);
-    if (!placement) return undefined;
-    
-    const updatedPlacement: Placement = { ...placement, ...placementData };
-    this.placements.set(id, updatedPlacement);
-    return updatedPlacement;
-  }
-  
-  async deletePlacement(id: number): Promise<boolean> {
-    return this.placements.delete(id);
-  }
-  
-  // Document methods
-  async getAllDocuments(): Promise<Document[]> {
-    return Array.from(this.documents.values());
-  }
-  
-  async getDocument(id: number): Promise<Document | undefined> {
-    return this.documents.get(id);
-  }
-  
-  async getDocumentsByRelation(relatedTo: string, relatedId: number): Promise<Document[]> {
-    return Array.from(this.documents.values()).filter(
-      doc => doc.relatedTo === relatedTo && doc.relatedId === relatedId
-    );
-  }
-  
-  async createDocument(insertDocument: InsertDocument): Promise<Document> {
-    const id = this.documentIdCounter++;
-    const document: Document = { 
-      ...insertDocument, 
-      id,
-      uploadDate: new Date()
-    };
-    this.documents.set(id, document);
-    return document;
-  }
-  
-  async updateDocument(id: number, documentData: Partial<InsertDocument>): Promise<Document | undefined> {
-    const document = this.documents.get(id);
-    if (!document) return undefined;
-    
-    const updatedDocument: Document = { ...document, ...documentData };
-    this.documents.set(id, updatedDocument);
-    return updatedDocument;
-  }
-  
-  async deleteDocument(id: number): Promise<boolean> {
-    return this.documents.delete(id);
-  }
-  
-  // Compliance Record methods
-  async getAllComplianceRecords(): Promise<ComplianceRecord[]> {
-    return Array.from(this.complianceRecords.values());
-  }
-  
-  async getComplianceRecord(id: number): Promise<ComplianceRecord | undefined> {
-    return this.complianceRecords.get(id);
-  }
-  
-  async getComplianceRecordsByRelation(relatedTo: string, relatedId: number): Promise<ComplianceRecord[]> {
-    return Array.from(this.complianceRecords.values()).filter(
-      record => record.relatedTo === relatedTo && record.relatedId === relatedId
-    );
-  }
-  
-  async createComplianceRecord(insertRecord: InsertComplianceRecord): Promise<ComplianceRecord> {
-    const id = this.complianceRecordIdCounter++;
-    const record: ComplianceRecord = { ...insertRecord, id };
-    this.complianceRecords.set(id, record);
-    return record;
-  }
-  
-  async updateComplianceRecord(id: number, recordData: Partial<InsertComplianceRecord>): Promise<ComplianceRecord | undefined> {
-    const record = this.complianceRecords.get(id);
-    if (!record) return undefined;
-    
-    const updatedRecord: ComplianceRecord = { ...record, ...recordData };
-    this.complianceRecords.set(id, updatedRecord);
-    return updatedRecord;
-  }
-  
-  async deleteComplianceRecord(id: number): Promise<boolean> {
-    return this.complianceRecords.delete(id);
-  }
-  
-  // Timesheet methods
-  async getAllTimesheets(): Promise<Timesheet[]> {
-    return Array.from(this.timesheets.values());
-  }
-  
-  async getTimesheet(id: number): Promise<Timesheet | undefined> {
-    return this.timesheets.get(id);
-  }
-  
-  async getTimesheetsByApprentice(apprenticeId: number): Promise<Timesheet[]> {
-    return Array.from(this.timesheets.values()).filter(
-      timesheet => timesheet.apprenticeId === apprenticeId
-    );
-  }
-  
-  async createTimesheet(insertTimesheet: InsertTimesheet): Promise<Timesheet> {
-    const id = this.timesheetIdCounter++;
-    const timesheet: Timesheet = { 
-      ...insertTimesheet, 
-      id,
-      submittedDate: new Date(),
-      approvalDate: null
-    };
-    this.timesheets.set(id, timesheet);
-    return timesheet;
-  }
-  
-  async updateTimesheet(id: number, timesheetData: Partial<InsertTimesheet>): Promise<Timesheet | undefined> {
-    const timesheet = this.timesheets.get(id);
-    if (!timesheet) return undefined;
-    
-    const updatedTimesheet: Timesheet = { ...timesheet, ...timesheetData };
-    this.timesheets.set(id, updatedTimesheet);
-    return updatedTimesheet;
-  }
-  
-  async deleteTimesheet(id: number): Promise<boolean> {
-    return this.timesheets.delete(id);
-  }
-  
-  // Timesheet Detail methods
-  async getTimesheetDetails(timesheetId: number): Promise<TimesheetDetail[]> {
-    return Array.from(this.timesheetDetails.values()).filter(
-      detail => detail.timesheetId === timesheetId
-    );
-  }
-  
-  async createTimesheetDetail(insertDetail: InsertTimesheetDetail): Promise<TimesheetDetail> {
-    const id = this.timesheetDetailIdCounter++;
-    const detail: TimesheetDetail = { ...insertDetail, id };
-    this.timesheetDetails.set(id, detail);
-    return detail;
-  }
-  
-  async updateTimesheetDetail(id: number, detailData: Partial<InsertTimesheetDetail>): Promise<TimesheetDetail | undefined> {
-    const detail = this.timesheetDetails.get(id);
-    if (!detail) return undefined;
-    
-    const updatedDetail: TimesheetDetail = { ...detail, ...detailData };
-    this.timesheetDetails.set(id, updatedDetail);
-    return updatedDetail;
-  }
-  
-  async deleteTimesheetDetail(id: number): Promise<boolean> {
-    return this.timesheetDetails.delete(id);
-  }
-  
-  // Activity Log methods
-  async getAllActivityLogs(): Promise<ActivityLog[]> {
-    return Array.from(this.activityLogs.values())
-      .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
-  }
-  
-  async getRecentActivityLogs(limit: number): Promise<ActivityLog[]> {
-    return Array.from(this.activityLogs.values())
-      .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
-      .slice(0, limit);
-  }
-  
-  async createActivityLog(insertLog: InsertActivityLog): Promise<ActivityLog> {
-    const id = this.activityLogIdCounter++;
-    const log: ActivityLog = { 
-      ...insertLog, 
-      id,
-      timestamp: new Date()
-    };
-    this.activityLogs.set(id, log);
-    return log;
-  }
-  
-  // Task methods
-  async getAllTasks(): Promise<Task[]> {
-    return Array.from(this.tasks.values());
-  }
-  
-  async getTask(id: number): Promise<Task | undefined> {
-    return this.tasks.get(id);
-  }
-  
-  async getTasksByAssignee(userId: number): Promise<Task[]> {
-    return Array.from(this.tasks.values()).filter(
-      task => task.assignedTo === userId
-    );
-  }
-  
-  async createTask(insertTask: InsertTask): Promise<Task> {
-    const id = this.taskIdCounter++;
-    const task: Task = { 
-      ...insertTask, 
-      id,
-      createdAt: new Date(),
-      completedAt: null
-    };
-    this.tasks.set(id, task);
-    return task;
-  }
-  
-  async updateTask(id: number, taskData: Partial<InsertTask>): Promise<Task | undefined> {
-    const task = this.tasks.get(id);
-    if (!task) return undefined;
-    
-    const updatedTask: Task = { ...task, ...taskData };
-    this.tasks.set(id, updatedTask);
-    return updatedTask;
-  }
-  
-  async deleteTask(id: number): Promise<boolean> {
-    return this.tasks.delete(id);
-  }
-  
-  async completeTask(id: number): Promise<Task | undefined> {
-    const task = this.tasks.get(id);
-    if (!task) return undefined;
-    
-    const completedTask: Task = { 
-      ...task, 
-      status: "completed",
-      completedAt: new Date()
-    };
-    this.tasks.set(id, completedTask);
-    return completedTask;
-  }
-}
 
-import { db } from "./db";
-import { and, eq, desc } from "drizzle-orm";
+  // Role methods
+  async getRole(id: number): Promise<Role | undefined> {
+    const [role] = await db.select().from(roles).where(eq(roles.id, id));
+    return role;
+  }
 
-// DatabaseStorage implementation using PostgreSQL
-export class DatabaseStorage implements IStorage {
-  // Roles
   async getAllRoles(): Promise<Role[]> {
     return await db.select().from(roles);
   }
 
-  async getRole(id: number): Promise<Role | undefined> {
-    const [role] = await db.select().from(roles).where(eq(roles.id, id));
-    return role || undefined;
-  }
-  
-  async getRoleByName(name: string): Promise<Role | undefined> {
-    const [role] = await db.select().from(roles).where(eq(roles.name, name));
-    return role || undefined;
-  }
-  
   async createRole(role: InsertRole): Promise<Role> {
-    const [newRole] = await db.insert(roles).values(role).returning();
-    return newRole;
+    const [createdRole] = await db.insert(roles).values(role).returning();
+    return createdRole;
   }
-  
-  async updateRole(id: number, roleData: Partial<InsertRole>): Promise<Role | undefined> {
-    const [updatedRole] = await db.update(roles)
-      .set(roleData)
+
+  async updateRole(id: number, role: Partial<InsertRole>): Promise<Role | undefined> {
+    const [updatedRole] = await db
+      .update(roles)
+      .set({ ...role, updatedAt: new Date() })
       .where(eq(roles.id, id))
       .returning();
-    return updatedRole || undefined;
+    return updatedRole;
   }
-  
+
   async deleteRole(id: number): Promise<boolean> {
-    await db.delete(roles).where(eq(roles.id, id));
-    return true;
+    const result = await db.delete(roles).where(eq(roles.id, id));
+    return result.rowCount > 0;
   }
-  
-  // Permissions
+
+  // Permission methods
+  async getPermission(id: number): Promise<Permission | undefined> {
+    const [permission] = await db.select().from(permissions).where(eq(permissions.id, id));
+    return permission;
+  }
+
   async getAllPermissions(): Promise<Permission[]> {
     return await db.select().from(permissions);
   }
-  
-  async getPermission(id: number): Promise<Permission | undefined> {
-    const [permission] = await db.select().from(permissions).where(eq(permissions.id, id));
-    return permission || undefined;
-  }
-  
-  async createPermission(permission: InsertPermission): Promise<Permission> {
-    const [newPermission] = await db.insert(permissions).values(permission).returning();
-    return newPermission;
-  }
-  
-  async updatePermission(id: number, permissionData: Partial<InsertPermission>): Promise<Permission | undefined> {
-    const [updatedPermission] = await db.update(permissions)
-      .set(permissionData)
-      .where(eq(permissions.id, id))
-      .returning();
-    return updatedPermission || undefined;
-  }
-  
-  async deletePermission(id: number): Promise<boolean> {
-    await db.delete(permissions).where(eq(permissions.id, id));
-    return true;
-  }
-  
-  // Role Permissions
+
   async getRolePermissions(roleId: number): Promise<Permission[]> {
-    const results = await db
-      .select({ permission: permissions })
-      .from(rolePermissions)
-      .innerJoin(permissions, eq(rolePermissions.permissionId, permissions.id))
+    const result = await db
+      .select()
+      .from(permissions)
+      .innerJoin(rolePermissions, eq(permissions.id, rolePermissions.permissionId))
       .where(eq(rolePermissions.roleId, roleId));
     
-    return results.map(row => row.permission);
+    return result.map(r => ({ ...r.permissions }));
   }
-  
+
   async assignPermissionToRole(rolePermission: InsertRolePermission): Promise<RolePermission> {
-    const [newRolePermission] = await db.insert(rolePermissions).values(rolePermission).returning();
-    return newRolePermission;
+    // Check if already assigned
+    const [existing] = await db
+      .select()
+      .from(rolePermissions)
+      .where(
+        and(
+          eq(rolePermissions.roleId, rolePermission.roleId),
+          eq(rolePermissions.permissionId, rolePermission.permissionId)
+        )
+      );
+    
+    if (existing) {
+      return existing;
+    }
+    
+    const [created] = await db
+      .insert(rolePermissions)
+      .values(rolePermission)
+      .returning();
+    
+    return created;
   }
-  
+
   async removePermissionFromRole(roleId: number, permissionId: number): Promise<boolean> {
-    await db.delete(rolePermissions)
+    const result = await db
+      .delete(rolePermissions)
       .where(
         and(
           eq(rolePermissions.roleId, roleId),
           eq(rolePermissions.permissionId, permissionId)
         )
       );
-    return true;
+    
+    return result.rowCount > 0;
   }
-  
-  // Subscription Plans
+
+  // Subscription Plan methods
+  async getSubscriptionPlan(id: number): Promise<SubscriptionPlan | undefined> {
+    const [plan] = await db.select().from(subscriptionPlans).where(eq(subscriptionPlans.id, id));
+    return plan;
+  }
+
   async getAllSubscriptionPlans(): Promise<SubscriptionPlan[]> {
     return await db.select().from(subscriptionPlans);
   }
-  
-  async getSubscriptionPlan(id: number): Promise<SubscriptionPlan | undefined> {
-    const [plan] = await db.select().from(subscriptionPlans).where(eq(subscriptionPlans.id, id));
-    return plan || undefined;
-  }
-  
+
   async createSubscriptionPlan(plan: InsertSubscriptionPlan): Promise<SubscriptionPlan> {
-    const [newPlan] = await db.insert(subscriptionPlans).values(plan).returning();
-    return newPlan;
+    const [createdPlan] = await db.insert(subscriptionPlans).values(plan).returning();
+    return createdPlan;
   }
-  
-  async updateSubscriptionPlan(id: number, planData: Partial<InsertSubscriptionPlan>): Promise<SubscriptionPlan | undefined> {
-    const [updatedPlan] = await db.update(subscriptionPlans)
-      .set(planData)
+
+  async updateSubscriptionPlan(id: number, plan: Partial<InsertSubscriptionPlan>): Promise<SubscriptionPlan | undefined> {
+    const [updatedPlan] = await db
+      .update(subscriptionPlans)
+      .set({ ...plan, updatedAt: new Date() })
       .where(eq(subscriptionPlans.id, id))
       .returning();
-    return updatedPlan || undefined;
+    return updatedPlan;
   }
-  
+
   async deleteSubscriptionPlan(id: number): Promise<boolean> {
-    await db.delete(subscriptionPlans).where(eq(subscriptionPlans.id, id));
-    return true;
+    const result = await db.delete(subscriptionPlans).where(eq(subscriptionPlans.id, id));
+    return result.rowCount > 0;
   }
-  
-  // User extended methods
-  async getAllUsers(): Promise<User[]> {
-    return await db.select().from(users);
+
+  // Activity Log methods
+  async createActivityLog(log: InsertActivityLog): Promise<ActivityLog> {
+    const [createdLog] = await db.insert(activityLogs).values(log).returning();
+    return createdLog;
   }
-  
-  async getUsersByRole(role: string): Promise<User[]> {
-    return await db.select().from(users).where(eq(users.role, role));
+
+  async getActivityLogs(options?: { userId?: number, relatedTo?: string, relatedId?: number, limit?: number }): Promise<ActivityLog[]> {
+    let query = db.select().from(activityLogs).orderBy(desc(activityLogs.timestamp));
+    
+    if (options?.userId) {
+      query = query.where(eq(activityLogs.userId, options.userId));
+    }
+    
+    if (options?.relatedTo) {
+      query = query.where(eq(activityLogs.relatedTo, options.relatedTo));
+    }
+    
+    if (options?.relatedId) {
+      query = query.where(eq(activityLogs.relatedId, options.relatedId));
+    }
+    
+    if (options?.limit) {
+      query = query.limit(options.limit);
+    }
+    
+    return await query;
   }
-  
-  async getUsersByOrganization(organizationId: number): Promise<User[]> {
-    return await db.select().from(users).where(eq(users.organizationId, organizationId));
+
+  // System Config methods
+  async getSystemConfig(key: string): Promise<SystemConfig | undefined> {
+    const [config] = await db.select().from(systemConfig).where(eq(systemConfig.key, key));
+    return config;
   }
-  
-  async updateUserStripeInfo(userId: number, stripeInfo: { customerId: string, subscriptionId: string }): Promise<User | undefined> {
-    const [updatedUser] = await db.update(users)
+
+  async getAllSystemConfigs(): Promise<SystemConfig[]> {
+    return await db.select().from(systemConfig);
+  }
+
+  async getSystemConfigsByCategory(category: string): Promise<SystemConfig[]> {
+    return await db.select().from(systemConfig).where(eq(systemConfig.category, category));
+  }
+
+  async setSystemConfig(config: InsertSystemConfig): Promise<SystemConfig> {
+    const [existingConfig] = await db.select().from(systemConfig).where(eq(systemConfig.key, config.key));
+    
+    if (existingConfig) {
+      const [updatedConfig] = await db
+        .update(systemConfig)
+        .set({
+          value: config.value,
+          description: config.description,
+          updatedAt: new Date()
+        })
+        .where(eq(systemConfig.key, config.key))
+        .returning();
+      
+      return updatedConfig;
+    } else {
+      const [newConfig] = await db
+        .insert(systemConfig)
+        .values(config)
+        .returning();
+      
+      return newConfig;
+    }
+  }
+
+  async deleteSystemConfig(key: string): Promise<boolean> {
+    const result = await db.delete(systemConfig).where(eq(systemConfig.key, key));
+    return result.rowCount > 0;
+  }
+
+  // Integration methods
+  async getIntegration(id: number): Promise<Integration | undefined> {
+    const [integration] = await db.select().from(integrations).where(eq(integrations.id, id));
+    return integration;
+  }
+
+  async getIntegrationByProvider(provider: string): Promise<Integration | undefined> {
+    const [integration] = await db.select().from(integrations).where(eq(integrations.provider, provider));
+    return integration;
+  }
+
+  async getAllIntegrations(): Promise<Integration[]> {
+    return await db.select().from(integrations);
+  }
+
+  async createIntegration(integration: InsertIntegration): Promise<Integration> {
+    const [createdIntegration] = await db.insert(integrations).values(integration).returning();
+    return createdIntegration;
+  }
+
+  async updateIntegration(id: number, integration: Partial<InsertIntegration>): Promise<Integration | undefined> {
+    const [updatedIntegration] = await db
+      .update(integrations)
+      .set({ ...integration, updatedAt: new Date() })
+      .where(eq(integrations.id, id))
+      .returning();
+    return updatedIntegration;
+  }
+
+  async deleteIntegration(id: number): Promise<boolean> {
+    const result = await db.delete(integrations).where(eq(integrations.id, id));
+    return result.rowCount > 0;
+  }
+
+  async testIntegrationConnection(id: number): Promise<{ success: boolean, message: string }> {
+    const [integration] = await db.select().from(integrations).where(eq(integrations.id, id));
+    
+    if (!integration) {
+      return { success: false, message: "Integration not found" };
+    }
+    
+    // Simulate testing different integrations
+    switch (integration.type) {
+      case 'api':
+        if (integration.provider === 'Fair Work') {
+          if (integration.apiKey && integration.apiUrl) {
+            return { success: true, message: "Successfully connected to Fair Work API" };
+          } else {
+            return { success: false, message: "Missing API key or URL" };
+          }
+        }
+        break;
+      
+      case 'notification':
+        if (integration.provider === 'SMTP') {
+          const config = integration.config as Record<string, any> || {};
+          if (config.smtpHost && config.smtpPort) {
+            return { success: true, message: "Successfully connected to SMTP server" };
+          } else {
+            return { success: false, message: "Missing SMTP configuration" };
+          }
+        }
+        break;
+    }
+    
+    // Generic success response for other integrations
+    return { success: true, message: "Test connection simulated successfully" };
+  }
+
+  async syncIntegration(id: number): Promise<boolean> {
+    const [integration] = await db
+      .update(integrations)
       .set({
-        stripeCustomerId: stripeInfo.customerId,
-        stripeSubscriptionId: stripeInfo.subscriptionId,
+        lastSynced: new Date(),
+        updatedAt: new Date()
       })
-      .where(eq(users.id, userId))
+      .where(eq(integrations.id, id))
       .returning();
-    return updatedUser || undefined;
-  }
-  // Users
-  async getUser(id: number): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.id, id));
-    return user || undefined;
+    
+    return !!integration;
   }
 
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.username, username));
-    return user || undefined;
+  // Import/Export methods
+  async getDataJob(id: number): Promise<DataJob | undefined> {
+    const [job] = await db.select().from(dataJobs).where(eq(dataJobs.id, id));
+    return job;
   }
 
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const [user] = await db.insert(users).values(insertUser).returning();
-    return user;
-  }
-
-  async updateUser(id: number, userData: Partial<InsertUser>): Promise<User | undefined> {
-    const [updatedUser] = await db.update(users)
-      .set(userData)
-      .where(eq(users.id, id))
-      .returning();
-    return updatedUser || undefined;
-  }
-
-  async deleteUser(id: number): Promise<boolean> {
-    await db.delete(users).where(eq(users.id, id));
-    return true;
-  }
-
-  // Apprentices
-  async getAllApprentices(): Promise<Apprentice[]> {
-    try {
-      // Use raw SQL to avoid column mismatch issues
-      const results = await db.execute(`
-        SELECT 
-          id, first_name as "firstName", last_name as "lastName", email, 
-          trade, status, progress, date_of_birth as "dateOfBirth", phone,
-          user_id as "userId", start_date as "startDate", end_date as "endDate",
-          profile_image as "profileImage", notes,
-          unique_student_identifier as "uniqueStudentIdentifier",
-          aqf_level as "aqfLevel",
-          apprenticeship_year as "apprenticeshipYear",
-          gto_enrolled as "gtoEnrolled",
-          gto_id as "gtoId",
-          at_school_flag as "atSchoolFlag"
-        FROM apprentices
-      `);
-      return results.rows as Apprentice[];
-    } catch (error) {
-      console.error("Error in getAllApprentices:", error);
-      // Return empty array instead of throwing to prevent application crashes
-      return [];
+  async getAllDataJobs(options?: { type?: string, status?: string, limit?: number }): Promise<DataJob[]> {
+    let query = db.select().from(dataJobs).orderBy(desc(dataJobs.createdAt));
+    
+    if (options?.type) {
+      query = query.where(eq(dataJobs.type, options.type));
     }
-  }
-
-  async getApprentice(id: number): Promise<Apprentice | undefined> {
-    const [apprentice] = await db.select().from(apprentices).where(eq(apprentices.id, id));
-    return apprentice || undefined;
-  }
-
-  async createApprentice(insertApprentice: InsertApprentice): Promise<Apprentice> {
-    const [apprentice] = await db.insert(apprentices).values(insertApprentice).returning();
-    return apprentice;
-  }
-
-  async updateApprentice(id: number, apprenticeData: Partial<InsertApprentice>): Promise<Apprentice | undefined> {
-    const [updatedApprentice] = await db.update(apprentices)
-      .set(apprenticeData)
-      .where(eq(apprentices.id, id))
-      .returning();
-    return updatedApprentice || undefined;
-  }
-
-  async deleteApprentice(id: number): Promise<boolean> {
-    await db.delete(apprentices).where(eq(apprentices.id, id));
-    return true;
-  }
-
-  // Host Employers
-  async getAllHostEmployers(): Promise<HostEmployer[]> {
-    try {
-      // Use raw SQL to avoid column mismatch issues
-      const results = await db.execute(`
-        SELECT 
-          id, name, email, industry, status, phone, notes,
-          contact_person as "contactPerson", address, 
-          safety_rating as "safetyRating", 
-          compliance_status as "complianceStatus",
-          labour_hire_licence_no as "labourHireLicenceNo", 
-          labour_hire_licence_expiry as "labourHireLicenceExpiry"
-        FROM host_employers
-      `);
-      return results.rows as HostEmployer[];
-    } catch (error) {
-      console.error("Error in getAllHostEmployers:", error);
-      // Return empty array instead of throwing to prevent application crashes
-      return [];
+    
+    if (options?.status) {
+      query = query.where(eq(dataJobs.status, options.status));
     }
+    
+    if (options?.limit) {
+      query = query.limit(options.limit);
+    }
+    
+    return await query;
   }
 
-  async getHostEmployer(id: number): Promise<HostEmployer | undefined> {
-    const [hostEmployer] = await db.select().from(hostEmployers).where(eq(hostEmployers.id, id));
-    return hostEmployer || undefined;
+  async createDataJob(job: InsertDataJob): Promise<DataJob> {
+    const [createdJob] = await db.insert(dataJobs).values(job).returning();
+    return createdJob;
   }
 
-  async createHostEmployer(insertHostEmployer: InsertHostEmployer): Promise<HostEmployer> {
-    const [hostEmployer] = await db.insert(hostEmployers).values(insertHostEmployer).returning();
-    return hostEmployer;
-  }
-
-  async updateHostEmployer(id: number, hostEmployerData: Partial<InsertHostEmployer>): Promise<HostEmployer | undefined> {
-    const [updatedHostEmployer] = await db.update(hostEmployers)
-      .set(hostEmployerData)
-      .where(eq(hostEmployers.id, id))
+  async updateDataJobStatus(id: number, status: string, options?: { recordsProcessed?: number, errors?: any[] }): Promise<DataJob | undefined> {
+    const updates: Partial<DataJob> = { status };
+    
+    if (options?.recordsProcessed !== undefined) {
+      updates.recordsProcessed = options.recordsProcessed;
+    }
+    
+    if (options?.errors !== undefined) {
+      updates.errors = options.errors;
+    }
+    
+    if (status === 'completed' || status === 'failed') {
+      updates.completedAt = new Date();
+    }
+    
+    const [updatedJob] = await db
+      .update(dataJobs)
+      .set(updates)
+      .where(eq(dataJobs.id, id))
       .returning();
-    return updatedHostEmployer || undefined;
+    
+    return updatedJob;
   }
 
-  async deleteHostEmployer(id: number): Promise<boolean> {
-    const result = await db.delete(hostEmployers).where(eq(hostEmployers.id, id));
-    return result.count > 0;
+  async deleteDataJob(id: number): Promise<boolean> {
+    const result = await db.delete(dataJobs).where(eq(dataJobs.id, id));
+    return result.rowCount > 0;
   }
 
-  // Training Contracts
-  async getAllTrainingContracts(): Promise<TrainingContract[]> {
-    return await db.select().from(trainingContracts);
+  // Custom Data View methods
+  async getDataView(id: number): Promise<DataView | undefined> {
+    const [view] = await db.select().from(dataViews).where(eq(dataViews.id, id));
+    return view;
   }
 
-  async getTrainingContract(id: number): Promise<TrainingContract | undefined> {
-    const [contract] = await db.select().from(trainingContracts).where(eq(trainingContracts.id, id));
-    return contract || undefined;
+  async getAllDataViews(userId?: number): Promise<DataView[]> {
+    let query = db.select().from(dataViews);
+    
+    if (userId) {
+      query = query.where(
+        or(
+          eq(dataViews.userId, userId),
+          eq(dataViews.isPublic, true)
+        )
+      );
+    }
+    
+    return await query;
   }
 
-  async getTrainingContractsByApprentice(apprenticeId: number): Promise<TrainingContract[]> {
-    return await db.select().from(trainingContracts).where(eq(trainingContracts.apprenticeId, apprenticeId));
+  async createDataView(view: InsertDataView): Promise<DataView> {
+    const [createdView] = await db.insert(dataViews).values(view).returning();
+    return createdView;
   }
 
-  async createTrainingContract(insertContract: InsertTrainingContract): Promise<TrainingContract> {
-    const [contract] = await db.insert(trainingContracts).values(insertContract).returning();
-    return contract;
-  }
-
-  async updateTrainingContract(id: number, contractData: Partial<InsertTrainingContract>): Promise<TrainingContract | undefined> {
-    const [updatedContract] = await db.update(trainingContracts)
-      .set(contractData)
-      .where(eq(trainingContracts.id, id))
+  async updateDataView(id: number, view: Partial<InsertDataView>): Promise<DataView | undefined> {
+    const [updatedView] = await db
+      .update(dataViews)
+      .set({ ...view, updatedAt: new Date() })
+      .where(eq(dataViews.id, id))
       .returning();
-    return updatedContract || undefined;
+    return updatedView;
   }
 
-  async deleteTrainingContract(id: number): Promise<boolean> {
-    const result = await db.delete(trainingContracts).where(eq(trainingContracts.id, id));
-    return result.count > 0;
-  }
-
-  // Placements
-  async getAllPlacements(): Promise<Placement[]> {
-    return await db.select().from(placements);
-  }
-
-  async getPlacement(id: number): Promise<Placement | undefined> {
-    const [placement] = await db.select().from(placements).where(eq(placements.id, id));
-    return placement || undefined;
-  }
-
-  async getPlacementsByApprentice(apprenticeId: number): Promise<Placement[]> {
-    return await db.select().from(placements).where(eq(placements.apprenticeId, apprenticeId));
-  }
-
-  async getPlacementsByHost(hostEmployerId: number): Promise<Placement[]> {
-    return await db.select().from(placements).where(eq(placements.hostEmployerId, hostEmployerId));
-  }
-
-  async createPlacement(insertPlacement: InsertPlacement): Promise<Placement> {
-    const [placement] = await db.insert(placements).values(insertPlacement).returning();
-    return placement;
-  }
-
-  async updatePlacement(id: number, placementData: Partial<InsertPlacement>): Promise<Placement | undefined> {
-    const [updatedPlacement] = await db.update(placements)
-      .set(placementData)
-      .where(eq(placements.id, id))
-      .returning();
-    return updatedPlacement || undefined;
-  }
-
-  async deletePlacement(id: number): Promise<boolean> {
-    const result = await db.delete(placements).where(eq(placements.id, id));
-    return result.count > 0;
-  }
-
-  // Documents
-  async getAllDocuments(): Promise<Document[]> {
-    return await db.select().from(documents);
-  }
-
-  async getDocument(id: number): Promise<Document | undefined> {
-    const [document] = await db.select().from(documents).where(eq(documents.id, id));
-    return document || undefined;
-  }
-
-  async getDocumentsByRelation(relatedTo: string, relatedId: number): Promise<Document[]> {
-    return await db.select().from(documents)
-      .where(and(
-        eq(documents.relatedTo, relatedTo),
-        eq(documents.relatedId, relatedId)
-      ));
-  }
-
-  async createDocument(insertDocument: InsertDocument): Promise<Document> {
-    const [document] = await db.insert(documents).values(insertDocument).returning();
-    return document;
-  }
-
-  async updateDocument(id: number, documentData: Partial<InsertDocument>): Promise<Document | undefined> {
-    const [updatedDocument] = await db.update(documents)
-      .set(documentData)
-      .where(eq(documents.id, id))
-      .returning();
-    return updatedDocument || undefined;
-  }
-
-  async deleteDocument(id: number): Promise<boolean> {
-    const result = await db.delete(documents).where(eq(documents.id, id));
-    return result.count > 0;
-  }
-
-  // Compliance Records
-  async getAllComplianceRecords(): Promise<ComplianceRecord[]> {
-    return await db.select().from(complianceRecords);
-  }
-
-  async getComplianceRecord(id: number): Promise<ComplianceRecord | undefined> {
-    const [record] = await db.select().from(complianceRecords).where(eq(complianceRecords.id, id));
-    return record || undefined;
-  }
-
-  async getComplianceRecordsByRelation(relatedTo: string, relatedId: number): Promise<ComplianceRecord[]> {
-    return await db.select().from(complianceRecords)
-      .where(and(
-        eq(complianceRecords.relatedTo, relatedTo),
-        eq(complianceRecords.relatedId, relatedId)
-      ));
-  }
-
-  async createComplianceRecord(insertRecord: InsertComplianceRecord): Promise<ComplianceRecord> {
-    const [record] = await db.insert(complianceRecords).values(insertRecord).returning();
-    return record;
-  }
-
-  async updateComplianceRecord(id: number, recordData: Partial<InsertComplianceRecord>): Promise<ComplianceRecord | undefined> {
-    const [updatedRecord] = await db.update(complianceRecords)
-      .set(recordData)
-      .where(eq(complianceRecords.id, id))
-      .returning();
-    return updatedRecord || undefined;
-  }
-
-  async deleteComplianceRecord(id: number): Promise<boolean> {
-    const result = await db.delete(complianceRecords).where(eq(complianceRecords.id, id));
-    return result.count > 0;
-  }
-
-  // Timesheets
-  async getAllTimesheets(): Promise<Timesheet[]> {
-    return await db.select().from(timesheets);
-  }
-
-  async getTimesheet(id: number): Promise<Timesheet | undefined> {
-    const [timesheet] = await db.select().from(timesheets).where(eq(timesheets.id, id));
-    return timesheet || undefined;
-  }
-
-  async getTimesheetsByApprentice(apprenticeId: number): Promise<Timesheet[]> {
-    return await db.select().from(timesheets).where(eq(timesheets.apprenticeId, apprenticeId));
-  }
-
-  async createTimesheet(insertTimesheet: InsertTimesheet): Promise<Timesheet> {
-    const [timesheet] = await db.insert(timesheets).values(insertTimesheet).returning();
-    return timesheet;
-  }
-
-  async updateTimesheet(id: number, timesheetData: Partial<InsertTimesheet>): Promise<Timesheet | undefined> {
-    const [updatedTimesheet] = await db.update(timesheets)
-      .set(timesheetData)
-      .where(eq(timesheets.id, id))
-      .returning();
-    return updatedTimesheet || undefined;
-  }
-
-  async deleteTimesheet(id: number): Promise<boolean> {
-    const result = await db.delete(timesheets).where(eq(timesheets.id, id));
-    return result.count > 0;
-  }
-
-  // Timesheet Details
-  async getTimesheetDetails(timesheetId: number): Promise<TimesheetDetail[]> {
-    return await db.select().from(timesheetDetails).where(eq(timesheetDetails.timesheetId, timesheetId));
-  }
-
-  async createTimesheetDetail(insertDetail: InsertTimesheetDetail): Promise<TimesheetDetail> {
-    const [detail] = await db.insert(timesheetDetails).values(insertDetail).returning();
-    return detail;
-  }
-
-  async updateTimesheetDetail(id: number, detailData: Partial<InsertTimesheetDetail>): Promise<TimesheetDetail | undefined> {
-    const [updatedDetail] = await db.update(timesheetDetails)
-      .set(detailData)
-      .where(eq(timesheetDetails.id, id))
-      .returning();
-    return updatedDetail || undefined;
-  }
-
-  async deleteTimesheetDetail(id: number): Promise<boolean> {
-    const result = await db.delete(timesheetDetails).where(eq(timesheetDetails.id, id));
-    return result.count > 0;
-  }
-
-  // Activity Logs
-  async getAllActivityLogs(): Promise<ActivityLog[]> {
-    return await db.select().from(activityLogs);
-  }
-
-  async getRecentActivityLogs(limit: number): Promise<ActivityLog[]> {
-    return await db.select().from(activityLogs)
-      .orderBy(desc(activityLogs.timestamp))
-      .limit(limit);
-  }
-
-  async createActivityLog(insertLog: InsertActivityLog): Promise<ActivityLog> {
-    const [log] = await db.insert(activityLogs).values(insertLog).returning();
-    return log;
-  }
-
-  // Tasks
-  async getAllTasks(): Promise<Task[]> {
-    return await db.select().from(tasks);
-  }
-
-  async getTask(id: number): Promise<Task | undefined> {
-    const [task] = await db.select().from(tasks).where(eq(tasks.id, id));
-    return task || undefined;
-  }
-
-  async getTasksByAssignee(userId: number): Promise<Task[]> {
-    return await db.select().from(tasks).where(eq(tasks.assignedTo, userId));
-  }
-
-  async createTask(insertTask: InsertTask): Promise<Task> {
-    const [task] = await db.insert(tasks).values(insertTask).returning();
-    return task;
-  }
-
-  async updateTask(id: number, taskData: Partial<InsertTask>): Promise<Task | undefined> {
-    const [updatedTask] = await db.update(tasks)
-      .set(taskData)
-      .where(eq(tasks.id, id))
-      .returning();
-    return updatedTask || undefined;
-  }
-
-  async deleteTask(id: number): Promise<boolean> {
-    const result = await db.delete(tasks).where(eq(tasks.id, id));
-    return result.count > 0;
-  }
-
-  async completeTask(id: number): Promise<Task | undefined> {
-    const [task] = await db.update(tasks)
-      .set({ status: "completed", completedAt: new Date() })
-      .where(eq(tasks.id, id))
-      .returning();
-    return task || undefined;
+  async deleteDataView(id: number): Promise<boolean> {
+    const result = await db.delete(dataViews).where(eq(dataViews.id, id));
+    return result.rowCount > 0;
   }
 }
 
-// Use DatabaseStorage for the app
 export const storage = new DatabaseStorage();

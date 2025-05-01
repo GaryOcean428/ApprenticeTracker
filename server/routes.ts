@@ -19,12 +19,18 @@ import {
 import { z } from "zod";
 import { gtoComplianceRouter } from "./api/gto-compliance-routes";
 import { vetRouter } from "./api/vet-routes";
+import { settingsRouter } from "./api/settings-routes";
 import { eq, and } from "drizzle-orm";
 import { db } from "./db"; // Assuming db connection is defined here
 import { users, gtoOrganizations } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // API Routes - prefix all routes with /api
+
+  // Register specialized route handlers
+  app.use('/api/gto-compliance', gtoComplianceRouter);
+  app.use('/api/vet', vetRouter);
+  app.use('/api/settings', settingsRouter);
 
   // User Management Routes
   // Get all users
