@@ -43,12 +43,21 @@ import { useToast } from "@/hooks/use-toast";
 
 interface Qualification {
   id: number;
-  code: string;
-  title: string;
-  description: string;
-  level: string;
+  qualificationCode: string;
+  qualificationTitle: string;
+  qualificationDescription: string;
+  aqfLevel: string;
+  aqfLevelNumber: number;
+  trainingPackage: string;
+  trainingPackageRelease: string;
+  totalUnits: number;
+  coreUnits: number;
+  electiveUnits: number;
+  nominalHours: number;
   isActive: boolean;
-  industryArea: string;
+  isApprenticeshipQualification: boolean;
+  isFundedQualification: boolean;
+  fundingDetails: string | null;
   createdAt: string;
   updatedAt: string;
 }
