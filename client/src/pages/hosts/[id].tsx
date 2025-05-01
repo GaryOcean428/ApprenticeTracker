@@ -25,9 +25,52 @@ import {
   Building2,
   MapPin,
   User,
-  Star
+  Star,
+  GraduationCap,
+  Plus,
+  Trash2
 } from "lucide-react";
-import { HostEmployer, Placement } from "@shared/schema";
+import { 
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow
+} from "@/components/ui/table";
+import { 
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger
+} from "@/components/ui/dialog";
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/hooks/use-toast";
+import { HostEmployer, Placement, Qualification } from "@shared/schema";
+
+interface PreferredQualification {
+  id: number;
+  hostEmployerId: number;
+  qualificationId: number;
+  priority: string;
+  notes: string | null;
+  isRequired: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  qualification?: Qualification;
+}
 
 const HostDetails = () => {
   const [, params] = useLocation();
@@ -51,6 +94,116 @@ const HostDetails = () => {
     },
     enabled: !!hostId
   });
+  
+  const { data: preferredQualifications, isLoading: isLoadingQualifications } = useQuery({
+    queryKey: [`/api/hosts/${hostId}/preferred-qualifications`],
+    queryFn: async () => {
+      const res = await fetch(`/api/hosts/${hostId}/preferred-qualifications`);
+      if (!res.ok) throw new Error('Failed to fetch preferred qualifications');
+      return res.json() as Promise<PreferredQualification[]>;
+    },
+    enabled: !!hostId
+  });
+  
+  const [isAddQualDialogOpen, setIsAddQualDialogOpen] = useState(false);
+  const [selectedQualificationId, setSelectedQualificationId] = useState<number | null>(null);
+  const [selectedPriority, setSelectedPriority] = useState<string>('medium');
+  const [isRequired, setIsRequired] = useState<boolean>(false);
+  const [qualificationNotes, setQualificationNotes] = useState<string>('');
+  
+  const { toast } = useToast();
+  
+  const { data: qualifications, isLoading: isLoadingAllQualifications } = useQuery({
+    queryKey: [`/api/qualifications`],
+    queryFn: async () => {
+      const res = await fetch(`/api/qualifications`);
+      if (!res.ok) throw new Error('Failed to fetch qualifications');
+      return res.json() as Promise<Qualification[]>;
+    }
+  });
+  
+  // Function to add a preferred qualification
+  const addPreferredQualification = async () => {
+    if (!selectedQualificationId) {
+      toast({
+        title: "Error",
+        description: "Please select a qualification",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    try {
+      const response = await fetch(`/api/hosts/${hostId}/preferred-qualifications`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          qualificationId: selectedQualificationId,
+          priority: selectedPriority,
+          isRequired,
+          notes: qualificationNotes || null
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to add preferred qualification');
+      }
+      
+      // Reset form
+      setSelectedQualificationId(null);
+      setSelectedPriority('medium');
+      setIsRequired(false);
+      setQualificationNotes('');
+      setIsAddQualDialogOpen(false);
+      
+      // Invalidate and refetch
+      window.location.reload();
+      
+      toast({
+        title: "Success",
+        description: "Preferred qualification added successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to add qualification",
+        variant: "destructive"
+      });
+    }
+  };
+  
+  // Function to remove a preferred qualification
+  const removePreferredQualification = async (id: number) => {
+    if (!confirm('Are you sure you want to remove this qualification preference?')) {
+      return;
+    }
+    
+    try {
+      const response = await fetch(`/api/hosts/${hostId}/preferred-qualifications/${id}`, {
+        method: 'DELETE'
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to remove preferred qualification');
+      }
+      
+      // Invalidate and refetch
+      window.location.reload();
+      
+      toast({
+        title: "Success",
+        description: "Preferred qualification removed successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to remove qualification",
+        variant: "destructive"
+      });
+    }
+  };
   
   if (isLoadingHost) {
     return (
@@ -331,10 +484,14 @@ const HostDetails = () => {
           </Card>
           
           <Tabs defaultValue="placements">
-            <TabsList className="grid grid-cols-3 mb-6">
+            <TabsList className="grid grid-cols-4 mb-6">
               <TabsTrigger value="placements">
                 <Users className="h-4 w-4 mr-2" />
                 Placements
+              </TabsTrigger>
+              <TabsTrigger value="qualifications">
+                <GraduationCap className="h-4 w-4 mr-2" />
+                Qualifications
               </TabsTrigger>
               <TabsTrigger value="documents">
                 <FileText className="h-4 w-4 mr-2" />
