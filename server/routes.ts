@@ -617,7 +617,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/activities/recent", async (req, res) => {
     try {
       const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
-      const activities = await storage.getRecentActivityLogs(limit);
+      const activities = await storage.getActivityLogs({ limit });
       res.json(activities);
     } catch (error) {
       res.status(500).json({ message: "Error fetching recent activities" });

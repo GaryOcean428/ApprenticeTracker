@@ -107,6 +107,21 @@ export interface IStorage {
   createComplianceRecord(record: InsertComplianceRecord): Promise<ComplianceRecord>;
   updateComplianceRecord(id: number, record: Partial<InsertComplianceRecord>): Promise<ComplianceRecord | undefined>;
 
+  // Task methods
+  getAllTasks(): Promise<Task[]>;
+  getTask(id: number): Promise<Task | undefined>;
+  getTasksByAssignee(assigneeId: number): Promise<Task[]>;
+  createTask(task: InsertTask): Promise<Task>;
+  updateTask(id: number, task: Partial<InsertTask>): Promise<Task | undefined>;
+  completeTask(id: number): Promise<Task | undefined>;
+  
+  // Timesheet methods
+  getAllTimesheets(): Promise<Timesheet[]>;
+  getTimesheet(id: number): Promise<Timesheet | undefined>;
+  getTimesheetsByApprentice(apprenticeId: number): Promise<Timesheet[]>;
+  createTimesheet(timesheet: InsertTimesheet): Promise<Timesheet>;
+  updateTimesheet(id: number, timesheet: Partial<InsertTimesheet>): Promise<Timesheet | undefined>;
+
   // Activity Log methods
   createActivityLog(log: InsertActivityLog): Promise<ActivityLog>;
   getActivityLogs(options?: { userId?: number, relatedTo?: string, relatedId?: number, limit?: number }): Promise<ActivityLog[]>;
@@ -611,6 +626,76 @@ export class DatabaseStorage implements IStorage {
       .where(eq(complianceRecords.id, id))
       .returning();
     return updatedRecord;
+  }
+  
+  // Task methods
+  async getAllTasks(): Promise<Task[]> {
+    return await db.select().from(tasks).orderBy(desc(tasks.dueDate));
+  }
+
+  async getTask(id: number): Promise<Task | undefined> {
+    const [task] = await db.select().from(tasks).where(eq(tasks.id, id));
+    return task;
+  }
+
+  async getTasksByAssignee(assigneeId: number): Promise<Task[]> {
+    return await db.select().from(tasks).where(eq(tasks.assignedTo, assigneeId)).orderBy(desc(tasks.dueDate));
+  }
+
+  async createTask(task: InsertTask): Promise<Task> {
+    const [createdTask] = await db.insert(tasks).values(task).returning();
+    return createdTask;
+  }
+
+  async updateTask(id: number, task: Partial<InsertTask>): Promise<Task | undefined> {
+    const [updatedTask] = await db
+      .update(tasks)
+      .set(task)
+      .where(eq(tasks.id, id))
+      .returning();
+    return updatedTask;
+  }
+
+  async completeTask(id: number): Promise<Task | undefined> {
+    const [completedTask] = await db
+      .update(tasks)
+      .set({
+        status: 'completed',
+        completedAt: new Date()
+      })
+      .where(eq(tasks.id, id))
+      .returning();
+    return completedTask;
+  }
+  
+  // Timesheet methods
+  async getAllTimesheets(): Promise<Timesheet[]> {
+    return await db.select().from(timesheets).orderBy(desc(timesheets.weekStarting));
+  }
+
+  async getTimesheet(id: number): Promise<Timesheet | undefined> {
+    const [timesheet] = await db.select().from(timesheets).where(eq(timesheets.id, id));
+    return timesheet;
+  }
+
+  async getTimesheetsByApprentice(apprenticeId: number): Promise<Timesheet[]> {
+    return await db.select().from(timesheets)
+      .where(eq(timesheets.apprenticeId, apprenticeId))
+      .orderBy(desc(timesheets.weekStarting));
+  }
+
+  async createTimesheet(timesheet: InsertTimesheet): Promise<Timesheet> {
+    const [createdTimesheet] = await db.insert(timesheets).values(timesheet).returning();
+    return createdTimesheet;
+  }
+
+  async updateTimesheet(id: number, timesheet: Partial<InsertTimesheet>): Promise<Timesheet | undefined> {
+    const [updatedTimesheet] = await db
+      .update(timesheets)
+      .set(timesheet)
+      .where(eq(timesheets.id, id))
+      .returning();
+    return updatedTimesheet;
   }
   
   // Activity Log methods
