@@ -17,6 +17,8 @@ import {
   placements,
   apprentices,
   timesheets,
+  hostEmployerPreferredQualifications,
+  qualifications,
 } from "@shared/schema";
 import { z } from "zod";
 
@@ -478,6 +480,162 @@ export function registerHostRoutes(app: Express) {
     } catch (error) {
       console.error("Error updating timesheet status:", error);
       res.status(500).json({ message: "Error updating timesheet status" });
+    }
+  });
+
+  // Host Employer Preferred Qualifications API Endpoints
+  
+  // Get all preferred qualifications for a host employer
+  app.get("/api/hosts/:hostId/preferred-qualifications", async (req, res) => {
+    try {
+      const hostId = parseInt(req.params.hostId);
+      
+      // Check if host employer exists
+      const host = await storage.getHostEmployer(hostId);
+      if (!host) {
+        return res.status(404).json({ message: "Host employer not found" });
+      }
+      
+      // Get all preferred qualifications for this host
+      const preferredQuals = await storage.getHostEmployerPreferredQualifications(hostId);
+      
+      // Get the full qualification details for each preference
+      const result = await Promise.all(
+        preferredQuals.map(async (pref) => {
+          const qualification = await storage.getQualification(pref.qualificationId);
+          return {
+            ...pref,
+            qualification: qualification || undefined
+          };
+        })
+      );
+      
+      res.json(result);
+    } catch (error) {
+      console.error("Error fetching host preferred qualifications:", error);
+      res.status(500).json({ message: "Error fetching host preferred qualifications" });
+    }
+  });
+  
+  // Get a specific preferred qualification
+  app.get("/api/hosts/:hostId/preferred-qualifications/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const hostId = parseInt(req.params.hostId);
+      
+      // Get the preferred qualification
+      const preferredQual = await storage.getHostEmployerPreferredQualification(id);
+      
+      if (!preferredQual || preferredQual.hostEmployerId !== hostId) {
+        return res.status(404).json({ message: "Preferred qualification not found" });
+      }
+      
+      // Get the qualification details
+      const qualification = await storage.getQualification(preferredQual.qualificationId);
+      
+      res.json({
+        ...preferredQual,
+        qualification: qualification || undefined
+      });
+    } catch (error) {
+      console.error("Error fetching preferred qualification:", error);
+      res.status(500).json({ message: "Error fetching preferred qualification" });
+    }
+  });
+  
+  // Add a preferred qualification to a host employer
+  app.post("/api/hosts/:hostId/preferred-qualifications", async (req, res) => {
+    try {
+      const hostId = parseInt(req.params.hostId);
+      const { qualificationId, priority, notes, isRequired } = req.body;
+      
+      // Check if host employer exists
+      const host = await storage.getHostEmployer(hostId);
+      if (!host) {
+        return res.status(404).json({ message: "Host employer not found" });
+      }
+      
+      // Check if qualification exists
+      const qualification = await storage.getQualification(qualificationId);
+      if (!qualification) {
+        return res.status(404).json({ message: "Qualification not found" });
+      }
+      
+      // Create new preferred qualification
+      const preferredQual = await storage.addHostEmployerPreferredQualification({
+        hostEmployerId: hostId,
+        qualificationId,
+        priority: priority || "medium",
+        notes,
+        isRequired: isRequired || false,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      });
+      
+      // Return with qualification details
+      res.status(201).json({
+        ...preferredQual,
+        qualification
+      });
+    } catch (error) {
+      console.error("Error creating preferred qualification:", error);
+      res.status(500).json({ message: "Error creating preferred qualification" });
+    }
+  });
+  
+  // Update a preferred qualification
+  app.patch("/api/hosts/:hostId/preferred-qualifications/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const hostId = parseInt(req.params.hostId);
+      const { priority, notes, isRequired } = req.body;
+      
+      // Check if the preferred qualification exists and belongs to the host
+      const existingPref = await storage.getHostEmployerPreferredQualification(id);
+      if (!existingPref || existingPref.hostEmployerId !== hostId) {
+        return res.status(404).json({ message: "Preferred qualification not found" });
+      }
+      
+      // Update the preferred qualification
+      const updatedPref = await storage.updateHostEmployerPreferredQualification(id, {
+        priority,
+        notes,
+        isRequired,
+        updatedAt: new Date()
+      });
+      
+      // Get the qualification details
+      const qualification = await storage.getQualification(existingPref.qualificationId);
+      
+      res.json({
+        ...updatedPref,
+        qualification: qualification || undefined
+      });
+    } catch (error) {
+      console.error("Error updating preferred qualification:", error);
+      res.status(500).json({ message: "Error updating preferred qualification" });
+    }
+  });
+  
+  // Remove a preferred qualification
+  app.delete("/api/hosts/:hostId/preferred-qualifications/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const hostId = parseInt(req.params.hostId);
+      
+      // Check if the preferred qualification exists and belongs to the host
+      const existingPref = await storage.getHostEmployerPreferredQualification(id);
+      if (!existingPref || existingPref.hostEmployerId !== hostId) {
+        return res.status(404).json({ message: "Preferred qualification not found" });
+      }
+      
+      // Delete the preferred qualification
+      await storage.removeHostEmployerPreferredQualification(id);
+      
+      res.status(204).end();
+    } catch (error) {
+      console.error("Error deleting preferred qualification:", error);
+      res.status(500).json({ message: "Error deleting preferred qualification" });
     }
   });
 

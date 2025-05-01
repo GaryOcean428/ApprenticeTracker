@@ -22,7 +22,7 @@ import {
   type HostEmployerPreferredQualification, type InsertHostEmployerPreferredQualification
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, or, desc, asc, sql } from "drizzle-orm";
+import { eq, and, or, desc, asc, sql, type SQL } from "drizzle-orm";
 import session from "express-session";
 import memorystore from "memorystore";
 
@@ -178,6 +178,83 @@ export class DatabaseStorage implements IStorage {
   constructor() {
     this.sessionStore = new MemoryStore({
       checkPeriod: 86400000, // 24 hours
+    });
+  }
+  
+  // Host Employer Preferred Qualifications methods
+  async getHostEmployerPreferredQualifications(hostEmployerId: number): Promise<HostEmployerPreferredQualification[]> {
+    return await db
+      .select()
+      .from(hostEmployerPreferredQualifications)
+      .where(eq(hostEmployerPreferredQualifications.hostEmployerId, hostEmployerId));
+  }
+  
+  async getHostEmployerPreferredQualification(id: number): Promise<HostEmployerPreferredQualification | undefined> {
+    const [qualification] = await db
+      .select()
+      .from(hostEmployerPreferredQualifications)
+      .where(eq(hostEmployerPreferredQualifications.id, id));
+    return qualification;
+  }
+  
+  async addHostEmployerPreferredQualification(qualification: InsertHostEmployerPreferredQualification): Promise<HostEmployerPreferredQualification> {
+    const [created] = await db
+      .insert(hostEmployerPreferredQualifications)
+      .values(qualification)
+      .returning();
+    return created;
+  }
+  
+  async updateHostEmployerPreferredQualification(id: number, qualification: Partial<InsertHostEmployerPreferredQualification>): Promise<HostEmployerPreferredQualification | undefined> {
+    const [updated] = await db
+      .update(hostEmployerPreferredQualifications)
+      .set({
+        ...qualification,
+        updatedAt: new Date()
+      })
+      .where(eq(hostEmployerPreferredQualifications.id, id))
+      .returning();
+    return updated;
+  }
+  
+  async removeHostEmployerPreferredQualification(id: number): Promise<boolean> {
+    const result = await db
+      .delete(hostEmployerPreferredQualifications)
+      .where(eq(hostEmployerPreferredQualifications.id, id));
+    return result.rowCount ? result.rowCount > 0 : false;
+  }
+  
+  // Qualification methods
+  async getQualification(id: number): Promise<Qualification | undefined> {
+    const [qualification] = await db
+      .select()
+      .from(qualifications)
+      .where(eq(qualifications.id, id));
+    return qualification;
+  }
+  
+  async getAllQualifications(): Promise<Qualification[]> {
+    return await db
+      .select()
+      .from(qualifications)
+      .orderBy(qualifications.qualificationTitle);
+  }
+  
+  async searchQualifications(query: string): Promise<Qualification[]> {
+    const searchTerm = query.trim().toLowerCase();
+    const allQualifications = await db
+      .select()
+      .from(qualifications);
+      
+    // Filter qualifications that match the search term in a case-insensitive way
+    return allQualifications.filter(qualification => {
+      const title = qualification.qualificationTitle?.toLowerCase() || '';
+      const code = qualification.qualificationCode?.toLowerCase() || '';
+      const desc = qualification.qualificationDescription?.toLowerCase() || '';
+      
+      return title.includes(searchTerm) || 
+             code.includes(searchTerm) || 
+             desc.includes(searchTerm);
     });
   }
 
