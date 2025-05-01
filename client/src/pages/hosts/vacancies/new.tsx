@@ -1,595 +1,606 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
+import { useState, useEffect } from "react";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
-  FormMessage
+  FormMessage,
+  FormDescription
 } from "@/components/ui/form";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle
-} from "@/components/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
-import { DatePicker } from "@/components/ui/date-picker";
 import { Checkbox } from "@/components/ui/checkbox";
-import { toast } from "@/hooks/use-toast";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { addDays, format } from "date-fns";
-import { ArrowLeft, BriefcaseBusiness, MapPin, GraduationCap, Briefcase } from "lucide-react";
-import { queryClient, apiRequest } from "@/lib/queryClient";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { DatePicker } from "@/components/ui/date-picker";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { format } from "date-fns";
+import { Loader2, CalendarIcon, ArrowLeft } from "lucide-react";
 
-// Define the form schema
+// Form schema
 const vacancyFormSchema = z.object({
-  hostEmployerId: z.string().min(1, "Host employer is required"),
-  title: z.string().min(3, "Job title is required"),
-  location: z.string().min(3, "Location is required"),
-  trade: z.string().min(1, "Trade is required"),
-  description: z.string().min(10, "Job description is required"),
+  title: z.string().min(5, "Title must be at least 5 characters"),
+  hostEmployerId: z.coerce.number().min(1, "Please select a host employer"),
+  location: z.string().min(3, "Location must be at least 3 characters"),
+  description: z.string().min(20, "Description must be at least 20 characters"),
+  requirements: z.string().optional(),
+  specialRequirements: z.string().optional(),
+  positionCount: z.coerce.number().min(1, "Must have at least 1 position").max(50, "Maximum 50 positions allowed"),
+  isRemote: z.boolean().default(false),
   startDate: z.date({
     required_error: "Start date is required",
   }),
-  numberOfPositions: z.coerce.number().min(1, "At least one position is required"),
   status: z.enum(["draft", "open", "filled", "closed"]),
-  requirements: z.string().optional(),
-  specialRequirements: z.string().optional(),
-  isRemote: z.boolean().default(false),
-  isApprenticeshipEligible: z.boolean().default(true),
-  isPublic: z.boolean().default(true),
-  minWage: z.coerce.number().min(0, "Minimum wage must be 0 or more"),
-  maxWage: z.coerce.number().min(0, "Maximum wage must be 0 or more"),
+  qualificationId: z.coerce.number().optional(),
+  aqfLevel: z.coerce.number().min(1).max(10).optional(),
+  industryRelevance: z.string().optional(),
+  trainingRequirements: z.string().optional(),
+  hourlyRate: z.coerce.number().min(0).optional(),
+  awardClassificationId: z.coerce.number().optional(),
+  registeredGTO: z.boolean().default(true)
 });
 
 type VacancyFormValues = z.infer<typeof vacancyFormSchema>;
 
-// Host employer type
 interface HostEmployer {
   id: number;
   name: string;
 }
 
-// Trade options
-const tradeOptions = [
-  "Carpentry",
-  "Electrical",
-  "Plumbing",
-  "Automotive",
-  "Commercial Cookery",
-  "Hairdressing",
-  "Information Technology",
-  "Business Administration",
-  "Childcare",
-  "Engineering",
-  "Horticulture",
-  "Hospitality",
-  "Retail",
-  "Construction",
-  "Healthcare",
-  "Other"
-];
+interface Qualification {
+  id: number;
+  name: string;
+  code: string;
+  aqfLevel: number;
+}
 
-// Location options
-const locationOptions = [
-  "Sydney CBD",
-  "Sydney - Inner West",
-  "Sydney - Western Suburbs",
-  "Sydney - Northern Beaches",
-  "Sydney - Eastern Suburbs",
-  "Sydney - South",
-  "Melbourne CBD",
-  "Melbourne - Inner Suburbs",
-  "Melbourne - Eastern Suburbs",
-  "Melbourne - Western Suburbs",
-  "Brisbane CBD",
-  "Brisbane - Inner Suburbs",
-  "Gold Coast",
-  "Perth Metropolitan",
-  "Adelaide Metropolitan",
-  "Canberra",
-  "Hobart",
-  "Darwin",
-  "Regional NSW",
-  "Regional VIC",
-  "Regional QLD",
-  "Regional SA",
-  "Regional WA",
-  "Regional TAS",
-  "Regional NT",
-  "Remote"
-];
+interface Award {
+  id: number;
+  name: string;
+  code: string;
+}
+
+interface AwardClassification {
+  id: number;
+  awardId: number;
+  level: string;
+  name: string;
+  minHourlyRate: number;
+}
 
 const NewVacancyPage = () => {
   const [, navigate] = useLocation();
+  const { toast } = useToast();
+  const [selectedAward, setSelectedAward] = useState<number | null>(null);
   
-  // Fetch host employers for the dropdown
-  const { data: hostEmployers, isLoading: loadingHosts } = useQuery({
+  // Get host employers
+  const { data: hostEmployers, isLoading: hostLoading } = useQuery({
     queryKey: ["/api/hosts"],
     queryFn: async () => {
       const res = await fetch("/api/hosts");
       if (!res.ok) {
-        // API not available yet
-        return [];
+        throw new Error("Failed to fetch host employers");
       }
       return res.json() as Promise<HostEmployer[]>;
     },
   });
-
-  // Set up form with default values
+  
+  // Get qualifications
+  const { data: qualifications, isLoading: qualificationsLoading } = useQuery({
+    queryKey: ["/api/qualifications"],
+    queryFn: async () => {
+      try {
+        const res = await fetch("/api/qualifications");
+        if (!res.ok) {
+          throw new Error("Failed to fetch qualifications");
+        }
+        return res.json() as Promise<Qualification[]>;
+      } catch (error) {
+        console.error("Error fetching qualifications:", error);
+        return [];
+      }
+    },
+  });
+  
+  // Get awards
+  const { data: awards, isLoading: awardsLoading } = useQuery({
+    queryKey: ["/api/awards"],
+    queryFn: async () => {
+      try {
+        const res = await fetch("/api/awards");
+        if (!res.ok) {
+          throw new Error("Failed to fetch awards");
+        }
+        return res.json() as Promise<Award[]>;
+      } catch (error) {
+        console.error("Error fetching awards:", error);
+        return [];
+      }
+    },
+  });
+  
+  // Get award classifications
+  const { data: classifications, isLoading: classificationsLoading } = useQuery({
+    queryKey: ["/api/award-classifications", selectedAward],
+    queryFn: async () => {
+      if (!selectedAward) return [];
+      
+      try {
+        const res = await fetch(`/api/award-classifications/${selectedAward}`);
+        if (!res.ok) {
+          throw new Error("Failed to fetch award classifications");
+        }
+        return res.json() as Promise<AwardClassification[]>;
+      } catch (error) {
+        console.error("Error fetching award classifications:", error);
+        return [];
+      }
+    },
+    enabled: !!selectedAward,
+  });
+  
+  // Initialize form
   const form = useForm<VacancyFormValues>({
     resolver: zodResolver(vacancyFormSchema),
     defaultValues: {
-      hostEmployerId: "",
       title: "",
       location: "",
-      trade: "",
       description: "",
-      startDate: addDays(new Date(), 14), // Default to 2 weeks from now
-      numberOfPositions: 1,
-      status: "draft",
       requirements: "",
       specialRequirements: "",
+      positionCount: 1,
       isRemote: false,
-      isApprenticeshipEligible: true,
-      isPublic: true,
-      minWage: 0,
-      maxWage: 0,
+      status: "draft",
+      registeredGTO: true
     },
   });
-
-  // Mutation for creating vacancy
+  
+  // Create vacancy mutation
   const createVacancyMutation = useMutation({
     mutationFn: async (data: VacancyFormValues) => {
-      return apiRequest("POST", "/api/vacancies", {
+      const formattedData = {
         ...data,
         startDate: format(data.startDate, "yyyy-MM-dd"),
-      });
+        createdAt: format(new Date(), "yyyy-MM-dd'T'HH:mm:ss"),
+        updatedAt: format(new Date(), "yyyy-MM-dd'T'HH:mm:ss"),
+      };
+      
+      const res = await apiRequest("POST", "/api/vacancies", formattedData);
+      return res.json();
     },
     onSuccess: () => {
       toast({
-        title: "Vacancy created",
-        description: "The job vacancy has been created successfully",
-        variant: "default",
+        title: "Success",
+        description: "Vacancy created successfully",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/vacancies"] });
       navigate("/hosts/vacancies");
     },
     onError: (error) => {
-      console.error("Failed to create vacancy:", error);
       toast({
-        title: "Failed to create vacancy",
-        description: "There was an error creating the vacancy. Please try again.",
+        title: "Error",
+        description: error.message || "Failed to create vacancy",
         variant: "destructive",
       });
     },
   });
-
+  
   const onSubmit = (values: VacancyFormValues) => {
     createVacancyMutation.mutate(values);
   };
-
+  
+  const isLoading = hostLoading || qualificationsLoading || awardsLoading || classificationsLoading;
+  const isMutating = createVacancyMutation.isPending;
+  
   return (
     <div className="space-y-6">
-      <div className="flex items-center">
-        <Button
-          variant="ghost"
-          onClick={() => navigate("/hosts/vacancies")}
-          className="mr-2"
-        >
+      <div className="flex items-center gap-4">
+        <Button variant="ghost" size="sm" onClick={() => navigate("/hosts/vacancies")}>
           <ArrowLeft className="h-4 w-4 mr-2" />
-          Back
+          Back to Vacancies
         </Button>
-        <h1 className="text-2xl font-bold">Create New Vacancy</h1>
       </div>
-
+      
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-2xl font-bold">Create New Vacancy</h1>
+          <p className="text-muted-foreground">Post a new job vacancy for host employers</p>
+        </div>
+      </div>
+      
       <Card>
-        <CardHeader>
-          <CardTitle>Vacancy Details</CardTitle>
-          <CardDescription>
-            Create a new job vacancy for host employers to fill with apprentices
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <FormField
-                  control={form.control}
-                  name="hostEmployerId"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Host Employer</FormLabel>
-                      <Select
-                        disabled={loadingHosts}
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select a host employer" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {hostEmployers?.map((host) => (
-                            <SelectItem key={host.id} value={host.id.toString()}>
-                              {host.name}
-                            </SelectItem>
-                          )) || (
-                            <SelectItem value="" disabled>
-                              No host employers available
-                            </SelectItem>
+        <CardContent className="p-6">
+          {isLoading ? (
+            <div className="flex justify-center items-center py-8">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              <span className="ml-2">Loading...</span>
+            </div>
+          ) : (
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-6">
+                    <FormField
+                      control={form.control}
+                      name="hostEmployerId"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Host Employer <span className="text-destructive">*</span></FormLabel>
+                          <Select
+                            value={field.value?.toString() || ""}
+                            onValueChange={field.onChange}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select a host employer" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {hostEmployers?.map((host) => (
+                                <SelectItem key={host.id} value={host.id.toString()}>
+                                  {host.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="title"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Job Title <span className="text-destructive">*</span></FormLabel>
+                          <FormControl>
+                            <Input placeholder="e.g. Apprentice Electrician" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="location"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Location <span className="text-destructive">*</span></FormLabel>
+                          <FormControl>
+                            <Input placeholder="e.g. Sydney, NSW" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="isRemote"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                          <div className="space-y-1 leading-none">
+                            <FormLabel>
+                              Remote Position
+                            </FormLabel>
+                            <FormDescription>
+                              Tick this if the position allows remote work
+                            </FormDescription>
+                          </div>
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="positionCount"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Number of Positions <span className="text-destructive">*</span></FormLabel>
+                          <FormControl>
+                            <Input type="number" min="1" {...field} />
+                          </FormControl>
+                          <FormDescription>
+                            How many openings are available for this vacancy
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="startDate"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-col">
+                          <FormLabel>Start Date <span className="text-destructive">*</span></FormLabel>
+                          <DatePicker
+                            date={field.value}
+                            setDate={field.onChange}
+                          />
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="status"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Status <span className="text-destructive">*</span></FormLabel>
+                          <Select
+                            value={field.value}
+                            onValueChange={field.onChange}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select status" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="draft">Draft</SelectItem>
+                              <SelectItem value="open">Open</SelectItem>
+                              <SelectItem value="filled">Filled</SelectItem>
+                              <SelectItem value="closed">Closed</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  
+                  <div className="space-y-6">
+                    <FormField
+                      control={form.control}
+                      name="description"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Description <span className="text-destructive">*</span></FormLabel>
+                          <FormControl>
+                            <Textarea
+                              placeholder="Provide a detailed description of the job..."
+                              className="min-h-28"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="requirements"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Requirements</FormLabel>
+                          <FormControl>
+                            <Textarea
+                              placeholder="List any general requirements for the position..."
+                              className="min-h-24"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="specialRequirements"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Special Requirements</FormLabel>
+                          <FormControl>
+                            <Textarea
+                              placeholder="Any special requirements or conditions..."
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
+                
+                <Card className="mt-6">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-lg">Australian Qualification Details</CardTitle>
+                    <CardDescription>
+                      Enter qualification and award details for this vacancy
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-4">
+                        <FormField
+                          control={form.control}
+                          name="qualificationId"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Qualification</FormLabel>
+                              <Select
+                                value={field.value?.toString() || ""}
+                                onValueChange={field.onChange}
+                              >
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Select a qualification" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent className="max-h-72">
+                                  {qualifications?.map((qual) => (
+                                    <SelectItem key={qual.id} value={qual.id.toString()}>
+                                      {qual.name} ({qual.code}) - AQF Level {qual.aqfLevel}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
                           )}
-                        </SelectContent>
-                      </Select>
-                      <FormDescription>
-                        Select the host employer for this vacancy
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="title"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Job Title</FormLabel>
-                      <FormControl>
-                        <Input placeholder="e.g. Apprentice Electrician" {...field} />
-                      </FormControl>
-                      <FormDescription>
-                        The title of the position
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="trade"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Trade/Occupation</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
+                        />
+                        
+                        <FormField
+                          control={form.control}
+                          name="aqfLevel"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>AQF Level</FormLabel>
+                              <Select
+                                value={field.value?.toString() || ""}
+                                onValueChange={field.onChange}
+                              >
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Select AQF level" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((level) => (
+                                    <SelectItem key={level} value={level.toString()}>
+                                      Level {level}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <FormDescription>
+                                Australian Qualifications Framework level
+                              </FormDescription>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                      
+                      <div className="space-y-4">
+                        <FormField
+                          control={form.control}
+                          name="registeredGTO"
+                          render={({ field }) => (
+                            <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                              <FormControl>
+                                <Checkbox
+                                  checked={field.value}
+                                  onCheckedChange={field.onChange}
+                                />
+                              </FormControl>
+                              <div className="space-y-1 leading-none">
+                                <FormLabel>
+                                  Registered GTO Position
+                                </FormLabel>
+                                <FormDescription>
+                                  This is a Group Training Organization registered apprenticeship
+                                </FormDescription>
+                              </div>
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={form.control}
+                          name="hourlyRate"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Hourly Rate (AUD)</FormLabel>
+                              <FormControl>
+                                <Input type="number" step="0.01" min="0" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+                      <div>
+                        <FormLabel>Award</FormLabel>
+                        <Select
+                          value={selectedAward?.toString() || ""}
+                          onValueChange={(value) => setSelectedAward(Number(value))}
+                        >
                           <SelectTrigger>
-                            <SelectValue placeholder="Select trade or occupation" />
+                            <SelectValue placeholder="Select an award" />
                           </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {tradeOptions.map((trade) => (
-                            <SelectItem key={trade} value={trade}>
-                              {trade}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormDescription>
-                        The trade or occupation category
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="location"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Location</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select location" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {locationOptions.map((location) => (
-                            <SelectItem key={location} value={location}>
-                              {location}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormDescription>
-                        The primary work location
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="startDate"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-col">
-                      <FormLabel>Start Date</FormLabel>
-                      <DatePicker
-                        date={field.value}
-                        setDate={field.onChange}
+                          <SelectContent>
+                            {awards?.map((award) => (
+                              <SelectItem key={award.id} value={award.id.toString()}>
+                                {award.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      
+                      <FormField
+                        control={form.control}
+                        name="awardClassificationId"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Classification</FormLabel>
+                            <Select
+                              value={field.value?.toString() || ""}
+                              onValueChange={field.onChange}
+                              disabled={!selectedAward || (classifications?.length || 0) === 0}
+                            >
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder={selectedAward ? "Select a classification" : "Select an award first"} />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                {classifications?.map((classification) => (
+                                  <SelectItem key={classification.id} value={classification.id.toString()}>
+                                    {classification.level} - {classification.name} (${classification.minHourlyRate.toFixed(2)}/hr)
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
                       />
-                      <FormDescription>
-                        When the position is expected to start
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="numberOfPositions"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Number of Positions</FormLabel>
-                      <FormControl>
-                        <Input type="number" {...field} />
-                      </FormControl>
-                      <FormDescription>
-                        How many identical positions are available
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="status"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Status</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select vacancy status" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="draft">Draft</SelectItem>
-                          <SelectItem value="open">Open</SelectItem>
-                          <SelectItem value="filled">Filled</SelectItem>
-                          <SelectItem value="closed">Closed</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormDescription>
-                        Current status of the vacancy
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <FormField
-                    control={form.control}
-                    name="minWage"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Minimum Wage ($)</FormLabel>
-                        <FormControl>
-                          <Input type="number" step="0.01" {...field} />
-                        </FormControl>
-                        <FormDescription>
-                          Minimum hourly wage rate
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="maxWage"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Maximum Wage ($)</FormLabel>
-                        <FormControl>
-                          <Input type="number" step="0.01" {...field} />
-                        </FormControl>
-                        <FormDescription>
-                          Maximum hourly wage rate
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <div className="flex justify-end space-x-4 pt-4">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => navigate("/hosts/vacancies")}
+                  >
+                    Cancel
+                  </Button>
+                  <Button type="submit" disabled={isMutating}>
+                    {isMutating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Create Vacancy
+                  </Button>
                 </div>
-
-                <div className="md:col-span-2 space-y-4">
-                  <FormField
-                    control={form.control}
-                    name="isRemote"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                        <FormControl>
-                          <Checkbox
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
-                        <div className="space-y-1 leading-none">
-                          <FormLabel>
-                            Remote Work Available
-                          </FormLabel>
-                          <FormDescription>
-                            Position is eligible for remote or work-from-home arrangements
-                          </FormDescription>
-                        </div>
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="isApprenticeshipEligible"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                        <FormControl>
-                          <Checkbox
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
-                        <div className="space-y-1 leading-none">
-                          <FormLabel>
-                            Apprenticeship Eligible
-                          </FormLabel>
-                          <FormDescription>
-                            Position is eligible for formal apprenticeship or traineeship arrangement
-                          </FormDescription>
-                        </div>
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="isPublic"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                        <FormControl>
-                          <Checkbox
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
-                        <div className="space-y-1 leading-none">
-                          <FormLabel>
-                            Publicly Visible
-                          </FormLabel>
-                          <FormDescription>
-                            Show this vacancy on the public job board and allow direct applications
-                          </FormDescription>
-                        </div>
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </div>
-
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Job Description</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Enter a detailed job description..."
-                        className="min-h-[150px]"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      Detailed description of the job responsibilities and daily tasks
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="requirements"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Requirements (Optional)</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Enter job requirements and qualifications..."
-                        className="min-h-[100px]"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      Required qualifications, certifications, skills, or experience
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="specialRequirements"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Special Requirements (Optional)</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Enter any special requirements or notes..."
-                        className="min-h-[100px]"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      Any special requirements, conditions, benefits, or additional information
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <div className="flex justify-end gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => navigate("/hosts/vacancies")}
-                >
-                  Cancel
-                </Button>
-                <Button 
-                  type="submit"
-                  disabled={createVacancyMutation.isPending}
-                >
-                  {createVacancyMutation.isPending ? (
-                    <span className="flex items-center">
-                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      Creating...
-                    </span>
-                  ) : (
-                    <span className="flex items-center">
-                      <BriefcaseBusiness className="mr-2 h-4 w-4" /> Create Vacancy
-                    </span>
-                  )}
-                </Button>
-              </div>
-            </form>
-          </Form>
+              </form>
+            </Form>
+          )}
         </CardContent>
       </Card>
     </div>
