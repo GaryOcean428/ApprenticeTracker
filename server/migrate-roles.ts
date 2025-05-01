@@ -72,8 +72,10 @@ export async function migrateRolesSchema() {
     const columnsToAdd = [
       { name: 'role_id', definition: 'INTEGER REFERENCES roles(id)' },
       { name: 'organization_id', definition: 'INTEGER' },
+      { name: 'is_active', definition: 'BOOLEAN DEFAULT TRUE' },
       { name: 'stripe_customer_id', definition: 'TEXT' },
       { name: 'stripe_subscription_id', definition: 'TEXT' },
+      { name: 'subscription_status', definition: 'TEXT' },
       { name: 'subscription_plan_id', definition: 'INTEGER REFERENCES subscription_plans(id)' },
       { name: 'subscription_starts_at', definition: 'TIMESTAMP WITH TIME ZONE' },
       { name: 'subscription_ends_at', definition: 'TIMESTAMP WITH TIME ZONE' },

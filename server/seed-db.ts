@@ -66,21 +66,29 @@ export async function seedDatabase() {
       console.error("Error creating default roles:", error);
     }
     
-    // Add admin user
-    const adminUser: InsertUser = {
-      username: "admin",
-      password: "admin123", // In a real app, this would be hashed
-      email: "admin@crm7.com",
-      firstName: "Admin",
-      lastName: "User",
-      role: "admin",
-      roleId: adminRoleId, // Use the admin role ID
-      profileImage: "https://images.unsplash.com/photo-1531427186611-ecfd6d936c79?ixlib=rb-1.2.1&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=200&fit=max&ixid=eyJhcHBfaWQiOjE3Nzg0fQ",
-      isActive: true
-    };
+    // Check if admin user exists, otherwise create one
+    let admin;
+    const existingAdminUser = await storage.getUserByUsername("admin");
     
-    const admin = await storage.createUser(adminUser);
-    console.log("Admin user created:", admin.id);
+    if (existingAdminUser) {
+      console.log("Admin user already exists with ID:", existingAdminUser.id);
+      admin = existingAdminUser;
+    } else {
+      const adminUser: InsertUser = {
+        username: "admin",
+        password: "admin123", // In a real app, this would be hashed
+        email: "admin@crm7.com",
+        firstName: "Admin",
+        lastName: "User",
+        role: "admin",
+        roleId: adminRoleId, // Use the admin role ID
+        profileImage: "https://images.unsplash.com/photo-1531427186611-ecfd6d936c79?ixlib=rb-1.2.1&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=200&fit=max&ixid=eyJhcHBfaWQiOjE3Nzg0fQ",
+        isActive: true
+      };
+      
+      admin = await storage.createUser(adminUser);
+      console.log("Admin user created:", admin.id);
+    }
     
     // Add sample apprentices
     const apprentices: InsertApprentice[] = [
