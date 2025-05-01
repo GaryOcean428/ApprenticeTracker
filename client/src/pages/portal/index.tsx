@@ -54,15 +54,20 @@ export default function PortalPage() {
           
           if (data.success) {
             // Successful login
-            if (data.user.role === 'Developer') {
+            if (data.user.role === 'developer' || data.user.platformAccess) {
               toast({
                 title: 'Platform-Level Access Granted',
                 description: `Logging in as Developer with full platform access`,
               });
-            } else {
+            } else if (data.user.organization) {
               toast({
                 title: 'Organization-Level Access Granted',
                 description: `Logging in as ${data.user.role} for ${data.user.organization.name}`,
+              });
+            } else {
+              toast({
+                title: 'Access Granted',
+                description: `Logging in as ${data.user.role}`,
               });
             }
             
@@ -209,8 +214,8 @@ export default function PortalPage() {
                           onChange={(e) => setUserRole(e.target.value)}
                         >
                           <option value="">Select role</option>
-                          <option value="Developer">Developer (Platform Level)</option>
-                          <option value="Admin">Organization Administrator</option>
+                          <option value="developer">Developer (Platform Level)</option>
+                          <option value="admin">Organization Administrator</option>
                         </select>
                       </div>
                       
