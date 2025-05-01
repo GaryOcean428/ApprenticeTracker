@@ -93,8 +93,8 @@ export default function UnitsOfCompetencyList() {
   const filteredUnits = units?.filter(unit => {
     const matchesSearch = 
       filter.search === "" || 
-      unit.unitCode.toLowerCase().includes(filter.search.toLowerCase()) ||
-      unit.unitTitle.toLowerCase().includes(filter.search.toLowerCase());
+      (unit.unitCode?.toLowerCase() || '').includes(filter.search.toLowerCase()) ||
+      (unit.unitTitle?.toLowerCase() || '').includes(filter.search.toLowerCase());
     
     const matchesTrainingPackage = 
       filter.trainingPackage === "" || 

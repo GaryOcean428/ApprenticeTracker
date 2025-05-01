@@ -76,9 +76,10 @@ export default function QualificationsList() {
   }
 
   const filteredQualifications = qualifications?.filter((qualification) => {
-    const matchesSearch = 
-      qualification.code.toLowerCase().includes(searchTerm.toLowerCase()) || 
-      qualification.title.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = searchTerm ? (
+      (qualification.code?.toLowerCase() || '').includes(searchTerm.toLowerCase()) || 
+      (qualification.title?.toLowerCase() || '').includes(searchTerm.toLowerCase())
+    ) : true;
     
     const matchesLevel = filter.level ? qualification.level === filter.level : true;
     const matchesIndustry = filter.industryArea ? qualification.industryArea === filter.industryArea : true;
