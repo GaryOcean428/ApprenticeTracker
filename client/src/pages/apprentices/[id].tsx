@@ -35,6 +35,19 @@ const ApprenticeDetails = () => {
   const [, params] = useLocation();
   const apprenticeId = parseInt(params.id);
   
+  if (isNaN(apprenticeId)) {
+    return (
+      <div className="flex flex-col items-center justify-center h-96">
+        <FileWarning className="h-16 w-16 text-destructive mb-4" />
+        <h2 className="text-2xl font-semibold mb-2">Invalid Apprentice ID</h2>
+        <p className="text-muted-foreground mb-6">The apprentice ID provided is not valid.</p>
+        <Button asChild>
+          <WouterLink href="/apprentices">Back to Apprentices</WouterLink>
+        </Button>
+      </div>
+    );
+  }
+  
   const { data: apprentice, isLoading: isLoadingApprentice, error: apprenticeError } = useQuery({
     queryKey: [`/api/apprentices/${apprenticeId}`],
     queryFn: async () => {
