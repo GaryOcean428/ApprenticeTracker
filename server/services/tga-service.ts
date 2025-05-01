@@ -342,11 +342,45 @@ export class TGAService {
         throw new Error(`Qualification ${qualificationCode} not found in TGA`);
       }
       
+      console.log(`Importing qualification: ${qualData.code} - ${qualData.title}`);
+      
       // Check if qualification already exists in our database
       const [existingQualification] = await db
         .select()
         .from(qualifications)
-        .where(eq(qualifications.code, qualData.code));
+        .where(eq(qualifications.qualificationCode, qualData.code));
+      
+      // Map AQF level number from the title (Certificate I = 1, etc.)
+      let aqfLevelNumber = 1; // Default to 1
+      if (qualData.level) {
+        aqfLevelNumber = qualData.level;
+      } else if (qualData.title.includes('Certificate I')) {
+        aqfLevelNumber = 1;
+      } else if (qualData.title.includes('Certificate II')) {
+        aqfLevelNumber = 2;
+      } else if (qualData.title.includes('Certificate III')) {
+        aqfLevelNumber = 3;
+      } else if (qualData.title.includes('Certificate IV')) {
+        aqfLevelNumber = 4;
+      } else if (qualData.title.includes('Diploma')) {
+        aqfLevelNumber = 5;
+      } else if (qualData.title.includes('Advanced Diploma')) {
+        aqfLevelNumber = 6;
+      }
+      
+      // Map AQF level from level number
+      const aqfLevelMap = {
+        1: "Certificate I",
+        2: "Certificate II",
+        3: "Certificate III",
+        4: "Certificate IV",
+        5: "Diploma",
+        6: "Advanced Diploma",
+        7: "Bachelor Degree",
+        8: "Graduate Certificate/Diploma",
+        9: "Master's Degree",
+        10: "Doctoral Degree"
+      };
       
       let qualificationId: number;
       
@@ -355,57 +389,68 @@ export class TGAService {
         const [insertedQual] = await db
           .insert(qualifications)
           .values({
-            code: qualData.code,
-            name: qualData.title,
-            aqfLevel: qualData.level,
-            status: qualData.status,
-            releaseDate: qualData.releaseDate ? new Date(qualData.releaseDate) : null,
-            expiryDate: qualData.expiryDate ? new Date(qualData.expiryDate) : null,
-            trainingPackageCode: qualData.trainingPackage?.code || null,
-            trainingPackageName: qualData.trainingPackage?.title || null,
-            accreditedCourseCode: qualData.accreditedCourse?.code || null,
-            accreditedCourseName: qualData.accreditedCourse?.title || null,
-            isNrt: qualData.nrtFlag,
+            qualificationCode: qualData.code,
+            qualificationTitle: qualData.title,
+            qualificationDescription: `Imported from Training.gov.au on ${new Date().toLocaleDateString()}`,
+            aqfLevel: aqfLevelMap[aqfLevelNumber] || "Certificate III",
+            aqfLevelNumber: aqfLevelNumber, 
+            trainingPackage: qualData.trainingPackage?.code || '',
+            trainingPackageRelease: "1.0",
+            totalUnits: 12, // Default values, will update later if available
+            coreUnits: 5,
+            electiveUnits: 7,
+            nominalHours: 600,
+            isActive: qualData.status === "Current",
+            isApprenticeshipQualification: aqfLevelNumber >= 3 && aqfLevelNumber <= 4, // Usually Cert III/IV
+            isFundedQualification: false,
+            fundingDetails: null,
             createdAt: new Date(),
             updatedAt: new Date(),
           })
           .returning();
         
         qualificationId = insertedQual.id;
+        console.log(`Inserted new qualification with ID: ${qualificationId}`);
       } else {
         // If it exists, update it
         const [updatedQual] = await db
           .update(qualifications)
           .set({
-            name: qualData.title,
-            aqfLevel: qualData.level,
-            status: qualData.status,
-            releaseDate: qualData.releaseDate ? new Date(qualData.releaseDate) : null,
-            expiryDate: qualData.expiryDate ? new Date(qualData.expiryDate) : null,
-            trainingPackageCode: qualData.trainingPackage?.code || null,
-            trainingPackageName: qualData.trainingPackage?.title || null,
-            accreditedCourseCode: qualData.accreditedCourse?.code || null,
-            accreditedCourseName: qualData.accreditedCourse?.title || null,
-            isNrt: qualData.nrtFlag,
+            qualificationTitle: qualData.title,
+            aqfLevel: aqfLevelMap[aqfLevelNumber] || "Certificate III",
+            aqfLevelNumber: aqfLevelNumber,
+            trainingPackage: qualData.trainingPackage?.code || '',
+            isActive: qualData.status === "Current",
             updatedAt: new Date(),
           })
-          .where(eq(qualifications.code, qualData.code))
+          .where(eq(qualifications.qualificationCode, qualData.code))
           .returning();
         
         qualificationId = updatedQual.id;
+        console.log(`Updated existing qualification with ID: ${qualificationId}`);
       }
       
       // Import core units
       if (qualData.unitsOfCompetency && qualData.unitsOfCompetency.core) {
+        console.log(`Importing ${qualData.unitsOfCompetency.core.length} core units`);
         for (const unitData of qualData.unitsOfCompetency.core) {
-          await this.importUnit(unitData, qualificationId, "core");
+          try {
+            await this.importUnit(unitData, qualificationId, true);
+          } catch (error) {
+            console.error(`Error importing core unit ${unitData.code}:`, error);
+          }
         }
       }
       
       // Import elective units
       if (qualData.unitsOfCompetency && qualData.unitsOfCompetency.elective) {
+        console.log(`Importing ${qualData.unitsOfCompetency.elective.length} elective units`);
         for (const unitData of qualData.unitsOfCompetency.elective) {
-          await this.importUnit(unitData, qualificationId, "elective");
+          try {
+            await this.importUnit(unitData, qualificationId, false);
+          } catch (error) {
+            console.error(`Error importing elective unit ${unitData.code}:`, error);
+          }
         }
       }
       
@@ -423,14 +468,14 @@ export class TGAService {
   private async importUnit(
     unitData: TGAUnitOfCompetency, 
     qualificationId: number, 
-    unitType: "core" | "elective"
+    isCore: boolean
   ): Promise<void> {
     try {
       // Check if unit already exists
       const [existingUnit] = await db
         .select()
         .from(unitsOfCompetency)
-        .where(eq(unitsOfCompetency.code, unitData.code));
+        .where(eq(unitsOfCompetency.unitCode, unitData.code));
       
       let unitId: number;
       
@@ -439,42 +484,39 @@ export class TGAService {
         const [insertedUnit] = await db
           .insert(unitsOfCompetency)
           .values({
-            code: unitData.code,
-            name: unitData.title,
-            status: unitData.status,
+            unitCode: unitData.code,
+            unitTitle: unitData.title,
+            unitDescription: `Imported from Training.gov.au`,
+            releaseNumber: "1",
             releaseDate: unitData.releaseDate ? new Date(unitData.releaseDate) : null,
-            expiryDate: unitData.expiryDate ? new Date(unitData.expiryDate) : null,
-            trainingPackageCode: unitData.trainingPackage?.code || null,
-            trainingPackageName: unitData.trainingPackage?.title || null,
-            fieldOfEducationCode: unitData.fieldOfEducation?.code || null,
-            fieldOfEducationName: unitData.fieldOfEducation?.description || null,
-            isNrt: unitData.nrtFlag,
+            trainingPackage: unitData.trainingPackage?.code || "", 
+            trainingPackageRelease: "1.0",
+            elementSummary: null,
+            performanceCriteria: null,
+            assessmentRequirements: null,
+            nominalHours: 20, // Default average
+            isActive: unitData.status === "Current",
+            isImported: true,
             createdAt: new Date(),
             updatedAt: new Date(),
           })
           .returning();
         
         unitId = insertedUnit.id;
+        console.log(`Inserted new unit with ID ${unitId}: ${unitData.code}`);
       } else {
         // If it exists, update it
-        const [updatedUnit] = await db
+        unitId = existingUnit.id;
+        await db
           .update(unitsOfCompetency)
           .set({
-            name: unitData.title,
-            status: unitData.status,
-            releaseDate: unitData.releaseDate ? new Date(unitData.releaseDate) : null,
-            expiryDate: unitData.expiryDate ? new Date(unitData.expiryDate) : null,
-            trainingPackageCode: unitData.trainingPackage?.code || null,
-            trainingPackageName: unitData.trainingPackage?.title || null,
-            fieldOfEducationCode: unitData.fieldOfEducation?.code || null,
-            fieldOfEducationName: unitData.fieldOfEducation?.description || null,
-            isNrt: unitData.nrtFlag,
+            unitTitle: unitData.title, 
+            isActive: unitData.status === "Current",
             updatedAt: new Date(),
           })
-          .where(eq(unitsOfCompetency.code, unitData.code))
-          .returning();
+          .where(eq(unitsOfCompetency.unitCode, unitData.code));
         
-        unitId = updatedUnit.id;
+        console.log(`Updated existing unit with ID ${unitId}: ${unitData.code}`);
       }
       
       // Check if qualification structure entry already exists
@@ -495,16 +537,20 @@ export class TGAService {
           .values({
             qualificationId,
             unitId,
-            unitType,
+            isCore,
+            groupName: isCore ? "Core" : "Elective",
+            isMandatoryElective: false,
             createdAt: new Date(),
             updatedAt: new Date(),
           });
+        console.log(`Linked unit ${unitData.code} to qualification as ${isCore ? 'core' : 'elective'}`);
       } else {
         // If it exists, update it (type might have changed)
         await db
           .update(qualificationStructure)
           .set({
-            unitType,
+            isCore,
+            groupName: isCore ? "Core" : "Elective",
             updatedAt: new Date(),
           })
           .where(
@@ -513,6 +559,7 @@ export class TGAService {
               eq(qualificationStructure.unitId, unitId)
             )
           );
+        console.log(`Updated link between unit ${unitData.code} and qualification`);
       }
       
     } catch (error) {
