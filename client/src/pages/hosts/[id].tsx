@@ -594,6 +594,184 @@ const HostDetails = () => {
               </Card>
             </TabsContent>
             
+            <TabsContent value="qualifications">
+              <Card>
+                <CardHeader>
+                  <div className="flex justify-between items-center">
+                    <CardTitle>Preferred Qualifications</CardTitle>
+                    <Dialog open={isAddQualDialogOpen} onOpenChange={setIsAddQualDialogOpen}>
+                      <DialogTrigger asChild>
+                        <Button size="sm">
+                          <GraduationCap className="h-4 w-4 mr-2" />
+                          Add Qualification
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Add Preferred Qualification</DialogTitle>
+                          <DialogDescription>
+                            Add a qualification that is preferred or required for apprentices at this host employer.
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="grid gap-4 py-4">
+                          <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="qualification" className="text-right">
+                              Qualification
+                            </Label>
+                            <div className="col-span-3">
+                              <Select 
+                                onValueChange={(value) => setSelectedQualificationId(parseInt(value))}
+                                value={selectedQualificationId?.toString() || ""}>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select a qualification" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {isLoadingAllQualifications ? (
+                                    <div className="flex items-center justify-center p-4">
+                                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
+                                      <span className="ml-2">Loading...</span>
+                                    </div>
+                                  ) : qualifications && qualifications.length > 0 ? (
+                                    qualifications.map(qual => (
+                                      <SelectItem key={qual.id} value={qual.id.toString()}>
+                                        {qual.title} ({qual.code})
+                                      </SelectItem>
+                                    ))
+                                  ) : (
+                                    <div className="p-4 text-center text-muted-foreground">
+                                      No qualifications found
+                                    </div>
+                                  )}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="priority" className="text-right">
+                              Priority
+                            </Label>
+                            <div className="col-span-3">
+                              <Select 
+                                defaultValue="medium" 
+                                onValueChange={setSelectedPriority}
+                                value={selectedPriority}>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select priority" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="high">High Priority</SelectItem>
+                                  <SelectItem value="medium">Medium Priority</SelectItem>
+                                  <SelectItem value="low">Low Priority</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="required" className="text-right">
+                              Required
+                            </Label>
+                            <div className="flex items-center space-x-2">
+                              <Checkbox id="required" checked={isRequired} onCheckedChange={(checked) => setIsRequired(!!checked)} />
+                              <label htmlFor="required" className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                This qualification is required for placement
+                              </label>
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-4 items-start gap-4">
+                            <Label htmlFor="notes" className="text-right pt-2">
+                              Notes
+                            </Label>
+                            <Textarea 
+                              id="notes" 
+                              className="col-span-3" 
+                              placeholder="Add any specific requirements or notes about this qualification" 
+                              value={qualificationNotes}
+                              onChange={(e) => setQualificationNotes(e.target.value)}
+                            />
+                          </div>
+                        </div>
+                        <DialogFooter>
+                          <Button variant="outline" onClick={() => setIsAddQualDialogOpen(false)}>Cancel</Button>
+                          <Button onClick={addPreferredQualification}>Add Qualification</Button>
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog>
+                  </div>
+                  <CardDescription>
+                    Qualifications this host employer prefers or requires for apprentice placements
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {isLoadingQualifications ? (
+                    <div className="space-y-4">
+                      {Array.from({ length: 3 }).map((_, i) => (
+                        <Skeleton key={i} className="h-16 w-full" />
+                      ))}
+                    </div>
+                  ) : preferredQualifications && preferredQualifications.length > 0 ? (
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Qualification</TableHead>
+                          <TableHead>Priority</TableHead>
+                          <TableHead>Required</TableHead>
+                          <TableHead>Notes</TableHead>
+                          <TableHead className="text-right">Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {preferredQualifications.map((prefQual) => (
+                          <TableRow key={prefQual.id}>
+                            <TableCell className="font-medium">
+                              {prefQual.qualification ? (
+                                <div>
+                                  <div>{prefQual.qualification.title}</div>
+                                  <div className="text-xs text-muted-foreground">{prefQual.qualification.code}</div>
+                                </div>
+                              ) : (
+                                `Qualification ID: ${prefQual.qualificationId}`
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              <Badge className={`${prefQual.priority === 'high' ? 'bg-destructive' : prefQual.priority === 'medium' ? 'bg-warning' : 'bg-muted'}`}>
+                                {prefQual.priority.charAt(0).toUpperCase() + prefQual.priority.slice(1)}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              {prefQual.isRequired ? (
+                                <Badge variant="outline" className="bg-success text-success-foreground">Required</Badge>
+                              ) : (
+                                <Badge variant="outline">Preferred</Badge>
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              {prefQual.notes || '-'}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <Button variant="ghost" size="icon" onClick={() => removePreferredQualification(prefQual.id)}>
+                                <Trash2 className="h-4 w-4 text-destructive" />
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  ) : (
+                    <div className="text-center py-12">
+                      <GraduationCap className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                      <h3 className="text-lg font-medium mb-2">No Preferred Qualifications</h3>
+                      <p className="text-muted-foreground mb-6">
+                        This host employer doesn't have any preferred qualifications specified yet.
+                      </p>
+                      <Button onClick={() => setIsAddQualDialogOpen(true)}>
+                        Add Qualification
+                      </Button>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+            
             <TabsContent value="compliance">
               <Card>
                 <CardHeader>
