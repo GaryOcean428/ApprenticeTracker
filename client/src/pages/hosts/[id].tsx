@@ -621,7 +621,7 @@ const HostDetails = () => {
                             <div className="col-span-3">
                               <Select 
                                 onValueChange={(value) => setSelectedQualificationId(parseInt(value))}
-                                value={selectedQualificationId?.toString() || ""}>
+                                value={selectedQualificationId?.toString() || undefined}>
                                 <SelectTrigger>
                                   <SelectValue placeholder="Select a qualification" />
                                 </SelectTrigger>

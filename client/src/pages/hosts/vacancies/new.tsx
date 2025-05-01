@@ -451,7 +451,7 @@ const NewVacancyPage = () => {
                                 <SelectContent className="max-h-72">
                                   {qualifications?.map((qual) => (
                                     <SelectItem key={qual.id} value={qual.id.toString()}>
-                                      {qual.name} ({qual.code}) - AQF Level {qual.aqfLevel}
+                                      {qual.code} - {qual.name} - AQF Level {qual.aqfLevel}
                                     </SelectItem>
                                   ))}
                                 </SelectContent>
