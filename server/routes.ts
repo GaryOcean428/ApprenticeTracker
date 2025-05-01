@@ -430,6 +430,127 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Error deleting subscription plan" });
     }
   });
+
+  // Helper function to check if a user's account should be active based on their role and subscription
+  async function checkUserActiveStatus(userId: number): Promise<boolean> {
+    // Get the user
+    const user = await storage.getUser(userId);
+    if (!user) return false;
+    
+    // Get the user's role
+    const role = user.roleId ? await storage.getRole(user.roleId) : null;
+    const roleName = role?.name?.toLowerCase() || '';
+    
+    // Developers always remain active regardless of subscription
+    if (roleName === 'developer') return true;
+    
+    // Check if the subscription is active based on end date
+    const hasActiveSubscription = user.subscriptionEndsAt 
+      ? new Date(user.subscriptionEndsAt) > new Date() 
+      : false;
+    
+    return hasActiveSubscription;
+  }
+  
+  // Update user subscription
+  app.post("/api/users/:id/subscription", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.id);
+      const { subscriptionPlanId, stripeCustomerId, stripeSubscriptionId, startDate, endDate } = req.body;
+      
+      // Get the user first
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Get the user's role
+      const role = user.roleId ? await storage.getRole(user.roleId) : null;
+      const roleName = role?.name?.toLowerCase() || '';
+      
+      // For developers, never expire the subscription (always active)
+      const isActive = roleName === 'developer' ? true : !!endDate && new Date(endDate) > new Date();
+      
+      // Update the user with subscription info
+      const updatedUser = await storage.updateUser(userId, {
+        subscriptionPlanId: subscriptionPlanId || null,
+        stripeCustomerId: stripeCustomerId || null,
+        stripeSubscriptionId: stripeSubscriptionId || null,
+        subscriptionStatus: isActive ? 'active' : 'expired',
+        isActive: isActive,
+        ...(startDate && { subscriptionStartsAt: new Date(startDate) }),
+        ...(endDate && { subscriptionEndsAt: new Date(endDate) }),
+      });
+      
+      if (!updatedUser) {
+        return res.status(500).json({ message: "Failed to update user subscription" });
+      }
+      
+      res.json({
+        id: updatedUser.id,
+        username: updatedUser.username,
+        email: updatedUser.email,
+        isActive: updatedUser.isActive,
+        subscriptionStatus: updatedUser.subscriptionStatus,
+        subscriptionEndsAt: updatedUser.subscriptionEndsAt,
+        role: roleName
+      });
+    } catch (error) {
+      console.error("Error updating user subscription:", error);
+      res.status(500).json({ 
+        message: "Error updating user subscription",
+        error: error instanceof Error ? error.message : String(error)
+      });
+    }
+  });
+  
+  // Refresh subscription statuses for all users (could be triggered by a cron job)
+  app.post("/api/subscriptions/refresh", async (req, res) => {
+    try {
+      // Get all users
+      const users = await storage.getAllUsers();
+      const results = [];
+      
+      // Check each user's subscription status
+      for (const user of users) {
+        // For developers, always keep active
+        const role = user.roleId ? await storage.getRole(user.roleId) : null;
+        const roleName = role?.name?.toLowerCase() || '';
+        
+        // Determine if the user should be active
+        const shouldBeActive = roleName === 'developer' ? true : 
+          user.subscriptionEndsAt && new Date(user.subscriptionEndsAt) > new Date();
+        
+        // Only update if the active status needs to change
+        if (user.isActive !== shouldBeActive) {
+          const updated = await storage.updateUser(user.id, {
+            isActive: shouldBeActive,
+            subscriptionStatus: shouldBeActive ? 'active' : 'expired'
+          });
+          
+          if (updated) {
+            results.push({
+              id: user.id,
+              username: user.username,
+              isActive: shouldBeActive,
+              changed: true
+            });
+          }
+        }
+      }
+      
+      res.json({
+        message: `Updated subscription statuses for ${results.length} users`,
+        updatedUsers: results
+      });
+    } catch (error) {
+      console.error("Error refreshing subscription statuses:", error);
+      res.status(500).json({ 
+        message: "Error refreshing subscription statuses", 
+        error: error instanceof Error ? error.message : String(error)
+      });
+    }
+  });
   
   // Get metrics for dashboard
   app.get("/api/dashboard/metrics", async (req, res) => {

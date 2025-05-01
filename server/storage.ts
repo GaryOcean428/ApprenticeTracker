@@ -1457,20 +1457,12 @@ export class DatabaseStorage implements IStorage {
           trade, status, progress, date_of_birth as "dateOfBirth", phone,
           user_id as "userId", start_date as "startDate", end_date as "endDate",
           profile_image as "profileImage", notes,
-          client_identifier_apprenticeships as "clientIdentifierApprenticeships",
           unique_student_identifier as "uniqueStudentIdentifier",
-          highest_school_level_completed as "highestSchoolLevelCompleted",
-          indigenous_status as "indigenousStatus",
-          language_identifier as "languageIdentifier",
-          country_of_birth as "countryOfBirth", 
-          disability_flag as "disabilityFlag",
           aqf_level as "aqfLevel",
           apprenticeship_year as "apprenticeshipYear",
           gto_enrolled as "gtoEnrolled",
           gto_id as "gtoId",
-          at_school_flag as "atSchoolFlag",
-          school_level_identifier as "schoolLevelIdentifier",
-          school_based_flag as "schoolBasedFlag"
+          at_school_flag as "atSchoolFlag"
         FROM apprentices
       `);
       return results.rows as Apprentice[];

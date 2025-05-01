@@ -90,6 +90,41 @@ export async function seedDatabase() {
       console.log("Admin user created:", admin.id);
     }
     
+    // Check if developer user exists, otherwise create one
+    const devRoleResult = await storage.getRoleByName("developer");
+    if (!devRoleResult) {
+      console.error("Developer role not found");
+      return;
+    }
+    const devRoleId = devRoleResult.id;
+    
+    const existingDevUser = await storage.getUserByUsername("developer");
+    if (existingDevUser) {
+      console.log("Developer user already exists with ID:", existingDevUser.id);
+    } else {
+      // Get a past date for expired subscription
+      const pastDate = new Date();
+      pastDate.setMonth(pastDate.getMonth() - 2); // 2 months ago
+      
+      const developerUser: InsertUser = {
+        username: "developer",
+        password: "dev123", // In a real app, this would be hashed
+        email: "developer@crm7.com",
+        firstName: "Dev",
+        lastName: "User",
+        role: "developer",
+        roleId: devRoleId,
+        profileImage: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-1.2.1&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=200&fit=max",
+        isActive: true,
+        subscriptionStatus: "expired", // Note: expired status but still active due to role
+        subscriptionStartsAt: new Date(pastDate.setMonth(pastDate.getMonth() - 3)), // 5 months ago
+        subscriptionEndsAt: pastDate // 2 months ago - expired!
+      };
+      
+      const dev = await storage.createUser(developerUser);
+      console.log("Developer user created with ID:", dev.id);
+    }
+    
     // Add sample apprentices
     const apprentices: InsertApprentice[] = [
       {
@@ -106,6 +141,12 @@ export async function seedDatabase() {
         startDate: formatDate(new Date("2023-01-15")),
         endDate: formatDate(new Date("2026-01-15")),
         notes: "Excellent progress in technical skills",
+        // Australian-specific fields
+        aqfLevel: "Certificate III",
+        apprenticeshipYear: 2,
+        gtoEnrolled: true,
+        uniqueStudentIdentifier: "USI123456789",
+        atSchoolFlag: false
       },
       {
         userId: null,
@@ -121,6 +162,12 @@ export async function seedDatabase() {
         startDate: formatDate(new Date("2023-03-10")),
         endDate: formatDate(new Date("2026-03-10")),
         notes: "Needs improvement in time management",
+        // Australian-specific fields
+        aqfLevel: "Certificate III",
+        apprenticeshipYear: 1,
+        gtoEnrolled: true,
+        uniqueStudentIdentifier: "USI987654321",
+        atSchoolFlag: false
       },
       {
         userId: null,
@@ -136,6 +183,12 @@ export async function seedDatabase() {
         startDate: formatDate(new Date("2022-09-05")),
         endDate: formatDate(new Date("2025-09-05")),
         notes: "Excellent technical skills",
+        // Australian-specific fields
+        aqfLevel: "Certificate IV",
+        apprenticeshipYear: 3,
+        gtoEnrolled: true,
+        uniqueStudentIdentifier: "USI555555555",
+        atSchoolFlag: false
       },
       {
         userId: null,
@@ -151,6 +204,12 @@ export async function seedDatabase() {
         startDate: formatDate(new Date("2023-02-20")),
         endDate: formatDate(new Date("2026-02-20")),
         notes: "Currently on hold due to personal reasons",
+        // Australian-specific fields
+        aqfLevel: "Certificate III",
+        apprenticeshipYear: 1,
+        gtoEnrolled: false,
+        uniqueStudentIdentifier: "USI777777777",
+        atSchoolFlag: true
       }
     ];
     
