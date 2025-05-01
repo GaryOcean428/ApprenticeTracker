@@ -57,14 +57,23 @@ export function registerTGARoutes(app: Express) {
   
   /**
    * Import a qualification from Training.gov.au into our database
+   * Handles both GET and POST methods for flexibility
    */
-  app.post("/api/tga/import/qualification/:code", async (req, res) => {
+  app.all("/api/tga/import/:code", async (req, res) => {
     try {
       const code = req.params.code;
+      console.log(`Importing qualification with code: ${code}`);
+      
+      // Validate qualification code format (typically alphanumeric with some variations)
+      if (!/^[A-Za-z0-9_-]+$/.test(code)) {
+        return res.status(400).json({
+          message: `Invalid qualification code format: ${code}`
+        });
+      }
       
       const qualificationId = await tgaService.importQualification(code);
       
-      res.status(201).json({
+      res.json({
         message: `Qualification ${code} imported successfully`,
         qualificationId
       });
@@ -75,6 +84,14 @@ export function registerTGARoutes(app: Express) {
         error: error instanceof Error ? error.message : 'Unknown error'
       });
     }
+  });
+  
+  /**
+   * Legacy endpoint support for qualification import
+   */
+  app.post("/api/tga/import/qualification/:code", async (req, res) => {
+    // Redirect to the new endpoint format
+    res.redirect(307, `/api/tga/import/${req.params.code}`);
   });
   
   /**
