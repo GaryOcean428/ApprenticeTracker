@@ -194,14 +194,29 @@ export function registerTGARoutes(app: Express) {
         });
       }
       
-      // No minimum length for sync queries
+      // Add debugging info
+      console.log(`Syncing qualifications with query: '${query}'`);
       
-      const importedCount = await tgaService.syncQualifications(query, limit || 10);
-      
-      res.json({
-        message: `Successfully synchronized ${importedCount} qualifications for query '${query}'`,
-        count: importedCount
-      });
+      try {
+        const importedCount = await tgaService.syncQualifications(query, limit || 10);
+        
+        res.json({
+          message: `Successfully synchronized ${importedCount} qualifications for query '${query}'`,
+          count: importedCount
+        });
+      } catch (syncError) {
+        console.error(`Error in syncQualifications:`, syncError);
+        
+        // For search query validation error, return a 400 status
+        if (syncError instanceof Error && syncError.message.includes("Search query must be at least 3 characters")) {
+          return res.status(400).json({
+            message: syncError.message
+          });
+        }
+        
+        // For other errors, return a 500 status
+        throw syncError;
+      }
     } catch (error) {
       console.error(`Error syncing qualifications:`, error);
       res.status(500).json({
