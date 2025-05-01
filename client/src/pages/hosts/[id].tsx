@@ -634,7 +634,7 @@ const HostDetails = () => {
                                   ) : qualifications && qualifications.length > 0 ? (
                                     qualifications.map(qual => (
                                       <SelectItem key={qual.id} value={qual.id.toString()}>
-                                        {qual.title} ({qual.code})
+                                        {qual.code} - {qual.title}
                                       </SelectItem>
                                     ))
                                   ) : (
@@ -725,8 +725,7 @@ const HostDetails = () => {
                             <TableCell className="font-medium">
                               {prefQual.qualification ? (
                                 <div>
-                                  <div>{prefQual.qualification.title}</div>
-                                  <div className="text-xs text-muted-foreground">{prefQual.qualification.code}</div>
+                                  <div>{prefQual.qualification.code} - {prefQual.qualification.title}</div>
                                 </div>
                               ) : (
                                 `Qualification ID: ${prefQual.qualificationId}`
