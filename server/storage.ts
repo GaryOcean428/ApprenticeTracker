@@ -2,7 +2,7 @@ import {
   roles, permissions, rolePermissions, subscriptionPlans, users, 
   apprentices, hostEmployers, trainingContracts, placements, 
   documents, complianceRecords, timesheets, timesheetDetails, 
-  activityLogs, tasks,
+  activityLogs, tasks, qualifications, hostEmployerPreferredQualifications,
   type Role, type InsertRole,
   type Permission, type InsertPermission,
   type RolePermission, type InsertRolePermission,
@@ -17,7 +17,9 @@ import {
   type Timesheet, type InsertTimesheet,
   type TimesheetDetail, type InsertTimesheetDetail,
   type ActivityLog, type InsertActivityLog,
-  type Task, type InsertTask
+  type Task, type InsertTask,
+  type Qualification, type InsertQualification,
+  type HostEmployerPreferredQualification, type InsertHostEmployerPreferredQualification
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, or, desc, asc, sql } from "drizzle-orm";
@@ -156,6 +158,18 @@ export interface IStorage {
   // createDataView(view: any): Promise<any>;
   // updateDataView(id: number, view: any): Promise<any | undefined>;
   // deleteDataView(id: number): Promise<boolean>;
+
+  // Host Employer Preferred Qualifications methods
+  getHostEmployerPreferredQualifications(hostEmployerId: number): Promise<HostEmployerPreferredQualification[]>;
+  getHostEmployerPreferredQualification(id: number): Promise<HostEmployerPreferredQualification | undefined>;
+  addHostEmployerPreferredQualification(qualification: InsertHostEmployerPreferredQualification): Promise<HostEmployerPreferredQualification>;
+  updateHostEmployerPreferredQualification(id: number, qualification: Partial<InsertHostEmployerPreferredQualification>): Promise<HostEmployerPreferredQualification | undefined>;
+  removeHostEmployerPreferredQualification(id: number): Promise<boolean>;
+  
+  // Qualification methods
+  getQualification(id: number): Promise<Qualification | undefined>;
+  getAllQualifications(): Promise<Qualification[]>;
+  searchQualifications(query: string): Promise<Qualification[]>;
 }
 
 export class DatabaseStorage implements IStorage {

@@ -948,3 +948,24 @@ export type InsertApprenticeUnitProgress = z.infer<typeof insertApprenticeUnitPr
 
 export type ApprenticeQualification = typeof apprenticeQualifications.$inferSelect;
 export type InsertApprenticeQualification = z.infer<typeof insertApprenticeQualificationSchema>;
+
+// Host Employer Preferred Qualifications
+export const hostEmployerPreferredQualifications = pgTable("host_employer_preferred_qualifications", {
+  id: serial("id").primaryKey(),
+  hostEmployerId: integer("host_employer_id").references(() => hostEmployers.id).notNull(),
+  qualificationId: integer("qualification_id").references(() => qualifications.id).notNull(),
+  priority: text("priority").default("medium"), // "high", "medium", "low"
+  notes: text("notes"),
+  isRequired: boolean("is_required").default(false), // Whether this qualification is required or just preferred
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertHostEmployerPreferredQualificationSchema = createInsertSchema(hostEmployerPreferredQualifications).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type HostEmployerPreferredQualification = typeof hostEmployerPreferredQualifications.$inferSelect;
+export type InsertHostEmployerPreferredQualification = z.infer<typeof insertHostEmployerPreferredQualificationSchema>;

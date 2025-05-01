@@ -7,6 +7,7 @@ import { migrateGtoComplianceSchema } from "./migrate-gto-compliance";
 import { seedGtoComplianceStandards } from "./seed-gto-compliance";
 import { migrateVetSchema } from "./migrate-vet";
 import { migrateRolesSchema } from "./migrate-roles";
+import { migrateHostPreferredQualifications } from "./migrate-host-preferred-quals";
 import { initializeScheduledTasks } from "./scheduled-tasks";
 
 const app = express();
@@ -61,6 +62,10 @@ app.use((req, res, next) => {
     // Migrate VET Training schema
     await migrateVetSchema();
     log("VET Training schema migration completed");
+    
+    // Migrate Host Employer Preferred Qualifications schema
+    await migrateHostPreferredQualifications();
+    log("Host Preferred Qualifications schema migration completed");
   } catch (error) {
     log("Error migrating database schema: " + error);
   }
