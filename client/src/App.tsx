@@ -34,6 +34,9 @@ import GtoComplianceDashboard from "./pages/gto-compliance/index";
 import StandardAssessment from "./pages/gto-compliance/standard-assessment";
 import ComplaintsManagement from "./pages/gto-compliance/complaints";
 
+// Settings Pages
+import UserManagement from "./pages/settings/user-management";
+
 // VET Training Module
 import UnitsOfCompetencyList from "./pages/vet/units/index";
 import CreateUnitOfCompetency from "./pages/vet/units/create";
