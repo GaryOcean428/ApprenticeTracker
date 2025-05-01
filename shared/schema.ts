@@ -3,6 +3,74 @@ import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
 // Users
+// Roles
+export const roles = pgTable("roles", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull().unique(),
+  description: text("description"),
+  isSystem: boolean("is_system").default(false), // System roles cannot be deleted
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertRoleSchema = createInsertSchema(roles).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+// Permissions
+export const permissions = pgTable("permissions", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull().unique(),
+  description: text("description"),
+  category: text("category"), // e.g., "apprentice", "host", "training", etc.
+  action: text("action").notNull(), // e.g., "create", "read", "update", "delete"
+  resource: text("resource").notNull(), // e.g., "apprentice", "host", "document", etc.
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertPermissionSchema = createInsertSchema(permissions).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+// Role Permissions (many-to-many)
+export const rolePermissions = pgTable("role_permissions", {
+  id: serial("id").primaryKey(),
+  roleId: integer("role_id").references(() => roles.id).notNull(),
+  permissionId: integer("permission_id").references(() => permissions.id).notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const insertRolePermissionSchema = createInsertSchema(rolePermissions).omit({
+  id: true,
+  createdAt: true,
+});
+
+// Subscription Plans (for future Stripe integration)
+export const subscriptionPlans = pgTable("subscription_plans", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull().unique(),
+  description: text("description"),
+  price: numeric("price", { precision: 10, scale: 2 }),
+  billingCycle: text("billing_cycle").default("monthly"), // "monthly", "yearly", etc.
+  features: json("features").default({}),
+  isActive: boolean("is_active").default(true),
+  stripePriceId: text("stripe_price_id"), // For Stripe integration
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertSubscriptionPlanSchema = createInsertSchema(subscriptionPlans).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+// Users
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   username: text("username").notNull().unique(),
@@ -10,8 +78,20 @@ export const users = pgTable("users", {
   email: text("email").notNull().unique(),
   firstName: text("first_name").notNull(),
   lastName: text("last_name").notNull(),
-  role: text("role").notNull().default("user"),
+  role: text("role").notNull().default("user"), // Legacy role field
+  roleId: integer("role_id").references(() => roles.id), // New reference to roles table
+  organizationId: integer("organization_id").references(() => gtoOrganizations.id), // Association with organization
   profileImage: text("profile_image"),
+  isActive: boolean("is_active").default(true),
+  lastLogin: timestamp("last_login"),
+  // Stripe fields for future integration
+  stripeCustomerId: text("stripe_customer_id"),
+  stripeSubscriptionId: text("stripe_subscription_id"),
+  subscriptionStatus: text("subscription_status"),
+  subscriptionPlanId: integer("subscription_plan_id").references(() => subscriptionPlans.id),
+  subscriptionEndsAt: timestamp("subscription_ends_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
 export const insertUserSchema = createInsertSchema(users).pick({
@@ -21,7 +101,11 @@ export const insertUserSchema = createInsertSchema(users).pick({
   firstName: true,
   lastName: true,
   role: true,
+  roleId: true,
+  organizationId: true,
   profileImage: true,
+  isActive: true,
+  subscriptionPlanId: true
 });
 
 // Apprentices
@@ -477,6 +561,18 @@ export const extendedTrainingContracts = {
 };
 
 // Export types
+export type Role = typeof roles.$inferSelect;
+export type InsertRole = z.infer<typeof insertRoleSchema>;
+
+export type Permission = typeof permissions.$inferSelect;
+export type InsertPermission = z.infer<typeof insertPermissionSchema>;
+
+export type RolePermission = typeof rolePermissions.$inferSelect;
+export type InsertRolePermission = z.infer<typeof insertRolePermissionSchema>;
+
+export type SubscriptionPlan = typeof subscriptionPlans.$inferSelect;
+export type InsertSubscriptionPlan = z.infer<typeof insertSubscriptionPlanSchema>;
+
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 
