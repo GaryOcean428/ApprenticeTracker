@@ -342,7 +342,7 @@ export default function QualificationStructure() {
                   <ScrollArea className="h-[300px] rounded-md border p-2">
                     <Table>
                       <TableHeader>
-                        <TableRow>
+                        <TableRow key="header">
                           <TableHead className="w-10"></TableHead>
                           <TableHead>Code</TableHead>
                           <TableHead>Title</TableHead>
@@ -465,7 +465,7 @@ export default function QualificationStructure() {
               ) : (
                 <Table>
                   <TableHeader>
-                    <TableRow>
+                    <TableRow key="coreHeader">
                       <TableHead className="w-1/6">Unit Code</TableHead>
                       <TableHead className="w-3/6">Unit Title</TableHead>
                       <TableHead className="w-1/6">Hours</TableHead>
@@ -544,7 +544,7 @@ export default function QualificationStructure() {
                     <h3 className="font-medium text-lg">{groupName}</h3>
                     <Table>
                       <TableHeader>
-                        <TableRow>
+                        <TableRow key={`${groupName}Header`}>
                           <TableHead className="w-1/6">Unit Code</TableHead>
                           <TableHead className="w-3/6">Unit Title</TableHead>
                           <TableHead className="w-1/6">Hours</TableHead>
