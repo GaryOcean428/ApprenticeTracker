@@ -854,14 +854,14 @@ export default function EditQualification() {
                           />
                         </div>
                         <Select
-                          value={selectedUnitGroup || ""}
-                          onValueChange={(value) => setSelectedUnitGroup(value === "" ? null : value)}
+                          value={selectedUnitGroup || "no-group"}
+                          onValueChange={(value) => setSelectedUnitGroup(value === "no-group" ? null : value)}
                         >
                           <SelectTrigger className="w-[180px]">
                             <SelectValue placeholder="Unit Group" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="">No Group</SelectItem>
+                            <SelectItem value="no-group">No Group</SelectItem>
                             {Object.keys(unitGroups).map((group) => (
                               <SelectItem key={group} value={group}>
                                 {group}
