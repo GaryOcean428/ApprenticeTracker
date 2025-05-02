@@ -31,6 +31,7 @@ const QUALIFICATION_SEARCH_TERMS = [
  * 
  * This function fetches qualifications from the Training.gov.au API
  * based on predefined search terms and imports them into our database.
+ * Uses a cache to avoid unnecessary API calls for recently fetched qualifications.
  */
 export async function syncQualifications() {
   console.log("Starting scheduled qualification sync...");
@@ -40,14 +41,22 @@ export async function syncQualifications() {
   for (const searchTerm of QUALIFICATION_SEARCH_TERMS) {
     try {
       console.log(`Syncing qualifications for: ${searchTerm}`);
-      const importedCount = await tgaService.syncQualifications(searchTerm, 10);
+      
+      // Set a higher limit for important search terms
+      const limit = (searchTerm.includes("Certificate") || searchTerm.includes("Diploma")) ? 20 : 10;
+      
+      // Use the optimized caching TGA service
+      const importedCount = await tgaService.syncQualifications(searchTerm, limit);
       totalImported += importedCount;
       console.log(`Imported ${importedCount} qualifications for '${searchTerm}'`);
       
       // Add a small delay between requests to avoid rate limiting
-      await new Promise(resolve => setTimeout(resolve, 500));
-    } catch (error) {
-      console.error(`Error syncing qualifications for '${searchTerm}':`, error);
+      // Longer delay for larger result sets
+      const delayTime = limit > 10 ? 1000 : 500;
+      await new Promise(resolve => setTimeout(resolve, delayTime));
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      console.error(`Error syncing qualifications for '${searchTerm}': ${errorMessage}`);
     }
   }
   

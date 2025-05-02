@@ -346,14 +346,14 @@ export default function EditQualification() {
   }
 
   // Filter units based on search term
-  const filteredUnits = unitsData?.units.filter(unit => {
+  const filteredUnits = unitsData && unitsData.units ? unitsData.units.filter(unit => {
     const searchTermLower = searchTerm.toLowerCase();
     return (
       unit.unitCode.toLowerCase().includes(searchTermLower) ||
       unit.unitTitle.toLowerCase().includes(searchTermLower) ||
-      unit.unitDescription.toLowerCase().includes(searchTermLower)
+      (unit.unitDescription?.toLowerCase() || '').includes(searchTermLower)
     );
-  }) || [];
+  }) : [];
 
   // Get unique unit groups
   const unitGroups = qualificationData?.qualification.structure?.reduce((groups: UnitGroups, structure) => {
