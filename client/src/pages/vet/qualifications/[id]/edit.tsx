@@ -975,8 +975,293 @@ export default function EditQualification() {
                 </AlertDescription>
               </Alert>
             )}
-          </form>
-        </Form>
+                </form>
+              </Form>
+            </TabsContent>
+            
+            <TabsContent value="units" className="space-y-6">
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <div>
+                    <CardTitle>Core Units</CardTitle>
+                    <CardDescription>
+                      Required units for this qualification ({coreUnits.length} of {qualification?.coreUnits || 0})
+                    </CardDescription>
+                  </div>
+                  <Dialog open={isAddUnitDialogOpen} onOpenChange={setIsAddUnitDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button size="sm" className="ml-auto">
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add Unit
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+                      <DialogHeader>
+                        <DialogTitle>Add Unit of Competency</DialogTitle>
+                        <DialogDescription>
+                          Search for and add a unit of competency to this qualification.
+                        </DialogDescription>
+                      </DialogHeader>
+                      
+                      <div className="space-y-4 my-4">
+                        <div className="flex items-center gap-2">
+                          <div className="relative flex-1">
+                            <Search className="absolute left-2 top-3 h-4 w-4 text-muted-foreground" />
+                            <Input
+                              placeholder="Search units by code or title..."
+                              className="pl-8"
+                              value={searchTerm}
+                              onChange={(e) => setSearchTerm(e.target.value)}
+                            />
+                          </div>
+                          <Select
+                            value={selectedUnitGroup || "General Electives"}
+                            onValueChange={(value) => setSelectedUnitGroup(value)}
+                          >
+                            <SelectTrigger className="w-[200px]">
+                              <SelectValue placeholder="Select unit group" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="General Electives">General Electives</SelectItem>
+                              {unitGroups.map((group) => (
+                                <SelectItem key={group} value={group}>
+                                  {group}
+                                </SelectItem>
+                              ))}
+                              <SelectItem value="new_group">+ Add New Group</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        
+                        {selectedUnitGroup === "new_group" && (
+                          <div className="flex items-center gap-2">
+                            <Input 
+                              placeholder="Enter new unit group name..."
+                              value={selectedUnitGroup === "new_group" ? "" : selectedUnitGroup || ""}
+                              onChange={(e) => setSelectedUnitGroup(e.target.value || "General Electives")}
+                            />
+                            <Button 
+                              variant="outline" 
+                              size="icon"
+                              onClick={() => setSelectedUnitGroup("General Electives")}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                      
+                      <div className="border rounded-md overflow-hidden">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead className="w-[150px]">Unit Code</TableHead>
+                              <TableHead>Unit Title</TableHead>
+                              <TableHead className="w-[100px] text-right">Actions</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {isLoadingUnits ? (
+                              <TableRow>
+                                <TableCell colSpan={3} className="text-center py-4">
+                                  <div className="flex justify-center items-center">
+                                    <div className="animate-spin w-6 h-6 border-2 border-primary border-t-transparent rounded-full" />
+                                  </div>
+                                </TableCell>
+                              </TableRow>
+                            ) : filteredUnits.length === 0 ? (
+                              <TableRow>
+                                <TableCell colSpan={3} className="text-center py-4 text-muted-foreground">
+                                  No units found matching your search.
+                                </TableCell>
+                              </TableRow>
+                            ) : (
+                              filteredUnits.map((unit) => (
+                                <TableRow key={unit.id}>
+                                  <TableCell className="font-medium">{unit.unitCode}</TableCell>
+                                  <TableCell>{unit.unitTitle}</TableCell>
+                                  <TableCell className="text-right">
+                                    <div className="flex justify-end gap-2">
+                                      <Button
+                                        size="sm"
+                                        variant="outline"
+                                        onClick={() => handleAddUnit(unit.id, true)}
+                                      >
+                                        Add as Core
+                                      </Button>
+                                      <Button
+                                        size="sm"
+                                        onClick={() => handleAddUnit(unit.id, false)}
+                                      >
+                                        Add as Elective
+                                      </Button>
+                                    </div>
+                                  </TableCell>
+                                </TableRow>
+                              ))
+                            )}
+                          </TableBody>
+                        </Table>
+                      </div>
+                      
+                      <DialogFooter>
+                        <Button variant="outline" onClick={() => setIsAddUnitDialogOpen(false)}>
+                          Cancel
+                        </Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
+                </CardHeader>
+                <CardContent>
+                  <div className="border rounded-md overflow-hidden">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="w-[150px]">Unit Code</TableHead>
+                          <TableHead>Unit Title</TableHead>
+                          <TableHead className="w-[100px] text-right">Hours</TableHead>
+                          <TableHead className="w-[150px] text-right">Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {coreUnits.length === 0 ? (
+                          <TableRow>
+                            <TableCell colSpan={4} className="text-center py-4 text-muted-foreground">
+                              No core units added yet. Click "Add Unit" to add core units.
+                            </TableCell>
+                          </TableRow>
+                        ) : (
+                          coreUnits.map((structure) => (
+                            <TableRow key={structure.id}>
+                              <TableCell className="font-medium">{structure.unit?.unitCode || 'N/A'}</TableCell>
+                              <TableCell>{structure.unit?.unitTitle || 'N/A'}</TableCell>
+                              <TableCell className="text-right">{structure.unit?.nominalHours || 0}</TableCell>
+                              <TableCell className="text-right">
+                                <div className="flex justify-end gap-2">
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => updateUnitMutation.mutate({ 
+                                      structureId: structure.id, 
+                                      isCore: false, 
+                                      unitGroup: "General Electives" 
+                                    })}
+                                  >
+                                    Move to Electives
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="destructive"
+                                    onClick={() => removeUnitMutation.mutate(structure.id)}
+                                  >
+                                    <X className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          ))
+                        )}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              {Object.entries(groupedElectives).map(([group, units]) => (
+                <Card key={group}>
+                  <CardHeader>
+                    <CardTitle>Elective Units: {group}</CardTitle>
+                    <CardDescription>
+                      {group === "General Electives" ? 
+                        `Select from these units to complete the required ${qualification?.electiveUnits || 0} elective units` :
+                        `Units from the ${group} group`
+                      }
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="border rounded-md overflow-hidden">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead className="w-[150px]">Unit Code</TableHead>
+                            <TableHead>Unit Title</TableHead>
+                            <TableHead className="w-[100px] text-right">Hours</TableHead>
+                            <TableHead className="w-[150px] text-right">Actions</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {units.length === 0 ? (
+                            <TableRow>
+                              <TableCell colSpan={4} className="text-center py-4 text-muted-foreground">
+                                No elective units in this group. Click "Add Unit" to add units.
+                              </TableCell>
+                            </TableRow>
+                          ) : (
+                            units.map((structure) => (
+                              <TableRow key={structure.id}>
+                                <TableCell className="font-medium">{structure.unit?.unitCode || 'N/A'}</TableCell>
+                                <TableCell>{structure.unit?.unitTitle || 'N/A'}</TableCell>
+                                <TableCell className="text-right">{structure.unit?.nominalHours || 0}</TableCell>
+                                <TableCell className="text-right">
+                                  <div className="flex justify-end gap-2">
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => updateUnitMutation.mutate({ 
+                                        structureId: structure.id, 
+                                        isCore: true, 
+                                        unitGroup: null 
+                                      })}
+                                    >
+                                      Move to Core
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      variant="destructive"
+                                      onClick={() => removeUnitMutation.mutate(structure.id)}
+                                    >
+                                      <X className="h-4 w-4" />
+                                    </Button>
+                                  </div>
+                                </TableCell>
+                              </TableRow>
+                            ))
+                          )}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </TabsContent>
+          </Tabs>
+        
+        {isDeleting && (
+          <Alert variant="destructive" className="mt-4">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Are you sure you want to delete this qualification?</AlertTitle>
+            <AlertDescription className="flex items-center gap-4 mt-2">
+              <span>This action cannot be undone.</span>
+              <div className="flex gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => setIsDeleting(false)}
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  variant="destructive" 
+                  size="sm"
+                  onClick={() => deleteMutation.mutate()}
+                  disabled={deleteMutation.isPending}
+                >
+                  Yes, Delete
+                </Button>
+              </div>
+            </AlertDescription>
+          </Alert>
+        )}
       )}
     </div>
   );
