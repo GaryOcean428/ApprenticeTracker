@@ -1,5 +1,6 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useParams, Link, useLocation } from "wouter";
+import { useParams, useLocation } from "wouter";
 import {
   Card,
   CardContent,
@@ -8,436 +9,515 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbSeparator,
+  BreadcrumbPage,
+} from "@/components/ui/breadcrumb";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import {
-  PenLine,
-  BookOpen,
-  Bookmark,
+  ChevronLeft,
   GraduationCap,
+  FileText,
+  Award,
+  BookOpen,
+  ListTodo,
+  Clock,
+  Users,
+  PenLine,
+  Download,
+  Share2,
+  AlertCircle,
+  Tags,
+  Code,
+  FileCode,
+  Monitor,
+  ArrowUpDown,
+  ChevronDown,
   User,
   Building,
-  Users,
-  List,
-  Clock,
   Calendar,
-  ClipboardList,
-  ArrowLeft,
-  Check,
-  X,
-  Layers,
-  BookOpen as Book,
+  ListChecks,
+  Briefcase
 } from "lucide-react";
-import { formatDate } from "@/lib/utils";
+
+interface Unit {
+  id: number;
+  unitCode: string;
+  unitTitle: string;
+  unitDescription: string;
+  isCore: boolean;
+  nominalHours: number;
+  prerequisiteUnitIds: number[] | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface QualificationStructure {
+  id: number;
+  qualificationId: number;
+  unitId: number;
+  isCore: boolean;
+  unitGroup: string | null;
+  createdAt: string;
+  updatedAt: string;
+  unit: Unit;
+}
+
+interface Qualification {
+  id: number;
+  qualificationCode: string;
+  qualificationTitle: string;
+  qualificationDescription: string;
+  aqfLevel: string;
+  aqfLevelNumber: number;
+  trainingPackage: string;
+  trainingPackageRelease: string;
+  totalUnits: number;
+  coreUnits: number;
+  electiveUnits: number;
+  nominalHours: number;
+  isActive: boolean;
+  isApprenticeshipQualification: boolean;
+  isFundedQualification: boolean;
+  fundingDetails: string | null;
+  createdAt: string;
+  updatedAt: string;
+  structure?: QualificationStructure[];
+}
+
+function getLevelColor(level: string) {
+  const levelNumber = parseInt(level.match(/\d+/)?.[0] || "1");
+  
+  switch(levelNumber) {
+    case 1: case 2: return "bg-blue-100 text-blue-800";
+    case 3: case 4: return "bg-green-100 text-green-800";
+    case 5: case 6: return "bg-yellow-100 text-yellow-800";
+    case 7: case 8: return "bg-orange-100 text-orange-800";
+    case 9: case 10: return "bg-red-100 text-red-800";
+    default: return "bg-gray-100 text-gray-800";
+  }
+}
+
+const QualificationSkeleton = () => (
+  <div className="space-y-6">
+    <div className="space-y-2">
+      <Skeleton className="h-8 w-3/4" />
+      <Skeleton className="h-4 w-1/2" />
+    </div>
+    
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <Skeleton className="h-32" />
+      <Skeleton className="h-32" />
+      <Skeleton className="h-32" />
+    </div>
+    
+    <div>
+      <Skeleton className="h-6 w-1/3 mb-4" />
+      <Skeleton className="h-24 w-full" />
+    </div>
+    
+    <div>
+      <Skeleton className="h-6 w-1/3 mb-4" />
+      <div className="space-y-2">
+        {Array(5).fill(0).map((_, i) => (
+          <Skeleton key={i} className="h-12 w-full" />
+        ))}
+      </div>
+    </div>
+  </div>
+);
 
 export default function QualificationDetails() {
-  const { id } = useParams();
+  const params = useParams<{ id: string }>();
   const [, navigate] = useLocation();
   const { toast } = useToast();
-
-  const { data: qualification, isLoading, error } = useQuery({
-    queryKey: [`/api/vet/qualifications/${id}`],
-    queryFn: async () => {
-      try {
-        const res = await fetch(`/api/vet/qualifications/${id}`);
-        if (!res.ok) throw new Error('Failed to fetch qualification details');
-        return res.json();
-      } catch (error) {
-        toast({
-          title: "Error",
-          description: "Failed to load qualification details.",
-          variant: "destructive"
-        });
-        throw error;
-      }
-    },
+  const [activeTab, setActiveTab] = useState("overview");
+  
+  const { data: qualification, isLoading, error } = useQuery<Qualification>({
+    queryKey: [`/api/vet/qualifications/${params.id}`],
   });
-
-  const { data: units, isLoading: unitsLoading } = useQuery({
-    queryKey: [`/api/vet/qualifications/${id}/units`],
-    queryFn: async () => {
-      try {
-        const res = await fetch(`/api/vet/qualifications/${id}/units`);
-        if (!res.ok) return [];
-        return res.json();
-      } catch (error) {
-        return [];
-      }
-    },
-    enabled: !!id,
+  
+  if (error) {
+    toast({
+      variant: "destructive",
+      title: "Error loading qualification",
+      description: "There was a problem loading the qualification data. Please try again later."
+    });
+  }
+  
+  const coreUnits = qualification?.structure?.filter(item => item.isCore) || [];
+  const electiveUnits = qualification?.structure?.filter(item => !item.isCore) || [];
+  
+  // Group electives by unit group if available
+  const groupedElectives: Record<string, QualificationStructure[]> = {};
+  electiveUnits.forEach(item => {
+    const group = item.unitGroup || "General Electives";
+    if (!groupedElectives[group]) {
+      groupedElectives[group] = [];
+    }
+    groupedElectives[group].push(item);
   });
-
-  if (isLoading) {
-    return (
-      <div className="space-y-6">
-        <div className="flex items-center gap-2">
-          <Skeleton className="h-10 w-10 rounded-full" />
-          <div>
-            <Skeleton className="h-8 w-48" />
-            <Skeleton className="h-4 w-32 mt-2" />
-          </div>
-        </div>
-        <Skeleton className="h-[600px] w-full" />
-      </div>
-    );
-  }
-
-  if (error || !qualification) {
-    return (
-      <Card>
-        <CardHeader>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="icon" onClick={() => navigate("/vet/qualifications")}>
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
-            <CardTitle>Error</CardTitle>
-          </div>
-          <CardDescription>Failed to load qualification details</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <p>There was an error retrieving the qualification details. The qualification may not exist or there was a server error.</p>
-          <Button 
-            className="mt-4" 
-            onClick={() => navigate("/vet/qualifications")}
-          >
-            Back to Qualifications
-          </Button>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  const core = units?.filter(unit => unit.isCore) || [];
-  const elective = units?.filter(unit => !unit.isCore) || [];
-
+  
   return (
-    <>
-      <div className="flex items-center gap-2 mb-6">
-        <Button variant="outline" size="icon" onClick={() => navigate("/vet/qualifications")}>
-          <ArrowLeft className="h-4 w-4" />
-        </Button>
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
-            <span>{qualification.qualificationCode}</span> 
-            <span className="text-muted-foreground">-</span> 
-            <span>{qualification.qualificationTitle}</span>
-          </h1>
-          <p className="text-muted-foreground">
-            AQF Level: {qualification.aqfLevel} | Training Package: {qualification.trainingPackage}
-          </p>
+          <Breadcrumb className="mb-2">
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink href="/vet/qualifications">Qualifications</BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>{qualification?.qualificationCode || "Details"}</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+          
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate("/vet/qualifications")}
+            >
+              <ChevronLeft className="h-5 w-5" />
+            </Button>
+            <h1 className="text-2xl font-bold tracking-tight">
+              {isLoading ? <Skeleton className="h-8 w-48" /> : qualification?.qualificationTitle}
+            </h1>
+          </div>
+        </div>
+        
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" onClick={() => navigate(`/vet/qualifications/${params.id}/edit`)}>
+            <PenLine className="mr-2 h-4 w-4" />
+            Edit
+          </Button>
+          <Button>
+            <FileText className="mr-2 h-4 w-4" />
+            Export Details
+          </Button>
         </div>
       </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <GraduationCap className="h-4 w-4" />
-              AQF Level
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold">{qualification.aqfLevel}</p>
-            <p className="text-sm text-muted-foreground">Level {qualification.aqfLevelNumber}</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <ClipboardList className="h-4 w-4" />
-              Units
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold">{qualification.totalUnits || 'N/A'}</p>
-            <p className="text-sm text-muted-foreground">
-              {qualification.coreUnits || 0} Core | {qualification.electiveUnits || 0} Elective
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <Clock className="h-4 w-4" />
-              Nominal Hours
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold">{qualification.nominalHours || 'N/A'}</p>
-            <p className="text-sm text-muted-foreground">Training Duration</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      <Tabs defaultValue="details" className="w-full">
-        <TabsList>
-          <TabsTrigger value="details">
-            <BookOpen className="h-4 w-4 mr-2" />
-            Details
-          </TabsTrigger>
-          <TabsTrigger value="structure">
-            <Layers className="h-4 w-4 mr-2" />
-            Qualification Structure
-          </TabsTrigger>
-          <TabsTrigger value="apprentices">
-            <Users className="h-4 w-4 mr-2" />
-            Enrolled Apprentices
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="details" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Qualification Details</CardTitle>
-              <CardDescription>
-                Information about this qualification from Training.gov.au
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
-                <div>
-                  <h3 className="text-sm font-medium text-muted-foreground mb-1">Qualification Code</h3>
-                  <p>{qualification.qualificationCode}</p>
-                </div>
-
-                <div>
-                  <h3 className="text-sm font-medium text-muted-foreground mb-1">Qualification Title</h3>
-                  <p>{qualification.qualificationTitle}</p>
-                </div>
-
-                <div>
-                  <h3 className="text-sm font-medium text-muted-foreground mb-1">Training Package</h3>
-                  <p>{qualification.trainingPackage} (Release {qualification.trainingPackageRelease})</p>
-                </div>
-
-                <div>
-                  <h3 className="text-sm font-medium text-muted-foreground mb-1">Status</h3>
-                  <Badge variant={qualification.isActive ? "default" : "outline"}>
-                    {qualification.isActive ? "Current" : "Superseded"}
-                  </Badge>
-                </div>
-
-                <div>
-                  <h3 className="text-sm font-medium text-muted-foreground mb-1">Apprenticeship Qualification</h3>
-                  {qualification.isApprenticeshipQualification ? 
-                    <Badge variant="default" className="bg-green-100 text-success">
-                      <Check className="mr-1 h-3 w-3" />
-                      Yes
-                    </Badge> : 
-                    <Badge variant="outline">
-                      <X className="mr-1 h-3 w-3" />
-                      No
-                    </Badge>
-                  }
-                </div>
-
-                <div>
-                  <h3 className="text-sm font-medium text-muted-foreground mb-1">Funded Qualification</h3>
-                  {qualification.isFundedQualification ? 
-                    <Badge variant="default" className="bg-green-100 text-success">
-                      <Check className="mr-1 h-3 w-3" />
-                      Yes
-                    </Badge> : 
-                    <Badge variant="outline">
-                      <X className="mr-1 h-3 w-3" />
-                      No
-                    </Badge>
-                  }
-                </div>
-              </div>
-
-              <Separator />
-
-              <div>
-                <h3 className="text-sm font-medium text-muted-foreground mb-2">Description</h3>
-                <p className="text-sm">{qualification.qualificationDescription}</p>
-              </div>
-
-              {qualification.fundingDetails && (
-                <>
-                  <Separator />
+      
+      {isLoading ? (
+        <QualificationSkeleton />
+      ) : qualification ? (
+        <div className="space-y-6">
+          <div className="flex flex-wrap gap-2 items-center">
+            <Badge className="text-base py-1 px-3">
+              {qualification.qualificationCode}
+            </Badge>
+            <Badge variant="outline" className={`${getLevelColor(qualification.aqfLevel)} border-0 text-base py-1 px-3`}>
+              {qualification.aqfLevel}
+            </Badge>
+            {qualification.isApprenticeshipQualification && (
+              <Badge variant="secondary" className="text-base py-1 px-3">
+                Apprenticeship Qualification
+              </Badge>
+            )}
+            {qualification.isFundedQualification && (
+              <Badge variant="secondary" className="text-base py-1 px-3">
+                Government Funded
+              </Badge>
+            )}
+            <Badge variant={qualification.isActive ? "default" : "destructive"}>
+              {qualification.isActive ? "Active" : "Inactive"}
+            </Badge>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base font-medium flex items-center">
+                  <BookOpen className="mr-2 h-4 w-4 text-muted-foreground" />
+                  Training Package
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-xl font-semibold">{qualification.trainingPackage}</p>
+                <p className="text-sm text-muted-foreground">Release: {qualification.trainingPackageRelease}</p>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base font-medium flex items-center">
+                  <Award className="mr-2 h-4 w-4 text-muted-foreground" />
+                  Unit Requirements
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-3 gap-2">
                   <div>
-                    <h3 className="text-sm font-medium text-muted-foreground mb-2">Funding Details</h3>
-                    <p className="text-sm">{qualification.fundingDetails}</p>
+                    <p className="text-xl font-semibold">{qualification.totalUnits}</p>
+                    <p className="text-sm text-muted-foreground">Total</p>
                   </div>
-                </>
+                  <div>
+                    <p className="text-xl font-semibold">{qualification.coreUnits}</p>
+                    <p className="text-sm text-muted-foreground">Core</p>
+                  </div>
+                  <div>
+                    <p className="text-xl font-semibold">{qualification.electiveUnits}</p>
+                    <p className="text-sm text-muted-foreground">Elective</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base font-medium flex items-center">
+                  <Clock className="mr-2 h-4 w-4 text-muted-foreground" />
+                  Nominal Hours
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-xl font-semibold">
+                  {qualification.nominalHours} hours
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Approximately {Math.round(qualification.nominalHours / 38)} weeks
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+          
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid w-full md:w-auto grid-cols-2 md:grid-cols-3">
+              <TabsTrigger value="overview">Overview</TabsTrigger>
+              <TabsTrigger value="units">Units of Competency</TabsTrigger>
+              <TabsTrigger value="related">Related Information</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="overview" className="space-y-6 mt-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Description</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="whitespace-pre-wrap">{qualification.qualificationDescription}</p>
+                </CardContent>
+              </Card>
+              
+              {qualification.fundingDetails && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Funding Details</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="whitespace-pre-wrap">{qualification.fundingDetails}</p>
+                  </CardContent>
+                </Card>
               )}
-            </CardContent>
-            <CardFooter className="flex justify-between">
-              <div className="text-sm text-muted-foreground">
-                Last updated: {formatDate(qualification.updatedAt)}
-              </div>
-              <Button variant="outline" onClick={() => navigate(`/vet/qualifications/${id}/edit`)}>
-                <PenLine className="mr-2 h-4 w-4" />
-                Edit Qualification
-              </Button>
-            </CardFooter>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="structure" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Qualification Structure</CardTitle>
-              <CardDescription>
-                Units of Competency that make up this qualification
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Tabs defaultValue="core">
-                <TabsList className="mb-4">
-                  <TabsTrigger value="core">
-                    Core Units ({core.length}/{qualification.coreUnits || 0})
-                  </TabsTrigger>
-                  <TabsTrigger value="elective">
-                    Elective Units ({elective.length}/{qualification.electiveUnits || 0})
-                  </TabsTrigger>
-                </TabsList>
-
-                <TabsContent value="core">
-                  {unitsLoading ? (
+              
+              <Card>
+                <CardHeader>
+                  <CardTitle>Additional Information</CardTitle>
+                </CardHeader>
+                <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <h3 className="font-semibold mb-2">Qualification Details</h3>
                     <div className="space-y-2">
-                      {Array(5).fill(0).map((_, i) => (
-                        <Skeleton key={i} className="h-12 w-full" />
-                      ))}
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Created</span>
+                        <span>{new Date(qualification.createdAt).toLocaleDateString()}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Last Updated</span>
+                        <span>{new Date(qualification.updatedAt).toLocaleDateString()}</span>
+                      </div>
                     </div>
-                  ) : core.length > 0 ? (
+                  </div>
+                  
+                  <div>
+                    <h3 className="font-semibold mb-2">External Resources</h3>
+                    <div className="space-y-2">
+                      <Button variant="outline" className="w-full justify-start">
+                        <Monitor className="mr-2 h-4 w-4" />
+                        View on Training.gov.au
+                      </Button>
+                      <Button variant="outline" className="w-full justify-start">
+                        <FileCode className="mr-2 h-4 w-4" />
+                        Download Mapping Guide
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+            
+            <TabsContent value="units" className="space-y-6 mt-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Core Units ({coreUnits.length})</CardTitle>
+                  <CardDescription>
+                    All core units must be completed for this qualification
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="border rounded-md">
                     <Table>
                       <TableHeader>
                         <TableRow>
-                          <TableHead>Unit Code</TableHead>
+                          <TableHead className="w-[180px]">Unit Code</TableHead>
                           <TableHead>Unit Title</TableHead>
-                          <TableHead>Hours</TableHead>
-                          <TableHead>Actions</TableHead>
+                          <TableHead className="w-[100px] text-right">Hours</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {core.map((unit) => (
-                          <TableRow key={unit.id}>
-                            <TableCell className="font-medium">{unit.unitCode}</TableCell>
-                            <TableCell>{unit.unitTitle}</TableCell>
-                            <TableCell>{unit.nominalHours || 'N/A'}</TableCell>
-                            <TableCell>
-                              <Button 
-                                variant="ghost" 
-                                size="sm"
-                                onClick={() => navigate(`/vet/units/${unit.unitId}`)}
-                              >
-                                <Book className="h-4 w-4 mr-2" />
-                                View Unit
-                              </Button>
+                        {coreUnits.length === 0 && (
+                          <TableRow>
+                            <TableCell colSpan={3} className="text-center py-4 text-muted-foreground">
+                              No core units found for this qualification
                             </TableCell>
+                          </TableRow>
+                        )}
+                        
+                        {coreUnits.map((item) => (
+                          <TableRow key={item.id}>
+                            <TableCell className="font-medium">{item.unit.unitCode}</TableCell>
+                            <TableCell>{item.unit.unitTitle}</TableCell>
+                            <TableCell className="text-right">{item.unit.nominalHours}</TableCell>
                           </TableRow>
                         ))}
                       </TableBody>
                     </Table>
-                  ) : (
-                    <div className="p-4 border rounded-md text-center">
-                      <p className="text-muted-foreground">No core units found</p>
-                      <Button 
-                        variant="outline" 
-                        className="mt-4"
-                        onClick={() => navigate(`/vet/qualifications/${id}/structure`)}
-                      >
-                        Manage Qualification Structure
-                      </Button>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              {Object.entries(groupedElectives).map(([group, units]) => (
+                <Card key={group}>
+                  <CardHeader>
+                    <CardTitle>Elective Units: {group} ({units.length})</CardTitle>
+                    <CardDescription>
+                      {group === "General Electives" ? 
+                        `Select from these units to complete the required ${qualification.electiveUnits} elective units` :
+                        `Units from the ${group} group`
+                      }
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="border rounded-md">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead className="w-[180px]">Unit Code</TableHead>
+                            <TableHead>Unit Title</TableHead>
+                            <TableHead className="w-[100px] text-right">Hours</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {units.map((item) => (
+                            <TableRow key={item.id}>
+                              <TableCell className="font-medium">{item.unit.unitCode}</TableCell>
+                              <TableCell>{item.unit.unitTitle}</TableCell>
+                              <TableCell className="text-right">{item.unit.nominalHours}</TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
                     </div>
-                  )}
-                </TabsContent>
-
-                <TabsContent value="elective">
-                  {unitsLoading ? (
-                    <div className="space-y-2">
-                      {Array(5).fill(0).map((_, i) => (
-                        <Skeleton key={i} className="h-12 w-full" />
-                      ))}
-                    </div>
-                  ) : elective.length > 0 ? (
+                  </CardContent>
+                </Card>
+              ))}
+            </TabsContent>
+            
+            <TabsContent value="related" className="space-y-6 mt-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Apprenticeships</CardTitle>
+                  <CardDescription>
+                    Apprentices currently enrolled in this qualification
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="border rounded-md">
                     <Table>
                       <TableHeader>
                         <TableRow>
-                          <TableHead>Unit Code</TableHead>
-                          <TableHead>Unit Title</TableHead>
-                          <TableHead>Hours</TableHead>
-                          <TableHead>Actions</TableHead>
+                          <TableHead>Apprentice</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Start Date</TableHead>
+                          <TableHead>Progress</TableHead>
+                          <TableHead className="text-right">Actions</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {elective.map((unit) => (
-                          <TableRow key={unit.id}>
-                            <TableCell className="font-medium">{unit.unitCode}</TableCell>
-                            <TableCell>{unit.unitTitle}</TableCell>
-                            <TableCell>{unit.nominalHours || 'N/A'}</TableCell>
-                            <TableCell>
-                              <Button 
-                                variant="ghost" 
-                                size="sm"
-                                onClick={() => navigate(`/vet/units/${unit.unitId}`)}
-                              >
-                                <Book className="h-4 w-4 mr-2" />
-                                View Unit
-                              </Button>
-                            </TableCell>
-                          </TableRow>
-                        ))}
+                        <TableRow>
+                          <TableCell colSpan={5} className="text-center py-4 text-muted-foreground">
+                            No apprentices currently enrolled in this qualification
+                          </TableCell>
+                        </TableRow>
                       </TableBody>
                     </Table>
-                  ) : (
-                    <div className="p-4 border rounded-md text-center">
-                      <p className="text-muted-foreground">No elective units found</p>
-                      <Button 
-                        variant="outline" 
-                        className="mt-4"
-                        onClick={() => navigate(`/vet/qualifications/${id}/structure`)}
-                      >
-                        Manage Qualification Structure
-                      </Button>
-                    </div>
-                  )}
-                </TabsContent>
-              </Tabs>
-            </CardContent>
-            <CardFooter>
-              <Button onClick={() => navigate(`/vet/qualifications/${id}/structure`)}>
-                <Layers className="mr-2 h-4 w-4" />
-                Manage Qualification Structure
-              </Button>
-            </CardFooter>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="apprentices" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Enrolled Apprentices</CardTitle>
-              <CardDescription>
-                Apprentices currently enrolled in this qualification
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="p-4 border rounded-md text-center">
-                <p className="text-muted-foreground mb-2">No apprentices currently enrolled in this qualification</p>
-                <p className="text-sm text-muted-foreground">When apprentices are enrolled in this qualification, they will appear here.</p>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
-    </>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader>
+                  <CardTitle>Host Employers</CardTitle>
+                  <CardDescription>
+                    Host employers seeking or employing apprentices with this qualification
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="border rounded-md">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Host Employer</TableHead>
+                          <TableHead>Industry</TableHead>
+                          <TableHead>Vacancies</TableHead>
+                          <TableHead>Current Placements</TableHead>
+                          <TableHead className="text-right">Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        <TableRow>
+                          <TableCell colSpan={5} className="text-center py-4 text-muted-foreground">
+                            No host employers associated with this qualification
+                          </TableCell>
+                        </TableRow>
+                      </TableBody>
+                    </Table>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
+        </div>
+      ) : (
+        <div className="p-8 text-center">
+          <AlertCircle className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+          <h3 className="text-lg font-medium mb-2">Qualification Not Found</h3>
+          <p className="text-muted-foreground mb-4">
+            The qualification you're looking for doesn't exist or you may not have permission to view it.
+          </p>
+          <Button onClick={() => navigate("/vet/qualifications")}>
+            Return to Qualifications
+          </Button>
+        </div>
+      )}
+    </div>
   );
 }
