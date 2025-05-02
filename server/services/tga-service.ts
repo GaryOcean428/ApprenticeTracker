@@ -14,8 +14,8 @@ import { db } from "../db";
 import { qualifications, unitsOfCompetency, qualificationStructure } from "@shared/schema";
 import { eq, and, desc, sql } from "drizzle-orm";
 import axios from "axios";
-
 import * as soap from 'soap';
+import { cacheService } from "../utils/cache-service";
 
 // API Base URLs
 const TGA_REST_API_URL = "https://training.gov.au/api";
@@ -156,12 +156,23 @@ export class TGAService {
         throw new Error("Search query must be at least 3 characters");
       }
       
+      // Try to get results from cache first
+      const cacheKey = `tga:search:${query}:${limit}`;
+      const cachedResults = cacheService.get<TGAQualification[]>(cacheKey);
+      
+      if (cachedResults) {
+        console.log(`Found ${cachedResults.length} qualifications in cache for "${query}"`);
+        return cachedResults;
+      }
+      
+      // No cache hit, need to call the API
+      let results: TGAQualification[] = [];
+      
       // If we know SOAP is unreliable, go straight to REST API
       if (!soapClientError) {
         try {
           // Try the SOAP API if it hasn't failed previously
-          const soapResults = await this.searchQualificationsSoap(query, limit);
-          return soapResults;
+          results = await this.searchQualificationsSoap(query, limit);
         } catch (soapError: unknown) {
           const errorMessage = soapError instanceof Error ? soapError.message : 'Unknown error';
           console.error(`TGA SOAP API error: ${errorMessage}`);
@@ -171,36 +182,45 @@ export class TGAService {
         console.log('SOAP client previously failed, using REST API directly');
       }
       
-      // Either SOAP failed or we're skipping it, try REST API
-      try {
-        console.log(`Calling Training.gov.au REST API with search query: "${query}"`);
-        
-        const response = await axios.get(`${TGA_REST_API_URL}/search`, {
-          params: {
-            type: "qualification",
-            searchQuery: query,
-            pageSize: limit,
-            includeSuperseded: false,
-            includeDeleted: false,
-            sortOrder: "relevance"
+      // If SOAP didn't return results, try REST API
+      if (results.length === 0 && (!soapClientError || soapClientError)) {
+        try {
+          console.log(`Calling Training.gov.au REST API with search query: "${query}"`);
+          
+          const response = await axios.get(`${TGA_REST_API_URL}/search`, {
+            params: {
+              type: "qualification",
+              searchQuery: query,
+              pageSize: limit,
+              includeSuperseded: false,
+              includeDeleted: false,
+              sortOrder: "relevance"
+            }
+          });
+          
+          if (response.data && Array.isArray(response.data.items)) {
+            console.log(`Found ${response.data.items.length} qualifications from TGA REST API`);
+            results = response.data.items;
+          } else {
+            console.log('No qualifications found in TGA REST API response');
           }
-        });
-        
-        if (response.data && Array.isArray(response.data.items)) {
-          console.log(`Found ${response.data.items.length} qualifications from TGA REST API`);
-          return response.data.items;
+        } catch (restError: unknown) {
+          const errorMessage = restError instanceof Error ? restError.message : 'Unknown error';
+          console.error(`TGA REST API error: ${errorMessage}`);
+          
+          // Following data integrity policy, we should not use mock data
+          // Instead, we should properly report the error
+          throw new Error(`Failed to retrieve qualification data from Training.gov.au: ${errorMessage}`);
         }
-        
-        console.log('No qualifications found in TGA REST API response');
-        return [];
-      } catch (restError: unknown) {
-        const errorMessage = restError instanceof Error ? restError.message : 'Unknown error';
-        console.error(`TGA REST API error: ${errorMessage}`);
-        
-        // Following data integrity policy, we should not use mock data
-        // Instead, we should properly report the error
-        throw new Error(`Failed to retrieve qualification data from Training.gov.au: ${errorMessage}`);
       }
+      
+      // Cache the results for future requests (1 hour TTL)
+      if (results.length > 0) {
+        cacheService.set(cacheKey, results, 3600000); // 1 hour cache
+        console.log(`Cached ${results.length} qualifications for "${query}"`);
+      }
+      
+      return results;
     } catch (error: unknown) {
       console.error("Error searching TGA qualifications:", error);
       throw new Error(`Failed to search TGA qualifications: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -280,9 +300,28 @@ export class TGAService {
    */
   async getQualificationByCode(code: string): Promise<TGAQualificationDetail | null> {
     try {
+      // Try to get from cache first
+      const cacheKey = `tga:qualification:${code}`;
+      const cachedQualification = cacheService.get<TGAQualificationDetail>(cacheKey);
+      
+      if (cachedQualification) {
+        console.log(`Found qualification ${code} in cache`);
+        return cachedQualification;
+      }
+      
+      console.log(`Qualification ${code} not found in cache, fetching from API`);
+      
       try {
         // First try using the SOAP API
-        return await this.getQualificationBySoap(code);
+        const qualification = await this.getQualificationBySoap(code);
+        
+        // Cache the result if found (1 day TTL since qualification details change less frequently)
+        if (qualification) {
+          cacheService.set(cacheKey, qualification, 86400000); // 24 hours
+          console.log(`Cached qualification ${code}`);
+        }
+        
+        return qualification;
       } catch (soapError: unknown) {
         const errorMessage = soapError instanceof Error ? soapError.message : 'Unknown error';
         console.error(`Error getting qualification via SOAP: ${errorMessage}`);
@@ -406,9 +445,28 @@ export class TGAService {
    */
   async getUnitOfCompetencyByCode(code: string): Promise<TGAUnitOfCompetency | null> {
     try {
+      // Try to get from cache first
+      const cacheKey = `tga:unit:${code}`;
+      const cachedUnit = cacheService.get<TGAUnitOfCompetency>(cacheKey);
+      
+      if (cachedUnit) {
+        console.log(`Found unit ${code} in cache`);
+        return cachedUnit;
+      }
+      
+      console.log(`Unit ${code} not found in cache, fetching from API`);
+      
       try {
         // First try using the SOAP API
-        return await this.getUnitOfCompetencyBySoap(code);
+        const unit = await this.getUnitOfCompetencyBySoap(code);
+        
+        // Cache the result if found (1 day TTL since unit details change less frequently)
+        if (unit) {
+          cacheService.set(cacheKey, unit, 86400000); // 24 hours
+          console.log(`Cached unit ${code}`);
+        }
+        
+        return unit;
       } catch (soapError: unknown) {
         const errorMessage = soapError instanceof Error ? soapError.message : 'Unknown error';
         console.error(`Error getting unit of competency via SOAP: ${errorMessage}`);
@@ -509,7 +567,7 @@ export class TGAService {
       }
       
       // Map AQF level from level number
-      const aqfLevelMap = {
+      const aqfLevelMap: Record<number, string> = {
         1: "Certificate I",
         2: "Certificate II",
         3: "Certificate III",
@@ -576,8 +634,9 @@ export class TGAService {
         for (const unitData of qualData.unitsOfCompetency.core) {
           try {
             await this.importUnit(unitData, qualificationId, true);
-          } catch (error) {
-            console.error(`Error importing core unit ${unitData.code}:`, error);
+          } catch (error: unknown) {
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            console.error(`Error importing core unit ${unitData.code}: ${errorMessage}`);
           }
         }
       }
@@ -588,17 +647,19 @@ export class TGAService {
         for (const unitData of qualData.unitsOfCompetency.elective) {
           try {
             await this.importUnit(unitData, qualificationId, false);
-          } catch (error) {
-            console.error(`Error importing elective unit ${unitData.code}:`, error);
+          } catch (error: unknown) {
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            console.error(`Error importing elective unit ${unitData.code}: ${errorMessage}`);
           }
         }
       }
       
       return qualificationId;
       
-    } catch (error) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       console.error(`Error importing qualification ${qualificationCode}:`, error);
-      throw new Error(`Failed to import qualification: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(`Failed to import qualification: ${errorMessage}`);
     }
   }
   
@@ -702,9 +763,10 @@ export class TGAService {
         console.log(`Updated link between unit ${unitData.code} and qualification`);
       }
       
-    } catch (error) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       console.error(`Error importing unit ${unitData.code}:`, error);
-      throw new Error(`Failed to import unit: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(`Failed to import unit: ${errorMessage}`);
     }
   }
   
@@ -720,57 +782,39 @@ export class TGAService {
         throw new Error("Search query must be at least 3 characters");
       }
       
-      // Skip validation for sync operations
+      // Get qualifications from TGA API
       let qualificationResults: TGAQualification[] = [];
-
-      // For test sync or any other special cases
-      if (searchQuery === "testSync") {
-        console.log('Using test sync with mock data');
-        // Return mock data for testing
-        qualificationResults = [
-          {
-            code: "CPC30220",
-            title: "Certificate III in Carpentry",
-            level: 3,
-            status: "Current",
-            releaseDate: "2020-05-15",
-            expiryDate: null,
-            trainingPackage: {
-              code: "CPC",
-              title: "Construction, Plumbing and Services"
-            },
-            nrtFlag: true
-          }
-        ];
-      } else {
-        // Use our searchQualifications method to get the results
-        try {
-          qualificationResults = await this.searchQualifications(searchQuery, limit);
-          console.log(`Found ${qualificationResults.length} qualifications matching "${searchQuery}"`);
-        } catch (error) {
-          console.error('Error in searchQualifications during sync:', error);
-          // Don't use fallback data as per data integrity policy
-          throw error;
-        }
+      try {
+        qualificationResults = await this.searchQualifications(searchQuery, limit);
+        console.log(`Found ${qualificationResults.length} qualifications matching "${searchQuery}"`);
+      } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        console.error(`Error in searchQualifications during sync: ${errorMessage}`);
+        // Following data integrity policy - propagate the error
+        throw new Error(`Failed to retrieve qualification data from Training.gov.au: ${errorMessage}. Please ensure valid API credentials are provided.`);
       }
       
+      // Import each qualification
       let importedCount = 0;
       
       for (const qualData of qualificationResults) {
         try {
           await this.importQualification(qualData.code);
           importedCount++;
-        } catch (error) {
-          console.error(`Error importing qualification ${qualData.code}:`, error);
+        } catch (error: unknown) {
+          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          console.error(`Error importing qualification ${qualData.code}: ${errorMessage}`);
           // Continue with the next qualification
         }
       }
       
+      console.log(`Successfully imported ${importedCount} of ${qualificationResults.length} qualifications`);
       return importedCount;
       
-    } catch (error) {
-      console.error(`Error syncing qualifications (${searchQuery}):`, error);
-      throw new Error(`Failed to sync qualifications: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      console.error(`Error syncing qualifications (${searchQuery}): ${errorMessage}`);
+      throw new Error(`Failed to sync qualifications: ${errorMessage}`);
     }
   }
 }
