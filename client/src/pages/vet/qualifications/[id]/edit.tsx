@@ -44,6 +44,25 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import {
   ChevronLeft,
@@ -64,6 +83,9 @@ import {
   BookText,
   Info,
   FileText,
+  Plus,
+  X,
+  Search,
 } from "lucide-react";
 
 const aqfLevels = [
@@ -99,6 +121,29 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
+interface Unit {
+  id: number;
+  unitCode: string;
+  unitTitle: string;
+  unitDescription: string;
+  isCore: boolean;
+  nominalHours: number;
+  prerequisiteUnitIds: number[] | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface QualificationStructure {
+  id: number;
+  qualificationId: number;
+  unitId: number;
+  isCore: boolean;
+  unitGroup: string | null;
+  createdAt: string;
+  updatedAt: string;
+  unit: Unit;
+}
+
 interface Qualification {
   id: number;
   qualificationCode: string;
@@ -118,6 +163,7 @@ interface Qualification {
   fundingDetails: string | null;
   createdAt: string;
   updatedAt: string;
+  structure?: QualificationStructure[];
 }
 
 export default function EditQualification() {
@@ -125,13 +171,23 @@ export default function EditQualification() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
   const [isDeleting, setIsDeleting] = useState(false);
+  const [activeTab, setActiveTab] = useState("details");
+  const [isAddUnitDialogOpen, setIsAddUnitDialogOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedUnitGroup, setSelectedUnitGroup] = useState<string | null>(null);
   
   // Fetch qualification data
   const { data: qualificationData, isLoading, error } = useQuery<{ qualification: Qualification }>({
     queryKey: [`/api/vet/qualifications/${params.id}`],
   });
   
+  // Fetch all units of competency for adding to qualification
+  const { data: unitsData, isLoading: isLoadingUnits } = useQuery<{ units: Unit[] }>({
+    queryKey: ["/api/vet/units"],
+  });
+  
   const qualification = qualificationData?.qualification;
+  const units = unitsData?.units || [];
   
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -241,6 +297,140 @@ export default function EditQualification() {
     },
   });
   
+  // Add unit to qualification
+  const addUnitMutation = useMutation({
+    mutationFn: async ({ unitId, isCore, unitGroup }: { unitId: number, isCore: boolean, unitGroup: string | null }) => {
+      const response = await apiRequest(
+        "POST",
+        `/api/vet/qualifications/${params.id}/units`,
+        { unitId, isCore, unitGroup }
+      );
+      return await response.json();
+    },
+    onSuccess: () => {
+      // Invalidate queries to refetch data
+      queryClient.invalidateQueries({ queryKey: [`/api/vet/qualifications/${params.id}`] });
+      
+      toast({
+        title: "Unit added",
+        description: "The unit has been added to the qualification successfully.",
+      });
+      
+      setIsAddUnitDialogOpen(false);
+    },
+    onError: (error: any) => {
+      toast({
+        variant: "destructive",
+        title: "Failed to add unit",
+        description: error.message || "An error occurred while adding the unit to the qualification.",
+      });
+    },
+  });
+  
+  // Remove unit from qualification
+  const removeUnitMutation = useMutation({
+    mutationFn: async (structureId: number) => {
+      const response = await apiRequest(
+        "DELETE",
+        `/api/vet/qualifications/${params.id}/units/${structureId}`
+      );
+      return await response.json();
+    },
+    onSuccess: () => {
+      // Invalidate queries to refetch data
+      queryClient.invalidateQueries({ queryKey: [`/api/vet/qualifications/${params.id}`] });
+      
+      toast({
+        title: "Unit removed",
+        description: "The unit has been removed from the qualification successfully.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        variant: "destructive",
+        title: "Failed to remove unit",
+        description: error.message || "An error occurred while removing the unit from the qualification.",
+      });
+    },
+  });
+  
+  // Update unit in qualification (change core/elective status or unit group)
+  const updateUnitMutation = useMutation({
+    mutationFn: async ({ structureId, isCore, unitGroup }: { structureId: number, isCore: boolean, unitGroup: string | null }) => {
+      const response = await apiRequest(
+        "PATCH",
+        `/api/vet/qualifications/${params.id}/units/${structureId}`,
+        { isCore, unitGroup }
+      );
+      return await response.json();
+    },
+    onSuccess: () => {
+      // Invalidate queries to refetch data
+      queryClient.invalidateQueries({ queryKey: [`/api/vet/qualifications/${params.id}`] });
+      
+      toast({
+        title: "Unit updated",
+        description: "The unit has been updated successfully.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        variant: "destructive",
+        title: "Failed to update unit",
+        description: error.message || "An error occurred while updating the unit.",
+      });
+    },
+  });
+
+  // Filter units based on search term
+  const filteredUnits = units.filter(unit => {
+    const matchesSearch = searchTerm === "" || 
+      unit.unitCode.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      unit.unitTitle.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    // Check if the unit is already in the qualification
+    const isAlreadyInQualification = qualification?.structure?.some(
+      structure => structure.unitId === unit.id
+    );
+    
+    return matchesSearch && !isAlreadyInQualification;
+  });
+  
+  // Get core and elective units from qualification structure
+  const coreUnits = qualification?.structure?.filter(structure => structure.isCore) || [];
+  const electiveUnits = qualification?.structure?.filter(structure => !structure.isCore) || [];
+  
+  // Group elective units by their unitGroup
+  const groupedElectives: Record<string, QualificationStructure[]> = {};
+  electiveUnits.forEach(structure => {
+    const group = structure.unitGroup || "General Electives";
+    if (!groupedElectives[group]) {
+      groupedElectives[group] = [];
+    }
+    groupedElectives[group].push(structure);
+  });
+  
+  // Get unique unit groups for selection
+  const unitGroups = Array.from(new Set(
+    qualification?.structure
+      ?.filter(structure => structure.unitGroup)
+      .map(structure => structure.unitGroup as string)
+  )) || [];
+  
+  // Add "General Electives" group if not already present
+  if (!unitGroups.includes("General Electives")) {
+    unitGroups.push("General Electives");
+  }
+  
+  // Handle new unit group creation
+  const handleAddUnit = (unitId: number, isCore: boolean) => {
+    addUnitMutation.mutate({
+      unitId,
+      isCore,
+      unitGroup: isCore ? null : selectedUnitGroup || "General Electives"
+    });
+  };
+  
   // Form submission handler
   function onSubmit(data: FormValues) {
     updateMutation.mutate(data);
@@ -349,8 +539,15 @@ export default function EditQualification() {
           </div>
         </div>
       ) : (
-        <Form {...form}>
-          <form id="qualification-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="mb-4">
+            <TabsTrigger value="details">Qualification Details</TabsTrigger>
+            <TabsTrigger value="units">Units of Competency</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="details">
+            <Form {...form}>
+              <form id="qualification-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             <Card>
               <CardHeader>
                 <CardTitle>Basic Information</CardTitle>
