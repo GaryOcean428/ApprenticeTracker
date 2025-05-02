@@ -1,0 +1,67 @@
+# Obtaining API Access to Training.gov.au Web Services
+
+Based on the research I've conducted, here's a precise, step-by-step process to obtain API access to the Training.gov.au (TGA) web services:
+
+## 1. Request Process Identification
+
+The Training.gov.au service provides web service access through a SOAP-based interface rather than a RESTful API. Access requires authentication with a username and password that must be passed to the web server.
+
+## 2. Access Application Procedure
+
+To request production access to the TGA web services, you need to:
+
+1. **Contact the TGA Support Team**: Email the TGA Client Support team at tga@education.gov.au to request web service access.
+
+2. **Complete Application Process**: You'll likely need to:
+   - Provide organization details and justification for API access
+   - Sign data access agreements
+   - Specify which services you need (Organization, Training Component, etc.)
+   - Demonstrate compliance with security requirements
+
+3. **Technical Preparation**: While awaiting approval, you can familiarize yourself with the API using the sandbox environment.
+
+## 3. Sandbox Environment Access
+
+To access the documentation and sandbox environment, navigate to http://tga.hsd.com.au using the credentials:
+- Username: WebService.Read (case sensitive)
+- Password: Asdf098 (case sensitive)
+
+This portal contains:
+- API specifications
+- Data models and definitions
+- Sample applications (.NET and Java)
+- WSDL files
+
+## 4. Technical Implementation Path
+
+The web services are accessed through the following endpoint structure:
+
+Sandbox endpoint: https://ws.sandbox.training.gov.au/Deewr.Tga.Webservices
+
+Service-specific endpoints include:
+- TrainingComponentService: https://ws.sandbox.training.gov.au/Deewr.Tga.WebServices/TrainingComponentService.svc
+- OrganisationService: For accessing RTO information
+
+## 5. Implementation Considerations
+
+1. **Authentication Mechanism**: The API uses Basic Authentication with username/password
+2. **WSDL Access**: Access the WSDL by appending `?wsdl` to service endpoints
+3. **Protocol Compatibility**: Ensure your client supports SOAP 1.1/1.2 and WS-Security
+4. **Cross-domain Limitations**: Implement server-side proxies if accessing from browser applications
+5. **Rate Limitations**: Inquire about usage quotas and rate limits during registration
+
+## 6. Post-Access Steps
+
+Once approved:
+1. Implement SOAP client using credentials provided
+2. Test thoroughly in sandbox before moving to production
+3. Configure error handling and retry logic
+4. Implement proper credential security measures
+
+## 7. Support Resources
+
+For technical issues or additional information:
+- TGA Help Desk: tga@education.gov.au
+- Technical documentation available through the sandbox portal
+
+The application process may take several business days, so plan accordingly if this integration is time-sensitive for your project.

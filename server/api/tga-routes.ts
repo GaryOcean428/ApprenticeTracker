@@ -319,8 +319,117 @@ export function registerTGARoutes(app: Express) {
     });
   });
   
-  // Duplicate sync route removed - handled by the other /api/tga/sync endpoint
-
-  // Removed duplicate route
+  /**
+   * Manually sync specific qualification codes
+   */
+  app.post("/api/tga/sync-batch", async (req, res) => {
+    try {
+      // Get qualification codes from request body
+      const { codes } = req.body;
+      
+      if (!codes || !Array.isArray(codes) || codes.length === 0) {
+        return res.status(400).json({
+          message: "Request must include an array of qualification codes"
+        });
+      }
+      
+      console.log(`Manual sync requested for ${codes.length} qualification codes`);
+      
+      // Keep track of results
+      const results = {
+        successful: [],
+        failed: []
+      };
+      
+      // Process each code
+      for (const code of codes) {
+        try {
+          // Validate qualification code format
+          if (!/^[A-Za-z0-9_-]+$/.test(code)) {
+            results.failed.push({
+              code,
+              error: "Invalid qualification code format"
+            });
+            continue;
+          }
+          
+          // Import the qualification
+          const qualificationId = await tgaService.importQualification(code);
+          
+          results.successful.push({
+            code,
+            qualificationId
+          });
+        } catch (importError) {
+          results.failed.push({
+            code,
+            error: importError instanceof Error ? importError.message : 'Unknown error'
+          });
+        }
+      }
+      
+      res.json({
+        message: `Processed ${codes.length} qualification codes: ${results.successful.length} successful, ${results.failed.length} failed`,
+        results
+      });
+    } catch (error) {
+      console.error("Error during batch qualification sync:", error);
+      res.status(500).json({
+        message: "Error processing qualification sync batch",
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+  
+  /**
+   * Run full qualification sync process with the specified keywords
+   */
+  app.post("/api/tga/sync-all", async (req, res) => {
+    try {
+      // Get the search keywords from request or use defaults
+      const { keywords = ["Certificate III", "Certificate IV", "Diploma"] } = req.body;
+      
+      if (!Array.isArray(keywords) || keywords.length === 0) {
+        return res.status(400).json({
+          message: "Keywords must be a non-empty array"
+        });
+      }
+      
+      // Track total sync count
+      let totalSyncCount = 0;
+      const results = [];
+      
+      // Process each keyword
+      for (const keyword of keywords) {
+        try {
+          console.log(`Running full sync for keyword: ${keyword}`);
+          const syncCount = await tgaService.syncQualifications(keyword);
+          totalSyncCount += syncCount;
+          
+          results.push({
+            keyword,
+            count: syncCount
+          });
+        } catch (syncError) {
+          results.push({
+            keyword,
+            error: syncError instanceof Error ? syncError.message : 'Unknown error'
+          });
+        }
+      }
+      
+      res.json({
+        message: `Successfully synced ${totalSyncCount} qualifications`,
+        totalCount: totalSyncCount,
+        results
+      });
+    } catch (error) {
+      console.error("Error running full qualification sync:", error);
+      res.status(500).json({
+        message: "Error running full qualification sync",
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
 
 }

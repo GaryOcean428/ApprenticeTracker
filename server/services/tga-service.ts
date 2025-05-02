@@ -5,7 +5,9 @@
  * qualification data, units of competency, and other training-related information
  * for use in the application.
  * 
- * API Documentation: https://training.gov.au/swagger/index.html
+ * API Documentation: 
+ * - REST API (Limited): https://training.gov.au/swagger/index.html
+ * - SOAP API (Complete): http://tga.hsd.com.au
  */
 
 import { db } from "../db";
@@ -13,8 +15,64 @@ import { qualifications, unitsOfCompetency, qualificationStructure } from "@shar
 import { eq, and, desc, sql } from "drizzle-orm";
 import axios from "axios";
 
-// API Base URL
-const TGA_API_BASE_URL = "https://training.gov.au/api";
+import * as soap from 'soap';
+
+// API Base URLs
+const TGA_REST_API_URL = "https://training.gov.au/api";
+const TGA_SOAP_API_URL = "https://ws.sandbox.training.gov.au/Deewr.Tga.WebServices";
+
+// SOAP API Authentication
+const TGA_SOAP_USERNAME = "WebService.Read";
+const TGA_SOAP_PASSWORD = "Asdf098";
+
+// Service endpoints
+const TGA_TRAINING_COMPONENT_SERVICE = `${TGA_SOAP_API_URL}/TrainingComponentService.svc`;
+const TGA_ORGANISATION_SERVICE = `${TGA_SOAP_API_URL}/OrganisationService.svc`;
+
+// SOAP WSDL URLs
+const TGA_TRAINING_COMPONENT_WSDL = `${TGA_TRAINING_COMPONENT_SERVICE}?wsdl`;
+const TGA_ORGANISATION_WSDL = `${TGA_ORGANISATION_SERVICE}?wsdl`;
+
+// SOAP authentication options
+const soapClientOptions = {
+  wsdl_options: {
+    username: TGA_SOAP_USERNAME,
+    password: TGA_SOAP_PASSWORD
+  },
+  disableCache: true,
+  httpClient: {
+    request: async (req, callback) => {
+      try {
+        // Add basic auth header
+        req.auth = {
+          user: TGA_SOAP_USERNAME,
+          pass: TGA_SOAP_PASSWORD,
+          sendImmediately: true
+        };
+        
+        const resp = await axios(req);
+        callback(null, resp.data);
+      } catch (error) {
+        callback(error);
+      }
+    }
+  }
+};
+
+// SOAP Client factory - creates and caches SOAP clients
+const soapClients = {};
+async function getSoapClient(wsdlUrl: string): Promise<any> {
+  if (!soapClients[wsdlUrl]) {
+    try {
+      console.log(`Creating new SOAP client for ${wsdlUrl}`);
+      soapClients[wsdlUrl] = await soap.createClientAsync(wsdlUrl, soapClientOptions);
+    } catch (error) {
+      console.error(`Error creating SOAP client: ${error.message}`);
+      throw error;
+    }
+  }
+  return soapClients[wsdlUrl];
+}
 
 // Types for TGA API responses
 interface TGAQualification {
@@ -65,7 +123,7 @@ interface TGAQualificationDetail extends TGAQualification {
  */
 export class TGAService {
   /**
-   * Search qualifications from Training.gov.au
+   * Search qualifications from Training.gov.au using SOAP API
    */
   async searchQualifications(query: string, limit: number = 20): Promise<TGAQualification[]> {
     try {
@@ -76,69 +134,167 @@ export class TGAService {
         throw new Error("Search query must be at least 3 characters");
       }
       
-      // Special exception for testing
-      if (query === "carpentry" || query === "construction") {
-        console.log('Using mock data for common search terms');
-        return [
-          {
-            code: "CPC30220",
-            title: "Certificate III in Carpentry",
-            level: 3,
-            status: "Current",
-            releaseDate: "2020-05-15",
-            expiryDate: null,
-            trainingPackage: {
-              code: "CPC",
-              title: "Construction, Plumbing and Services"
-            },
-            nrtFlag: true
-          },
-          {
-            code: "CPC40120",
-            title: "Certificate IV in Building and Construction",
-            level: 4,
-            status: "Current",
-            releaseDate: "2020-06-15",
-            expiryDate: null,
-            trainingPackage: {
-              code: "CPC",
-              title: "Construction, Plumbing and Services"
-            },
-            nrtFlag: true
+      try {
+        // First try the SOAP API
+        return await this.searchQualificationsSoap(query, limit);
+      } catch (soapError) {
+        console.error(`TGA SOAP API error:`, soapError);
+        
+        // Fall back to REST API for now
+        console.log(`Falling back to REST API...`);
+        
+        try {
+          console.log(`Calling Training.gov.au REST API with search query: "${query}"`);
+          
+          const response = await axios.get(`${TGA_REST_API_URL}/search`, {
+            params: {
+              type: "qualification",
+              searchQuery: query,
+              pageSize: limit,
+              includeSuperseded: false,
+              includeDeleted: false,
+              sortOrder: "relevance"
+            }
+          });
+          
+          if (response.data && Array.isArray(response.data.items)) {
+            console.log(`Found ${response.data.items.length} qualifications from TGA REST API`);
+            return response.data.items;
           }
-        ];
+          
+          console.log('No qualifications found in TGA REST API response');
+          return [];
+        } catch (restError) {
+          console.error(`TGA REST API error:`, restError);
+          
+          // Finally, for testing/development, use some hardcoded examples
+          if (process.env.NODE_ENV === 'development') {
+            console.log('Using demo data for development');
+            return [
+              {
+                code: "CPC30220",
+                title: "Certificate III in Carpentry",
+                level: 3,
+                status: "Current",
+                releaseDate: "2020-05-15",
+                expiryDate: null,
+                trainingPackage: {
+                  code: "CPC",
+                  title: "Construction, Plumbing and Services"
+                },
+                nrtFlag: true
+              },
+              {
+                code: "CPC40120",
+                title: "Certificate IV in Building and Construction",
+                level: 4,
+                status: "Current",
+                releaseDate: "2020-06-15",
+                expiryDate: null,
+                trainingPackage: {
+                  code: "CPC",
+                  title: "Construction, Plumbing and Services"
+                },
+                nrtFlag: true
+              }
+            ];
+          }
+          
+          // In production, propagate the error
+          throw restError;
+        }
+      }
+    } catch (error) {
+      console.error("Error searching TGA qualifications:", error);
+      throw new Error(`Failed to search TGA qualifications: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+  
+  /**
+   * Search qualifications from Training.gov.au using SOAP API
+   */
+  private async searchQualificationsSoap(query: string, limit: number = 20): Promise<TGAQualification[]> {
+    try {
+      console.log(`Searching qualifications with SOAP API, query: "${query}"`);
+      
+      // Get the training component service client
+      const client = await getSoapClient(TGA_TRAINING_COMPONENT_WSDL);
+      
+      // Prepare search parameters
+      const searchParams = {
+        searchType: "TRAINING_COMPONENT",
+        searchText: query,
+        filterParams: {
+          TrainingComponentType: "QUALIFICATION",
+          StatusFilter: ["CURRENT"], // Can also include "SUPERSEDED" if needed
+          MaximumResults: limit
+        }
+      };
+      
+      // Call the search method
+      const result = await client.SearchAsync(searchParams);
+      
+      if (!result || !result[0] || !result[0].SearchResult || !result[0].SearchResult.Results) {
+        console.log('No search results from TGA SOAP API');
+        return [];
       }
       
-      // For production usage, use the real API
-      try {
-        console.log(`Calling Training.gov.au API with search query: "${query}"`);
+      const results = result[0].SearchResult.Results;
+      
+      // Map the SOAP response to our format
+      return results.map(item => {
+        // Extract AQF level from title (e.g., "Certificate III" => level 3)
+        let level = 1; // Default to level 1
         
-        const response = await axios.get(`${TGA_API_BASE_URL}/search`, {
-          params: {
-            type: "qualification",
-            searchQuery: query,
-            pageSize: limit,
-            includeSuperseded: false,
-            includeDeleted: false,
-            sortOrder: "relevance"
-          }
-        });
-        
-        if (response.data && Array.isArray(response.data.items)) {
-          console.log(`Found ${response.data.items.length} qualifications from TGA API`);
-          return response.data.items;
+        if (item.Title) {
+          if (item.Title.includes("Certificate I")) level = 1;
+          else if (item.Title.includes("Certificate II")) level = 2;
+          else if (item.Title.includes("Certificate III")) level = 3;
+          else if (item.Title.includes("Certificate IV")) level = 4;
+          else if (item.Title.includes("Diploma")) level = 5;
+          else if (item.Title.includes("Advanced Diploma")) level = 6;
+          else if (item.Title.includes("Graduate Certificate")) level = 7;
+          else if (item.Title.includes("Graduate Diploma")) level = 8;
         }
         
-        console.log('No qualifications found in TGA API response');
-        return [];
-      } catch (apiError) {
-        console.error(`TGA API error:`, apiError);
+        return {
+          code: item.Code,
+          title: item.Title,
+          level: level,
+          status: item.Status,
+          releaseDate: item.ReleaseDate,
+          expiryDate: item.ExpiryDate || null,
+          trainingPackage: item.ParentCode ? {
+            code: item.ParentCode,
+            title: item.ParentTitle || ''
+          } : undefined,
+          nrtFlag: true // Assuming all results from TGA are NRT
+        };
+      });
+    } catch (error) {
+      console.error(`Error searching qualifications with SOAP: ${error.message}`);
+      throw error;
+    }
+  }
+  
+  /**
+   * Get qualification details by code
+   */
+  async getQualificationByCode(code: string): Promise<TGAQualificationDetail | null> {
+    try {
+      try {
+        // First try using the SOAP API
+        return await this.getQualificationBySoap(code);
+      } catch (soapError) {
+        console.error(`Error getting qualification via SOAP: ${soapError.message}`);
         
-        // Return demo data for development
+        // Fall back to mock data for development/testing
         if (process.env.NODE_ENV === 'development') {
-          console.log('Using demo data for development');
-          return [
-            {
+          console.log(`Using mock data for qualification ${code}`);
+          
+          // Mock response for testing
+          if (code === "CPC30220") {
+            return {
               code: "CPC30220",
               title: "Certificate III in Carpentry",
               level: 3,
@@ -149,127 +305,197 @@ export class TGAService {
                 code: "CPC",
                 title: "Construction, Plumbing and Services"
               },
-              nrtFlag: true
-            }
-          ];
+              nrtFlag: true,
+              unitsOfCompetency: {
+                core: [
+                  {
+                    code: "CPCCCA2002",
+                    title: "Use carpentry tools and equipment",
+                    status: "Current",
+                    nrtFlag: true
+                  },
+                  {
+                    code: "CPCCCA2011",
+                    title: "Handle carpentry materials",
+                    status: "Current",
+                    nrtFlag: true
+                  }
+                ],
+                elective: [
+                  {
+                    code: "CPCCCA3001",
+                    title: "Carry out general demolition",
+                    status: "Current",
+                    nrtFlag: true
+                  },
+                  {
+                    code: "CPCCCA3002",
+                    title: "Carry out setting out",
+                    status: "Current",
+                    nrtFlag: true
+                  }
+                ]
+              }
+            };
+          } else if (code === "CPC40120") {
+            return {
+              code: "CPC40120",
+              title: "Certificate IV in Building and Construction",
+              level: 4,
+              status: "Current",
+              releaseDate: "2020-06-15",
+              expiryDate: null,
+              trainingPackage: {
+                code: "CPC",
+                title: "Construction, Plumbing and Services"
+              },
+              nrtFlag: true,
+              unitsOfCompetency: {
+                core: [
+                  {
+                    code: "CPCCBC4001",
+                    title: "Apply building codes and standards",
+                    status: "Current",
+                    nrtFlag: true
+                  },
+                  {
+                    code: "CPCCBC4002",
+                    title: "Manage work health and safety",
+                    status: "Current",
+                    nrtFlag: true
+                  }
+                ],
+                elective: [
+                  {
+                    code: "CPCCBC4003",
+                    title: "Select and prepare a construction contract",
+                    status: "Current",
+                    nrtFlag: true
+                  },
+                  {
+                    code: "CPCCBC4004",
+                    title: "Identify and produce estimated costs",
+                    status: "Current",
+                    nrtFlag: true
+                  }
+                ]
+              }
+            };
+          }
         }
         
-        // In production, propagate the error
-        throw apiError;
+        if (process.env.NODE_ENV === 'production') {
+          // In production, propagate the error
+          throw soapError;
+        }
+        
+        return null;
       }
     } catch (error) {
-      console.error("Error searching TGA qualifications:", error);
-      throw new Error(`Failed to search TGA qualifications: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      console.error(`Error fetching TGA qualification ${code}:`, error);
+      throw new Error(`Failed to fetch TGA qualification: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
   
   /**
-   * Get qualification details by code
+   * Get qualification details by code using SOAP API
    */
-  async getQualificationByCode(code: string): Promise<TGAQualificationDetail | null> {
+  private async getQualificationBySoap(code: string): Promise<TGAQualificationDetail | null> {
     try {
-      // Mock response for testing
-      if (code === "CPC30220") {
-        return {
-          code: "CPC30220",
-          title: "Certificate III in Carpentry",
-          level: 3,
-          status: "Current",
-          releaseDate: "2020-05-15",
-          expiryDate: null,
-          trainingPackage: {
-            code: "CPC",
-            title: "Construction, Plumbing and Services"
-          },
-          nrtFlag: true,
-          unitsOfCompetency: {
-            core: [
-              {
-                code: "CPCCCA2002",
-                title: "Use carpentry tools and equipment",
-                status: "Current",
-                nrtFlag: true
-              },
-              {
-                code: "CPCCCA2011",
-                title: "Handle carpentry materials",
-                status: "Current",
-                nrtFlag: true
-              }
-            ],
-            elective: [
-              {
-                code: "CPCCCA3001",
-                title: "Carry out general demolition",
-                status: "Current",
-                nrtFlag: true
-              },
-              {
-                code: "CPCCCA3002",
-                title: "Carry out setting out",
-                status: "Current",
-                nrtFlag: true
-              }
-            ]
-          }
-        };
-      } else if (code === "CPC40120") {
-        return {
-          code: "CPC40120",
-          title: "Certificate IV in Building and Construction",
-          level: 4,
-          status: "Current",
-          releaseDate: "2020-06-15",
-          expiryDate: null,
-          trainingPackage: {
-            code: "CPC",
-            title: "Construction, Plumbing and Services"
-          },
-          nrtFlag: true,
-          unitsOfCompetency: {
-            core: [
-              {
-                code: "CPCCBC4001",
-                title: "Apply building codes and standards",
-                status: "Current",
-                nrtFlag: true
-              },
-              {
-                code: "CPCCBC4002",
-                title: "Manage work health and safety",
-                status: "Current",
-                nrtFlag: true
-              }
-            ],
-            elective: [
-              {
-                code: "CPCCBC4003",
-                title: "Select and prepare a construction contract",
-                status: "Current",
-                nrtFlag: true
-              },
-              {
-                code: "CPCCBC4004",
-                title: "Identify and produce estimated costs",
-                status: "Current",
-                nrtFlag: true
-              }
-            ]
-          }
-        };
+      console.log(`Fetching qualification details for ${code} using SOAP API`);
+      
+      // Get the training component service client
+      const client = await getSoapClient(TGA_TRAINING_COMPONENT_WSDL);
+      
+      // Get qualification details
+      const qualResult = await client.GetTrainingComponentDetailsAsync({
+        code: code,
+        componentType: "QUALIFICATION"
+      });
+      
+      if (!qualResult || !qualResult[0] || !qualResult[0].GetTrainingComponentDetailsResult) {
+        console.log(`No qualification found with code ${code}`);
+        return null;
       }
       
-      /* Real API implementation
-      const response = await axios.get(`${TGA_API_BASE_URL}/qualification/${code}`);
+      const qualData = qualResult[0].GetTrainingComponentDetailsResult;
       
-      if (response.data) {
-        return response.data;
+      // Extract AQF level from title
+      let level = 1;
+      if (qualData.Title) {
+        if (qualData.Title.includes("Certificate I")) level = 1;
+        else if (qualData.Title.includes("Certificate II")) level = 2;
+        else if (qualData.Title.includes("Certificate III")) level = 3;
+        else if (qualData.Title.includes("Certificate IV")) level = 4;
+        else if (qualData.Title.includes("Diploma")) level = 5;
+        else if (qualData.Title.includes("Advanced Diploma")) level = 6;
+        else if (qualData.Title.includes("Graduate Certificate")) level = 7;
+        else if (qualData.Title.includes("Graduate Diploma")) level = 8;
       }
-      */
-      return null;
+      
+      // Get units of competency for this qualification
+      const unitResult = await client.GetTrainingComponentRelationshipsAsync({
+        code: code,
+        componentType: "QUALIFICATION",
+        relationshipTypes: ["QUALIFICATION_TO_UNIT_OF_COMPETENCY"]
+      });
+      
+      let coreUnits = [];
+      let electiveUnits = [];
+      
+      if (unitResult && 
+          unitResult[0] && 
+          unitResult[0].GetTrainingComponentRelationshipsResult && 
+          unitResult[0].GetTrainingComponentRelationshipsResult.Relationships) {
+        
+        const relationships = unitResult[0].GetTrainingComponentRelationshipsResult.Relationships;
+        
+        // Process each relationship to determine core vs elective units
+        for (const rel of relationships) {
+          if (rel.RelatedComponentCode && rel.RelatedComponentTitle) {
+            const unit = {
+              code: rel.RelatedComponentCode,
+              title: rel.RelatedComponentTitle,
+              status: rel.RelatedComponentStatus || "Unknown",
+              nrtFlag: true  // Assuming all from TGA are NRT
+            };
+            
+            // Determine if this is a core or elective unit
+            const isCore = rel.Attributes && 
+                          rel.Attributes.some(attr => 
+                            attr.Name === "UnitFlag" && 
+                            attr.Value === "C");
+            
+            if (isCore) {
+              coreUnits.push(unit);
+            } else {
+              electiveUnits.push(unit);
+            }
+          }
+        }
+      }
+      
+      // Construct and return the qualification details
+      return {
+        code: qualData.Code,
+        title: qualData.Title,
+        level: level,
+        status: qualData.Status,
+        releaseDate: qualData.ReleaseDate,
+        expiryDate: qualData.ExpiryDate || null,
+        trainingPackage: qualData.ParentCode ? {
+          code: qualData.ParentCode,
+          title: qualData.ParentTitle || ''
+        } : undefined,
+        nrtFlag: true,  // Assuming all from TGA are NRT
+        unitsOfCompetency: {
+          core: coreUnits,
+          elective: electiveUnits
+        }
+      };
     } catch (error) {
-      console.error(`Error fetching TGA qualification ${code}:`, error);
-      throw new Error(`Failed to fetch TGA qualification: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      console.error(`Error fetching qualification via SOAP: ${error.message}`);
+      throw error;
     }
   }
   
@@ -278,72 +504,127 @@ export class TGAService {
    */
   async getUnitOfCompetencyByCode(code: string): Promise<TGAUnitOfCompetency | null> {
     try {
-      // Mock response for testing
-      const mockUnits = {
-        "CPCCCA2002": {
-          code: "CPCCCA2002",
-          title: "Use carpentry tools and equipment",
-          status: "Current",
-          nrtFlag: true
-        },
-        "CPCCCA2011": {
-          code: "CPCCCA2011",
-          title: "Handle carpentry materials",
-          status: "Current",
-          nrtFlag: true
-        },
-        "CPCCCA3001": {
-          code: "CPCCCA3001",
-          title: "Carry out general demolition",
-          status: "Current",
-          nrtFlag: true
-        },
-        "CPCCCA3002": {
-          code: "CPCCCA3002",
-          title: "Carry out setting out",
-          status: "Current",
-          nrtFlag: true
-        },
-        "CPCCBC4001": {
-          code: "CPCCBC4001",
-          title: "Apply building codes and standards",
-          status: "Current",
-          nrtFlag: true
-        },
-        "CPCCBC4002": {
-          code: "CPCCBC4002",
-          title: "Manage work health and safety",
-          status: "Current",
-          nrtFlag: true
-        },
-        "CPCCBC4003": {
-          code: "CPCCBC4003",
-          title: "Select and prepare a construction contract",
-          status: "Current",
-          nrtFlag: true
-        },
-        "CPCCBC4004": {
-          code: "CPCCBC4004",
-          title: "Identify and produce estimated costs",
-          status: "Current",
-          nrtFlag: true
+      try {
+        // First try using the SOAP API
+        return await this.getUnitOfCompetencyBySoap(code);
+      } catch (soapError) {
+        console.error(`Error getting unit of competency via SOAP: ${soapError.message}`);
+        
+        // Fall back to mock data for development/testing
+        if (process.env.NODE_ENV === 'development') {
+          console.log(`Using mock data for unit ${code}`);
+          
+          // Mock response for testing
+          const mockUnits = {
+            "CPCCCA2002": {
+              code: "CPCCCA2002",
+              title: "Use carpentry tools and equipment",
+              status: "Current",
+              nrtFlag: true
+            },
+            "CPCCCA2011": {
+              code: "CPCCCA2011",
+              title: "Handle carpentry materials",
+              status: "Current",
+              nrtFlag: true
+            },
+            "CPCCCA3001": {
+              code: "CPCCCA3001",
+              title: "Carry out general demolition",
+              status: "Current",
+              nrtFlag: true
+            },
+            "CPCCCA3002": {
+              code: "CPCCCA3002",
+              title: "Carry out setting out",
+              status: "Current",
+              nrtFlag: true
+            },
+            "CPCCBC4001": {
+              code: "CPCCBC4001",
+              title: "Apply building codes and standards",
+              status: "Current",
+              nrtFlag: true
+            },
+            "CPCCBC4002": {
+              code: "CPCCBC4002",
+              title: "Manage work health and safety",
+              status: "Current",
+              nrtFlag: true
+            },
+            "CPCCBC4003": {
+              code: "CPCCBC4003",
+              title: "Select and prepare a construction contract",
+              status: "Current",
+              nrtFlag: true
+            },
+            "CPCCBC4004": {
+              code: "CPCCBC4004",
+              title: "Identify and produce estimated costs",
+              status: "Current",
+              nrtFlag: true
+            }
+          };
+          
+          return mockUnits[code] || null;
         }
-      };
-      
-      return mockUnits[code] || null;
-      
-      /* Real API implementation
-      const response = await axios.get(`${TGA_API_BASE_URL}/unit/${code}`);
-      
-      if (response.data) {
-        return response.data;
+        
+        if (process.env.NODE_ENV === 'production') {
+          // In production, propagate the error
+          throw soapError;
+        }
+        
+        return null;
       }
-      
-      return null;
-      */
     } catch (error) {
       console.error(`Error fetching TGA unit ${code}:`, error);
       throw new Error(`Failed to fetch TGA unit of competency: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+  
+  /**
+   * Get unit of competency details using SOAP API
+   */
+  private async getUnitOfCompetencyBySoap(code: string): Promise<TGAUnitOfCompetency | null> {
+    try {
+      console.log(`Fetching unit of competency details for ${code} using SOAP API`);
+      
+      // Get the training component service client
+      const client = await getSoapClient(TGA_TRAINING_COMPONENT_WSDL);
+      
+      // Get unit details
+      const unitResult = await client.GetTrainingComponentDetailsAsync({
+        code: code,
+        componentType: "UNIT_OF_COMPETENCY"
+      });
+      
+      if (!unitResult || !unitResult[0] || !unitResult[0].GetTrainingComponentDetailsResult) {
+        console.log(`No unit found with code ${code}`);
+        return null;
+      }
+      
+      const unitData = unitResult[0].GetTrainingComponentDetailsResult;
+      
+      // Construct and return the unit details
+      return {
+        code: unitData.Code,
+        title: unitData.Title,
+        status: unitData.Status,
+        releaseDate: unitData.ReleaseDate,
+        expiryDate: unitData.ExpiryDate || null,
+        trainingPackage: unitData.ParentCode ? {
+          code: unitData.ParentCode,
+          title: unitData.ParentTitle || ''
+        } : undefined,
+        fieldOfEducation: unitData.FieldOfEducationCode ? {
+          code: unitData.FieldOfEducationCode,
+          description: unitData.FieldOfEducationDescription || ''
+        } : undefined,
+        nrtFlag: unitData.NrtFlag || true
+      };
+    } catch (error) {
+      console.error(`Error fetching unit via SOAP: ${error.message}`);
+      throw error;
     }
   }
   
