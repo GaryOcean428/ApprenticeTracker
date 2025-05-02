@@ -48,11 +48,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Table,
   TableBody,
+  TableCaption,
   TableCell,
+  TableFooter,
   TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
@@ -62,65 +65,32 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
-import {
-  ChevronLeft,
-  Save,
-  Trash2,
-  AlertCircle,
-  ChevronDown,
-  FolderInput,
-  BookOpen,
-  Award,
-  FileBadge,
-  CheckSquare,
-  Coins,
-  GraduationCap,
-  Timer,
-  Hash,
-  Boxes,
-  BookText,
-  Info,
-  FileText,
-  Plus,
-  X,
-  Search,
-} from "lucide-react";
+import { AlertCircle, ArrowLeft, CheckCircle, ChevronRight, CircleAlert, FileText, Loader2, Pencil, Plus, Search, Trash, X } from "lucide-react";
 
-const aqfLevels = [
-  "Certificate I",
-  "Certificate II",
-  "Certificate III",
-  "Certificate IV",
-  "Diploma",
-  "Advanced Diploma",
-  "Graduate Certificate",
-  "Graduate Diploma",
-  "Bachelor Degree",
-  "Master's Degree"
-];
-
+// Define form schema
 const formSchema = z.object({
   qualificationCode: z.string().min(1, "Qualification code is required"),
   qualificationTitle: z.string().min(1, "Qualification title is required"),
-  qualificationDescription: z.string().min(1, "Description is required"),
+  qualificationDescription: z.string().optional(),
   aqfLevel: z.string().min(1, "AQF level is required"),
   aqfLevelNumber: z.coerce.number().int().min(1).max(10),
   trainingPackage: z.string().min(1, "Training package is required"),
-  trainingPackageRelease: z.string().min(1, "Release information is required"),
-  totalUnits: z.coerce.number().int().min(1, "At least 1 total unit is required"),
-  coreUnits: z.coerce.number().int().min(0, "Cannot be negative"),
-  electiveUnits: z.coerce.number().int().min(0, "Cannot be negative"),
-  nominalHours: z.coerce.number().int().min(0, "Cannot be negative"),
+  trainingPackageRelease: z.string().min(1, "Training package release is required"),
+  totalUnits: z.coerce.number().int().min(1, "Total units is required"),
+  coreUnits: z.coerce.number().int().min(0, "Core units must be 0 or greater"),
+  electiveUnits: z.coerce.number().int().min(0, "Elective units must be 0 or greater"),
+  nominalHours: z.coerce.number().int().min(0, "Nominal hours must be 0 or greater"),
   isActive: z.boolean().default(true),
   isApprenticeshipQualification: z.boolean().default(false),
   isFundedQualification: z.boolean().default(false),
-  fundingDetails: z.string().nullable().optional(),
+  fundingDetails: z.string().optional().nullable(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
 
+// Define unit interface
 interface Unit {
   id: number;
   unitCode: string;
@@ -133,6 +103,7 @@ interface Unit {
   updatedAt: string;
 }
 
+// Define qualification structure interface
 interface QualificationStructure {
   id: number;
   qualificationId: number;
@@ -144,6 +115,7 @@ interface QualificationStructure {
   unit: Unit;
 }
 
+// Define qualification interface
 interface Qualification {
   id: number;
   qualificationCode: string;
@@ -166,6 +138,9 @@ interface Qualification {
   structure?: QualificationStructure[];
 }
 
+// Define unit group type for organizing units
+type UnitGroups = Record<string, QualificationStructure[]>;
+
 export default function EditQualification() {
   const params = useParams<{ id: string }>();
   const [, navigate] = useLocation();
@@ -178,17 +153,16 @@ export default function EditQualification() {
   
   // Fetch qualification data
   const { data: qualificationData, isLoading, error } = useQuery<{ qualification: Qualification }>({
-    queryKey: [`/api/vet/qualifications/${params.id}`],
+    queryKey: ["/api/vet/qualifications", params.id],
+    enabled: !!params.id,
   });
-  
-  // Fetch all units of competency for adding to qualification
+
+  // Fetch units data
   const { data: unitsData, isLoading: isLoadingUnits } = useQuery<{ units: Unit[] }>({
     queryKey: ["/api/vet/units"],
   });
-  
-  const qualification = qualificationData?.qualification;
-  const units = unitsData?.units || [];
-  
+
+  // Form setup
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -206,257 +180,268 @@ export default function EditQualification() {
       isActive: true,
       isApprenticeshipQualification: false,
       isFundedQualification: false,
-      fundingDetails: "",
+      fundingDetails: null,
     },
   });
-  
-  // Update form values when qualification data is loaded
+
+  // Update form with qualification data when available
   useEffect(() => {
-    if (qualification) {
-      // Reset form with qualification data
+    if (qualificationData?.qualification) {
+      const qualification = qualificationData.qualification;
       form.reset({
-        qualificationCode: qualification.qualificationCode || "",
-        qualificationTitle: qualification.qualificationTitle || "",
+        qualificationCode: qualification.qualificationCode,
+        qualificationTitle: qualification.qualificationTitle,
         qualificationDescription: qualification.qualificationDescription || "",
-        aqfLevel: qualification.aqfLevel || "",
-        aqfLevelNumber: qualification.aqfLevelNumber || 1,
-        trainingPackage: qualification.trainingPackage || "",
-        trainingPackageRelease: qualification.trainingPackageRelease || "",
-        totalUnits: qualification.totalUnits || 0,
-        coreUnits: qualification.coreUnits || 0,
-        electiveUnits: qualification.electiveUnits || 0,
-        nominalHours: qualification.nominalHours || 0,
+        aqfLevel: qualification.aqfLevel,
+        aqfLevelNumber: qualification.aqfLevelNumber,
+        trainingPackage: qualification.trainingPackage,
+        trainingPackageRelease: qualification.trainingPackageRelease,
+        totalUnits: qualification.totalUnits,
+        coreUnits: qualification.coreUnits,
+        electiveUnits: qualification.electiveUnits,
+        nominalHours: qualification.nominalHours,
         isActive: qualification.isActive,
         isApprenticeshipQualification: qualification.isApprenticeshipQualification,
         isFundedQualification: qualification.isFundedQualification,
-        fundingDetails: qualification.fundingDetails || "",
+        fundingDetails: qualification.fundingDetails,
       });
     }
-  }, [qualification, form]);
-  
-  // Update mutation
+  }, [qualificationData, form]);
+
+  // Update qualification mutation
   const updateMutation = useMutation({
     mutationFn: async (data: FormValues) => {
-      const response = await apiRequest(
+      const res = await apiRequest(
         "PATCH",
         `/api/vet/qualifications/${params.id}`,
-        { qualificationData: data }
+        data
       );
-      return await response.json();
+      return await res.json();
     },
     onSuccess: () => {
-      // Invalidate queries to refetch data
-      queryClient.invalidateQueries({ queryKey: ["/api/vet/qualifications"] });
-      queryClient.invalidateQueries({ queryKey: [`/api/vet/qualifications/${params.id}`] });
-      
       toast({
         title: "Qualification updated",
-        description: "The qualification has been updated successfully.",
+        description: "Qualification has been updated successfully",
       });
-      
-      // Navigate back to qualification details page
-      navigate(`/vet/qualifications/${params.id}`);
-    },
-    onError: (error: any) => {
-      toast({
-        variant: "destructive",
-        title: "Failed to update qualification",
-        description: error.message || "An error occurred while updating the qualification.",
-      });
-    },
-  });
-  
-  // Delete mutation
-  const deleteMutation = useMutation({
-    mutationFn: async () => {
-      const response = await apiRequest(
-        "DELETE",
-        `/api/vet/qualifications/${params.id}`
-      );
-      return await response.json();
-    },
-    onSuccess: () => {
-      // Invalidate queries to refetch data
       queryClient.invalidateQueries({ queryKey: ["/api/vet/qualifications"] });
-      
-      toast({
-        title: "Qualification deleted",
-        description: "The qualification has been deleted successfully.",
-      });
-      
-      // Navigate back to qualifications list
-      navigate("/vet/qualifications");
+      queryClient.invalidateQueries({ queryKey: ["/api/vet/qualifications", params.id] });
     },
-    onError: (error: any) => {
+    onError: (error) => {
       toast({
+        title: "Error",
+        description: `Failed to update qualification: ${error.message}`,
         variant: "destructive",
-        title: "Failed to delete qualification",
-        description: error.message || "An error occurred while deleting the qualification.",
-      });
-      setIsDeleting(false);
-    },
-  });
-  
-  // Add unit to qualification
-  const addUnitMutation = useMutation({
-    mutationFn: async ({ unitId, isCore, unitGroup }: { unitId: number, isCore: boolean, unitGroup: string | null }) => {
-      const response = await apiRequest(
-        "POST",
-        `/api/vet/qualifications/${params.id}/units`,
-        { unitId, isCore, unitGroup }
-      );
-      return await response.json();
-    },
-    onSuccess: () => {
-      // Invalidate queries to refetch data
-      queryClient.invalidateQueries({ queryKey: [`/api/vet/qualifications/${params.id}`] });
-      
-      toast({
-        title: "Unit added",
-        description: "The unit has been added to the qualification successfully.",
-      });
-      
-      setIsAddUnitDialogOpen(false);
-    },
-    onError: (error: any) => {
-      toast({
-        variant: "destructive",
-        title: "Failed to add unit",
-        description: error.message || "An error occurred while adding the unit to the qualification.",
-      });
-    },
-  });
-  
-  // Remove unit from qualification
-  const removeUnitMutation = useMutation({
-    mutationFn: async (structureId: number) => {
-      const response = await apiRequest(
-        "DELETE",
-        `/api/vet/qualifications/${params.id}/units/${structureId}`
-      );
-      return await response.json();
-    },
-    onSuccess: () => {
-      // Invalidate queries to refetch data
-      queryClient.invalidateQueries({ queryKey: [`/api/vet/qualifications/${params.id}`] });
-      
-      toast({
-        title: "Unit removed",
-        description: "The unit has been removed from the qualification successfully.",
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        variant: "destructive",
-        title: "Failed to remove unit",
-        description: error.message || "An error occurred while removing the unit from the qualification.",
-      });
-    },
-  });
-  
-  // Update unit in qualification (change core/elective status or unit group)
-  const updateUnitMutation = useMutation({
-    mutationFn: async ({ structureId, isCore, unitGroup }: { structureId: number, isCore: boolean, unitGroup: string | null }) => {
-      const response = await apiRequest(
-        "PATCH",
-        `/api/vet/qualifications/${params.id}/units/${structureId}`,
-        { isCore, unitGroup }
-      );
-      return await response.json();
-    },
-    onSuccess: () => {
-      // Invalidate queries to refetch data
-      queryClient.invalidateQueries({ queryKey: [`/api/vet/qualifications/${params.id}`] });
-      
-      toast({
-        title: "Unit updated",
-        description: "The unit has been updated successfully.",
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        variant: "destructive",
-        title: "Failed to update unit",
-        description: error.message || "An error occurred while updating the unit.",
       });
     },
   });
 
-  // Filter units based on search term
-  const filteredUnits = units.filter(unit => {
-    const matchesSearch = searchTerm === "" || 
-      unit.unitCode.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      unit.unitTitle.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    // Check if the unit is already in the qualification
-    const isAlreadyInQualification = qualification?.structure?.some(
-      structure => structure.unitId === unit.id
-    );
-    
-    return matchesSearch && !isAlreadyInQualification;
+  // Delete qualification mutation
+  const deleteMutation = useMutation({
+    mutationFn: async () => {
+      const res = await apiRequest(
+        "DELETE",
+        `/api/vet/qualifications/${params.id}`
+      );
+      return await res.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Qualification deleted",
+        description: "Qualification has been deleted successfully",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/vet/qualifications"] });
+      navigate("/vet/qualifications");
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: `Failed to delete qualification: ${error.message}`,
+        variant: "destructive",
+      });
+      setIsDeleting(false);
+    },
   });
-  
-  // Get core and elective units from qualification structure
-  const coreUnits = qualification?.structure?.filter(structure => structure.isCore) || [];
-  const electiveUnits = qualification?.structure?.filter(structure => !structure.isCore) || [];
-  
-  // Group elective units by their unitGroup
-  const groupedElectives: Record<string, QualificationStructure[]> = {};
-  electiveUnits.forEach(structure => {
-    const group = structure.unitGroup || "General Electives";
-    if (!groupedElectives[group]) {
-      groupedElectives[group] = [];
-    }
-    groupedElectives[group].push(structure);
+
+  // Add unit to qualification mutation
+  const addUnitMutation = useMutation({
+    mutationFn: async ({ unitId, isCore, unitGroup }: { unitId: number; isCore: boolean; unitGroup: string | null }) => {
+      const res = await apiRequest(
+        "POST",
+        `/api/vet/qualifications/${params.id}/units`,
+        { unitId, isCore, unitGroup }
+      );
+      return await res.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Unit added",
+        description: "Unit has been added to the qualification",
+      });
+      setIsAddUnitDialogOpen(false);
+      queryClient.invalidateQueries({ queryKey: ["/api/vet/qualifications", params.id] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: `Failed to add unit: ${error.message}`,
+        variant: "destructive",
+      });
+    },
   });
-  
-  // Get unique unit groups for selection
-  const unitGroups = Array.from(new Set(
-    qualification?.structure
-      ?.filter(structure => structure.unitGroup)
-      .map(structure => structure.unitGroup as string)
-  )) || [];
-  
-  // Add "General Electives" group if not already present
-  if (!unitGroups.includes("General Electives")) {
-    unitGroups.push("General Electives");
-  }
-  
-  // Handle new unit group creation
-  const handleAddUnit = (unitId: number, isCore: boolean) => {
-    addUnitMutation.mutate({
-      unitId,
-      isCore,
-      unitGroup: isCore ? null : selectedUnitGroup || "General Electives"
-    });
-  };
-  
-  // Form submission handler
+
+  // Remove unit from qualification mutation
+  const removeUnitMutation = useMutation({
+    mutationFn: async (structureId: number) => {
+      const res = await apiRequest(
+        "DELETE",
+        `/api/vet/qualifications/${params.id}/units/${structureId}`
+      );
+      return await res.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Unit removed",
+        description: "Unit has been removed from the qualification",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/vet/qualifications", params.id] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: `Failed to remove unit: ${error.message}`,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Update unit group mutation
+  const updateUnitGroupMutation = useMutation({
+    mutationFn: async ({ structureId, unitGroup }: { structureId: number; unitGroup: string | null }) => {
+      const res = await apiRequest(
+        "PATCH",
+        `/api/vet/qualifications/${params.id}/units/${structureId}`,
+        { unitGroup }
+      );
+      return await res.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Unit group updated",
+        description: "Unit group has been updated",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/vet/qualifications", params.id] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: `Failed to update unit group: ${error.message}`,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Handle form submission
   function onSubmit(data: FormValues) {
     updateMutation.mutate(data);
   }
-  
-  if (error) {
+
+  // Filter units based on search term
+  const filteredUnits = unitsData?.units.filter(unit => {
+    const searchTermLower = searchTerm.toLowerCase();
     return (
-      <div className="p-8">
+      unit.unitCode.toLowerCase().includes(searchTermLower) ||
+      unit.unitTitle.toLowerCase().includes(searchTermLower) ||
+      unit.unitDescription.toLowerCase().includes(searchTermLower)
+    );
+  }) || [];
+
+  // Get unique unit groups
+  const unitGroups = qualificationData?.qualification.structure?.reduce((groups: UnitGroups, structure) => {
+    const groupName = structure.unitGroup || 'Ungrouped';
+    if (!groups[groupName]) {
+      groups[groupName] = [];
+    }
+    groups[groupName].push(structure);
+    return groups;
+  }, {}) || {};
+
+  // Check if unit is already in the qualification
+  const isUnitInQualification = (unitId: number) => {
+    return qualificationData?.qualification.structure?.some(
+      (structure) => structure.unitId === unitId
+    ) || false;
+  };
+
+  // Function to handle adding unit to qualification
+  const handleAddUnit = (unitId: number) => {
+    if (isUnitInQualification(unitId)) {
+      toast({
+        title: "Unit already added",
+        description: "This unit is already part of the qualification",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    addUnitMutation.mutate({
+      unitId,
+      isCore: false, // Default to elective
+      unitGroup: selectedUnitGroup,
+    });
+  };
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <Breadcrumb className="mb-4">
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/vet/qualifications">Qualifications</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>Loading...</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+        <Skeleton className="h-[75px] w-full" />
+        <Skeleton className="h-[300px] w-full" />
+      </div>
+    );
+  }
+
+  // Error state
+  if (error || !qualificationData) {
+    return (
+      <div className="space-y-6">
+        <Breadcrumb className="mb-4">
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/vet/qualifications">Qualifications</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>Error</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>Error</AlertTitle>
           <AlertDescription>
-            Failed to load qualification data. Please try again later.
+            {error instanceof Error ? error.message : "Failed to load qualification"}
           </AlertDescription>
         </Alert>
-        <Button
-          className="mt-4"
-          variant="outline"
-          onClick={() => navigate("/vet/qualifications")}
-        >
-          <ChevronLeft className="mr-2 h-4 w-4" /> Back to Qualifications
+        <Button onClick={() => navigate("/vet/qualifications")}>
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Back to Qualifications
         </Button>
       </div>
     );
   }
-  
+
+  // Render the component
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -468,801 +453,596 @@ export default function EditQualification() {
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbLink href={`/vet/qualifications/${params.id}`}>
-                  {isLoading ? "Details" : qualification?.qualificationCode}
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>Edit</BreadcrumbPage>
+                <BreadcrumbPage>{qualificationData.qualification.qualificationCode}</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
-          
           <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => navigate(`/vet/qualifications/${params.id}`)}
-            >
-              <ChevronLeft className="h-5 w-5" />
-            </Button>
             <h1 className="text-2xl font-bold tracking-tight">
-              {isLoading ? (
-                <Skeleton className="h-8 w-48" />
-              ) : (
-                `Edit ${qualification?.qualificationCode}`
-              )}
+              Edit Qualification
             </h1>
+            <Badge variant={qualificationData.qualification.isActive ? "default" : "secondary"}>
+              {qualificationData.qualification.isActive ? "Active" : "Inactive"}
+            </Badge>
           </div>
+          <p className="text-muted-foreground">
+            {qualificationData.qualification.qualificationCode} - {qualificationData.qualification.qualificationTitle}
+          </p>
         </div>
-        
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            onClick={() => navigate(`/vet/qualifications/${params.id}`)}
-          >
-            Cancel
+        <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={() => navigate(`/vet/qualifications/${params.id}`)}>
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to View
           </Button>
-          <Button 
-            variant="destructive" 
-            onClick={() => setIsDeleting(true)}
-            disabled={isDeleting || deleteMutation.isPending}
-          >
-            <Trash2 className="mr-2 h-4 w-4" />
+          <Button variant="destructive" onClick={() => setIsDeleting(true)}>
+            <Trash className="mr-2 h-4 w-4" />
             Delete
-          </Button>
-          <Button 
-            type="submit" 
-            form="qualification-form" 
-            disabled={updateMutation.isPending}
-          >
-            <Save className="mr-2 h-4 w-4" />
-            Save Changes
           </Button>
         </div>
       </div>
-      
-      {isLoading ? (
-        <div className="space-y-6">
-          <Skeleton className="h-12 w-full" />
-          <Skeleton className="h-12 w-full" />
-          <Skeleton className="h-24 w-full" />
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Skeleton className="h-12 w-full" />
-            <Skeleton className="h-12 w-full" />
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Skeleton className="h-12 w-full" />
-            <Skeleton className="h-12 w-full" />
-            <Skeleton className="h-12 w-full" />
-          </div>
-        </div>
-      ) : (
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="mb-4">
-            <TabsTrigger value="details">Qualification Details</TabsTrigger>
-            <TabsTrigger value="units">Units of Competency</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="details">
-            <Form {...form}>
-              <form id="qualification-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            <Card>
-              <CardHeader>
-                <CardTitle>Basic Information</CardTitle>
-                <CardDescription>
-                  The core details of the qualification including code, title and description.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <FormField
-                    control={form.control}
-                    name="qualificationCode"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="flex items-center gap-2">
-                          <Hash className="h-4 w-4 text-muted-foreground" />
-                          Qualification Code
-                        </FormLabel>
-                        <FormControl>
-                          <Input placeholder="e.g. CPC40120" {...field} />
-                        </FormControl>
-                        <FormDescription>
-                          The official national code for this qualification
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={form.control}
-                    name="qualificationTitle"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="flex items-center gap-2">
-                          <FileText className="h-4 w-4 text-muted-foreground" />
-                          Qualification Title
-                        </FormLabel>
-                        <FormControl>
-                          <Input 
-                            placeholder="e.g. Certificate IV in Building and Construction"
-                            {...field} 
-                          />
-                        </FormControl>
-                        <FormDescription>
-                          The full official title of this qualification
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                
-                <FormField
-                  control={form.control}
-                  name="qualificationDescription"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="flex items-center gap-2">
-                        <BookText className="h-4 w-4 text-muted-foreground" />
-                        Description
-                      </FormLabel>
-                      <FormControl>
-                        <Textarea 
-                          placeholder="Enter a description of the qualification..."
-                          className="min-h-[120px]"
-                          {...field} 
-                        />
-                      </FormControl>
-                      <FormDescription>
-                        A detailed description of what this qualification covers
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle>Classification Details</CardTitle>
-                <CardDescription>
-                  Information about the qualification's level, training package and unit requirements.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <FormField
-                    control={form.control}
-                    name="aqfLevel"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="flex items-center gap-2">
-                          <GraduationCap className="h-4 w-4 text-muted-foreground" />
-                          AQF Level
-                        </FormLabel>
-                        <Select 
-                          onValueChange={field.onChange} 
-                          defaultValue={field.value}
-                          value={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select AQF level" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {aqfLevels.map((level, index) => (
-                              <SelectItem key={level} value={level}>
-                                {level}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormDescription>
-                          The Australian Qualifications Framework level
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={form.control}
-                    name="aqfLevelNumber"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="flex items-center gap-2">
-                          <Hash className="h-4 w-4 text-muted-foreground" />
-                          AQF Level Number
-                        </FormLabel>
-                        <FormControl>
-                          <Input 
-                            type="number" 
-                            min="1" 
-                            max="10"
-                            {...field} 
-                          />
-                        </FormControl>
-                        <FormDescription>
-                          The numeric value of the AQF level (1-10)
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <FormField
-                    control={form.control}
-                    name="trainingPackage"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="flex items-center gap-2">
-                          <BookOpen className="h-4 w-4 text-muted-foreground" />
-                          Training Package
-                        </FormLabel>
-                        <FormControl>
-                          <Input 
-                            placeholder="e.g. CPC - Construction, Plumbing and Services" 
-                            {...field} 
-                          />
-                        </FormControl>
-                        <FormDescription>
-                          The training package this qualification belongs to
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={form.control}
-                    name="trainingPackageRelease"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="flex items-center gap-2">
-                          <FileBadge className="h-4 w-4 text-muted-foreground" />
-                          Training Package Release
-                        </FormLabel>
-                        <FormControl>
-                          <Input placeholder="e.g. Release 5.0" {...field} />
-                        </FormControl>
-                        <FormDescription>
-                          The version/release of the training package
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                
-                <Separator />
-                
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <FormField
-                    control={form.control}
-                    name="totalUnits"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="flex items-center gap-2">
-                          <Boxes className="h-4 w-4 text-muted-foreground" />
-                          Total Units
-                        </FormLabel>
-                        <FormControl>
-                          <Input type="number" min="1" {...field} />
-                        </FormControl>
-                        <FormDescription>
-                          Total units required
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={form.control}
-                    name="coreUnits"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="flex items-center gap-2">
-                          <CheckSquare className="h-4 w-4 text-muted-foreground" />
-                          Core Units
-                        </FormLabel>
-                        <FormControl>
-                          <Input type="number" min="0" {...field} />
-                        </FormControl>
-                        <FormDescription>
-                          Number of core units
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={form.control}
-                    name="electiveUnits"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="flex items-center gap-2">
-                          <FolderInput className="h-4 w-4 text-muted-foreground" />
-                          Elective Units
-                        </FormLabel>
-                        <FormControl>
-                          <Input type="number" min="0" {...field} />
-                        </FormControl>
-                        <FormDescription>
-                          Number of elective units
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                
-                <FormField
-                  control={form.control}
-                  name="nominalHours"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="flex items-center gap-2">
-                        <Timer className="h-4 w-4 text-muted-foreground" />
-                        Nominal Hours
-                      </FormLabel>
-                      <FormControl>
-                        <Input type="number" min="0" {...field} />
-                      </FormControl>
-                      <FormDescription>
-                        The estimated time (in hours) required to complete this qualification
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle>Status & Classification</CardTitle>
-                <CardDescription>
-                  Active status and additional classification information.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <FormField
-                    control={form.control}
-                    name="isActive"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-start space-x-3 space-y-0 p-4 border rounded-md">
-                        <FormControl>
-                          <Checkbox
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
-                        <div className="space-y-1 leading-none">
-                          <FormLabel>
-                            Active Qualification
-                          </FormLabel>
-                          <FormDescription>
-                            Indicates this qualification is currently active and available
-                          </FormDescription>
-                        </div>
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={form.control}
-                    name="isApprenticeshipQualification"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-start space-x-3 space-y-0 p-4 border rounded-md">
-                        <FormControl>
-                          <Checkbox
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
-                        <div className="space-y-1 leading-none">
-                          <FormLabel>
-                            Apprenticeship Qualification
-                          </FormLabel>
-                          <FormDescription>
-                            Can be delivered through an apprenticeship pathway
-                          </FormDescription>
-                        </div>
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={form.control}
-                    name="isFundedQualification"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-start space-x-3 space-y-0 p-4 border rounded-md">
-                        <FormControl>
-                          <Checkbox
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
-                        <div className="space-y-1 leading-none">
-                          <FormLabel>
-                            Funded Qualification
-                          </FormLabel>
-                          <FormDescription>
-                            Eligible for government funding or subsidies
-                          </FormDescription>
-                        </div>
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                
-                <FormField
-                  control={form.control}
-                  name="fundingDetails"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="flex items-center gap-2">
-                        <Coins className="h-4 w-4 text-muted-foreground" />
-                        Funding Details
-                      </FormLabel>
-                      <FormControl>
-                        <Textarea 
-                          placeholder="Enter details about available funding or subsidies for this qualification..."
-                          className="min-h-[100px]"
-                          {...field} 
-                          value={field.value || ''}
-                        />
-                      </FormControl>
-                      <FormDescription>
-                        Specific information about funding arrangements (if applicable)
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </CardContent>
-              <CardFooter className="flex justify-between">
-                <Button
-                  variant="ghost"
-                  onClick={() => navigate(`/vet/qualifications/${params.id}`)}
-                >
-                  Cancel
-                </Button>
-                <Button 
-                  type="submit" 
-                  disabled={updateMutation.isPending}
-                >
-                  <Save className="mr-2 h-4 w-4" />
-                  Save Changes
-                </Button>
-              </CardFooter>
-            </Card>
-            
-            {isDeleting && (
-              <Alert variant="destructive">
-                <AlertCircle className="h-4 w-4" />
-                <AlertTitle>Are you sure you want to delete this qualification?</AlertTitle>
-                <AlertDescription className="flex items-center gap-4 mt-2">
-                  <span>This action cannot be undone.</span>
-                  <div className="flex gap-2">
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => setIsDeleting(false)}
-                    >
-                      Cancel
-                    </Button>
-                    <Button 
-                      variant="destructive" 
-                      size="sm"
-                      onClick={() => deleteMutation.mutate()}
-                      disabled={deleteMutation.isPending}
-                    >
-                      Yes, Delete
-                    </Button>
-                  </div>
-                </AlertDescription>
-              </Alert>
-            )}
-                </form>
-              </Form>
-            </TabsContent>
-            
-            <TabsContent value="units" className="space-y-6">
+
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="details">Details</TabsTrigger>
+          <TabsTrigger value="units">Units</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="details" className="space-y-6">
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <Card>
-                <CardHeader className="flex flex-row items-center justify-between">
-                  <div>
-                    <CardTitle>Core Units</CardTitle>
-                    <CardDescription>
-                      Required units for this qualification ({coreUnits.length} of {qualification?.coreUnits || 0})
-                    </CardDescription>
+                <CardHeader>
+                  <CardTitle>Qualification Details</CardTitle>
+                  <CardDescription>
+                    Update qualification details and properties
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <FormField
+                      control={form.control}
+                      name="qualificationCode"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Qualification Code</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="qualificationTitle"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Qualification Title</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                   </div>
-                  <Dialog open={isAddUnitDialogOpen} onOpenChange={setIsAddUnitDialogOpen}>
-                    <DialogTrigger asChild>
-                      <Button size="sm" className="ml-auto">
-                        <Plus className="h-4 w-4 mr-2" />
-                        Add Unit
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
-                      <DialogHeader>
-                        <DialogTitle>Add Unit of Competency</DialogTitle>
-                        <DialogDescription>
-                          Search for and add a unit of competency to this qualification.
-                        </DialogDescription>
-                      </DialogHeader>
-                      
-                      <div className="space-y-4 my-4">
-                        <div className="flex items-center gap-2">
-                          <div className="relative flex-1">
-                            <Search className="absolute left-2 top-3 h-4 w-4 text-muted-foreground" />
-                            <Input
-                              placeholder="Search units by code or title..."
-                              className="pl-8"
-                              value={searchTerm}
-                              onChange={(e) => setSearchTerm(e.target.value)}
-                            />
-                          </div>
+
+                  <FormField
+                    control={form.control}
+                    name="qualificationDescription"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Description</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            {...field}
+                            value={field.value || ""}
+                            className="min-h-[120px]"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <FormField
+                      control={form.control}
+                      name="aqfLevel"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>AQF Level</FormLabel>
                           <Select
-                            value={selectedUnitGroup || "General Electives"}
-                            onValueChange={(value) => setSelectedUnitGroup(value)}
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                            value={field.value}
                           >
-                            <SelectTrigger className="w-[200px]">
-                              <SelectValue placeholder="Select unit group" />
-                            </SelectTrigger>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select AQF level" />
+                              </SelectTrigger>
+                            </FormControl>
                             <SelectContent>
-                              <SelectItem value="General Electives">General Electives</SelectItem>
-                              {unitGroups.map((group) => (
-                                <SelectItem key={group} value={group}>
-                                  {group}
-                                </SelectItem>
-                              ))}
-                              <SelectItem value="new_group">+ Add New Group</SelectItem>
+                              <SelectItem value="Certificate I">Certificate I</SelectItem>
+                              <SelectItem value="Certificate II">Certificate II</SelectItem>
+                              <SelectItem value="Certificate III">Certificate III</SelectItem>
+                              <SelectItem value="Certificate IV">Certificate IV</SelectItem>
+                              <SelectItem value="Diploma">Diploma</SelectItem>
+                              <SelectItem value="Advanced Diploma">Advanced Diploma</SelectItem>
+                              <SelectItem value="Graduate Certificate">Graduate Certificate</SelectItem>
+                              <SelectItem value="Graduate Diploma">Graduate Diploma</SelectItem>
+                              <SelectItem value="Bachelor Degree">Bachelor Degree</SelectItem>
+                              <SelectItem value="Masters Degree">Masters Degree</SelectItem>
                             </SelectContent>
                           </Select>
-                        </div>
-                        
-                        {selectedUnitGroup === "new_group" && (
-                          <div className="flex items-center gap-2">
-                            <Input 
-                              placeholder="Enter new unit group name..."
-                              value={selectedUnitGroup === "new_group" ? "" : selectedUnitGroup || ""}
-                              onChange={(e) => setSelectedUnitGroup(e.target.value || "General Electives")}
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="aqfLevelNumber"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>AQF Level Number</FormLabel>
+                          <Select
+                            onValueChange={(value) => field.onChange(parseInt(value))}
+                            defaultValue={field.value.toString()}
+                            value={field.value.toString()}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select AQF level number" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="1">1</SelectItem>
+                              <SelectItem value="2">2</SelectItem>
+                              <SelectItem value="3">3</SelectItem>
+                              <SelectItem value="4">4</SelectItem>
+                              <SelectItem value="5">5</SelectItem>
+                              <SelectItem value="6">6</SelectItem>
+                              <SelectItem value="7">7</SelectItem>
+                              <SelectItem value="8">8</SelectItem>
+                              <SelectItem value="9">9</SelectItem>
+                              <SelectItem value="10">10</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="trainingPackage"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Training Package</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="trainingPackageRelease"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Training Package Release</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="totalUnits"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Total Units</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              {...field}
+                              onChange={(e) => field.onChange(parseInt(e.target.value))}
                             />
-                            <Button 
-                              variant="outline" 
-                              size="icon"
-                              onClick={() => setSelectedUnitGroup("General Electives")}
-                            >
-                              <X className="h-4 w-4" />
-                            </Button>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="coreUnits"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Core Units</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              {...field}
+                              onChange={(e) => field.onChange(parseInt(e.target.value))}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="electiveUnits"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Elective Units</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              {...field}
+                              onChange={(e) => field.onChange(parseInt(e.target.value))}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="nominalHours"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Nominal Hours</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              {...field}
+                              onChange={(e) => field.onChange(parseInt(e.target.value))}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <FormField
+                      control={form.control}
+                      name="isActive"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                          <div className="space-y-1 leading-none">
+                            <FormLabel>
+                              Active Qualification
+                            </FormLabel>
+                            <FormDescription>
+                              Available for enrollment
+                            </FormDescription>
+                          </div>
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="isApprenticeshipQualification"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                          <div className="space-y-1 leading-none">
+                            <FormLabel>
+                              Apprenticeship Qualification
+                            </FormLabel>
+                            <FormDescription>
+                              Eligible for apprenticeships
+                            </FormDescription>
+                          </div>
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="isFundedQualification"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                          <div className="space-y-1 leading-none">
+                            <FormLabel>
+                              Funded Qualification
+                            </FormLabel>
+                            <FormDescription>
+                              Eligible for government funding
+                            </FormDescription>
+                          </div>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <FormField
+                    control={form.control}
+                    name="fundingDetails"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Funding Details</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            {...field}
+                            value={field.value || ""}
+                            className="min-h-[100px]"
+                            placeholder="Enter funding details if this is a funded qualification"
+                            disabled={!form.watch("isFundedQualification")}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </CardContent>
+                <CardFooter className="flex justify-between">
+                  <Button variant="outline" type="button" onClick={() => navigate(`/vet/qualifications/${params.id}`)}>
+                    Cancel
+                  </Button>
+                  <Button type="submit" disabled={updateMutation.isPending}>
+                    {updateMutation.isPending && (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    )}
+                    Save Changes
+                  </Button>
+                </CardFooter>
+              </Card>
+            </form>
+          </Form>
+        </TabsContent>
+
+        <TabsContent value="units" className="space-y-6">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle>Units of Competency</CardTitle>
+                <CardDescription>
+                  Manage units associated with this qualification
+                </CardDescription>
+              </div>
+              <div className="flex gap-2">
+                <Dialog open={isAddUnitDialogOpen} onOpenChange={setIsAddUnitDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button>
+                      <Plus className="mr-2 h-4 w-4" />
+                      Add Unit
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[600px]">
+                    <DialogHeader>
+                      <DialogTitle>Add Unit of Competency</DialogTitle>
+                      <DialogDescription>
+                        Search and add units to this qualification.
+                      </DialogDescription>
+                    </DialogHeader>
+
+                    <div className="space-y-4 py-4">
+                      <div className="flex items-center gap-2">
+                        <div className="grid w-full gap-1.5">
+                          <Input
+                            type="search"
+                            placeholder="Search by code or title..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="w-full"
+                          />
+                        </div>
+                        <Select
+                          value={selectedUnitGroup || ""}
+                          onValueChange={(value) => setSelectedUnitGroup(value === "" ? null : value)}
+                        >
+                          <SelectTrigger className="w-[180px]">
+                            <SelectValue placeholder="Unit Group" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="">No Group</SelectItem>
+                            {Object.keys(unitGroups).map((group) => (
+                              <SelectItem key={group} value={group}>
+                                {group}
+                              </SelectItem>
+                            ))}
+                            <SelectItem value="New Group">+ New Group</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      {selectedUnitGroup === "New Group" && (
+                        <Input
+                          placeholder="Enter new group name"
+                          value={selectedUnitGroup === "New Group" ? "" : selectedUnitGroup || ""}
+                          onChange={(e) => setSelectedUnitGroup(e.target.value)}
+                        />
+                      )}
+
+                      <ScrollArea className="h-[300px] rounded-md border">
+                        {isLoadingUnits ? (
+                          <div className="p-4 flex justify-center">
+                            <Loader2 className="h-6 w-6 animate-spin" />
+                          </div>
+                        ) : filteredUnits.length === 0 ? (
+                          <div className="p-4 text-center text-muted-foreground">
+                            No units found
+                          </div>
+                        ) : (
+                          <div className="p-4 space-y-2">
+                            {filteredUnits.map((unit) => (
+                              <div
+                                key={unit.id}
+                                className="flex items-center justify-between p-2 rounded-md hover:bg-muted"
+                              >
+                                <div>
+                                  <div className="font-medium">{unit.unitCode}</div>
+                                  <div className="text-sm text-muted-foreground">{unit.unitTitle}</div>
+                                </div>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleAddUnit(unit.id)}
+                                  disabled={isUnitInQualification(unit.id) || addUnitMutation.isPending}
+                                >
+                                  {isUnitInQualification(unit.id) ? (
+                                    <CheckCircle className="h-4 w-4 text-green-500" />
+                                  ) : (
+                                    <Plus className="h-4 w-4" />
+                                  )}
+                                </Button>
+                              </div>
+                            ))}
                           </div>
                         )}
-                      </div>
-                      
-                      <div className="border rounded-md overflow-hidden">
-                        <Table>
-                          <TableHeader>
-                            <TableRow>
-                              <TableHead className="w-[150px]">Unit Code</TableHead>
-                              <TableHead>Unit Title</TableHead>
-                              <TableHead className="w-[100px] text-right">Actions</TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            {isLoadingUnits ? (
+                      </ScrollArea>
+                    </div>
+
+                    <DialogFooter>
+                      <Button variant="outline" onClick={() => setIsAddUnitDialogOpen(false)}>
+                        Close
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                {Object.keys(unitGroups).length === 0 ? (
+                  <div className="text-center p-8 border rounded-md">
+                    <FileText className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                    <h3 className="text-lg font-medium">No Units Added</h3>
+                    <p className="text-muted-foreground mb-4">
+                      This qualification doesn't have any units of competency yet.
+                    </p>
+                    <Button
+                      onClick={() => setIsAddUnitDialogOpen(true)}
+                      variant="secondary"
+                    >
+                      <Plus className="mr-2 h-4 w-4" />
+                      Add First Unit
+                    </Button>
+                  </div>
+                ) : (
+                  Object.entries(unitGroups).map(([groupName, structures]) => (
+                    <Card key={groupName} className="overflow-hidden">
+                      <CardHeader className="bg-muted/50">
+                        <CardTitle className="text-base">
+                          {groupName}
+                          <Badge variant="outline" className="ml-2">
+                            {structures.length} {structures.length === 1 ? "unit" : "units"}
+                          </Badge>
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="p-0">
+                        <div className="border-t">
+                          <Table>
+                            <TableHeader>
                               <TableRow>
-                                <TableCell colSpan={3} className="text-center py-4">
-                                  <div className="flex justify-center items-center">
-                                    <div className="animate-spin w-6 h-6 border-2 border-primary border-t-transparent rounded-full" />
-                                  </div>
-                                </TableCell>
+                                <TableHead className="w-[120px]">Unit Code</TableHead>
+                                <TableHead>Title</TableHead>
+                                <TableHead className="w-[100px] text-center">Type</TableHead>
+                                <TableHead className="w-[100px] text-center">Hours</TableHead>
+                                <TableHead className="w-[100px] text-right">Actions</TableHead>
                               </TableRow>
-                            ) : filteredUnits.length === 0 ? (
-                              <TableRow>
-                                <TableCell colSpan={3} className="text-center py-4 text-muted-foreground">
-                                  No units found matching your search.
-                                </TableCell>
-                              </TableRow>
-                            ) : (
-                              filteredUnits.map((unit) => (
-                                <TableRow key={unit.id}>
-                                  <TableCell className="font-medium">{unit.unitCode}</TableCell>
-                                  <TableCell>{unit.unitTitle}</TableCell>
+                            </TableHeader>
+                            <TableBody>
+                              {structures.map((structure) => (
+                                <TableRow key={structure.id}>
+                                  <TableCell className="font-medium">
+                                    {structure.unit.unitCode}
+                                  </TableCell>
+                                  <TableCell>{structure.unit.unitTitle}</TableCell>
+                                  <TableCell className="text-center">
+                                    <Badge variant={structure.isCore ? "default" : "secondary"}>
+                                      {structure.isCore ? "Core" : "Elective"}
+                                    </Badge>
+                                  </TableCell>
+                                  <TableCell className="text-center">
+                                    {structure.unit.nominalHours}
+                                  </TableCell>
                                   <TableCell className="text-right">
-                                    <div className="flex justify-end gap-2">
+                                    <div className="flex justify-end gap-1">
                                       <Button
-                                        size="sm"
-                                        variant="outline"
-                                        onClick={() => handleAddUnit(unit.id, true)}
+                                        size="icon"
+                                        variant="ghost"
+                                        onClick={() => updateUnitGroupMutation.mutate({
+                                          structureId: structure.id,
+                                          unitGroup: null, // Set to null to remove from group
+                                        })}
                                       >
-                                        Add as Core
+                                        <Pencil className="h-4 w-4" />
                                       </Button>
                                       <Button
-                                        size="sm"
-                                        onClick={() => handleAddUnit(unit.id, false)}
+                                        size="icon"
+                                        variant="destructive"
+                                        onClick={() => removeUnitMutation.mutate(structure.id)}
                                       >
-                                        Add as Elective
+                                        <X className="h-4 w-4" />
                                       </Button>
                                     </div>
                                   </TableCell>
                                 </TableRow>
-                              ))
-                            )}
-                          </TableBody>
-                        </Table>
-                      </div>
-                      
-                      <DialogFooter>
-                        <Button variant="outline" onClick={() => setIsAddUnitDialogOpen(false)}>
-                          Cancel
-                        </Button>
-                      </DialogFooter>
-                    </DialogContent>
-                  </Dialog>
-                </CardHeader>
-                <CardContent>
-                  <div className="border rounded-md overflow-hidden">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead className="w-[150px]">Unit Code</TableHead>
-                          <TableHead>Unit Title</TableHead>
-                          <TableHead className="w-[100px] text-right">Hours</TableHead>
-                          <TableHead className="w-[150px] text-right">Actions</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {coreUnits.length === 0 ? (
-                          <TableRow>
-                            <TableCell colSpan={4} className="text-center py-4 text-muted-foreground">
-                              No core units added yet. Click "Add Unit" to add core units.
-                            </TableCell>
-                          </TableRow>
-                        ) : (
-                          coreUnits.map((structure) => (
-                            <TableRow key={structure.id}>
-                              <TableCell className="font-medium">{structure.unit?.unitCode || 'N/A'}</TableCell>
-                              <TableCell>{structure.unit?.unitTitle || 'N/A'}</TableCell>
-                              <TableCell className="text-right">{structure.unit?.nominalHours || 0}</TableCell>
-                              <TableCell className="text-right">
-                                <div className="flex justify-end gap-2">
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={() => updateUnitMutation.mutate({ 
-                                      structureId: structure.id, 
-                                      isCore: false, 
-                                      unitGroup: "General Electives" 
-                                    })}
-                                  >
-                                    Move to Electives
-                                  </Button>
-                                  <Button
-                                    size="sm"
-                                    variant="destructive"
-                                    onClick={() => removeUnitMutation.mutate(structure.id)}
-                                  >
-                                    <X className="h-4 w-4" />
-                                  </Button>
-                                </div>
-                              </TableCell>
-                            </TableRow>
-                          ))
-                        )}
-                      </TableBody>
-                    </Table>
-                  </div>
-                </CardContent>
-              </Card>
-              
-              {Object.entries(groupedElectives).map(([group, units]) => (
-                <Card key={group}>
-                  <CardHeader>
-                    <CardTitle>Elective Units: {group}</CardTitle>
-                    <CardDescription>
-                      {group === "General Electives" ? 
-                        `Select from these units to complete the required ${qualification?.electiveUnits || 0} elective units` :
-                        `Units from the ${group} group`
-                      }
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="border rounded-md overflow-hidden">
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead className="w-[150px]">Unit Code</TableHead>
-                            <TableHead>Unit Title</TableHead>
-                            <TableHead className="w-[100px] text-right">Hours</TableHead>
-                            <TableHead className="w-[150px] text-right">Actions</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {units.length === 0 ? (
-                            <TableRow>
-                              <TableCell colSpan={4} className="text-center py-4 text-muted-foreground">
-                                No elective units in this group. Click "Add Unit" to add units.
-                              </TableCell>
-                            </TableRow>
-                          ) : (
-                            units.map((structure) => (
-                              <TableRow key={structure.id}>
-                                <TableCell className="font-medium">{structure.unit?.unitCode || 'N/A'}</TableCell>
-                                <TableCell>{structure.unit?.unitTitle || 'N/A'}</TableCell>
-                                <TableCell className="text-right">{structure.unit?.nominalHours || 0}</TableCell>
-                                <TableCell className="text-right">
-                                  <div className="flex justify-end gap-2">
-                                    <Button
-                                      size="sm"
-                                      variant="outline"
-                                      onClick={() => updateUnitMutation.mutate({ 
-                                        structureId: structure.id, 
-                                        isCore: true, 
-                                        unitGroup: null 
-                                      })}
-                                    >
-                                      Move to Core
-                                    </Button>
-                                    <Button
-                                      size="sm"
-                                      variant="destructive"
-                                      onClick={() => removeUnitMutation.mutate(structure.id)}
-                                    >
-                                      <X className="h-4 w-4" />
-                                    </Button>
-                                  </div>
-                                </TableCell>
-                              </TableRow>
-                            ))
-                          )}
-                        </TableBody>
-                      </Table>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </TabsContent>
-          </Tabs>
+                              ))}
+                            </TableBody>
+                          </Table>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
           
-          {isDeleting && (
-            <Alert variant="destructive" className="mt-4">
-              <AlertCircle className="h-4 w-4" />
-              <AlertTitle>Are you sure you want to delete this qualification?</AlertTitle>
-              <AlertDescription className="flex items-center gap-4 mt-2">
-                <span>This action cannot be undone.</span>
-                <div className="flex gap-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => setIsDeleting(false)}
-                  >
-                    Cancel
-                  </Button>
-                  <Button 
-                    variant="destructive" 
-                    size="sm"
-                    onClick={() => deleteMutation.mutate()}
-                    disabled={deleteMutation.isPending}
-                  >
-                    Yes, Delete
-                  </Button>
-                </div>
-              </AlertDescription>
-            </Alert>
-          )}
-        </div>
-      );
-    }
+      {isDeleting && (
+        <Alert variant="destructive" className="mt-4">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Are you sure you want to delete this qualification?</AlertTitle>
+          <AlertDescription className="flex items-center gap-4 mt-2">
+            <span>This action cannot be undone.</span>
+            <div className="flex gap-2">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => setIsDeleting(false)}
+              >
+                Cancel
+              </Button>
+              <Button 
+                variant="destructive" 
+                size="sm"
+                onClick={() => deleteMutation.mutate()}
+                disabled={deleteMutation.isPending}
+              >
+                Yes, Delete
+              </Button>
+            </div>
+          </AlertDescription>
+        </Alert>
+      )}
+    </div>
+  );
 }
