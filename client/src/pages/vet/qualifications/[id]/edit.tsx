@@ -356,20 +356,22 @@ export default function EditQualification() {
   }) : [];
 
   // Get unique unit groups
-  const unitGroups = qualificationData?.qualification.structure?.reduce((groups: UnitGroups, structure) => {
-    const groupName = structure.unitGroup || 'Ungrouped';
-    if (!groups[groupName]) {
-      groups[groupName] = [];
-    }
-    groups[groupName].push(structure);
-    return groups;
-  }, {}) || {};
+  const unitGroups = qualificationData?.qualification?.structure ? 
+    qualificationData.qualification.structure.reduce((groups: UnitGroups, structure) => {
+      const groupName = structure.unitGroup || 'Ungrouped';
+      if (!groups[groupName]) {
+        groups[groupName] = [];
+      }
+      groups[groupName].push(structure);
+      return groups;
+    }, {}) : {};
 
   // Check if unit is already in the qualification
   const isUnitInQualification = (unitId: number) => {
-    return qualificationData?.qualification.structure?.some(
-      (structure) => structure.unitId === unitId
-    ) || false;
+    return qualificationData?.qualification?.structure ? 
+      qualificationData.qualification.structure.some(
+        (structure) => structure.unitId === unitId
+      ) : false;
   };
 
   // Function to handle adding unit to qualification
@@ -453,7 +455,7 @@ export default function EditQualification() {
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbPage>{qualificationData.qualification.qualificationCode}</BreadcrumbPage>
+                <BreadcrumbPage>{qualificationData?.qualification?.qualificationCode || 'Qualification'}</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
@@ -461,12 +463,12 @@ export default function EditQualification() {
             <h1 className="text-2xl font-bold tracking-tight">
               Edit Qualification
             </h1>
-            <Badge variant={qualificationData.qualification.isActive ? "default" : "secondary"}>
-              {qualificationData.qualification.isActive ? "Active" : "Inactive"}
+            <Badge variant={qualificationData?.qualification?.isActive ? "default" : "secondary"}>
+              {qualificationData?.qualification?.isActive ? "Active" : "Inactive"}
             </Badge>
           </div>
           <p className="text-muted-foreground">
-            {qualificationData.qualification.qualificationCode} - {qualificationData.qualification.qualificationTitle}
+            {qualificationData?.qualification?.qualificationCode || 'No Code'} - {qualificationData?.qualification?.qualificationTitle || 'No Title'}
           </p>
         </div>
         <div className="flex items-center gap-2">
