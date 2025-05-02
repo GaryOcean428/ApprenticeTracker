@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { ArrowLeft, Check, Save, X } from "lucide-react";
+import { ArrowLeft, Check, Save, X, Search, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -29,6 +29,21 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import { Badge } from "@/components/ui/badge";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+
 
 const createQualificationSchema = z.object({
   code: z.string().min(1, "Qualification code is required"),
@@ -42,9 +57,26 @@ const createQualificationSchema = z.object({
   releases: z.array(z.string()).default([]),
 });
 
+interface TGAQualification {
+  code: string;
+  title: string;
+  level?: number;
+  status?: string;
+  releaseDate?: string;
+  expiryDate?: string;
+  trainingPackage?: {
+    code: string;
+    title: string;
+  };
+  nrtFlag?: boolean;
+}
+
 export default function CreateQualification() {
   const [, navigate] = useLocation();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedQualification, setSelectedQualification] = useState<TGAQualification | null>(null);
+  const [isQualificationPopoverOpen, setIsQualificationPopoverOpen] = useState(false);
 
   // Initialize form with default values
   const form = useForm<z.infer<typeof createQualificationSchema>>({
@@ -63,6 +95,73 @@ export default function CreateQualification() {
   });
 
   const { toast } = useToast();
+
+  // Search TGA qualifications
+  const { data: searchResults, isLoading: isSearching } = useQuery<TGAQualification[]>({
+    queryKey: ["/api/tga/search", searchTerm],
+    queryFn: async () => {
+      if (!searchTerm || searchTerm.length < 3) return [];
+      const res = await apiRequest("GET", `/api/tga/search?q=${encodeURIComponent(searchTerm)}&limit=10`);
+      return await res.json();
+    },
+    enabled: searchTerm.length >= 3,
+  });
+
+  // Get qualification details from code (for after selection)
+  const { data: qualificationDetails, isLoading: isLoadingDetails } = useQuery<any>({
+    queryKey: ["/api/tga/qualification", selectedQualification?.code],
+    queryFn: async () => {
+      if (!selectedQualification?.code) return null;
+      const res = await apiRequest("GET", `/api/tga/qualification/${selectedQualification.code}`);
+      return await res.json();
+    },
+    enabled: !!selectedQualification?.code,
+  });
+
+  // Update form when qualification details are loaded
+  useEffect(() => {
+    if (qualificationDetails) {
+      // Map AQF level from level number
+      const aqfLevelMap = {
+        1: "Certificate I",
+        2: "Certificate II",
+        3: "Certificate III",
+        4: "Certificate IV",
+        5: "Diploma",
+        6: "Advanced Diploma",
+        7: "Bachelor Degree",
+        8: "Graduate Certificate",
+        9: "Masters Degree",
+        10: "Doctoral Degree"
+      };
+
+      // Set active based on status
+      const isActive = qualificationDetails.status === "Current";
+      const isSuperseded = qualificationDetails.status === "Superseded";
+      
+      // Get industry area from training package if available
+      let industryArea = "Other Services";
+      if (qualificationDetails.trainingPackage?.title) {
+        const packageTitle = qualificationDetails.trainingPackage.title;
+        if (packageTitle.includes("Construction")) {
+          industryArea = "Construction";
+        } else if (packageTitle.includes("Health")) {
+          industryArea = "Health Care and Social Assistance";
+        } else if (packageTitle.includes("Education")) {
+          industryArea = "Education and Training";
+        }
+        // Additional mappings could be added here
+      }
+
+      form.setValue("code", qualificationDetails.code);
+      form.setValue("title", qualificationDetails.title);
+      form.setValue("level", qualificationDetails.level && aqfLevelMap[qualificationDetails.level as keyof typeof aqfLevelMap] || "");
+      form.setValue("description", `This qualification is part of the ${qualificationDetails.trainingPackage?.title || "National Training Package"}.`);
+      form.setValue("industryArea", industryArea);
+      form.setValue("isActive", isActive);
+      form.setValue("isSuperseded", isSuperseded);
+    }
+  }, [qualificationDetails]);
 
   const createMutation = useMutation({
     mutationFn: async (data: z.infer<typeof createQualificationSchema>) => {
@@ -93,6 +192,11 @@ export default function CreateQualification() {
 
   const onSubmit = (data: z.infer<typeof createQualificationSchema>) => {
     createMutation.mutate(data);
+  };
+  
+  const handleSelectQualification = (qualification: TGAQualification) => {
+    setSelectedQualification(qualification);
+    setIsQualificationPopoverOpen(false);
   };
 
   // List of AQF levels
@@ -213,13 +317,93 @@ export default function CreateQualification() {
                 control={form.control}
                 name="title"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="flex flex-col">
                     <FormLabel>Qualification Title</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g. Certificate III in Electrotechnology Electrician" {...field} value={field.value || ""} />
-                    </FormControl>
+                    <Popover open={isQualificationPopoverOpen} onOpenChange={setIsQualificationPopoverOpen}>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant="outline"
+                            role="combobox"
+                            aria-expanded={isQualificationPopoverOpen}
+                            className="justify-between w-full font-normal"
+                          >
+                            {selectedQualification ? (
+                              <div className="flex items-center gap-2 truncate">
+                                <span className="font-semibold text-primary">{selectedQualification.code}</span>
+                                <span className="truncate">{selectedQualification.title}</span>
+                              </div>
+                            ) : field.value ? (
+                              field.value
+                            ) : (
+                              "Search for a qualification..."
+                            )}
+                            <Search className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="p-0" align="start" side="bottom" sideOffset={5}>
+                        <Command className="w-full">
+                          <CommandInput
+                            placeholder="Search qualifications by name..."
+                            value={searchTerm}
+                            onValueChange={setSearchTerm}
+                            className="h-9"
+                          />
+                          {searchTerm.length > 0 && searchTerm.length < 3 && (
+                            <div className="px-4 py-2.5 text-sm text-muted-foreground">
+                              Enter at least 3 characters to search
+                            </div>
+                          )}
+                          <CommandEmpty>
+                            {isSearching ? (
+                              <div className="flex items-center justify-center py-6">
+                                <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                              </div>
+                            ) : (
+                              "No qualifications found"
+                            )}
+                          </CommandEmpty>
+                          <CommandList>
+                            {searchResults && searchResults.length > 0 && (
+                              <CommandGroup heading="Training.gov.au Qualifications">
+                                {searchResults.map((qualification) => (
+                                  <CommandItem
+                                    key={qualification.code}
+                                    value={qualification.code}
+                                    onSelect={() => handleSelectQualification(qualification)}
+                                    className="flex flex-col items-start py-3"
+                                  >
+                                    <div className="flex items-center w-full">
+                                      <span className="font-medium">{qualification.code}</span>
+                                      <Badge
+                                        variant={qualification.status === "Current" ? "default" : "outline"}
+                                        className="ml-2"
+                                      >
+                                        {qualification.status || "Unknown"}
+                                      </Badge>
+                                      <span className="ml-auto text-sm text-muted-foreground">
+                                        {aqfLevels.find(l => l.value.includes(qualification.level?.toString() || ""))?.label || ""}
+                                      </span>
+                                    </div>
+                                    <div className="mt-1 w-full truncate text-sm text-muted-foreground">
+                                      {qualification.title}
+                                    </div>
+                                    {qualification.trainingPackage && (
+                                      <div className="mt-1 text-xs text-muted-foreground">
+                                        {qualification.trainingPackage.title}
+                                      </div>
+                                    )}
+                                  </CommandItem>
+                                ))}
+                              </CommandGroup>
+                            )}
+                          </CommandList>
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
                     <FormDescription>
-                      The official title of this qualification
+                      Search and select from official Training.gov.au qualifications (automatically fills related fields)
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
