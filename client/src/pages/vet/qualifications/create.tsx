@@ -57,6 +57,11 @@ const createQualificationSchema = z.object({
   releases: z.array(z.string()).default([]),
 });
 
+interface TGAQualificationTrainingPackage {
+  code: string;
+  title: string;
+}
+
 interface TGAQualification {
   code: string;
   title: string;
@@ -64,10 +69,7 @@ interface TGAQualification {
   status?: string;
   releaseDate?: string;
   expiryDate?: string;
-  trainingPackage?: {
-    code: string;
-    title: string;
-  };
+  trainingPackage?: TGAQualificationTrainingPackage;
   nrtFlag?: boolean;
 }
 
@@ -118,8 +120,15 @@ export default function CreateQualification() {
     enabled: !!selectedQualification?.code,
   });
 
+  // Loading state for form fields when qualification is selected
+  const [isPopulatingFields, setIsPopulatingFields] = useState(false);
+
   // Update form when qualification details are loaded
   useEffect(() => {
+    if (selectedQualification) {
+      setIsPopulatingFields(true);
+    }
+    
     if (qualificationDetails) {
       // Map AQF level from level number
       const aqfLevelMap = {
@@ -153,15 +162,25 @@ export default function CreateQualification() {
         // Additional mappings could be added here
       }
 
-      form.setValue("code", qualificationDetails.code);
-      form.setValue("title", qualificationDetails.title);
-      form.setValue("level", qualificationDetails.level && aqfLevelMap[qualificationDetails.level as keyof typeof aqfLevelMap] || "");
-      form.setValue("description", `This qualification is part of the ${qualificationDetails.trainingPackage?.title || "National Training Package"}.`);
-      form.setValue("industryArea", industryArea);
-      form.setValue("isActive", isActive);
-      form.setValue("isSuperseded", isSuperseded);
+      // Set field values with a small delay to show loading state
+      setTimeout(() => {
+        form.setValue("code", qualificationDetails.code);
+        form.setValue("title", qualificationDetails.title);
+        form.setValue("level", qualificationDetails.level && aqfLevelMap[qualificationDetails.level as keyof typeof aqfLevelMap] || "");
+        form.setValue("description", `This qualification is part of the ${qualificationDetails.trainingPackage?.title || "National Training Package"}.`);
+        form.setValue("industryArea", industryArea);
+        form.setValue("isActive", isActive);
+        form.setValue("isSuperseded", isSuperseded);
+        setIsPopulatingFields(false);
+        
+        toast({
+          title: "Qualification data loaded",
+          description: `Details for ${qualificationDetails.code} populated from Training.gov.au`,
+          variant: "default",
+        });
+      }, 500); // Short delay for visual feedback
     }
-  }, [qualificationDetails]);
+  }, [qualificationDetails, selectedQualification]);
 
   const createMutation = useMutation({
     mutationFn: async (data: z.infer<typeof createQualificationSchema>) => {
@@ -256,10 +275,20 @@ export default function CreateQualification() {
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
             <CardHeader>
-              <CardTitle>Qualification Details</CardTitle>
-              <CardDescription>
-                Enter the details for the new qualification
-              </CardDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Qualification Details</CardTitle>
+                  <CardDescription>
+                    Enter the details for the new qualification
+                  </CardDescription>
+                </div>
+                {isPopulatingFields && (
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span className="text-sm">Populating fields...</span>
+                  </div>
+                )}
+              </div>
             </CardHeader>
             
             <CardContent className="space-y-6">
@@ -383,7 +412,7 @@ export default function CreateQualification() {
                                         {qualification.status || "Unknown"}
                                       </Badge>
                                       <span className="ml-auto text-sm text-muted-foreground">
-                                        {aqfLevels.find(l => l.value.includes(qualification.level?.toString() || ""))?.label || ""}
+                                        {qualification.level && `AQF Level ${qualification.level}`}
                                       </span>
                                     </div>
                                     <div className="mt-1 w-full truncate text-sm text-muted-foreground">
