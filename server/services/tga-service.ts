@@ -34,33 +34,36 @@ const TGA_TRAINING_COMPONENT_WSDL = `${TGA_TRAINING_COMPONENT_SERVICE}?wsdl`;
 const TGA_ORGANISATION_WSDL = `${TGA_ORGANISATION_SERVICE}?wsdl`;
 
 // SOAP authentication options
+interface SoapRequest {
+  url: string;
+  headers: Record<string, string>;
+  auth?: {
+    user: string;
+    pass: string;
+    sendImmediately: boolean;
+  };
+}
+
+interface SoapCallback {
+  (error: Error | null, response?: any): void;
+}
+
+// We're using a simplified httpClient here since the soap library in TypeScript
+// has type compatibility issues with axios
 const soapClientOptions = {
   wsdl_options: {
     username: TGA_SOAP_USERNAME,
     password: TGA_SOAP_PASSWORD
   },
-  disableCache: true,
-  httpClient: {
-    request: async (req, callback) => {
-      try {
-        // Add basic auth header
-        req.auth = {
-          user: TGA_SOAP_USERNAME,
-          pass: TGA_SOAP_PASSWORD,
-          sendImmediately: true
-        };
-        
-        const resp = await axios(req);
-        callback(null, resp.data);
-      } catch (error) {
-        callback(error);
-      }
-    }
-  }
+  disableCache: true
 };
 
 // SOAP Client factory - creates and caches SOAP clients
-const soapClients = {};
+interface SoapClients {
+  [key: string]: any;
+}
+
+const soapClients: SoapClients = {};
 let soapClientError = false;
 
 async function getSoapClient(wsdlUrl: string): Promise<any> {
@@ -76,15 +79,16 @@ async function getSoapClient(wsdlUrl: string): Promise<any> {
       const clientPromise = soap.createClientAsync(wsdlUrl, soapClientOptions);
       
       // Create a timeout promise
-      const timeoutPromise = new Promise((_, reject) => {
+      const timeoutPromise = new Promise<never>((_, reject) => {
         setTimeout(() => reject(new Error('SOAP client creation timed out')), 5000);
       });
       
       // Race between the client creation and the timeout
       soapClients[wsdlUrl] = await Promise.race([clientPromise, timeoutPromise]);
       
-    } catch (error) {
-      console.error(`Error creating SOAP client: ${error.message}`);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      console.error(`Error creating SOAP client: ${errorMessage}`);
       soapClientError = true; // Mark that SOAP is not working
       throw error;
     }
@@ -158,8 +162,9 @@ export class TGAService {
           // Try the SOAP API if it hasn't failed previously
           const soapResults = await this.searchQualificationsSoap(query, limit);
           return soapResults;
-        } catch (soapError) {
-          console.error(`TGA SOAP API error:`, soapError);
+        } catch (soapError: unknown) {
+          const errorMessage = soapError instanceof Error ? soapError.message : 'Unknown error';
+          console.error(`TGA SOAP API error: ${errorMessage}`);
           console.log(`Falling back to REST API...`);
         }
       } else {
@@ -188,46 +193,15 @@ export class TGAService {
         
         console.log('No qualifications found in TGA REST API response');
         return [];
-      } catch (restError) {
-        console.error(`TGA REST API error:`, restError);
+      } catch (restError: unknown) {
+        const errorMessage = restError instanceof Error ? restError.message : 'Unknown error';
+        console.error(`TGA REST API error: ${errorMessage}`);
         
-        // Finally, for testing/development, use some hardcoded examples
-        if (process.env.NODE_ENV === 'development') {
-          console.log('Using demo data for development');
-          return [
-            {
-              code: "CPC30220",
-              title: "Certificate III in Carpentry",
-              level: 3,
-              status: "Current",
-              releaseDate: "2020-05-15",
-              expiryDate: undefined,
-              trainingPackage: {
-                code: "CPC",
-                title: "Construction, Plumbing and Services"
-              },
-              nrtFlag: true
-            },
-            {
-              code: "CPC40120",
-              title: "Certificate IV in Building and Construction",
-              level: 4,
-              status: "Current",
-              releaseDate: "2020-06-15",
-              expiryDate: undefined,
-              trainingPackage: {
-                code: "CPC",
-                title: "Construction, Plumbing and Services"
-              },
-              nrtFlag: true
-            }
-          ];
-        }
-        
-        // In production, propagate the error
-        throw restError;
+        // Following data integrity policy, we should not use mock data
+        // Instead, we should properly report the error
+        throw new Error(`Failed to retrieve qualification data from Training.gov.au: ${errorMessage}`);
       }
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Error searching TGA qualifications:", error);
       throw new Error(`Failed to search TGA qualifications: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
@@ -265,7 +239,7 @@ export class TGAService {
       const results = result[0].SearchResult.Results;
       
       // Map the SOAP response to our format
-      return results.map(item => {
+      return results.map((item: any) => {
         // Extract AQF level from title (e.g., "Certificate III" => level 3)
         let level = 1; // Default to level 1
         
@@ -281,12 +255,12 @@ export class TGAService {
         }
         
         return {
-          code: item.Code,
-          title: item.Title,
+          code: item.Code || '',
+          title: item.Title || '',
           level: level,
-          status: item.Status,
+          status: item.Status || 'Unknown',
           releaseDate: item.ReleaseDate,
-          expiryDate: item.ExpiryDate || null,
+          expiryDate: item.ExpiryDate || undefined,
           trainingPackage: item.ParentCode ? {
             code: item.ParentCode,
             title: item.ParentTitle || ''
@@ -294,8 +268,9 @@ export class TGAService {
           nrtFlag: true // Assuming all results from TGA are NRT
         };
       });
-    } catch (error) {
-      console.error(`Error searching qualifications with SOAP: ${error.message}`);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      console.error(`Error searching qualifications with SOAP: ${errorMessage}`);
       throw error;
     }
   }
@@ -308,113 +283,16 @@ export class TGAService {
       try {
         // First try using the SOAP API
         return await this.getQualificationBySoap(code);
-      } catch (soapError) {
-        console.error(`Error getting qualification via SOAP: ${soapError.message}`);
+      } catch (soapError: unknown) {
+        const errorMessage = soapError instanceof Error ? soapError.message : 'Unknown error';
+        console.error(`Error getting qualification via SOAP: ${errorMessage}`);
         
-        // Fall back to mock data for development/testing
-        if (process.env.NODE_ENV === 'development') {
-          console.log(`Using mock data for qualification ${code}`);
-          
-          // Mock response for testing
-          if (code === "CPC30220") {
-            return {
-              code: "CPC30220",
-              title: "Certificate III in Carpentry",
-              level: 3,
-              status: "Current",
-              releaseDate: "2020-05-15",
-              expiryDate: null,
-              trainingPackage: {
-                code: "CPC",
-                title: "Construction, Plumbing and Services"
-              },
-              nrtFlag: true,
-              unitsOfCompetency: {
-                core: [
-                  {
-                    code: "CPCCCA2002",
-                    title: "Use carpentry tools and equipment",
-                    status: "Current",
-                    nrtFlag: true
-                  },
-                  {
-                    code: "CPCCCA2011",
-                    title: "Handle carpentry materials",
-                    status: "Current",
-                    nrtFlag: true
-                  }
-                ],
-                elective: [
-                  {
-                    code: "CPCCCA3001",
-                    title: "Carry out general demolition",
-                    status: "Current",
-                    nrtFlag: true
-                  },
-                  {
-                    code: "CPCCCA3002",
-                    title: "Carry out setting out",
-                    status: "Current",
-                    nrtFlag: true
-                  }
-                ]
-              }
-            };
-          } else if (code === "CPC40120") {
-            return {
-              code: "CPC40120",
-              title: "Certificate IV in Building and Construction",
-              level: 4,
-              status: "Current",
-              releaseDate: "2020-06-15",
-              expiryDate: null,
-              trainingPackage: {
-                code: "CPC",
-                title: "Construction, Plumbing and Services"
-              },
-              nrtFlag: true,
-              unitsOfCompetency: {
-                core: [
-                  {
-                    code: "CPCCBC4001",
-                    title: "Apply building codes and standards",
-                    status: "Current",
-                    nrtFlag: true
-                  },
-                  {
-                    code: "CPCCBC4002",
-                    title: "Manage work health and safety",
-                    status: "Current",
-                    nrtFlag: true
-                  }
-                ],
-                elective: [
-                  {
-                    code: "CPCCBC4003",
-                    title: "Select and prepare a construction contract",
-                    status: "Current",
-                    nrtFlag: true
-                  },
-                  {
-                    code: "CPCCBC4004",
-                    title: "Identify and produce estimated costs",
-                    status: "Current",
-                    nrtFlag: true
-                  }
-                ]
-              }
-            };
-          }
-        }
-        
-        if (process.env.NODE_ENV === 'production') {
-          // In production, propagate the error
-          throw soapError;
-        }
-        
-        return null;
+        // Following data integrity policy, we should ask for proper credentials
+        // rather than using mock data. Throw a clear error so the application can
+        // handle it appropriately.
+        throw new Error(`Unable to retrieve qualification data from Training.gov.au API: ${errorMessage}. Please ensure valid API credentials are provided.`);
       }
-    } catch (error) {
+    } catch (error: unknown) {
       console.error(`Error fetching TGA qualification ${code}:`, error);
       throw new Error(`Failed to fetch TGA qualification: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
@@ -463,8 +341,8 @@ export class TGAService {
         relationshipTypes: ["QUALIFICATION_TO_UNIT_OF_COMPETENCY"]
       });
       
-      let coreUnits = [];
-      let electiveUnits = [];
+      let coreUnits: TGAUnitOfCompetency[] = [];
+      let electiveUnits: TGAUnitOfCompetency[] = [];
       
       if (unitResult && 
           unitResult[0] && 
@@ -476,7 +354,7 @@ export class TGAService {
         // Process each relationship to determine core vs elective units
         for (const rel of relationships) {
           if (rel.RelatedComponentCode && rel.RelatedComponentTitle) {
-            const unit = {
+            const unit: TGAUnitOfCompetency = {
               code: rel.RelatedComponentCode,
               title: rel.RelatedComponentTitle,
               status: rel.RelatedComponentStatus || "Unknown",
@@ -485,7 +363,7 @@ export class TGAService {
             
             // Determine if this is a core or elective unit
             const isCore = rel.Attributes && 
-                          rel.Attributes.some(attr => 
+                          rel.Attributes.some((attr: any) => 
                             attr.Name === "UnitFlag" && 
                             attr.Value === "C");
             
@@ -505,7 +383,7 @@ export class TGAService {
         level: level,
         status: qualData.Status,
         releaseDate: qualData.ReleaseDate,
-        expiryDate: qualData.ExpiryDate || null,
+        expiryDate: qualData.ExpiryDate || undefined,
         trainingPackage: qualData.ParentCode ? {
           code: qualData.ParentCode,
           title: qualData.ParentTitle || ''
@@ -516,8 +394,9 @@ export class TGAService {
           elective: electiveUnits
         }
       };
-    } catch (error) {
-      console.error(`Error fetching qualification via SOAP: ${error.message}`);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      console.error(`Error fetching qualification via SOAP: ${errorMessage}`);
       throw error;
     }
   }
@@ -530,76 +409,15 @@ export class TGAService {
       try {
         // First try using the SOAP API
         return await this.getUnitOfCompetencyBySoap(code);
-      } catch (soapError) {
-        console.error(`Error getting unit of competency via SOAP: ${soapError.message}`);
+      } catch (soapError: unknown) {
+        const errorMessage = soapError instanceof Error ? soapError.message : 'Unknown error';
+        console.error(`Error getting unit of competency via SOAP: ${errorMessage}`);
         
-        // Fall back to mock data for development/testing
-        if (process.env.NODE_ENV === 'development') {
-          console.log(`Using mock data for unit ${code}`);
-          
-          // Mock response for testing
-          const mockUnits = {
-            "CPCCCA2002": {
-              code: "CPCCCA2002",
-              title: "Use carpentry tools and equipment",
-              status: "Current",
-              nrtFlag: true
-            },
-            "CPCCCA2011": {
-              code: "CPCCCA2011",
-              title: "Handle carpentry materials",
-              status: "Current",
-              nrtFlag: true
-            },
-            "CPCCCA3001": {
-              code: "CPCCCA3001",
-              title: "Carry out general demolition",
-              status: "Current",
-              nrtFlag: true
-            },
-            "CPCCCA3002": {
-              code: "CPCCCA3002",
-              title: "Carry out setting out",
-              status: "Current",
-              nrtFlag: true
-            },
-            "CPCCBC4001": {
-              code: "CPCCBC4001",
-              title: "Apply building codes and standards",
-              status: "Current",
-              nrtFlag: true
-            },
-            "CPCCBC4002": {
-              code: "CPCCBC4002",
-              title: "Manage work health and safety",
-              status: "Current",
-              nrtFlag: true
-            },
-            "CPCCBC4003": {
-              code: "CPCCBC4003",
-              title: "Select and prepare a construction contract",
-              status: "Current",
-              nrtFlag: true
-            },
-            "CPCCBC4004": {
-              code: "CPCCBC4004",
-              title: "Identify and produce estimated costs",
-              status: "Current",
-              nrtFlag: true
-            }
-          };
-          
-          return mockUnits[code] || null;
-        }
-        
-        if (process.env.NODE_ENV === 'production') {
-          // In production, propagate the error
-          throw soapError;
-        }
-        
-        return null;
+        // Following data integrity policy, we should ask for proper credentials
+        // rather than using mock data
+        throw new Error(`Unable to retrieve unit of competency data from Training.gov.au API: ${errorMessage}. Please ensure valid API credentials are provided.`);
       }
-    } catch (error) {
+    } catch (error: unknown) {
       console.error(`Error fetching TGA unit ${code}:`, error);
       throw new Error(`Failed to fetch TGA unit of competency: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
@@ -634,7 +452,7 @@ export class TGAService {
         title: unitData.Title,
         status: unitData.Status,
         releaseDate: unitData.ReleaseDate,
-        expiryDate: unitData.ExpiryDate || null,
+        expiryDate: unitData.ExpiryDate || undefined,
         trainingPackage: unitData.ParentCode ? {
           code: unitData.ParentCode,
           title: unitData.ParentTitle || ''
@@ -645,8 +463,9 @@ export class TGAService {
         } : undefined,
         nrtFlag: unitData.NrtFlag || true
       };
-    } catch (error) {
-      console.error(`Error fetching unit via SOAP: ${error.message}`);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      console.error(`Error fetching unit via SOAP: ${errorMessage}`);
       throw error;
     }
   }
