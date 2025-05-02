@@ -213,6 +213,188 @@ vetRouter.get('/qualifications/:id', async (req, res) => {
   }
 });
 
+// Add units to qualification structure
+vetRouter.post('/qualifications/:id/units', async (req, res) => {
+  try {
+    const qualificationId = parseInt(req.params.id);
+    const { units } = req.body;
+    
+    if (!units || !Array.isArray(units) || units.length === 0) {
+      return res.status(400).json({ message: 'No units provided' });
+    }
+    
+    // Check if qualification exists
+    const [qualification] = await db
+      .select()
+      .from(qualifications)
+      .where(eq(qualifications.id, qualificationId));
+    
+    if (!qualification) {
+      return res.status(404).json({ message: 'Qualification not found' });
+    }
+    
+    // Get the current highest order for core and elective units
+    const existingUnits = await db
+      .select()
+      .from(qualificationStructure)
+      .where(eq(qualificationStructure.qualificationId, qualificationId));
+    
+    const maxCoreOrder = existingUnits
+      .filter(u => u.isCore)
+      .reduce((max, unit) => Math.max(max, unit.order || 0), 0);
+    
+    const maxElectiveOrderByGroup: Record<string, number> = {};
+    existingUnits
+      .filter(u => !u.isCore)
+      .forEach(unit => {
+        const group = unit.groupName || 'General Electives';
+        maxElectiveOrderByGroup[group] = Math.max(
+          maxElectiveOrderByGroup[group] || 0,
+          unit.order || 0
+        );
+      });
+    
+    // Start a transaction
+    await db.transaction(async (tx) => {
+      // Process each unit
+      for (const unit of units) {
+        const { unitId, isCore, groupName, isMandatoryElective } = unit;
+        
+        // Determine the order
+        let order;
+        if (isCore) {
+          order = maxCoreOrder + 1;
+        } else {
+          const group = groupName || 'General Electives';
+          order = (maxElectiveOrderByGroup[group] || 0) + 1;
+          maxElectiveOrderByGroup[group] = order;
+        }
+        
+        // Insert into structure
+        await tx.insert(qualificationStructure).values({
+          qualificationId,
+          unitId,
+          isCore,
+          groupName: groupName || null,
+          isMandatoryElective: !!isMandatoryElective,
+          order
+        });
+      }
+    });
+    
+    res.status(201).json({ message: 'Units added successfully' });
+  } catch (error) {
+    console.error('Error adding units to qualification:', error);
+    res.status(500).json({ message: 'Error adding units to qualification structure' });
+  }
+});
+
+// Remove a unit from qualification structure
+vetRouter.delete('/qualifications/:id/units/:unitStructureId', async (req, res) => {
+  try {
+    const qualificationId = parseInt(req.params.id);
+    const unitStructureId = parseInt(req.params.unitStructureId);
+    
+    // Delete the unit from structure
+    const result = await db
+      .delete(qualificationStructure)
+      .where(
+        and(
+          eq(qualificationStructure.id, unitStructureId),
+          eq(qualificationStructure.qualificationId, qualificationId)
+        )
+      );
+    
+    if (result.rowsAffected === 0) {
+      return res.status(404).json({ message: 'Unit not found in qualification structure' });
+    }
+    
+    res.json({ message: 'Unit removed successfully' });
+  } catch (error) {
+    console.error('Error removing unit from qualification:', error);
+    res.status(500).json({ message: 'Error removing unit from qualification structure' });
+  }
+});
+
+// Update unit order in qualification structure
+vetRouter.patch('/qualifications/:id/units/:unitStructureId/order', async (req, res) => {
+  try {
+    const qualificationId = parseInt(req.params.id);
+    const unitStructureId = parseInt(req.params.unitStructureId);
+    const { direction } = req.body;
+    
+    if (!['up', 'down'].includes(direction)) {
+      return res.status(400).json({ message: 'Invalid direction. Must be "up" or "down"' });
+    }
+    
+    // Get the current unit
+    const [currentUnit] = await db
+      .select()
+      .from(qualificationStructure)
+      .where(
+        and(
+          eq(qualificationStructure.id, unitStructureId),
+          eq(qualificationStructure.qualificationId, qualificationId)
+        )
+      );
+    
+    if (!currentUnit) {
+      return res.status(404).json({ message: 'Unit not found in qualification structure' });
+    }
+    
+    // Get adjacent unit (the one we need to swap with)
+    const adjacentUnitQuery = db
+      .select()
+      .from(qualificationStructure)
+      .where(
+        and(
+          eq(qualificationStructure.qualificationId, qualificationId),
+          eq(qualificationStructure.isCore, currentUnit.isCore)
+        )
+      );
+    
+    // If unit is in a group, ensure we only swap within the same group
+    if (!currentUnit.isCore && currentUnit.groupName) {
+      adjacentUnitQuery.where(eq(qualificationStructure.groupName, currentUnit.groupName));
+    }
+    
+    // Find the unit to swap with based on direction
+    if (direction === 'up') {
+      adjacentUnitQuery
+        .where(eq(qualificationStructure.order, currentUnit.order - 1))
+        .orderBy(qualificationStructure.order);
+    } else {
+      adjacentUnitQuery
+        .where(eq(qualificationStructure.order, currentUnit.order + 1))
+        .orderBy(qualificationStructure.order);
+    }
+    
+    const [adjacentUnit] = await adjacentUnitQuery;
+    
+    if (!adjacentUnit) {
+      return res.status(400).json({ message: 'Cannot move unit in that direction' });
+    }
+    
+    // Swap the orders
+    await db.transaction(async (tx) => {
+      await tx
+        .update(qualificationStructure)
+        .set({ order: adjacentUnit.order })
+        .where(eq(qualificationStructure.id, currentUnit.id));
+      
+      await tx
+        .update(qualificationStructure)
+        .set({ order: currentUnit.order })
+        .where(eq(qualificationStructure.id, adjacentUnit.id));
+    });
+    
+    res.json({ message: 'Unit order updated successfully' });
+  } catch (error) {
+    console.error('Error updating unit order:', error);
+    res.status(500).json({ message: 'Error updating unit order' });
+  }
+});
+
 // Create qualification
 vetRouter.post('/qualifications', async (req, res) => {
   try {
