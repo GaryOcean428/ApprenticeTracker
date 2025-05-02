@@ -96,8 +96,8 @@ export default function QualificationsList() {
     return matchesSearch && matchesLevel && matchesIndustry;
   });
 
-  const uniqueLevels = [...new Set(qualifications?.map(q => q.level) || [])];
-  const uniqueIndustries = [...new Set(qualifications?.map(q => q.industryArea) || [])];
+  const uniqueLevels = Array.from(new Set(qualifications?.map(q => q.aqfLevel) || []));
+  const uniqueIndustries = Array.from(new Set(qualifications?.map(q => q.trainingPackage) || []));
 
   return (
     <>

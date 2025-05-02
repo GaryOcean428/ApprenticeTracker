@@ -292,6 +292,14 @@ function Router() {
       <Route path="/vet/units/create" component={CreateUnitOfCompetency} />
       <Route path="/vet/qualifications" component={QualificationsList} />
       <Route path="/vet/qualifications/create" component={CreateQualification} />
+      <Route path="/vet/qualifications/:id" component={() => {
+        const QualificationDetail = lazy(() => import("./pages/vet/qualifications/[id]"));
+        return (
+          <Suspense fallback={<div className="p-8 flex items-center justify-center"><div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"/></div>}>
+            <QualificationDetail />
+          </Suspense>
+        );
+      }} />
       <Route path="/vet/training-packages" component={() => {
         const TrainingPackages = lazy(() => import("./pages/vet/training-packages/index"));
         return (
