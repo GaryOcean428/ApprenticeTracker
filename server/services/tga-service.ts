@@ -145,6 +145,81 @@ interface TGAQualificationDetail extends TGAQualification {
  */
 export class TGAService {
   /**
+   * Get qualification details from Training.gov.au by code
+   * Uses SOAP API as primary source and falls back to REST API if needed
+   */
+  async getQualification(code: string, includeUnits: boolean = true): Promise<TGAQualificationDetail> {
+    try {
+      console.log(`Getting qualification details for code: "${code}", includeUnits: ${includeUnits}`);
+      
+      // Try to get results from cache first
+      const cacheKey = `tga:qualification:${code}:${includeUnits}`;
+      const cachedResult = cacheService.get<TGAQualificationDetail>(cacheKey);
+      
+      if (cachedResult) {
+        console.log(`Found qualification details in cache for "${code}"`);
+        return cachedResult;
+      }
+      
+      // No cache hit, try SOAP API first then fall back to REST API
+      let qualificationDetail: TGAQualificationDetail | null = null;
+      
+      try {
+        qualificationDetail = await this.getQualificationBySoap(code);
+      } catch (soapError: unknown) {
+        const errorMessage = soapError instanceof Error ? soapError.message : 'Unknown error';
+        console.error(`TGA SOAP API error: ${errorMessage}`);
+        console.log(`Falling back to REST API...`);
+      }
+      
+      // If SOAP didn't work, try REST API
+      if (!qualificationDetail) {
+        try {
+          console.log(`Calling Training.gov.au REST API for qualification: "${code}"`);
+          
+          const response = await axios.get(`${TGA_REST_API_URL}/qualification/${code}`);
+          
+          if (response.data) {
+            // Map the REST API response to our internal format
+            const data = response.data;
+            
+            qualificationDetail = {
+              code: data.code,
+              title: data.title,
+              level: parseInt(data.level || '3'),
+              status: data.status || 'Current',
+              releaseDate: data.releaseDate,
+              expiryDate: data.expiryDate,
+              trainingPackage: data.trainingPackage,
+              nrtFlag: data.nrtFlag || true,
+              unitsOfCompetency: {
+                core: data.coreUnits || [],
+                elective: data.electiveUnits || []
+              }
+            };
+          }
+        } catch (restError: unknown) {
+          const errorMessage = restError instanceof Error ? restError.message : 'Unknown error';
+          console.error(`TGA REST API error: ${errorMessage}`);
+        }
+      }
+      
+      if (!qualificationDetail) {
+        throw new Error(`Qualification with code ${code} not found in TGA`);
+      }
+      
+      // Cache the results for future requests (24 hour TTL for qualification details)
+      cacheService.set(cacheKey, qualificationDetail, 86400000); // 24 hours cache
+      console.log(`Cached qualification details for "${code}"`);
+      
+      return qualificationDetail;
+    } catch (error: unknown) {
+      console.error(`Error fetching TGA qualification ${code}:`, error);
+      throw new Error(`Failed to fetch TGA qualification: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  /**
    * Search qualifications from Training.gov.au using SOAP API
    */
   async searchQualifications(query: string, limit: number = 20): Promise<TGAQualification[]> {

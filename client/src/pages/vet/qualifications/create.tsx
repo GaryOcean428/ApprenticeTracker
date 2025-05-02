@@ -185,13 +185,43 @@ export default function CreateQualification() {
   const createMutation = useMutation({
     mutationFn: async (data: z.infer<typeof createQualificationSchema>) => {
       setIsSubmitting(true);
+      
+      // Step 1: Create the qualification
       const res = await apiRequest("POST", "/api/vet/qualifications", data);
-      return await res.json();
+      const qualification = await res.json();
+      
+      // Step 2: If using TGA data and we have units, import them too
+      if (selectedQualification?.code && qualificationDetails?.unitsOfCompetency) {
+        try {
+          // Import all units from TGA
+          const importRes = await apiRequest("POST", `/api/tga/import/${selectedQualification.code}`, {
+            skipExisting: true, // Skip if qualification already exists
+            importUnits: true    // Also import associated units
+          });
+          
+          // Include import results in our response
+          qualification.unitsImported = true;
+          qualification.importResults = await importRes.json();
+        } catch (importError) {
+          console.error("Error importing units from TGA:", importError);
+          // Continue anyway - qualification was created, just units weren't imported
+          qualification.unitsImported = false;
+          qualification.importError = importError instanceof Error ? importError.message : 'Unknown error';
+        }
+      }
+      
+      return qualification;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      // Show appropriate message based on whether units were also imported
+      let description = "The qualification has been added to the system";
+      if (data.unitsImported) {
+        description += " with associated units of competency";
+      }
+      
       toast({
         title: "Qualification created successfully",
-        description: "The qualification has been added to the system",
+        description,
         variant: "default",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/vet/qualifications"] });

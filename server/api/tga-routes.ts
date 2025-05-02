@@ -123,109 +123,21 @@ export function registerTGARoutes(app: Express) {
   app.get("/api/tga/qualification/:code", async (req, res) => {
     try {
       const code = req.params.code;
+      const includeUnits = req.query.includeUnits === 'true';
       
-      // Temporarily use sample data for qualification details
-      console.log(`TGA Qualification: Using sample data for code '${code}'`);
-      let qualificationDetails = null;
-      
-      // Return sample data based on the code
-      if (code === "CPC30220") {
-        qualificationDetails = {
-          code: "CPC30220",
-          title: "Certificate III in Carpentry",
-          level: 3,
-          status: "Current",
-          releaseDate: "2020-05-15",
-          expiryDate: undefined,
-          trainingPackage: {
-            code: "CPC",
-            title: "Construction, Plumbing and Services"
-          },
-          nrtFlag: true,
-          unitsOfCompetency: {
-            core: [
-              {
-                code: "CPCCCA2002",
-                title: "Use carpentry tools and equipment",
-                status: "Current",
-                nrtFlag: true
-              },
-              {
-                code: "CPCCCA2011",
-                title: "Handle carpentry materials",
-                status: "Current",
-                nrtFlag: true
-              }
-            ],
-            elective: [
-              {
-                code: "CPCCCA3001",
-                title: "Carry out general demolition",
-                status: "Current",
-                nrtFlag: true
-              },
-              {
-                code: "CPCCCA3002",
-                title: "Carry out setting out",
-                status: "Current",
-                nrtFlag: true
-              }
-            ]
-          }
-        };
-      } else if (code === "CPC40120") {
-        qualificationDetails = {
-          code: "CPC40120",
-          title: "Certificate IV in Building and Construction",
-          level: 4,
-          status: "Current",
-          releaseDate: "2020-06-15",
-          expiryDate: undefined,
-          trainingPackage: {
-            code: "CPC",
-            title: "Construction, Plumbing and Services"
-          },
-          nrtFlag: true,
-          unitsOfCompetency: {
-            core: [
-              {
-                code: "CPCCBC4001",
-                title: "Apply building codes and standards",
-                status: "Current",
-                nrtFlag: true
-              },
-              {
-                code: "CPCCBC4002",
-                title: "Manage work health and safety",
-                status: "Current",
-                nrtFlag: true
-              }
-            ],
-            elective: [
-              {
-                code: "CPCCBC4003",
-                title: "Select and prepare a construction contract",
-                status: "Current",
-                nrtFlag: true
-              },
-              {
-                code: "CPCCBC4004",
-                title: "Identify and produce estimated costs",
-                status: "Current",
-                nrtFlag: true
-              }
-            ]
-          }
-        };
-      }
-      
-      if (!qualificationDetails) {
-        return res.status(404).json({
-          message: `Qualification with code ${code} not found in TGA`
+      try {
+        // Try to fetch real data from TGA API using the TGAService
+        const qualificationDetails = await tgaService.getQualificationByCode(code);
+        return res.json(qualificationDetails);
+      } catch (apiError) {
+        // If API fails, return a proper error response
+        console.error(`Failed to fetch qualification from TGA API: ${apiError instanceof Error ? apiError.message : 'Unknown error'}`);
+        return res.status(500).json({
+          message: "Failed to fetch qualification details from Training.gov.au",
+          error: apiError instanceof Error ? apiError.message : 'Unknown error',
+          code: code
         });
       }
-      
-      res.json(qualificationDetails);
     } catch (error) {
       console.error(`Error fetching TGA qualification ${req.params.code}:`, error);
       res.status(500).json({
@@ -244,15 +156,18 @@ export function registerTGARoutes(app: Express) {
       const code = req.params.code;
       console.log(`Importing qualification with code: ${code}`);
       
+      // Check for options
+      const skipExisting = req.body?.skipExisting === true;
+      const importUnits = req.body?.importUnits === true;
+      
+      console.log(`Options: skipExisting=${skipExisting}, importUnits=${importUnits}`);
+      
       // Validate qualification code format (typically alphanumeric with some variations)
       if (!/^[A-Za-z0-9_-]+$/.test(code)) {
         return res.status(400).json({
           message: `Invalid qualification code format: ${code}`
         });
       }
-      
-      // Temporarily simulate qualification import
-      console.log(`TGA Import: Using sample data for code '${code}'`);
       
       // Check if the qualification already exists in the database
       const existingQual = await db
@@ -261,11 +176,20 @@ export function registerTGARoutes(app: Express) {
         .where(eq(qualifications.qualificationCode, code));
       
       let qualificationId = 0;
+      let isNewlyCreated = false;
       
-      if (existingQual.length > 0) {
+      // If it exists and we're skipping existing qualifications, return early with the existing ID
+      if (existingQual.length > 0 && skipExisting) {
+        qualificationId = existingQual[0].id;
+        console.log(`Qualification ${code} already exists with ID ${qualificationId} - skipping import`);
+      } 
+      // If it exists but we're not skipping, update units if needed
+      else if (existingQual.length > 0) {
         qualificationId = existingQual[0].id;
         console.log(`Qualification ${code} already exists with ID ${qualificationId}`);
-      } else {
+      } 
+      // If it doesn't exist, create it
+      else {
         // Insert the qualification
         if (code === "CPC30220") {
           const [result] = await db.insert(qualifications).values({
