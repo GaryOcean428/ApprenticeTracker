@@ -102,7 +102,9 @@ interface Qualification {
   structure?: QualificationStructure[];
 }
 
-function getLevelColor(level: string) {
+function getLevelColor(level: string | undefined) {
+  if (!level) return "bg-gray-100 text-gray-800";
+  
   const levelNumber = parseInt(level.match(/\d+/)?.[0] || "1");
   
   switch(levelNumber) {
@@ -252,8 +254,8 @@ export default function QualificationDetails() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-xl font-semibold">{qualification.trainingPackage}</p>
-                <p className="text-sm text-muted-foreground">Release: {qualification.trainingPackageRelease}</p>
+                <p className="text-xl font-semibold">{qualification.trainingPackage || 'N/A'}</p>
+                <p className="text-sm text-muted-foreground">Release: {qualification.trainingPackageRelease || 'N/A'}</p>
               </CardContent>
             </Card>
             
@@ -267,15 +269,15 @@ export default function QualificationDetails() {
               <CardContent>
                 <div className="grid grid-cols-3 gap-2">
                   <div>
-                    <p className="text-xl font-semibold">{qualification.totalUnits}</p>
+                    <p className="text-xl font-semibold">{qualification.totalUnits || 0}</p>
                     <p className="text-sm text-muted-foreground">Total</p>
                   </div>
                   <div>
-                    <p className="text-xl font-semibold">{qualification.coreUnits}</p>
+                    <p className="text-xl font-semibold">{qualification.coreUnits || 0}</p>
                     <p className="text-sm text-muted-foreground">Core</p>
                   </div>
                   <div>
-                    <p className="text-xl font-semibold">{qualification.electiveUnits}</p>
+                    <p className="text-xl font-semibold">{qualification.electiveUnits || 0}</p>
                     <p className="text-sm text-muted-foreground">Elective</p>
                   </div>
                 </div>
@@ -291,10 +293,10 @@ export default function QualificationDetails() {
               </CardHeader>
               <CardContent>
                 <p className="text-xl font-semibold">
-                  {qualification.nominalHours} hours
+                  {qualification.nominalHours || 0} hours
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  Approximately {Math.round(qualification.nominalHours / 38)} weeks
+                  Approximately {Math.round((qualification.nominalHours || 0) / 38)} weeks
                 </p>
               </CardContent>
             </Card>
@@ -393,9 +395,9 @@ export default function QualificationDetails() {
                         
                         {coreUnits.map((item) => (
                           <TableRow key={item.id}>
-                            <TableCell className="font-medium">{item.unit.unitCode}</TableCell>
-                            <TableCell>{item.unit.unitTitle}</TableCell>
-                            <TableCell className="text-right">{item.unit.nominalHours}</TableCell>
+                            <TableCell className="font-medium">{item.unit?.unitCode || 'N/A'}</TableCell>
+                            <TableCell>{item.unit?.unitTitle || 'N/A'}</TableCell>
+                            <TableCell className="text-right">{item.unit?.nominalHours || 0}</TableCell>
                           </TableRow>
                         ))}
                       </TableBody>
@@ -428,9 +430,9 @@ export default function QualificationDetails() {
                         <TableBody>
                           {units.map((item) => (
                             <TableRow key={item.id}>
-                              <TableCell className="font-medium">{item.unit.unitCode}</TableCell>
-                              <TableCell>{item.unit.unitTitle}</TableCell>
-                              <TableCell className="text-right">{item.unit.nominalHours}</TableCell>
+                              <TableCell className="font-medium">{item.unit?.unitCode || 'N/A'}</TableCell>
+                              <TableCell>{item.unit?.unitTitle || 'N/A'}</TableCell>
+                              <TableCell className="text-right">{item.unit?.nominalHours || 0}</TableCell>
                             </TableRow>
                           ))}
                         </TableBody>
