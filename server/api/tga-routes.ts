@@ -345,7 +345,12 @@ export function registerTGARoutes(app: Express) {
             }
           }
           
-          // Insert the qualification
+          // Count units for required fields
+          const coreUnits = qualificationData.unitsOfCompetency?.core?.length || 2;
+          const electiveUnits = qualificationData.unitsOfCompetency?.elective?.length || 2;
+          const totalUnits = coreUnits + electiveUnits;
+          
+          // Insert the qualification with required field values
           const [result] = await db.insert(qualifications).values({
             qualificationCode: qualificationData.code,
             qualificationTitle: qualificationData.title,
@@ -356,7 +361,10 @@ export function registerTGARoutes(app: Express) {
             aqfLevelNumber: aqfLevelNumber,
             status: qualificationData.status || "Current",
             releaseDate: new Date(qualificationData.releaseDate || new Date()),
-            isImported: true
+            isImported: true,
+            totalUnits: totalUnits,
+            coreUnits: coreUnits,
+            electiveUnits: electiveUnits
           }).returning();
           
           qualificationId = result.id;
@@ -405,10 +413,14 @@ export function registerTGARoutes(app: Express) {
           const [result] = await db.insert(qualifications).values({
             qualificationCode: code,
             qualificationTitle: `Qualification ${code}`,
+            qualificationDescription: "Imported qualification",
             aqfLevel: "3",
             aqfLevelNumber: 3, 
             status: "Current",
-            isImported: true
+            isImported: true,
+            totalUnits: 4,
+            coreUnits: 2,
+            electiveUnits: 2
           }).returning();
           
           qualificationId = result.id;
