@@ -32,7 +32,14 @@ export function QualificationSearch({ onImport, isImporting = false }: Qualifica
   const { toast } = useToast();
 
   const { data, isLoading, error, refetch } = useQuery<Qualification[]>({
-    queryKey: ["/api/tga/search", searchTerm],
+    queryKey: ["/api/tga/search"],
+    queryFn: async () => {
+      if (searchTerm.length < 3) {
+        throw new Error("Search term must be at least 3 characters");
+      }
+      const res = await apiRequest("GET", `/api/tga/search?query=${encodeURIComponent(searchTerm)}`);
+      return res.json();
+    },
     enabled: false,
   });
 

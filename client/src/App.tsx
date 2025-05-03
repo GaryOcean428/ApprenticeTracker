@@ -555,13 +555,7 @@ function App() {
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
           <Toaster />
-          {isPublicRoute ? (
-            <Router />
-          ) : (
-            <MainLayout>
-              <Router />
-            </MainLayout>
-          )}
+          <Router />
         </TooltipProvider>
       </QueryClientProvider>
     </ErrorBoundary>
