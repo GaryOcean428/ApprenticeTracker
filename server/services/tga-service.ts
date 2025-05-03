@@ -409,7 +409,15 @@ export class TGAService {
             ? `Business Services Qualification (${code})` 
             : (code.startsWith("CPC") 
               ? `Construction Qualification (${code})` 
-              : `Qualification ${code}`),
+              : (code.startsWith("AUR")
+                ? `Automotive Qualification (${code})`
+                : (code.startsWith("SIT")
+                  ? `Hospitality Qualification (${code})`
+                  : (code.startsWith("ICT")
+                    ? `Information Technology Qualification (${code})`
+                    : (code.startsWith("AHC")
+                      ? `Agriculture & Horticulture Qualification (${code})`
+                      : `Qualification ${code}`))))),
           description: "This qualification reflects the role of individuals in a variety of roles who use well-developed skills and a broad knowledge base in a wide variety of contexts.",
           level: code.match(/\d+/) ? parseInt(code.match(/\d+/)[0].substring(0, 1)) : 4,
           status: "Current",
@@ -420,7 +428,16 @@ export class TGAService {
               ? "Business Services" 
               : (code.startsWith("CPC") 
                 ? "Construction, Plumbing and Services" 
-                : "Training Package")
+                : (code.startsWith("AUR")
+                  ? "Automotive Retail, Service and Repair"
+                  : (code.startsWith("SIT")
+                    ? "Tourism, Travel and Hospitality"
+                    : (code.startsWith("ICT")
+                      ? "Information and Communications Technology"
+                      : (code.startsWith("AHC")
+                        ? "Agriculture, Horticulture and Conservation and Land Management"
+                        : "Training Package")))))
+              
           },
           unitsOfCompetency: {
             core: [
