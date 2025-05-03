@@ -340,6 +340,14 @@ function Router() {
           </Suspense>
         );
       }} />
+      <Route path="/vet/training-packages/:id" component={() => {
+        const TrainingPackageDetail = lazy(() => import("./pages/vet/training-packages/[id]/index"));
+        return (
+          <Suspense fallback={<div className="p-8 flex items-center justify-center"><div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"/></div>}>
+            <TrainingPackageDetail />
+          </Suspense>
+        );
+      }} />
       <Route path="/vet/assessments" component={() => {
         const AssessmentRecords = lazy(() => import("./pages/vet/assessments/index"));
         return (
