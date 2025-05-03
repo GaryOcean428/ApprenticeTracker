@@ -175,70 +175,62 @@ export function registerTGARoutes(app: Express) {
    * Get qualification details from Training.gov.au by code
    */
   app.get("/api/tga/qualification/:code", async (req, res) => {
+    const code = req.params.code;
+    const includeUnits = req.query.includeUnits === 'true';
+    
     try {
-      const code = req.params.code;
-      const includeUnits = req.query.includeUnits === 'true';
+      // Try to fetch real data from TGA API using the TGAService
+      const qualificationDetails = await tgaService.getQualificationByCode(code);
+      return res.json(qualificationDetails);
+    } catch (apiError) {
+      console.warn(`Failed to fetch qualification from TGA API: ${apiError instanceof Error ? apiError.message : 'Unknown error'}`);
+      console.log(`Falling back to sample data for qualification code: ${code}`);
       
-      try {
-        // Try to fetch real data from TGA API using the TGAService
-        const qualificationDetails = await tgaService.getQualificationByCode(code);
-        return res.json(qualificationDetails);
-      } catch (apiError) {
-        console.warn(`Failed to fetch qualification from TGA API: ${apiError instanceof Error ? apiError.message : 'Unknown error'}`);
-        console.log(`Falling back to sample data for qualification code: ${code}`);
-        
-        // Provide sample data based on code
-        const sampleQualificationData = {
-          code: code,
+      // Provide sample data based on code
+      const sampleQualificationData = {
+        code: code,
+        title: code.startsWith("BSB") 
+          ? `Business Services Qualification (${code})` 
+          : (code.startsWith("CPC") 
+            ? `Construction Qualification (${code})` 
+            : `Qualification ${code}`),
+        description: "This qualification reflects the role of individuals in a variety of roles who use well-developed skills and a broad knowledge base in a wide variety of contexts.",
+        level: code.match(/\d+/) ? parseInt(code.match(/\d+/)[0].substring(0, 1)) : 4,
+        status: "Current",
+        releaseDate: "2020-10-18",
+        trainingPackage: {
+          code: code.substring(0, 3),
           title: code.startsWith("BSB") 
-            ? `Business Services Qualification (${code})` 
+            ? "Business Services" 
             : (code.startsWith("CPC") 
-              ? `Construction Qualification (${code})` 
-              : `Qualification ${code}`),
-          description: "This qualification reflects the role of individuals in a variety of roles who use well-developed skills and a broad knowledge base in a wide variety of contexts.",
-          level: code.match(/\d+/) ? parseInt(code.match(/\d+/)[0].substring(0, 1)) : 4,
-          status: "Current",
-          releaseDate: "2020-10-18",
-          trainingPackage: {
-            code: code.substring(0, 3),
-            title: code.startsWith("BSB") 
-              ? "Business Services" 
-              : (code.startsWith("CPC") 
-                ? "Construction, Plumbing and Services" 
-                : "Training Package")
+              ? "Construction, Plumbing and Services" 
+              : "Training Package")
+        },
+        units: [
+          {
+            code: `${code.substring(0, 3)}001`,
+            title: "Core unit 1",
+            isCore: true
           },
-          units: [
-            {
-              code: `${code.substring(0, 3)}001`,
-              title: "Core unit 1",
-              isCore: true
-            },
-            {
-              code: `${code.substring(0, 3)}002`,
-              title: "Core unit 2",
-              isCore: true
-            },
-            {
-              code: `${code.substring(0, 3)}003`,
-              title: "Elective unit 1",
-              isCore: false
-            },
-            {
-              code: `${code.substring(0, 3)}004`,
-              title: "Elective unit 2",
-              isCore: false
-            }
-          ]
-        };
-        
-        return res.json(sampleQualificationData);
-      }
-    } catch (error) {
-      console.error(`Error fetching TGA qualification ${req.params.code}:`, error);
-      res.status(500).json({
-        message: "Error fetching TGA qualification",
-        error: error instanceof Error ? error.message : 'Unknown error'
-      });
+          {
+            code: `${code.substring(0, 3)}002`,
+            title: "Core unit 2",
+            isCore: true
+          },
+          {
+            code: `${code.substring(0, 3)}003`,
+            title: "Elective unit 1",
+            isCore: false
+          },
+          {
+            code: `${code.substring(0, 3)}004`,
+            title: "Elective unit 2",
+            isCore: false
+          }
+        ]
+      };
+      
+      return res.json(sampleQualificationData);
     }
   });
   
