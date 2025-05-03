@@ -89,6 +89,7 @@ export function registerTGARoutes(app: Express) {
         // Return extended sample data as a fallback
         console.log(`TGA Search: Using extended sample data for query '${query}'`);
         const results = [
+          // Construction
           {
             code: "CPC30220",
             title: "Certificate III in Carpentry",
@@ -113,6 +114,7 @@ export function registerTGARoutes(app: Express) {
             },
             nrtFlag: true
           },
+          // Business
           {
             code: "BSB50120",
             title: "Diploma of Business",
@@ -146,6 +148,70 @@ export function registerTGARoutes(app: Express) {
             trainingPackage: {
               code: "BSB",
               title: "Business Services"
+            },
+            nrtFlag: true
+          },
+          // Automotive
+          {
+            code: "AUR30620",
+            title: "Certificate III in Light Vehicle Mechanical Technology",
+            level: 3,
+            status: "Current",
+            releaseDate: "2020-07-28",
+            trainingPackage: {
+              code: "AUR",
+              title: "Automotive Retail, Service and Repair"
+            },
+            nrtFlag: true
+          },
+          {
+            code: "AUR40216",
+            title: "Certificate IV in Automotive Mechanical Diagnosis",
+            level: 4,
+            status: "Current",
+            releaseDate: "2020-05-14",
+            trainingPackage: {
+              code: "AUR",
+              title: "Automotive Retail, Service and Repair"
+            },
+            nrtFlag: true
+          },
+          // Hospitality
+          {
+            code: "SIT30622",
+            title: "Certificate III in Hospitality",
+            level: 3,
+            status: "Current",
+            releaseDate: "2022-06-10",
+            trainingPackage: {
+              code: "SIT",
+              title: "Tourism, Travel and Hospitality"
+            },
+            nrtFlag: true
+          },
+          // Information Technology
+          {
+            code: "ICT50220",
+            title: "Diploma of Information Technology",
+            level: 5,
+            status: "Current",
+            releaseDate: "2021-06-02",
+            trainingPackage: {
+              code: "ICT",
+              title: "Information and Communications Technology"
+            },
+            nrtFlag: true
+          },
+          // Agriculture & Horticulture
+          {
+            code: "AHC30716",
+            title: "Certificate III in Horticulture",
+            level: 3,
+            status: "Current",
+            releaseDate: "2019-03-22",
+            trainingPackage: {
+              code: "AHC",
+              title: "Agriculture, Horticulture and Conservation and Land Management"
             },
             nrtFlag: true
           }
@@ -193,7 +259,15 @@ export function registerTGARoutes(app: Express) {
           ? `Business Services Qualification (${code})` 
           : (code.startsWith("CPC") 
             ? `Construction Qualification (${code})` 
-            : `Qualification ${code}`),
+            : (code.startsWith("AUR")
+              ? `Automotive Qualification (${code})`
+              : (code.startsWith("SIT")
+                ? `Hospitality Qualification (${code})`
+                : (code.startsWith("ICT")
+                  ? `Information Technology Qualification (${code})`
+                  : (code.startsWith("AHC")
+                    ? `Agriculture & Horticulture Qualification (${code})`
+                    : `Qualification ${code}`))))),
         description: "This qualification reflects the role of individuals in a variety of roles who use well-developed skills and a broad knowledge base in a wide variety of contexts.",
         level: code.match(/\d+/) ? parseInt(code.match(/\d+/)[0].substring(0, 1)) : 4,
         status: "Current",
@@ -204,7 +278,15 @@ export function registerTGARoutes(app: Express) {
             ? "Business Services" 
             : (code.startsWith("CPC") 
               ? "Construction, Plumbing and Services" 
-              : "Training Package")
+              : (code.startsWith("AUR")
+                ? "Automotive Retail, Service and Repair"
+                : (code.startsWith("SIT")
+                  ? "Tourism, Travel and Hospitality"
+                  : (code.startsWith("ICT")
+                    ? "Information and Communications Technology"
+                    : (code.startsWith("AHC")
+                      ? "Agriculture, Horticulture and Conservation and Land Management"
+                      : "Training Package")))))
         },
         units: [
           {
@@ -293,7 +375,15 @@ export function registerTGARoutes(app: Express) {
                 ? `Business Services Qualification (${code})` 
                 : (code.startsWith("CPC") 
                   ? `Construction Qualification (${code})` 
-                  : `Qualification ${code}`),
+                  : (code.startsWith("AUR")
+                    ? `Automotive Qualification (${code})`
+                    : (code.startsWith("SIT")
+                      ? `Hospitality Qualification (${code})`
+                      : (code.startsWith("ICT")
+                        ? `Information Technology Qualification (${code})`
+                        : (code.startsWith("AHC")
+                          ? `Agriculture & Horticulture Qualification (${code})`
+                          : `Qualification ${code}`))))),
               description: "This qualification reflects the role of individuals in a variety of roles who use well-developed skills and a broad knowledge base in a wide variety of contexts.",
               level: code.match(/\d+/) ? parseInt(code.match(/\d+/)[0].substring(0, 1)) : 4,
               status: "Current",
@@ -304,7 +394,15 @@ export function registerTGARoutes(app: Express) {
                   ? "Business Services" 
                   : (code.startsWith("CPC") 
                     ? "Construction, Plumbing and Services" 
-                    : "Training Package")
+                    : (code.startsWith("AUR")
+                      ? "Automotive Retail, Service and Repair"
+                      : (code.startsWith("SIT")
+                        ? "Tourism, Travel and Hospitality"
+                        : (code.startsWith("ICT")
+                          ? "Information and Communications Technology"
+                          : (code.startsWith("AHC")
+                            ? "Agriculture, Horticulture and Conservation and Land Management"
+                            : "Training Package")))))
               },
               units: [
                 {
