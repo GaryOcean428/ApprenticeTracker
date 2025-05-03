@@ -308,6 +308,14 @@ function Router() {
       }} />
       <Route path="/vet/qualifications" component={QualificationsList} />
       <Route path="/vet/qualifications/create" component={CreateQualification} />
+      <Route path="/vet/qualifications/import" component={() => {
+        const ImportQualifications = lazy(() => import("./pages/vet/qualifications/import"));
+        return (
+          <Suspense fallback={<div className="p-8 flex items-center justify-center"><div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"/></div>}>
+            <ImportQualifications />
+          </Suspense>
+        );
+      }} />
       <Route path="/vet/qualifications/:id" component={() => {
         const QualificationDetail = lazy(() => import("./pages/vet/qualifications/[id]/index"));
         return (

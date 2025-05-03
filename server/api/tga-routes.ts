@@ -79,35 +79,89 @@ export function registerTGARoutes(app: Express) {
         });
       }
       
-      // Temporarily use sample data until we fix the SOAP client issues
-      console.log(`TGA Search: Using sample data for query '${query}'`);
-      const results = [
-        {
-          code: "CPC30220",
-          title: "Certificate III in Carpentry",
-          level: 3,
-          status: "Current",
-          releaseDate: "2020-05-15",
-          trainingPackage: {
-            code: "CPC",
-            title: "Construction, Plumbing and Services"
+      try {
+        // First try to fetch from TGA API via our TGA service
+        const searchResults = await tgaService.searchQualifications(query, limit);
+        return res.json(searchResults);
+      } catch (apiError) {
+        console.warn(`TGA API search failed, falling back to sample data: ${apiError instanceof Error ? apiError.message : 'Unknown error'}`);
+        
+        // Return extended sample data as a fallback
+        console.log(`TGA Search: Using extended sample data for query '${query}'`);
+        const results = [
+          {
+            code: "CPC30220",
+            title: "Certificate III in Carpentry",
+            level: 3,
+            status: "Current",
+            releaseDate: "2020-05-15",
+            trainingPackage: {
+              code: "CPC",
+              title: "Construction, Plumbing and Services"
+            },
+            nrtFlag: true
           },
-          nrtFlag: true
-        },
-        {
-          code: "CPC40120",
-          title: "Certificate IV in Building and Construction",
-          level: 4,
-          status: "Current",
-          releaseDate: "2020-06-15",
-          trainingPackage: {
-            code: "CPC",
-            title: "Construction, Plumbing and Services"
+          {
+            code: "CPC40120",
+            title: "Certificate IV in Building and Construction",
+            level: 4,
+            status: "Current",
+            releaseDate: "2020-06-15",
+            trainingPackage: {
+              code: "CPC",
+              title: "Construction, Plumbing and Services"
+            },
+            nrtFlag: true
           },
-          nrtFlag: true
-        }
-      ];
-      res.json(results);
+          {
+            code: "BSB50120",
+            title: "Diploma of Business",
+            level: 5,
+            status: "Current",
+            releaseDate: "2020-10-18",
+            trainingPackage: {
+              code: "BSB",
+              title: "Business Services"
+            },
+            nrtFlag: true
+          },
+          {
+            code: "BSB30120",
+            title: "Certificate III in Business",
+            level: 3,
+            status: "Current",
+            releaseDate: "2020-10-15",
+            trainingPackage: {
+              code: "BSB",
+              title: "Business Services"
+            },
+            nrtFlag: true
+          },
+          {
+            code: "BSB40420",
+            title: "Certificate IV in Human Resource Management",
+            level: 4,
+            status: "Current",
+            releaseDate: "2020-12-03",
+            trainingPackage: {
+              code: "BSB",
+              title: "Business Services"
+            },
+            nrtFlag: true
+          }
+        ];
+        
+        // Filter results based on the query
+        const filteredResults = results.filter(qual => {
+          const searchLower = query.toLowerCase();
+          return qual.code.toLowerCase().includes(searchLower) || 
+                 qual.title.toLowerCase().includes(searchLower) ||
+                 qual.trainingPackage.code.toLowerCase().includes(searchLower) ||
+                 qual.trainingPackage.title.toLowerCase().includes(searchLower);
+        });
+        
+        return res.json(filteredResults);
+      }
     } catch (error) {
       console.error("Error searching TGA qualifications:", error);
       res.status(500).json({
