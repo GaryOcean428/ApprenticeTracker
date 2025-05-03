@@ -298,6 +298,14 @@ function Router() {
           </Suspense>
         );
       }} />
+      <Route path="/vet/units/:id/edit" component={() => {
+        const UnitEdit = lazy(() => import("./pages/vet/units/[id]/edit"));
+        return (
+          <Suspense fallback={<div className="p-8 flex items-center justify-center"><div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"/></div>}>
+            <UnitEdit />
+          </Suspense>
+        );
+      }} />
       <Route path="/vet/qualifications" component={QualificationsList} />
       <Route path="/vet/qualifications/create" component={CreateQualification} />
       <Route path="/vet/qualifications/:id" component={() => {

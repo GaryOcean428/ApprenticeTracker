@@ -184,26 +184,32 @@ export default function EditQualification() {
     },
   });
 
+  // Debug qualification data
+  useEffect(() => {
+    console.log('Qualification data received:', qualificationData);
+  }, [qualificationData]);
+
   // Update form with qualification data when available
   useEffect(() => {
     if (qualificationData?.qualification) {
       const qualification = qualificationData.qualification;
+      console.log('Setting form data with:', qualification);
       form.reset({
-        qualificationCode: qualification.qualificationCode,
-        qualificationTitle: qualification.qualificationTitle,
+        qualificationCode: qualification.qualificationCode || "",
+        qualificationTitle: qualification.qualificationTitle || "",
         qualificationDescription: qualification.qualificationDescription || "",
-        aqfLevel: qualification.aqfLevel,
-        aqfLevelNumber: qualification.aqfLevelNumber,
-        trainingPackage: qualification.trainingPackage,
-        trainingPackageRelease: qualification.trainingPackageRelease,
-        totalUnits: qualification.totalUnits,
-        coreUnits: qualification.coreUnits,
-        electiveUnits: qualification.electiveUnits,
-        nominalHours: qualification.nominalHours,
-        isActive: qualification.isActive,
-        isApprenticeshipQualification: qualification.isApprenticeshipQualification,
-        isFundedQualification: qualification.isFundedQualification,
-        fundingDetails: qualification.fundingDetails,
+        aqfLevel: qualification.aqfLevel || "",
+        aqfLevelNumber: qualification.aqfLevelNumber || 1,
+        trainingPackage: qualification.trainingPackage || "",
+        trainingPackageRelease: qualification.trainingPackageRelease || "",
+        totalUnits: qualification.totalUnits || 0,
+        coreUnits: qualification.coreUnits || 0,
+        electiveUnits: qualification.electiveUnits || 0,
+        nominalHours: qualification.nominalHours || 0,
+        isActive: qualification.isActive || false,
+        isApprenticeshipQualification: qualification.isApprenticeshipQualification || false,
+        isFundedQualification: qualification.isFundedQualification || false,
+        fundingDetails: qualification.fundingDetails || null,
       });
     }
   }, [qualificationData, form]);
