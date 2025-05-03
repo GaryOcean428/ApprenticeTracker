@@ -108,10 +108,16 @@ export default function QualificationsList() {
             Manage AQF Qualifications for apprenticeships and traineeships
           </p>
         </div>
-        <Button onClick={() => navigate("/vet/qualifications/create")}>
-          <PlusCircle className="mr-2 h-4 w-4" />
-          Add Qualification
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => navigate("/vet/qualifications/import")}>
+            <Search className="mr-2 h-4 w-4" />
+            Import from TGA
+          </Button>
+          <Button onClick={() => navigate("/vet/qualifications/create")}>
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Add Qualification
+          </Button>
+        </div>
       </div>
 
       <div className="mb-6 flex flex-col sm:flex-row gap-4">
@@ -216,7 +222,7 @@ export default function QualificationsList() {
                 {!isLoading && filteredQualifications?.length === 0 && (
                   <TableRow>
                     <TableCell colSpan={6} className="text-center py-6 text-muted-foreground">
-                      No qualifications found. <Link href="/vet/qualifications/create" className="text-primary underline">Add one</Link>
+                      No qualifications found. <Link href="/vet/qualifications/create" className="text-primary underline">Add one</Link> or <Link href="/vet/qualifications/import" className="text-primary underline">import from TGA</Link>
                     </TableCell>
                   </TableRow>
                 )}
