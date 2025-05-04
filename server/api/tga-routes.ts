@@ -1,8 +1,11 @@
-import type { Express } from "express";
+import type { Express, Request, Response } from "express";
 import { tgaService } from "../services/tga-service";
 import { db } from "../db";
 import { qualifications, unitsOfCompetency, qualificationStructure } from "@shared/schema";
 import { eq, and, desc, asc, like, or, count } from "drizzle-orm";
+import { validateQuery, validateParams, validateBody, 
+         tgaSearchSchema, tgaQualificationSchema, tgaQualificationImportSchema, tgaSyncSchema } from "../utils/validation";
+import { z } from "zod";
 
 export function registerTGARoutes(app: Express) {
   // Register specific routes before parameterized routes to prevent conflicts
@@ -68,16 +71,9 @@ export function registerTGARoutes(app: Express) {
   /**
    * Search for qualifications in the Training.gov.au system
    */
-  app.get("/api/tga/search", async (req, res) => {
+  app.get("/api/tga/search", validateQuery(tgaSearchSchema), async (req: Request, res: Response) => {
     try {
-      const query = req.query.q as string;
-      const limit = req.query.limit ? parseInt(req.query.limit as string) : 20;
-      
-      if (!query || query.length < 3) {
-        return res.status(400).json({
-          message: "Search query must be at least 3 characters"
-        });
-      }
+      const { q: query, limit } = req.query as z.infer<typeof tgaSearchSchema>;
       
       try {
         // First try to fetch from TGA API via our TGA service
@@ -240,9 +236,12 @@ export function registerTGARoutes(app: Express) {
   /**
    * Get qualification details from Training.gov.au by code
    */
-  app.get("/api/tga/qualification/:code", async (req, res) => {
-    const code = req.params.code;
-    const includeUnits = req.query.includeUnits === 'true';
+  app.get("/api/tga/qualification/:code", 
+    validateParams(tgaQualificationSchema),
+    validateQuery(z.object({ includeUnits: z.string().optional().transform(val => val === 'true') })),
+    async (req: Request, res: Response) => {
+    const { code } = req.params as z.infer<typeof tgaQualificationSchema>;
+    const { includeUnits = false } = req.query as any;
     
     try {
       // Try to fetch real data from TGA API using the TGAService
@@ -320,9 +319,15 @@ export function registerTGARoutes(app: Express) {
    * Import a qualification from Training.gov.au into our database
    * Handles both GET and POST methods for flexibility
    */
-  app.all("/api/tga/import/:code", async (req, res) => {
+  app.all("/api/tga/import/:code", 
+    validateParams(tgaQualificationImportSchema),
+    validateBody(z.object({
+      skipExisting: z.boolean().optional().default(false),
+      importUnits: z.boolean().optional().default(true)
+    }).optional().default({})),
+    async (req: Request, res: Response) => {
     try {
-      const code = req.params.code;
+      const { code } = req.params as z.infer<typeof tgaQualificationImportSchema>;
       console.log(`Importing qualification with code: ${code}`);
       
       // Check for options
@@ -331,13 +336,6 @@ export function registerTGARoutes(app: Express) {
       const importUnits = req.body?.importUnits !== false; // Default to true
       
       console.log(`Options: skipExisting=${skipExisting}, importUnits=${importUnits}`);
-      
-      // Validate qualification code format (typically alphanumeric with some variations)
-      if (!/^[A-Za-z0-9_-]+$/.test(code)) {
-        return res.status(400).json({
-          message: `Invalid qualification code format: ${code}`
-        });
-      }
       
       // Check if the qualification already exists in the database
       const existingQual = await db
@@ -550,19 +548,14 @@ export function registerTGARoutes(app: Express) {
   /**
    * Sync qualifications based on a search term
    */
-  app.post("/api/tga/sync", async (req, res) => {
+  app.post("/api/tga/sync", 
+    validateBody(tgaSyncSchema),
+    async (req: Request, res: Response) => {
     try {
-      // Support both parameter formats for compatibility
-      const searchQuery = req.body.searchQuery || req.body.query;
-      const limit = req.body.limit || 20;
+      // Get validated params from request body
+      const { searchQuery, limit } = req.body as z.infer<typeof tgaSyncSchema>;
       
       console.log(`API: Syncing qualifications with query: '${searchQuery}'`);
-      
-      if (!searchQuery || searchQuery.length < 3) {
-        return res.status(400).json({
-          message: "Search query must be at least 3 characters"
-        });
-      }
       
       const syncCount = await tgaService.syncQualifications(searchQuery, limit);
       
