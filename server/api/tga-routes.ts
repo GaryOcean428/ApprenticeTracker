@@ -327,7 +327,8 @@ export function registerTGARoutes(app: Express) {
       
       // Check for options
       const skipExisting = req.body?.skipExisting === true;
-      const importUnits = req.body?.importUnits === true;
+      // Default importUnits to true for better user experience
+      const importUnits = req.body?.importUnits !== false; // Default to true
       
       console.log(`Options: skipExisting=${skipExisting}, importUnits=${importUnits}`);
       
