@@ -739,26 +739,28 @@ export class TGAService {
       // If qualification doesn't exist, insert it
       if (!existingQualification) {
         // Using the correct unit counts from the data
+        const newQualificationData = {
+          qualificationCode: qualData.code,
+          qualificationTitle: qualData.title,
+          qualificationDescription: qualData.description || `Imported from Training.gov.au on ${new Date().toLocaleDateString()}`,
+          aqfLevel: aqfLevelMap[aqfLevelNumber] || "Certificate III",
+          aqfLevelNumber: aqfLevelNumber, 
+          trainingPackage: qualData.trainingPackage?.code || '',
+          trainingPackageTitle: qualData.trainingPackage?.title || '',
+          trainingPackageRelease: "1.0",
+          totalUnits: totalUnits, 
+          coreUnits: coreUnits,
+          electiveUnits: electiveUnits,
+          nominalHours: 600, // Default estimate
+          isActive: qualData.status === "Current",
+          isApprenticeshipQualification: aqfLevelNumber >= 3 && aqfLevelNumber <= 4, // Usually Cert III/IV
+          isFundedQualification: false,
+          isImported: true
+        };
+        
         const insertedQuals = await db
           .insert(qualifications)
-          .values({
-            qualificationCode: qualData.code,
-            qualificationTitle: qualData.title,
-            qualificationDescription: qualData.description || `Imported from Training.gov.au on ${new Date().toLocaleDateString()}`,
-            aqfLevel: aqfLevelMap[aqfLevelNumber] || "Certificate III",
-            aqfLevelNumber: aqfLevelNumber, 
-            trainingPackage: qualData.trainingPackage?.code || '',
-            trainingPackageTitle: qualData.trainingPackage?.title || '',
-            trainingPackageRelease: "1.0",
-            totalUnits: totalUnits, 
-            coreUnits: coreUnits,
-            electiveUnits: electiveUnits,
-            nominalHours: 600, // Default estimate
-            isActive: qualData.status === "Current",
-            isApprenticeshipQualification: aqfLevelNumber >= 3 && aqfLevelNumber <= 4, // Usually Cert III/IV
-            isFundedQualification: false,
-            isImported: true
-          })
+          .values(newQualificationData)
           .returning();
         
         qualificationId = insertedQuals[0].id;
@@ -837,23 +839,26 @@ export class TGAService {
       // If unit doesn't exist, insert it
       if (existingUnits.length === 0) {
         // Create the unit with proper field names matching the schema
+        // Use insertUnitOfCompetencySchema from shared schema to ensure proper typing
+        const newUnitData = {
+          unitCode: unitData.code,
+          unitTitle: unitData.title,
+          unitDescription: unitData.description || `Imported from Training.gov.au`,
+          releaseNumber: "1",
+          releaseDate: unitData.releaseDate ? new Date(unitData.releaseDate) : null,
+          trainingPackage: unitData.trainingPackage?.code || "", 
+          trainingPackageRelease: "1.0",
+          elementSummary: null,
+          performanceCriteria: null,
+          assessmentRequirements: null,
+          nominalHours: 20, // Default average
+          isActive: unitData.status === "Current",
+          isImported: true
+        };
+        
         const newUnits = await db
           .insert(unitsOfCompetency)
-          .values({
-            unitCode: unitData.code,
-            unitTitle: unitData.title,
-            unitDescription: unitData.description || `Imported from Training.gov.au`,
-            releaseNumber: "1",
-            releaseDate: unitData.releaseDate ? new Date(unitData.releaseDate) : null,
-            trainingPackage: unitData.trainingPackage?.code || "", 
-            trainingPackageRelease: "1.0",
-            elementSummary: null,
-            performanceCriteria: null,
-            assessmentRequirements: null,
-            nominalHours: 20, // Default average
-            isActive: unitData.status === "Current",
-            isImported: true
-          })
+          .values(newUnitData)
           .returning();
         
         unitId = newUnits[0].id;
