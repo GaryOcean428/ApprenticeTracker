@@ -114,3 +114,20 @@ export const tgaSyncSchema = z.object({
   searchQuery: z.string().min(3, 'Search query must be at least 3 characters').max(100, 'Search query too long'),
   limit: z.string().optional().transform(val => (val ? parseInt(val) : 20))
 });
+
+export const tgaSyncBatchSchema = z.object({
+  codes: z.array(z.string().min(5, 'Qualification code must be at least 5 characters').max(20, 'Qualification code too long'))
+    .min(1, 'At least one qualification code is required')
+});
+
+export const tgaSyncAllSchema = z.object({
+  keywords: z.array(z.string().min(3, 'Keyword must be at least 3 characters').max(50, 'Keyword too long'))
+    .min(1, 'At least one keyword is required')
+    .optional()
+    .default(["Certificate III", "Certificate IV", "Diploma"])
+});
+
+// Additional schema for database qualification search
+export const qualificationSearchSchema = z.object({
+  q: z.string().min(2, 'Search query must be at least 2 characters').max(100, 'Search query too long')
+});

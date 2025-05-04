@@ -4,7 +4,8 @@ import { db } from "../db";
 import { qualifications, unitsOfCompetency, qualificationStructure } from "@shared/schema";
 import { eq, and, desc, asc, like, or, count } from "drizzle-orm";
 import { validateQuery, validateParams, validateBody, 
-         tgaSearchSchema, tgaQualificationSchema, tgaQualificationImportSchema, tgaSyncSchema } from "../utils/validation";
+         tgaSearchSchema, tgaQualificationSchema, tgaQualificationImportSchema, tgaSyncSchema,
+         idParamSchema, tgaSyncBatchSchema, tgaSyncAllSchema } from "../utils/validation";
 import { z } from "zod";
 
 export function registerTGARoutes(app: Express) {
@@ -13,15 +14,13 @@ export function registerTGARoutes(app: Express) {
   /**
    * Search qualifications in our database
    */
-  app.get("/api/qualifications/search", async (req, res) => {
+  app.get("/api/qualifications/search", 
+    validateQuery(z.object({
+      q: z.string().min(2, 'Search query must be at least 2 characters').max(100)
+    })),
+    async (req: Request, res: Response) => {
     try {
-      const query = req.query.q as string;
-      
-      if (!query || query.length < 2) {
-        return res.status(400).json({
-          message: "Search query must be at least 2 characters"
-        });
-      }
+      const { q: query } = req.query as { q: string };
       
       console.log(`Searching qualifications with query: ${query}`);
       
@@ -594,18 +593,12 @@ export function registerTGARoutes(app: Express) {
   /**
    * Get a specific qualification from our database by ID
    */
-  app.get("/api/qualifications/:id", async (req, res) => {
+  app.get("/api/qualifications/:id", 
+    validateParams(idParamSchema),
+    async (req: Request, res: Response) => {
     try {
-      // Safely parse the ID, ensuring it's a valid number or returning NaN
-      const idParam = req.params.id;
-      const id = parseInt(idParam);
-      
-      // Check if id is a valid number
-      if (isNaN(id)) {
-        return res.status(400).json({
-          message: `Invalid qualification ID: '${idParam}' is not a number`
-        });
-      }
+      // Get validated ID from params
+      const { id } = req.params as z.infer<typeof idParamSchema>;
       
       console.log(`Fetching qualification with ID: ${id}`);
       
@@ -708,16 +701,12 @@ export function registerTGARoutes(app: Express) {
   /**
    * Manually sync specific qualification codes
    */
-  app.post("/api/tga/sync-batch", async (req, res) => {
+  app.post("/api/tga/sync-batch",
+    validateBody(tgaSyncBatchSchema),
+    async (req: Request, res: Response) => {
     try {
-      // Get qualification codes from request body
-      const { codes } = req.body;
-      
-      if (!codes || !Array.isArray(codes) || codes.length === 0) {
-        return res.status(400).json({
-          message: "Request must include an array of qualification codes"
-        });
-      }
+      // Get validation qualification codes from request body
+      const { codes } = req.body as z.infer<typeof tgaSyncBatchSchema>;
       
       console.log(`Manual sync requested for ${codes.length} qualification codes`);
       
@@ -770,16 +759,12 @@ export function registerTGARoutes(app: Express) {
   /**
    * Run full qualification sync process with the specified keywords
    */
-  app.post("/api/tga/sync-all", async (req, res) => {
+  app.post("/api/tga/sync-all",
+    validateBody(tgaSyncAllSchema),
+    async (req: Request, res: Response) => {
     try {
-      // Get the search keywords from request or use defaults
-      const { keywords = ["Certificate III", "Certificate IV", "Diploma"] } = req.body;
-      
-      if (!Array.isArray(keywords) || keywords.length === 0) {
-        return res.status(400).json({
-          message: "Keywords must be a non-empty array"
-        });
-      }
+      // Get validated keywords from request body with defaults applied
+      const { keywords } = req.body as z.infer<typeof tgaSyncAllSchema>;
       
       // Track total sync count
       let totalSyncCount = 0;
