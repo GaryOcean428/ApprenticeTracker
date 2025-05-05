@@ -87,6 +87,11 @@ interface StorageIntegration extends Integration {
   isDefault: boolean;
 }
 
+// Type guard for storage integration
+function isStorageIntegration(integration: Integration): integration is StorageIntegration {
+  return integration.type === 's3' || integration.type === 'local';
+}
+
 type ApiIntegrationFormValues = z.infer<typeof apiIntegrationSchema>;
 type WebhookFormValues = z.infer<typeof webhookSchema>;
 type DocumentStorageFormValues = z.infer<typeof documentStorageSchema>;
@@ -169,7 +174,7 @@ const IntegrationCard = ({
             ))}
           </div>
         )}
-        {'isDefault' in integration && integration.isDefault && (
+        {isStorageIntegration(integration) && integration.isDefault && (
           <Badge className="mt-2 bg-blue-100 text-blue-800 hover:bg-blue-100">Default Storage</Badge>
         )}
       </CardContent>
@@ -470,35 +475,32 @@ const IntegrationsSettings = () => {
   const handleEditIntegration = (integration: Integration) => {
     setSelectedIntegration(integration);
 
-    if (integration.type === 'webhook') {
-      const webhookIntegration = integration as WebhookIntegration;
+    if (isWebhookIntegration(integration)) {
       webhookForm.reset({
         name: integration.name,
-        url: webhookIntegration.url,
-        events: webhookIntegration.events || [],
-        secret: webhookIntegration.secret || '',
-        headers: webhookIntegration.headers || {},
+        url: integration.url,
+        events: integration.events || [],
+        secret: integration.secret || '',
+        headers: integration.headers || {},
         isActive: integration.isActive,
       });
       setShowWebhookConfig(true);
-    } else if (integration.type === 's3' || integration.type === 'local') {
-      const storageIntegration = integration as StorageIntegration;
+    } else if (isStorageIntegration(integration)) {
       documentServiceForm.reset({
         name: integration.name,
         type: integration.type,
         config: integration.config || {},
         isActive: integration.isActive,
-        isDefault: storageIntegration.isDefault || false,
+        isDefault: integration.isDefault || false,
       });
       setShowDocumentConfig(true);
-    } else {
-      const apiIntegration = integration as ApiIntegration;
+    } else if (isApiIntegration(integration)) {
       apiForm.reset({
         name: integration.name,
         type: integration.type,
-        baseUrl: apiIntegration.baseUrl,
-        apiKey: apiIntegration.apiKey,
-        apiKeyHeader: apiIntegration.apiKeyHeader,
+        baseUrl: integration.baseUrl,
+        apiKey: integration.apiKey,
+        apiKeyHeader: integration.apiKeyHeader,
         isActive: integration.isActive,
         description: integration.config?.description || '',
       });
@@ -551,10 +553,10 @@ const IntegrationsSettings = () => {
             
             {isLoadingIntegrations ? (
               <div className="text-center py-8">Loading API integrations...</div>
-            ) : integrations && integrations.filter(i => i.type !== 'webhook' && i.type !== 's3' && i.type !== 'local').length > 0 ? (
+            ) : integrations && integrations.filter(i => isApiIntegration(i)).length > 0 ? (
               <div className="grid md:grid-cols-2 gap-4">
                 {integrations
-                  .filter(i => i.type !== 'webhook' && i.type !== 's3' && i.type !== 'local')
+                  .filter(i => isApiIntegration(i))
                   .map(integration => (
                     <IntegrationCard
                       key={integration.id}
@@ -766,10 +768,10 @@ const IntegrationsSettings = () => {
             
             {isLoadingIntegrations ? (
               <div className="text-center py-8">Loading webhooks...</div>
-            ) : integrations && integrations.filter(i => i.type === 'webhook').length > 0 ? (
+            ) : integrations && integrations.filter(i => isWebhookIntegration(i)).length > 0 ? (
               <div className="grid md:grid-cols-2 gap-4">
                 {integrations
-                  .filter(i => i.type === 'webhook')
+                  .filter(i => isWebhookIntegration(i))
                   .map(integration => (
                     <IntegrationCard
                       key={integration.id}
@@ -957,10 +959,10 @@ const IntegrationsSettings = () => {
             
             {isLoadingIntegrations ? (
               <div className="text-center py-8">Loading storage services...</div>
-            ) : integrations && integrations.filter(i => i.type === 's3' || i.type === 'local').length > 0 ? (
+            ) : integrations && integrations.filter(i => isStorageIntegration(i)).length > 0 ? (
               <div className="grid md:grid-cols-2 gap-4">
                 {integrations
-                  .filter(i => i.type === 's3' || i.type === 'local')
+                  .filter(i => isStorageIntegration(i))
                   .map(integration => (
                     <IntegrationCard
                       key={integration.id}
