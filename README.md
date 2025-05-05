@@ -70,13 +70,13 @@ The platform is currently under active development with the following major comp
 3. Set up environment variables
 4. Start the development server: `npm run dev`
 
-## Upcoming Features
+## Current Development Focus
 
-- Payroll system with award rate integration
-- Enrichment program management
-- Progress reviews system
-- Calendar integration for field officers
-- Training plans development and tracking
+✅ Payroll system with award rate integration
+✅ Enrichment program management
+⏳ Progress reviews system
+⏳ Calendar integration for field officers
+⏳ Training plans development and tracking
 
 ## License
 
