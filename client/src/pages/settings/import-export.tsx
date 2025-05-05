@@ -4,7 +4,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectLabel, SelectSeparator } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -18,10 +18,11 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { DownloadCloud, FileInput, FilePlus, FileUp, Upload, ArrowDownToLine, FileText, FileIcon, AlertTriangle, Database, CheckCircle2, Trash2, Settings, Columns, UploadCloud, Eye, Paperclip, X, Wand2, Check } from 'lucide-react';
+import { DownloadCloud, FileInput, FilePlus, FileUp, Upload, ArrowDownToLine, FileText, FileIcon, AlertTriangle, Database, CheckCircle2, Trash2, Settings, Columns, UploadCloud, Eye, Paperclip, X, Wand2, Check, FileSearch, Edit3 } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Switch } from '@/components/ui/switch';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 // Enhanced schemas for column customization
 interface ColumnMapping {
@@ -72,7 +73,22 @@ const entityOptions = [
   { value: 'tasks', label: 'Tasks' },
   { value: 'qualifications', label: 'Qualifications' },
   { value: 'units_of_competency', label: 'Units of Competency' },
+  { value: 'awards', label: 'Awards (Fair Work)' },
+  { value: 'enterprise_agreements', label: 'Enterprise Agreements' },
+  { value: 'pay_rates', label: 'Pay Rates' },
+  { value: 'classifications', label: 'Award Classifications' },
+  { value: 'penalties', label: 'Penalty Rates' },
+  { value: 'allowances', label: 'Allowances' },
 ];
+
+// Group entities by type for better organization
+const entityGroups = {
+  'People': ['apprentices', 'host_employers', 'users'],
+  'Contracts': ['training_contracts', 'placements'],
+  'Documentation': ['documents', 'compliance_records', 'tasks', 'timesheets'],
+  'Training': ['qualifications', 'units_of_competency'],
+  'Fair Work': ['awards', 'enterprise_agreements', 'pay_rates', 'classifications', 'penalties', 'allowances'],
+};
 
 interface ImportJob {
   id: string;
@@ -100,6 +116,26 @@ interface ExportJob {
   downloadUrl?: string;
 }
 
+// Schema for Enterprise Agreement upload
+const enterpriseAgreementSchema = z.object({
+  name: z.string().min(3, { message: 'Agreement name is required' }),
+  organization: z.string().min(3, { message: 'Organization name is required' }),
+  start_date: z.string().min(1, { message: 'Start date is required' }),
+  end_date: z.string().min(1, { message: 'End date is required' }),
+  industry: z.string().optional(),
+  status: z.enum(['active', 'expired', 'pending']).default('active'),
+});
+
+type EnterpriseAgreementFormValues = z.infer<typeof enterpriseAgreementSchema>;
+
+// Interface for extracted pay rates
+interface ExtractedPayRate {
+  classification: string;
+  rate: number;
+  effective_date: string;
+  notes?: string;
+}
+
 const ImportExportSettings = () => {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('import');
@@ -112,6 +148,13 @@ const ImportExportSettings = () => {
   const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
   const [previewData, setPreviewData] = useState<any[]>([]);
   const [entityFields, setEntityFields] = useState<{label: string, value: string}[]>([]);
+  
+  // Enterprise Agreement related states
+  const [showEAUploadDialog, setShowEAUploadDialog] = useState(false);
+  const [eaFile, setEAFile] = useState<File | null>(null);
+  const [extractedRates, setExtractedRates] = useState<ExtractedPayRate[]>([]);
+  const [isExtracting, setIsExtracting] = useState(false);
+  const [showExtractedRates, setShowExtractedRates] = useState(false);
   
   // Forms
   const importForm = useForm<ImportFormValues>({
@@ -131,6 +174,19 @@ const ImportExportSettings = () => {
       entityType: 'apprentices',
       includeRelated: false,
       filter: '',
+    },
+  });
+  
+  // EA Form for Enterprise Agreement upload
+  const eaForm = useForm<EnterpriseAgreementFormValues>({
+    resolver: zodResolver(enterpriseAgreementSchema),
+    defaultValues: {
+      name: '',
+      organization: '',
+      start_date: '',
+      end_date: '',
+      industry: '',
+      status: 'active',
     },
   });
 
@@ -303,14 +359,73 @@ const ImportExportSettings = () => {
       });
     },
   });
+  
+  // Enterprise Agreement extraction mutation
+  const extractPayRatesMutation = useMutation({
+    mutationFn: async (data: FormData) => {
+      setIsExtracting(true);
+      const response = await apiRequest('POST', '/api/enterprise-agreements/extract', data);
+      return await response.json();
+    },
+    onSuccess: (data) => {
+      setIsExtracting(false);
+      if (data && data.extracted_rates) {
+        setExtractedRates(data.extracted_rates);
+        setShowExtractedRates(true);
+        toast({
+          title: 'Success',
+          description: `Successfully extracted ${data.extracted_rates.length} pay rates from the document.`,
+        });
+      } else {
+        toast({
+          title: 'Warning',
+          description: 'No pay rates were found in the document. Please check if the document contains rate information in a recognizable format.',
+          variant: 'destructive',
+        });
+      }
+    },
+    onError: (error: Error) => {
+      setIsExtracting(false);
+      toast({
+        title: 'Error',
+        description: `Failed to extract pay rates: ${error.message}`,
+        variant: 'destructive',
+      });
+    },
+  });
+  
+  // Enterprise Agreement save mutation
+  const saveEnterpriseAgreementMutation = useMutation({
+    mutationFn: async (data: { agreement: EnterpriseAgreementFormValues, rates: ExtractedPayRate[] }) => {
+      const response = await apiRequest('POST', '/api/enterprise-agreements', data);
+      return await response.json();
+    },
+    onSuccess: () => {
+      eaForm.reset();
+      setEAFile(null);
+      setExtractedRates([]);
+      setShowEAUploadDialog(false);
+      setShowExtractedRates(false);
+      toast({
+        title: 'Success',
+        description: 'Enterprise Agreement and pay rates saved successfully',
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: 'Error',
+        description: `Failed to save Enterprise Agreement: ${error.message}`,
+        variant: 'destructive',
+      });
+    },
+  });
 
   // Handle file selection
   // Get entity fields for mapping based on entity type
   useEffect(() => {
     const entityType = importForm.getValues('entityType');
     
-    // This would normally be an API call to get the entity schema
-    // For now, we'll use mock fields based on entity type
+    // For the entity schema fields, we use a mapping based on entity type
     const getEntityFields = () => {
       switch (entityType) {
         case 'apprentices':
@@ -347,6 +462,79 @@ const ImportExportSettings = () => {
             { label: 'Description', value: 'description' },
             { label: 'Status', value: 'status' },
             { label: 'Release Date', value: 'releaseDate' },
+          ];
+        // Fair Work related entities
+        case 'awards':
+          return [
+            { label: 'Award ID', value: 'award_fixed_id' },
+            { label: 'Award Code', value: 'code' },
+            { label: 'Award Name', value: 'name' },
+            { label: 'Operative From', value: 'award_operative_from' },
+            { label: 'Operative To', value: 'award_operative_to' },
+            { label: 'Published Year', value: 'published_year' },
+            { label: 'Version Number', value: 'version_number' },
+          ];
+        case 'enterprise_agreements':
+          return [
+            { label: 'Agreement ID', value: 'agreement_id' },
+            { label: 'Agreement Name', value: 'name' },
+            { label: 'Organization', value: 'organization' },
+            { label: 'Start Date', value: 'start_date' },
+            { label: 'End Date', value: 'end_date' },
+            { label: 'Document URL', value: 'document_url' },
+            { label: 'Status', value: 'status' },
+            { label: 'Industry', value: 'industry' },
+          ];
+        case 'classifications':
+          return [
+            { label: 'Award ID', value: 'award_fixed_id' },
+            { label: 'Classification ID', value: 'classification_fixed_id' },
+            { label: 'Classification', value: 'classification' },
+            { label: 'Classification Level', value: 'classification_level' },
+            { label: 'Base Rate', value: 'base_rate' },
+            { label: 'Base Rate Type', value: 'base_rate_type' },
+            { label: 'Calculated Rate', value: 'calculated_rate' },
+            { label: 'Calculated Rate Type', value: 'calculated_rate_type' },
+            { label: 'Clauses', value: 'clauses' },
+            { label: 'Operative From', value: 'operative_from' },
+            { label: 'Employee Rate Type', value: 'employee_rate_type_code' },
+          ];
+        case 'pay_rates':
+          return [
+            { label: 'Award ID', value: 'award_fixed_id' },
+            { label: 'Classification ID', value: 'classification_fixed_id' },
+            { label: 'Pay Rate ID', value: 'pay_rate_id' },
+            { label: 'Rate Amount', value: 'rate_amount' },
+            { label: 'Rate Type', value: 'rate_type' },
+            { label: 'Effective Date', value: 'effective_date' },
+            { label: 'End Date', value: 'end_date' },
+            { label: 'Override Amount', value: 'override_amount' },
+            { label: 'Override Reason', value: 'override_reason' },
+            { label: 'Override Authorized By', value: 'override_authorized_by' },
+          ];
+        case 'penalties':
+          return [
+            { label: 'Award ID', value: 'award_fixed_id' },
+            { label: 'Penalty ID', value: 'penalty_fixed_id' },
+            { label: 'Penalty Rate', value: 'penalty_rate' },
+            { label: 'Rate Base', value: 'rate_base' },
+            { label: 'Period From', value: 'period_from' },
+            { label: 'Period To', value: 'period_to' },
+            { label: 'Day of Week', value: 'day_of_week' },
+            { label: 'Classification Level', value: 'classification_level' },
+            { label: 'Clause Description', value: 'clause_description' },
+          ];
+        case 'allowances':
+          return [
+            { label: 'Award ID', value: 'award_fixed_id' },
+            { label: 'Allowance ID', value: 'wage_allowance_fixed_id' },
+            { label: 'Allowance Name', value: 'allowance' },
+            { label: 'Allowance Amount', value: 'allowance_amount' },
+            { label: 'Is All Purpose', value: 'is_all_purpose' },
+            { label: 'Payment Frequency', value: 'payment_frequency' },
+            { label: 'Operative From', value: 'operative_from' },
+            { label: 'Operative To', value: 'operative_to' },
+            { label: 'Clauses', value: 'clauses' },
           ];
         default:
           return [];
@@ -893,10 +1081,18 @@ const ImportExportSettings = () => {
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              {entityOptions.map(option => (
-                                <SelectItem key={option.value} value={option.value}>
-                                  {option.label}
-                                </SelectItem>
+                              {Object.entries(entityGroups).map(([groupName, groupValues]) => (
+                                <>
+                                  <SelectLabel className="text-sm font-bold text-gray-500">{groupName}</SelectLabel>
+                                  {entityOptions
+                                    .filter(option => groupValues.includes(option.value))
+                                    .map(option => (
+                                      <SelectItem key={option.value} value={option.value}>
+                                        {option.label}
+                                      </SelectItem>
+                                    ))}
+                                  <SelectSeparator className="my-1" />
+                                </>
                               ))}
                             </SelectContent>
                           </Select>
