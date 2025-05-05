@@ -506,12 +506,27 @@ const ImportExportSettings = () => {
       return;
     }
     
+    // Check if column mapping has been applied
+    if (data.columnMapping === undefined && columnMapping.length > 0) {
+      setShowMappingDialog(true);
+      toast({
+        title: 'Column Mapping Required',
+        description: 'Please map the columns before importing',
+      });
+      return;
+    }
+    
     const formData = new FormData();
     formData.append('file', selectedFile);
     formData.append('fileType', data.fileType);
     formData.append('entityType', data.entityType);
     formData.append('updateExisting', data.updateExisting.toString());
     formData.append('skipErrors', data.skipErrors.toString());
+    
+    // Add column mapping if available
+    if (data.columnMapping) {
+      formData.append('columnMapping', JSON.stringify(data.columnMapping));
+    }
     
     createImportJobMutation.mutate(formData);
   };
@@ -641,6 +656,49 @@ const ImportExportSettings = () => {
     return new Date(dateString).toLocaleString();
   };
 
+  // Auto-map columns based on similarity between source column names and target field names
+  const autoMapColumns = () => {
+    const updatedMapping = [...columnMapping];
+    
+    columnMapping.forEach((mapping, index) => {
+      // Skip columns that are already mapped
+      if (mapping.targetField !== '') return;
+      
+      const sourceColumn = mapping.sourceColumn.toLowerCase();
+      
+      // Try to find a matching field
+      const matchingField = entityFields.find(field => {
+        const fieldValue = field.value.toLowerCase();
+        const fieldLabel = field.label.toLowerCase();
+        
+        // Check for exact match or close match
+        return (
+          sourceColumn === fieldValue || 
+          sourceColumn === fieldLabel ||
+          sourceColumn.replace(/[_\s-]/g, '') === fieldValue.replace(/[_\s-]/g, '') ||
+          sourceColumn.replace(/[_\s-]/g, '') === fieldLabel.replace(/[_\s-]/g, '')
+        );
+      });
+      
+      if (matchingField) {
+        updatedMapping[index] = {
+          ...mapping,
+          targetField: matchingField.value,
+          // Set required to true for common required fields
+          required: ['email', 'firstName', 'lastName', 'code', 'title'].includes(matchingField.value)
+        };
+      }
+    });
+    
+    setColumnMapping(updatedMapping);
+    
+    const mappedCount = updatedMapping.filter(m => m.targetField !== '').length;
+    toast({
+      title: 'Auto-Mapping Applied',
+      description: `${mappedCount} columns automatically mapped`,
+    });
+  };
+  
   // Apply column mapping and continue with import
   const applyColumnMapping = () => {
     // Filter out unmapped columns
@@ -767,13 +825,31 @@ const ImportExportSettings = () => {
             </div>
           )}
           
-          <DialogFooter className="mt-4">
-            <Button variant="outline" type="button" onClick={() => setShowMappingDialog(false)}>
-              Cancel
-            </Button>
-            <Button type="button" onClick={applyColumnMapping}>
-              Apply Mapping
-            </Button>
+          <DialogFooter className="mt-4 flex items-center justify-between">
+            <div className="flex items-center">
+              <Button 
+                variant="secondary" 
+                type="button" 
+                onClick={autoMapColumns}
+                className="mr-2"
+              >
+                <Wand2 className="mr-2 h-4 w-4" />
+                Auto-Map Columns
+              </Button>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Button variant="outline" type="button" onClick={() => setShowMappingDialog(false)}>
+                Cancel
+              </Button>
+              <Button 
+                type="button" 
+                onClick={applyColumnMapping} 
+                disabled={!columnMapping.some(mapping => mapping.targetField !== '')}
+              >
+                <Check className="mr-2 h-4 w-4" />
+                Apply Mapping
+              </Button>
+            </div>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -927,9 +1003,35 @@ const ImportExportSettings = () => {
                     </div>
                   )}
 
-                  <Button type="submit" disabled={!selectedFile || isUploading}>
-                    {isUploading ? 'Uploading...' : 'Start Import'}
-                  </Button>
+                  <div className="flex flex-wrap gap-2">
+                    <Button 
+                      type="submit" 
+                      disabled={!selectedFile || isUploading || createImportJobMutation.isPending}
+                    >
+                      {isUploading || createImportJobMutation.isPending ? (
+                        <>
+                          <span className="mr-2 h-4 w-4 animate-spin">⌛</span>
+                          {isUploading ? 'Uploading...' : 'Importing...'}
+                        </>
+                      ) : (
+                        <>
+                          <FilePlus className="mr-2 h-4 w-4" />
+                          Start Import
+                        </>
+                      )}
+                    </Button>
+                    
+                    {selectedFile && columnMapping.length > 0 && !importForm.getValues('columnMapping') && (
+                      <Button 
+                        type="button" 
+                        variant="outline" 
+                        onClick={() => setShowMappingDialog(true)}
+                      >
+                        <Columns className="mr-2 h-4 w-4" />
+                        Configure Column Mapping
+                      </Button>
+                    )}
+                  </div>
                 </form>
               </Form>
             </CardContent>
@@ -1189,8 +1291,22 @@ const ImportExportSettings = () => {
                     </div>
                   </div>
 
-                  <Button type="submit">
-                    Start Export
+                  <Button 
+                    type="submit" 
+                    className="mt-4" 
+                    disabled={createExportJobMutation.isPending || selectedColumns.length === 0}
+                  >
+                    {createExportJobMutation.isPending ? (
+                      <>
+                        <span className="mr-2 h-4 w-4 animate-spin">⌛</span>
+                        Exporting...
+                      </>
+                    ) : (
+                      <>
+                        <ArrowDownToLine className="mr-2 h-4 w-4" />
+                        Export Data
+                      </>
+                    )}
                   </Button>
                 </form>
               </Form>
