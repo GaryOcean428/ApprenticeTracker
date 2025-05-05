@@ -1,21 +1,15 @@
-import { useState } from 'react';
 import { useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Shield, ShieldAlert, Users, ChevronRight, Building, Briefcase, GraduationCap } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Shield, ChevronRight, Building, GraduationCap, ClipboardList, Clock, Briefcase, Users, Calendar } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/use-auth';
 
 export default function PortalPage() {
   const [, setLocation] = useLocation();
-  const [userRole, setUserRole] = useState('');
-  const [organization, setOrganization] = useState('');
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [adminVerificationStep, setAdminVerificationStep] = useState(false);
   const { toast } = useToast();
+  const { user } = useAuth();
 
   // This handles role-based routing with proper access control
   const handlePortalAccess = async (portal: string) => {

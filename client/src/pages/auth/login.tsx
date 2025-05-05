@@ -37,10 +37,22 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const { user, isLoading } = useAuth();
   
-  // Redirect to portal if already authenticated
+  // Redirect to appropriate dashboard if already authenticated
   useEffect(() => {
     if (user && !isLoading) {
-      setLocation('/portal');
+      // Redirect based on user role
+      if (user.role === 'developer' || user.role === 'admin') {
+        setLocation('/admin');
+      } else if (user.role === 'apprentice') {
+        setLocation('/apprentices');
+      } else if (user.role === 'host_employer') {
+        setLocation('/hosts');
+      } else if (user.role === 'field_officer') {
+        setLocation('/field-officers');
+      } else {
+        // Fallback to portal as a dashboard
+        setLocation('/portal');
+      }
     }
   }, [user, isLoading, setLocation]);
 
@@ -80,8 +92,19 @@ export default function LoginPage() {
         description: `Welcome back, ${data.user.firstName}!`,
       });
       
-      // Redirect to portal
-      setLocation('/portal');
+      // Redirect based on user role
+      if (data.user.role === 'developer' || data.user.role === 'admin') {
+        setLocation('/admin');
+      } else if (data.user.role === 'apprentice') {
+        setLocation('/apprentices');
+      } else if (data.user.role === 'host_employer') {
+        setLocation('/hosts');
+      } else if (data.user.role === 'field_officer') {
+        setLocation('/field-officers');
+      } else {
+        // Fallback to portal as a dashboard
+        setLocation('/portal');
+      }
     },
     onError: (error: Error) => {
       toast({
