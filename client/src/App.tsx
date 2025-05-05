@@ -228,7 +228,7 @@ function Router() {
             </Suspense>
           );
         }} />
-        <Route path="/field-officers/actions" component={() => {
+        <ProtectedRoute path="/field-officers/actions" component={() => {
           const Actions = lazy(() => import("./pages/field-officers/actions/index"));
           return (
             <Suspense fallback={<div>Loading...</div>}>
@@ -370,9 +370,9 @@ function Router() {
         }} />
         
         {/* Contracts & Placements Routes */}
-        <Route path="/contracts" component={ContractsList} />
+        <ProtectedRoute path="/contracts" component={ContractsList} />
         {/* TODO: Create Contract creation page */}
-        <Route path="/contracts/create" component={() => {
+        <ProtectedRoute path="/contracts/create" component={() => {
           return (
             <div className="p-8">
               <h1 className="text-2xl font-bold mb-4">Create Training Contract</h1>
@@ -381,7 +381,7 @@ function Router() {
           );
         }} />
         {/* TODO: Create Contract details page */}
-        <Route path="/contracts/:id" component={() => {
+        <ProtectedRoute path="/contracts/:id" component={() => {
           const id = window.location.pathname.split('/').pop();
           return (
             <div className="p-8">
@@ -391,9 +391,9 @@ function Router() {
             </div>
           );
         }} />
-        <Route path="/placements" component={PlacementsList} />
+        <ProtectedRoute path="/placements" component={PlacementsList} />
         {/* TODO: Create Placement creation page */}
-        <Route path="/placements/create" component={() => {
+        <ProtectedRoute path="/placements/create" component={() => {
           return (
             <div className="p-8">
               <h1 className="text-2xl font-bold mb-4">Create Placement</h1>
@@ -402,7 +402,7 @@ function Router() {
           );
         }} />
         {/* TODO: Create Placement details page */}
-        <Route path="/placements/:id" component={() => {
+        <ProtectedRoute path="/placements/:id" component={() => {
           const id = window.location.pathname.split('/').pop();
           return (
             <div className="p-8">
@@ -414,9 +414,9 @@ function Router() {
         }} />
         
         {/* Document Routes */}
-        <Route path="/documents" component={DocumentsList} />
+        <ProtectedRoute path="/documents" component={DocumentsList} />
         {/* TODO: Create Document upload page */}
-        <Route path="/documents/upload" component={() => {
+        <ProtectedRoute path="/documents/upload" component={() => {
           return (
             <div className="p-8">
               <h1 className="text-2xl font-bold mb-4">Upload Document</h1>
@@ -425,7 +425,7 @@ function Router() {
           );
         }} />
         {/* TODO: Create Document details page */}
-        <Route path="/documents/:id" component={() => {
+        <ProtectedRoute path="/documents/:id" component={() => {
           const id = window.location.pathname.split('/').pop();
           return (
             <div className="p-8">
