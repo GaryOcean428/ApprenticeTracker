@@ -1070,3 +1070,122 @@ export type InsertEnrichmentWorkshop = z.infer<typeof insertEnrichmentWorkshopSc
 
 export type WorkshopAttendee = typeof workshopAttendees.$inferSelect;
 export type InsertWorkshopAttendee = z.infer<typeof insertWorkshopAttendeeSchema>;
+
+// Progress Review Templates
+export const progressReviewTemplates = pgTable("progress_review_templates", {
+  id: serial("id").primaryKey(),
+  templateName: text("template_name").notNull(),
+  description: text("description"),
+  templateVersion: text("template_version").notNull(),
+  formStructure: jsonb("form_structure").notNull(),
+  isActive: boolean("is_active").default(true),
+  createdBy: integer("created_by").references(() => users.id),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertProgressReviewTemplateSchema = createInsertSchema(progressReviewTemplates).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+// Progress Reviews
+export const progressReviews = pgTable("progress_reviews", {
+  id: serial("id").primaryKey(),
+  apprenticeId: integer("apprentice_id").references(() => apprentices.id).notNull(),
+  templateId: integer("template_id").references(() => progressReviewTemplates.id).notNull(),
+  reviewerId: integer("reviewer_id").references(() => users.id).notNull(),
+  reviewDate: timestamp("review_date").notNull(),
+  scheduledDate: timestamp("scheduled_date"),
+  status: text("status").notNull().default("scheduled"), // scheduled, in_progress, completed, cancelled
+  reviewPeriodStart: date("review_period_start"),
+  reviewPeriodEnd: date("review_period_end"),
+  reviewData: jsonb("review_data").notNull(),
+  overallRating: integer("overall_rating"),
+  reviewSummary: text("review_summary"),
+  apprenticeFeedback: text("apprentice_feedback"),
+  reviewLocation: text("review_location"),
+  nextReviewDate: timestamp("next_review_date"),
+  nextReviewGoals: jsonb("next_review_goals"),
+  hostEmployerId: integer("host_employer_id").references(() => hostEmployers.id),
+  supervisorPresent: boolean("supervisor_present").default(false),
+  supervisorName: text("supervisor_name"),
+  supervisorFeedback: text("supervisor_feedback"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertProgressReviewSchema = createInsertSchema(progressReviews).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+// Progress Review Participants
+export const progressReviewParticipants = pgTable("progress_review_participants", {
+  id: serial("id").primaryKey(),
+  reviewId: integer("review_id").references(() => progressReviews.id).notNull(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  role: text("role").notNull(), // reviewer, observer, mentor, etc.
+  attendanceStatus: text("attendance_status").notNull().default("invited"), // invited, confirmed, attended, absent
+  notes: text("notes"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const insertProgressReviewParticipantSchema = createInsertSchema(progressReviewParticipants).omit({
+  id: true,
+  createdAt: true,
+});
+
+// Progress Review Action Items
+export const progressReviewActionItems = pgTable("progress_review_action_items", {
+  id: serial("id").primaryKey(),
+  reviewId: integer("review_id").references(() => progressReviews.id).notNull(),
+  actionDescription: text("action_description").notNull(),
+  priority: text("priority").notNull().default("medium"), // low, medium, high, critical
+  assigneeId: integer("assignee_id").references(() => users.id),
+  dueDate: date("due_date"),
+  status: text("status").notNull().default("pending"), // pending, in_progress, completed, cancelled
+  completionDate: date("completion_date"),
+  completionNotes: text("completion_notes"),
+  createdBy: integer("created_by").references(() => users.id).notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertProgressReviewActionItemSchema = createInsertSchema(progressReviewActionItems).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+// Progress Review Documents
+export const progressReviewDocuments = pgTable("progress_review_documents", {
+  id: serial("id").primaryKey(),
+  reviewId: integer("review_id").references(() => progressReviews.id).notNull(),
+  documentId: integer("document_id").references(() => documents.id).notNull(),
+  documentType: text("document_type").notNull(), // evidence, signature, attachment, etc.
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const insertProgressReviewDocumentSchema = createInsertSchema(progressReviewDocuments).omit({
+  id: true,
+  createdAt: true,
+});
+
+// Types for Progress Reviews
+export type ProgressReviewTemplate = typeof progressReviewTemplates.$inferSelect;
+export type InsertProgressReviewTemplate = z.infer<typeof insertProgressReviewTemplateSchema>;
+
+export type ProgressReview = typeof progressReviews.$inferSelect;
+export type InsertProgressReview = z.infer<typeof insertProgressReviewSchema>;
+
+export type ProgressReviewParticipant = typeof progressReviewParticipants.$inferSelect;
+export type InsertProgressReviewParticipant = z.infer<typeof insertProgressReviewParticipantSchema>;
+
+export type ProgressReviewActionItem = typeof progressReviewActionItems.$inferSelect;
+export type InsertProgressReviewActionItem = z.infer<typeof insertProgressReviewActionItemSchema>;
+
+export type ProgressReviewDocument = typeof progressReviewDocuments.$inferSelect;
+export type InsertProgressReviewDocument = z.infer<typeof insertProgressReviewDocumentSchema>;
