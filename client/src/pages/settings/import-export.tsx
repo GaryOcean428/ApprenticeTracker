@@ -18,7 +18,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { DownloadCloud, FileInput, FilePlus, FileUp, Upload, ArrowDownToLine, FileText, FileIcon, AlertTriangle, Database, CheckCircle2, Trash2, Settings, Columns, UploadCloud, Eye, Paperclip, X, Wand2, Check, FileSearch, Edit3 } from 'lucide-react';
+import { DownloadCloud, FileInput, FilePlus, FileUp, Upload, ArrowDownToLine, FileText, FileIcon, AlertTriangle, Database, CheckCircle2, Trash2, Settings, Columns, UploadCloud, Eye, Paperclip, X, Wand2, Check, FileSearch, Edit3, Loader2 } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Switch } from '@/components/ui/switch';
@@ -364,25 +364,19 @@ const ImportExportSettings = () => {
   const extractPayRatesMutation = useMutation({
     mutationFn: async (data: FormData) => {
       setIsExtracting(true);
-      const response = await apiRequest('POST', '/api/enterprise-agreements/extract', data);
-      return await response.json();
+      setShowExtractedRates(false);
+      const response = await apiRequest('POST', '/api/enterprise-agreements/extract-rates', data, { rawFormData: true });
+      const result = await response.json();
+      return result.rates;
     },
-    onSuccess: (data) => {
+    onSuccess: (rates: ExtractedPayRate[]) => {
+      setExtractedRates(rates);
+      setShowExtractedRates(true);
       setIsExtracting(false);
-      if (data && data.extracted_rates) {
-        setExtractedRates(data.extracted_rates);
-        setShowExtractedRates(true);
-        toast({
-          title: 'Success',
-          description: `Successfully extracted ${data.extracted_rates.length} pay rates from the document.`,
-        });
-      } else {
-        toast({
-          title: 'Warning',
-          description: 'No pay rates were found in the document. Please check if the document contains rate information in a recognizable format.',
-          variant: 'destructive',
-        });
-      }
+      toast({
+        title: 'Success',
+        description: `Extracted ${rates.length} pay rates from the document`,
+      });
     },
     onError: (error: Error) => {
       setIsExtracting(false);
@@ -394,21 +388,21 @@ const ImportExportSettings = () => {
     },
   });
   
-  // Enterprise Agreement save mutation
+  // Save Enterprise Agreement with extracted rates
   const saveEnterpriseAgreementMutation = useMutation({
     mutationFn: async (data: { agreement: EnterpriseAgreementFormValues, rates: ExtractedPayRate[] }) => {
       const response = await apiRequest('POST', '/api/enterprise-agreements', data);
       return await response.json();
     },
     onSuccess: () => {
-      eaForm.reset();
+      setShowEAUploadDialog(false);
       setEAFile(null);
       setExtractedRates([]);
-      setShowEAUploadDialog(false);
       setShowExtractedRates(false);
+      eaForm.reset();
       toast({
         title: 'Success',
-        description: 'Enterprise Agreement and pay rates saved successfully',
+        description: 'Enterprise Agreement saved successfully',
       });
     },
     onError: (error: Error) => {
