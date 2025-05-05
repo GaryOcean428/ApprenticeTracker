@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, date, timestamp, json, numeric, uuid } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, date, timestamp, json, numeric, uuid, jsonb } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 import { relations } from "drizzle-orm";
@@ -969,3 +969,104 @@ export const insertHostEmployerPreferredQualificationSchema = createInsertSchema
 
 export type HostEmployerPreferredQualification = typeof hostEmployerPreferredQualifications.$inferSelect;
 export type InsertHostEmployerPreferredQualification = z.infer<typeof insertHostEmployerPreferredQualificationSchema>;
+
+// Enrichment Programs
+export const enrichmentPrograms = pgTable("enrichment_programs", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description").notNull(),
+  category: text("category").notNull(), // e.g., "soft skills", "technical", "safety", "professional development"
+  status: text("status").notNull().default("upcoming"), // "upcoming", "active", "completed", "cancelled"
+  startDate: date("start_date").notNull(),
+  endDate: date("end_date"),
+  tags: jsonb("tags").default([]).notNull(),
+  facilitator: text("facilitator"),
+  location: text("location"),
+  maxParticipants: integer("max_participants"),
+  cost: numeric("cost", { precision: 10, scale: 2 }),
+  fundingSource: text("funding_source"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertEnrichmentProgramSchema = createInsertSchema(enrichmentPrograms).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+// Enrichment Program Participants
+export const enrichmentParticipants = pgTable("enrichment_participants", {
+  id: serial("id").primaryKey(),
+  programId: integer("program_id").references(() => enrichmentPrograms.id).notNull(),
+  apprenticeId: integer("apprentice_id").references(() => apprentices.id).notNull(),
+  enrollmentDate: date("enrollment_date").notNull().defaultNow(),
+  status: text("status").notNull().default("enrolled"), // "enrolled", "completed", "withdrawn"
+  completionDate: date("completion_date"),
+  feedback: text("feedback"),
+  rating: integer("rating"), // Rating given by participant
+  notes: text("notes"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertEnrichmentParticipantSchema = createInsertSchema(enrichmentParticipants).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+// Enrichment Workshops/Events
+export const enrichmentWorkshops = pgTable("enrichment_workshops", {
+  id: serial("id").primaryKey(),
+  programId: integer("program_id").references(() => enrichmentPrograms.id),
+  name: text("name").notNull(),
+  description: text("description").notNull(),
+  workshopDate: date("workshop_date").notNull(),
+  startTime: text("start_time"),
+  endTime: text("end_time"),
+  location: text("location"),
+  facilitator: text("facilitator"),
+  maxAttendees: integer("max_attendees"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertEnrichmentWorkshopSchema = createInsertSchema(enrichmentWorkshops).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+// Workshop Attendees
+export const workshopAttendees = pgTable("workshop_attendees", {
+  id: serial("id").primaryKey(),
+  workshopId: integer("workshop_id").references(() => enrichmentWorkshops.id).notNull(),
+  apprenticeId: integer("apprentice_id").references(() => apprentices.id).notNull(),
+  status: text("status").notNull().default("registered"), // "registered", "attended", "cancelled", "no-show"
+  registrationDate: timestamp("registration_date").notNull().defaultNow(),
+  feedback: text("feedback"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertWorkshopAttendeeSchema = createInsertSchema(workshopAttendees).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+// Types export
+export type EnrichmentProgram = typeof enrichmentPrograms.$inferSelect;
+export type InsertEnrichmentProgram = z.infer<typeof insertEnrichmentProgramSchema>;
+
+export type EnrichmentParticipant = typeof enrichmentParticipants.$inferSelect;
+export type InsertEnrichmentParticipant = z.infer<typeof insertEnrichmentParticipantSchema>;
+
+export type EnrichmentWorkshop = typeof enrichmentWorkshops.$inferSelect;
+export type InsertEnrichmentWorkshop = z.infer<typeof insertEnrichmentWorkshopSchema>;
+
+export type WorkshopAttendee = typeof workshopAttendees.$inferSelect;
+export type InsertWorkshopAttendee = z.infer<typeof insertWorkshopAttendeeSchema>;
