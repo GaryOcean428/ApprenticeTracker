@@ -37,6 +37,7 @@ import SiteAssessment from "./pages/field-officers/site-assessment";
 import GtoComplianceDashboard from "./pages/gto-compliance/index";
 import StandardAssessment from "./pages/gto-compliance/standard-assessment";
 import ComplaintsManagement from "./pages/gto-compliance/complaints";
+import PermissionsDemo from "./pages/settings/permissions-demo";
 
 // Settings Pages
 import UserManagement from "./pages/settings/user-management";
@@ -269,6 +270,7 @@ function Router() {
         {/* Settings Routes */}
         <ProtectedRoute path="/settings/users" component={UserManagement} />
         <ProtectedRoute path="/settings/permissions" component={PermissionsManagement} />
+        <ProtectedRoute path="/settings/permissions-demo" component={PermissionsDemo} />
         <ProtectedRoute path="/settings/configuration" component={SystemConfiguration} />
         <ProtectedRoute path="/settings/integrations" component={IntegrationsSettings} />
         <ProtectedRoute path="/settings/import-export" component={ImportExportSettings} />
