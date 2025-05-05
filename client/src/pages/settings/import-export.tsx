@@ -1320,7 +1320,7 @@ const ImportExportSettings = () => {
                             </FormControl>
                             <SelectContent>
                               {Object.entries(entityGroups).map(([groupName, groupValues]) => (
-                                <>
+                                <SelectGroup key={groupName}>
                                   <SelectLabel className="text-sm font-bold text-gray-500">{groupName}</SelectLabel>
                                   {entityOptions
                                     .filter(option => groupValues.includes(option.value))
@@ -1330,7 +1330,7 @@ const ImportExportSettings = () => {
                                       </SelectItem>
                                     ))}
                                   <SelectSeparator className="my-1" />
-                                </>
+                                </SelectGroup>
                               ))}
                             </SelectContent>
                           </Select>
