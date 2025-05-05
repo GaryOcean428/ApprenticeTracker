@@ -26,6 +26,7 @@ import { fairWorkRouter } from "./api/fair-work-routes";
 import { authRouter, isAuthenticated, hasRole } from "./api/auth-routes";
 import payrollRouter from "./api/payroll";
 import enrichmentRouter from "./api/enrichment";
+import progressReviewsRouter from "./api/progress-reviews";
 import { eq, and } from "drizzle-orm";
 import { db } from "./db"; // Assuming db connection is defined here
 import { users, gtoOrganizations } from "@shared/schema";

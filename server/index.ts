@@ -10,6 +10,7 @@ import { migrateVetSchema } from "./migrate-vet";
 import { migrateRolesSchema } from "./migrate-roles";
 import { migrateHostPreferredQualifications } from "./migrate-host-preferred-quals";
 import { migrateEnrichmentSchema } from "./migrate-enrichment";
+import { migrateProgressReviewsSchema } from "./migrate-progress-reviews";
 import { initializeScheduledTasks } from "./scheduled-tasks";
 
 const app = express();
@@ -72,6 +73,10 @@ app.use((req, res, next) => {
     // Migrate Enrichment Program tables
     await migrateEnrichmentSchema();
     log("Enrichment Program schema migration completed");
+    
+    // Migrate Progress Reviews schema
+    await migrateProgressReviewsSchema();
+    log("Progress Reviews schema migration completed");
   } catch (error) {
     log("Error migrating database schema: " + error);
   }
