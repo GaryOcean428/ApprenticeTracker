@@ -55,6 +55,8 @@ export class AwardRateCalculator {
    */
   async calculateTimesheetPay(timesheetId: number): Promise<any> {
     try {
+      logger.info(`Calculating pay for timesheet ID ${timesheetId}`);
+      
       // Get timesheet details
       const [timesheet] = await db
         .select()
@@ -62,6 +64,7 @@ export class AwardRateCalculator {
         .where(eq(timesheets.id, timesheetId));
 
       if (!timesheet) {
+        logger.error(`Timesheet with ID ${timesheetId} not found`);
         throw new Error(`Timesheet with ID ${timesheetId} not found`);
       }
 
@@ -237,6 +240,11 @@ export class AwardRateCalculator {
     shiftDetails: ShiftDetails
   ): Promise<CalculationResult> {
     try {
+      logger.info(`Calculating pay for shift on ${shiftDetails.date.toISOString().split('T')[0]}`, {
+        awardId, 
+        classificationId,
+        dayType: shiftDetails.dayType || 'not specified'
+      });
       // Get base pay rate for this classification
       // Note: In a production system, this would need to account for the apprentice's year
       // and possibly other factors specific to the award
@@ -377,6 +385,7 @@ export class AwardRateCalculator {
     penaltyRuleId?: number;
   } | null> {
     try {
+      logger.info(`Determining applicable award for apprentice ID ${apprenticeId}, placement ID ${placementId}`);
       // Get apprentice details including their trade
       const [apprentice] = await db.select().from(apprentices).where(eq(apprentices.id, apprenticeId));
       
@@ -541,6 +550,8 @@ export class AwardRateCalculator {
    * Uses the API client to fetch and validate award rates against the current Fair Work Commission data
    */
   async validateAwardRates(awardCode: string, classificationCode: string, hourlyRate: number): Promise<any> {
+    logger.info(`Validating award rates: Award Code=${awardCode}, Classification=${classificationCode}, Rate=${hourlyRate}`);
+    
     if (!this.fairworkClient) {
       logger.warn('No Fair Work API client provided, skipping external validation');
       return { 
@@ -598,7 +609,10 @@ export class AwardRateCalculator {
     classifications: number;
     rates: number;
   }> {
+    logger.info('Starting import of modern awards data from Fair Work API');
+    
     if (!this.fairworkClient) {
+      logger.error('Fair Work API client not configured for importing data');
       throw new Error('Fair Work API client not configured');
     }
 
@@ -676,6 +690,7 @@ export class AwardRateCalculator {
         }
       }
 
+      logger.info('Successfully imported modern awards data', { stats });
       return stats;
     } catch (error) {
       logger.error('Error importing modern awards data from Fair Work API', { error });
