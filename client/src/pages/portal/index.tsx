@@ -1,388 +1,414 @@
+import { useState } from 'react';
 import { useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Shield, ChevronRight, Building, GraduationCap, ClipboardList, Clock, Briefcase, Users, Calendar } from 'lucide-react';
+import { Shield, ChevronRight, Building, GraduationCap, ClipboardList, Clock, Briefcase, Users, Calendar, CheckCircle, FileSpreadsheet } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/use-auth';
 
 export default function PortalPage() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
+  const [activeTab, setActiveTab] = useState('dashboard');
 
-  // This handles role-based routing with proper access control
-  const handlePortalAccess = async (portal: string) => {
-    // For admin portal, extra verification is required
-    if (portal === 'admin' && !adminVerificationStep) {
-      setAdminVerificationStep(true);
-      return;
-    }
-
-    // If admin verification is shown and login is attempted
-    if (adminVerificationStep) {
-      // Validate form fields
-      if (username && password && organization && userRole) {
-        try {
-          // Show loading toast
-          toast({
-            title: 'Verifying credentials',
-            description: 'Please wait while we verify your access...',
-          });
-          
-          // Call API to verify access
-          const response = await fetch('/api/verify-access', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              username,
-              password,
-              organization,
-              role: userRole,
-            }),
-          });
-          
-          const data = await response.json();
-          
-          if (data.success) {
-            // Successful login
-            if (data.user.role === 'developer' || data.user.platformAccess) {
-              toast({
-                title: 'Platform-Level Access Granted',
-                description: `Logging in as Developer with full platform access`,
-              });
-            } else if (data.user.organization) {
-              toast({
-                title: 'Organization-Level Access Granted',
-                description: `Logging in as ${data.user.role} for ${data.user.organization.name}`,
-              });
-            } else {
-              toast({
-                title: 'Access Granted',
-                description: `Logging in as ${data.user.role}`,
-              });
-            }
-            
-            // Route to the appropriate portal
-            setLocation('/admin');
-          } else {
-            // Failed login
-            toast({
-              variant: 'destructive',
-              title: 'Access Denied',
-              description: data.message || 'Invalid credentials or insufficient permissions.',
-            });
-          }
-        } catch (error) {
-          console.error('Error during authentication:', error);
-          toast({
-            variant: 'destructive',
-            title: 'Authentication Error',
-            description: 'An error occurred during authentication. Please try again.',
-          });
-        }
-      } else {
-        toast({
-          variant: 'destructive',
-          title: 'Missing Information',
-          description: 'Please enter all required fields.',
-        });
-      }
-      return;
-    }
-    
-    // Handle regular portal access for non-admin roles
-    switch(portal) {
-      case 'apprentice':
-        toast({
-          title: 'Redirecting to Apprentice Portal',
-          description: 'Access to training records and timesheets.',
-        });
-        setLocation('/apprentices');
-        break;
-      case 'host':
-        toast({
-          title: 'Redirecting to Host Employer Portal',
-          description: 'Access to placement management and timesheet approvals.',
-        });
-        setLocation('/hosts');
-        break;
-      case 'field-officer':
-        toast({
-          title: 'Redirecting to Field Officer Portal',
-          description: 'Access to site visits and apprentice support.',
-        });
-        setLocation('/field-officers');
-        break;
-      default:
-        setLocation('/admin');
-    }
+  // Navigate to specific modules
+  const navigateTo = (path: string) => {
+    toast({
+      title: 'Opening module',
+      description: `Navigating to ${path.slice(1)}`,
+    });
+    setLocation(path);
   };
   
-  // Helper to reset the admin verification process
-  const resetAdminVerification = () => {
-    setAdminVerificationStep(false);
-    setUsername('');
-    setPassword('');
-    setOrganization('');
-    setUserRole('');
+  // If still loading user data, show loading state
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <div className="animate-spin h-12 w-12 border-4 border-primary border-t-transparent rounded-full"></div>
+        <p className="ml-4 text-lg">Loading your dashboard...</p>
+      </div>
+    );
+  }
+  
+  // If no user is found, redirect to login
+  if (!user) {
+    setLocation('/auth/login');
+    return null;
+  }
+
+  // Generate user-specific greeting based on time of day
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Good morning';
+    if (hour < 18) return 'Good afternoon';
+    return 'Good evening';
   };
 
-  return (
-    <div className="flex min-h-screen flex-col items-center justify-center p-6 bg-gray-50">
-      <div className="w-full max-w-4xl">
-        <h1 className="text-4xl font-bold text-center mb-2 bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
-          Portal Access
-        </h1>
-        <p className="text-center text-gray-600 mb-8">
-          Select the appropriate portal to access your dashboard
-        </p>
+  // Helper to format date
+  const formatDate = (date: Date) => {
+    return new Intl.DateTimeFormat('en-AU', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    }).format(date);
+  };
 
-        <Tabs defaultValue="main" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="main">Main Admin</TabsTrigger>
-            <TabsTrigger value="apprentice">Apprentice</TabsTrigger>
-            <TabsTrigger value="host">Host Employer</TabsTrigger>
-            <TabsTrigger value="field">Field Officer</TabsTrigger>
+  // Check if user has specific roles
+  const isAdmin = user?.role === 'admin' || user?.role === 'developer';
+  const isApprentice = user?.role === 'apprentice';
+  const isHost = user?.role === 'host_employer';
+  const isFieldOfficer = user?.role === 'field_officer';
+
+  return (
+    <div className="min-h-screen bg-gray-50 p-6">
+      <div className="max-w-7xl mx-auto">
+        {/* Header section */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold">
+            {getGreeting()}, {user?.firstName || user?.username}
+            <span className="text-gray-400 text-base ml-2 font-normal">
+              {formatDate(new Date())}
+            </span>
+          </h1>
+          <p className="text-gray-600 mt-1">
+            Welcome to your CRM7 dashboard. Here's an overview of your recent activity.
+          </p>
+        </div>
+
+        {/* Dashboard tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid grid-cols-3 lg:grid-cols-5 mb-6">
+            <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+            {isAdmin && <TabsTrigger value="admin">Admin</TabsTrigger>}
+            {isApprentice && <TabsTrigger value="apprentice">Apprentice</TabsTrigger>}
+            {isHost && <TabsTrigger value="host">Host Employer</TabsTrigger>}
+            {isFieldOfficer && <TabsTrigger value="fieldOfficer">Field Officer</TabsTrigger>}
           </TabsList>
           
-          <TabsContent value="main">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Shield className="mr-2 h-5 w-5" />
-                  CRM7 Admin Portal
-                  {adminVerificationStep && <ShieldAlert className="ml-2 h-5 w-5 text-amber-500" />}
-                </CardTitle>
-                <CardDescription>
-                  Access the main administrative system for managing all aspects of apprenticeships, host employers, and compliance.
-                </CardDescription>
-              </CardHeader>
+          <TabsContent value="dashboard">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Quick Actions Card */}
+              <Card className="col-span-1">
+                <CardHeader>
+                  <CardTitle className="text-lg">Quick Actions</CardTitle>
+                  <CardDescription>Common tasks and shortcuts</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    {isApprentice && (
+                      <>
+                        <Button className="w-full justify-start" variant="outline" onClick={() => navigateTo('/apprentices/timesheets/submit')}>
+                          <Clock className="mr-2 h-4 w-4" /> Submit Timesheet
+                        </Button>
+                        <Button className="w-full justify-start" variant="outline" onClick={() => navigateTo('/apprentices/qualifications')}>
+                          <GraduationCap className="mr-2 h-4 w-4" /> View Training Progress
+                        </Button>
+                      </>
+                    )}
+                    
+                    {isHost && (
+                      <>
+                        <Button className="w-full justify-start" variant="outline" onClick={() => navigateTo('/hosts/timesheets')}>
+                          <FileSpreadsheet className="mr-2 h-4 w-4" /> Approve Timesheets
+                        </Button>
+                        <Button className="w-full justify-start" variant="outline" onClick={() => navigateTo('/hosts/placements')}>
+                          <Users className="mr-2 h-4 w-4" /> View Placements
+                        </Button>
+                      </>
+                    )}
+                    
+                    {isFieldOfficer && (
+                      <>
+                        <Button className="w-full justify-start" variant="outline" onClick={() => navigateTo('/field-officers/visits/schedule')}>
+                          <Calendar className="mr-2 h-4 w-4" /> Schedule Visit
+                        </Button>
+                        <Button className="w-full justify-start" variant="outline" onClick={() => navigateTo('/field-officers/reviews')}>
+                          <ClipboardList className="mr-2 h-4 w-4" /> Progress Reviews
+                        </Button>
+                      </>
+                    )}
+                    
+                    {isAdmin && (
+                      <>
+                        <Button className="w-full justify-start" variant="outline" onClick={() => navigateTo('/admin/apprentices')}>
+                          <GraduationCap className="mr-2 h-4 w-4" /> Manage Apprentices
+                        </Button>
+                        <Button className="w-full justify-start" variant="outline" onClick={() => navigateTo('/admin/hosts')}>
+                          <Building className="mr-2 h-4 w-4" /> Manage Host Employers
+                        </Button>
+                        <Button className="w-full justify-start" variant="outline" onClick={() => navigateTo('/admin/compliance')}>
+                          <Shield className="mr-2 h-4 w-4" /> Compliance
+                        </Button>
+                      </>
+                    )}
+                    
+                    <Button className="w-full justify-start" variant="outline" onClick={() => navigateTo('/profile')}>
+                      <Users className="mr-2 h-4 w-4" /> My Profile
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
               
-              {adminVerificationStep ? (
-                <>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div className="bg-amber-50 p-3 rounded-md border border-amber-200 mb-4">
-                        <p className="text-sm text-amber-800">
-                          <ShieldAlert className="inline mr-2 h-4 w-4" />
-                          CRM system access requires organization and platform-level administrator credentials.
-                        </p>
-                      </div>
-                      
-                      <div className="bg-blue-50 p-3 rounded-md border border-blue-200 mb-4">
-                        <p className="text-sm text-blue-800 font-medium mb-1">
-                          <Users className="inline mr-2 h-4 w-4" />
-                          Access Level Information
-                        </p>
-                        <ul className="text-xs text-blue-700 list-disc list-inside space-y-1">
-                          <li>For <strong>Developer</strong> (platform-level) access: Use username <code className="bg-blue-100 px-1 rounded">dev</code> with organization <code className="bg-blue-100 px-1 rounded">Braden Group</code></li>
-                          <li>For <strong>Admin</strong> (organization-level) access: Use username <code className="bg-blue-100 px-1 rounded">admin</code> with your organization</li>
-                          <li>For testing purposes, you can use any password</li>
-                        </ul>
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <Label htmlFor="organization">Organization</Label>
-                        <select
-                          id="organization"
-                          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                          value={organization}
-                          onChange={(e) => setOrganization(e.target.value)}
-                        >
-                          <option value="select-org">Select organization</option>
-                          <option value="Braden Group">Braden Group/Braden Pty Ltd</option>
-                          <option value="ABC Training">ABC Training</option>
-                          <option value="Vocational Skills Institute">Vocational Skills Institute</option>
-                        </select>
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <Label htmlFor="role">Administrator Role</Label>
-                        <select
-                          id="role"
-                          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                          value={userRole}
-                          onChange={(e) => setUserRole(e.target.value)}
-                        >
-                          <option value="select-role">Select role</option>
-                          <option value="developer">Developer (Platform Level)</option>
-                          <option value="admin">Organization Administrator</option>
-                        </select>
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <Label htmlFor="username">Username</Label>
-                        <Input 
-                          id="username" 
-                          placeholder="Enter username" 
-                          value={username}
-                          onChange={(e) => setUsername(e.target.value)}
-                        />
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <Label htmlFor="password">Password</Label>
-                        <Input 
-                          id="password" 
-                          type="password" 
-                          placeholder="Enter password" 
-                          value={password}
-                          onChange={(e) => setPassword(e.target.value)}
-                        />
+              {/* Recent Activity Card */}
+              <Card className="col-span-1 md:col-span-2">
+                <CardHeader>
+                  <CardTitle className="text-lg">Recent Activity</CardTitle>
+                  <CardDescription>Your latest updates and notifications</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {/* Activity items */}
+                    <div className="flex items-start space-x-4 rounded-md p-3 bg-gray-50 border border-gray-100">
+                      <CheckCircle className="mt-1 h-5 w-5 text-green-500" />
+                      <div className="flex-1 space-y-1">
+                        <p className="text-sm font-medium">Progress Review Completed</p>
+                        <p className="text-xs text-gray-500">Your quarterly progress review has been completed</p>
+                        <p className="text-xs text-gray-400">15 minutes ago</p>
                       </div>
                     </div>
-                  </CardContent>
-                  <CardFooter className="flex justify-between">
-                    <Button variant="outline" onClick={resetAdminVerification}>
-                      Back
-                    </Button>
-                    <Button onClick={() => handlePortalAccess('admin')}>
-                      Verify Access <ChevronRight className="ml-2 h-4 w-4" />
-                    </Button>
-                  </CardFooter>
-                </>
-              ) : (
-                <>
-                  <CardContent>
-                    <p className="text-sm text-gray-600">
-                      This portal provides access to all system features including:
-                    </p>
-                    <ul className="list-disc list-inside mt-2 text-sm text-gray-600">
-                      <li>Apprentice management</li>
-                      <li>Host employer management</li>
-                      <li>Training and compliance tracking</li>
-                      <li>System administration</li>
-                      <li>Financial management</li>
-                    </ul>
-                    <div className="bg-blue-50 p-3 rounded-md border border-blue-200 mt-4">
-                      <p className="text-sm text-blue-800">
-                        <Shield className="inline mr-2 h-4 w-4" />
-                        CRM access is restricted to authorized personnel only.
-                      </p>
+                    
+                    <div className="flex items-start space-x-4 rounded-md p-3 bg-gray-50 border border-gray-100">
+                      <Clock className="mt-1 h-5 w-5 text-blue-500" />
+                      <div className="flex-1 space-y-1">
+                        <p className="text-sm font-medium">Timesheet Submitted</p>
+                        <p className="text-xs text-gray-500">Your timesheet for week ending 03/05/2025 has been submitted for approval</p>
+                        <p className="text-xs text-gray-400">Yesterday</p>
+                      </div>
                     </div>
-                  </CardContent>
-                  <CardFooter>
-                    <Button className="w-full" onClick={() => handlePortalAccess('admin')}>
-                      Access Admin Portal
-                    </Button>
-                  </CardFooter>
-                </>
-              )}
-            </Card>
+                    
+                    <div className="flex items-start space-x-4 rounded-md p-3 bg-gray-50 border border-gray-100">
+                      <Calendar className="mt-1 h-5 w-5 text-indigo-500" />
+                      <div className="flex-1 space-y-1">
+                        <p className="text-sm font-medium">Field Visit Scheduled</p>
+                        <p className="text-xs text-gray-500">Your field officer has scheduled a visit for 10/05/2025</p>
+                        <p className="text-xs text-gray-400">2 days ago</p>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
           
+
+          
+
+          
+
+          <TabsContent value="admin">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center text-lg">
+                    <Shield className="mr-2 h-5 w-5" />
+                    Administration
+                  </CardTitle>
+                  <CardDescription>
+                    Access the main administrative features
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    <Button className="w-full justify-start" variant="outline" onClick={() => navigateTo('/admin')}>
+                      <Shield className="mr-2 h-4 w-4" /> Admin Dashboard
+                    </Button>
+                    <Button className="w-full justify-start" variant="outline" onClick={() => navigateTo('/admin/users')}>
+                      <Users className="mr-2 h-4 w-4" /> User Management
+                    </Button>
+                    <Button className="w-full justify-start" variant="outline" onClick={() => navigateTo('/admin/reports')}>
+                      <FileSpreadsheet className="mr-2 h-4 w-4" /> Reports
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center text-lg">
+                    <GraduationCap className="mr-2 h-5 w-5" />
+                    Apprentice Management
+                  </CardTitle>
+                  <CardDescription>
+                    Manage apprentices and their training
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    <Button className="w-full justify-start" variant="outline" onClick={() => navigateTo('/admin/apprentices')}>
+                      <Users className="mr-2 h-4 w-4" /> View All Apprentices
+                    </Button>
+                    <Button className="w-full justify-start" variant="outline" onClick={() => navigateTo('/admin/qualifications')}>
+                      <GraduationCap className="mr-2 h-4 w-4" /> Qualifications
+                    </Button>
+                    <Button className="w-full justify-start" variant="outline" onClick={() => navigateTo('/admin/progress-reviews')}>
+                      <ClipboardList className="mr-2 h-4 w-4" /> Progress Reviews
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
           <TabsContent value="apprentice">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <GraduationCap className="mr-2 h-5 w-5" />
-                  Apprentice Portal
-                </CardTitle>
-                <CardDescription>
-                  Access your apprenticeship details, training progress, and scheduled activities.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-gray-600">
-                  The apprentice portal allows you to:
-                </p>
-                <ul className="list-disc list-inside mt-2 text-sm text-gray-600">
-                  <li>View your training plan</li>
-                  <li>Submit timesheets</li>
-                  <li>Track qualification progress</li>
-                  <li>Access learning resources</li>
-                  <li>Contact your field officer</li>
-                </ul>
-                <div className="flex items-center gap-4 bg-gray-50 p-3 rounded-md border border-gray-200 mt-4">
-                  <div>
-                    <p className="text-sm font-medium">Personal portal</p>
-                    <p className="text-xs text-gray-500">Limited access to your own data</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center text-lg">
+                    <GraduationCap className="mr-2 h-5 w-5" />
+                    Your Training
+                  </CardTitle>
+                  <CardDescription>
+                    Access your training information
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    <Button className="w-full justify-start" variant="outline" onClick={() => navigateTo('/apprentices/qualification')}>
+                      <GraduationCap className="mr-2 h-4 w-4" /> My Qualification
+                    </Button>
+                    <Button className="w-full justify-start" variant="outline" onClick={() => navigateTo('/apprentices/reviews')}>
+                      <ClipboardList className="mr-2 h-4 w-4" /> Progress Reviews
+                    </Button>
+                    <Button className="w-full justify-start" variant="outline" onClick={() => navigateTo('/apprentices/resources')}>
+                      <FileSpreadsheet className="mr-2 h-4 w-4" /> Learning Resources
+                    </Button>
                   </div>
-                </div>
-              </CardContent>
-              <CardFooter>
-                <Button className="w-full" onClick={() => handlePortalAccess('apprentice')}>
-                  Access Apprentice Portal <ChevronRight className="ml-2 h-4 w-4" />
-                </Button>
-              </CardFooter>
-            </Card>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center text-lg">
+                    <Clock className="mr-2 h-5 w-5" />
+                    Timesheets
+                  </CardTitle>
+                  <CardDescription>
+                    Manage your work hours
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    <Button className="w-full justify-start" variant="outline" onClick={() => navigateTo('/apprentices/timesheets/submit')}>
+                      <Clock className="mr-2 h-4 w-4" /> Submit Timesheet
+                    </Button>
+                    <Button className="w-full justify-start" variant="outline" onClick={() => navigateTo('/apprentices/timesheets')}>
+                      <FileSpreadsheet className="mr-2 h-4 w-4" /> View Timesheets
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
-          
+
           <TabsContent value="host">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Building className="mr-2 h-5 w-5" />
-                  Host Employer Portal
-                </CardTitle>
-                <CardDescription>
-                  Manage your apprentices, contracts, and workplace arrangements.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-gray-600">
-                  The host employer portal allows you to:
-                </p>
-                <ul className="list-disc list-inside mt-2 text-sm text-gray-600">
-                  <li>View current apprentice placements</li>
-                  <li>Manage workplace agreements</li>
-                  <li>Approve timesheets</li>
-                  <li>Request new apprentices</li>
-                  <li>Access compliance resources</li>
-                </ul>
-                <div className="flex items-center gap-4 bg-gray-50 p-3 rounded-md border border-gray-200 mt-4">
-                  <div>
-                    <p className="text-sm font-medium">Employer portal</p>
-                    <p className="text-xs text-gray-500">Limited to your organization's placements</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center text-lg">
+                    <Users className="mr-2 h-5 w-5" />
+                    Apprentice Placements
+                  </CardTitle>
+                  <CardDescription>
+                    Manage your current apprentices
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    <Button className="w-full justify-start" variant="outline" onClick={() => navigateTo('/hosts/apprentices')}>
+                      <Users className="mr-2 h-4 w-4" /> Current Apprentices
+                    </Button>
+                    <Button className="w-full justify-start" variant="outline" onClick={() => navigateTo('/hosts/placements')}>
+                      <Building className="mr-2 h-4 w-4" /> Placement Details
+                    </Button>
+                    <Button className="w-full justify-start" variant="outline" onClick={() => navigateTo('/hosts/request')}>
+                      <GraduationCap className="mr-2 h-4 w-4" /> Request New Apprentice
+                    </Button>
                   </div>
-                </div>
-              </CardContent>
-              <CardFooter>
-                <Button className="w-full" onClick={() => handlePortalAccess('host')}>
-                  Access Host Portal <ChevronRight className="ml-2 h-4 w-4" />
-                </Button>
-              </CardFooter>
-            </Card>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center text-lg">
+                    <Clock className="mr-2 h-5 w-5" />
+                    Timesheets & Compliance
+                  </CardTitle>
+                  <CardDescription>
+                    Approve hours and access resources
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    <Button className="w-full justify-start" variant="outline" onClick={() => navigateTo('/hosts/timesheets')}>
+                      <Clock className="mr-2 h-4 w-4" /> Approve Timesheets
+                    </Button>
+                    <Button className="w-full justify-start" variant="outline" onClick={() => navigateTo('/hosts/compliance')}>
+                      <Shield className="mr-2 h-4 w-4" /> Compliance Resources
+                    </Button>
+                    <Button className="w-full justify-start" variant="outline" onClick={() => navigateTo('/hosts/agreements')}>
+                      <FileSpreadsheet className="mr-2 h-4 w-4" /> Training Agreements
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
-          
-          <TabsContent value="field">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Briefcase className="mr-2 h-5 w-5" />
-                  Field Officer Portal
-                </CardTitle>
-                <CardDescription>
-                  Manage site visits, apprentice check-ins, and compliance activities.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-gray-600">
-                  The field officer portal allows you to:
-                </p>
-                <ul className="list-disc list-inside mt-2 text-sm text-gray-600">
-                  <li>Schedule workplace visits</li>
-                  <li>Record site assessments</li>
-                  <li>Manage apprentice progress</li>
-                  <li>Document compliance activities</li>
-                  <li>Generate field reports</li>
-                </ul>
-                <div className="flex items-center gap-4 bg-gray-50 p-3 rounded-md border border-gray-200 mt-4">
-                  <div>
-                    <p className="text-sm font-medium">Field staff portal</p>
-                    <p className="text-xs text-gray-500">Limited to your assigned apprentices and employers</p>
+
+          <TabsContent value="fieldOfficer">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center text-lg">
+                    <Users className="mr-2 h-5 w-5" />
+                    Apprentice Support
+                  </CardTitle>
+                  <CardDescription>
+                    Manage your assigned apprentices
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    <Button className="w-full justify-start" variant="outline" onClick={() => navigateTo('/field-officers/apprentices')}>
+                      <Users className="mr-2 h-4 w-4" /> My Apprentices
+                    </Button>
+                    <Button className="w-full justify-start" variant="outline" onClick={() => navigateTo('/field-officers/reviews')}>
+                      <ClipboardList className="mr-2 h-4 w-4" /> Progress Reviews
+                    </Button>
+                    <Button className="w-full justify-start" variant="outline" onClick={() => navigateTo('/field-officers/support')}>
+                      <GraduationCap className="mr-2 h-4 w-4" /> Support Requests
+                    </Button>
                   </div>
-                </div>
-              </CardContent>
-              <CardFooter>
-                <Button className="w-full" onClick={() => handlePortalAccess('field-officer')}>
-                  Access Field Officer Portal <ChevronRight className="ml-2 h-4 w-4" />
-                </Button>
-              </CardFooter>
-            </Card>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center text-lg">
+                    <Calendar className="mr-2 h-5 w-5" />
+                    Site Visits & Activities
+                  </CardTitle>
+                  <CardDescription>
+                    Manage your field activities
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    <Button className="w-full justify-start" variant="outline" onClick={() => navigateTo('/field-officers/visits/schedule')}>
+                      <Calendar className="mr-2 h-4 w-4" /> Schedule Visit
+                    </Button>
+                    <Button className="w-full justify-start" variant="outline" onClick={() => navigateTo('/field-officers/visits')}>
+                      <Clock className="mr-2 h-4 w-4" /> Visit History
+                    </Button>
+                    <Button className="w-full justify-start" variant="outline" onClick={() => navigateTo('/field-officers/hosts')}>
+                      <Building className="mr-2 h-4 w-4" /> Host Employers
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
         </Tabs>
       </div>
