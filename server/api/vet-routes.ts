@@ -56,10 +56,11 @@ vetRouter.get('/units', validateQuery(vetUnitSearchSchema), async (req, res) => 
     
     if (search) {
       // Use parameterized queries for search to prevent SQL injection
+      const searchPattern = `%${search}%`;
       query = query.where(
         or(
-          like(unitsOfCompetency.unitCode, sql`CONCAT('%', ${search}, '%')`),
-          like(unitsOfCompetency.unitTitle, sql`CONCAT('%', ${search}, '%')`)
+          like(unitsOfCompetency.unitCode, searchPattern),
+          like(unitsOfCompetency.unitTitle, searchPattern)
         )
       );
     }
@@ -169,10 +170,11 @@ vetRouter.get('/qualifications', validateQuery(vetQualificationSearchSchema), as
     
     if (search) {
       // Use parameterized queries for search to prevent SQL injection
+      const searchPattern = `%${search}%`;
       query = query.where(
         or(
-          like(qualifications.qualificationCode, sql`CONCAT('%', ${search}, '%')`),
-          like(qualifications.qualificationTitle, sql`CONCAT('%', ${search}, '%')`)
+          like(qualifications.qualificationCode, searchPattern),
+          like(qualifications.qualificationTitle, searchPattern)
         )
       );
     }

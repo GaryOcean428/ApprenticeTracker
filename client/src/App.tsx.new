@@ -357,22 +357,20 @@ function Router() {
             </Suspense>
           );
         }} />
-        {/* TODO: Create Training Package import page */}
         <Route path="/vet/training-packages/import" component={() => {
+          const ImportPackage = lazy(() => import("./pages/vet/training-packages/import"));
           return (
-            <div className="p-8">
-              <h1 className="text-2xl font-bold mb-4">Import Training Packages</h1>
-              <p className="text-muted-foreground mb-4">This page is currently under development.</p>
-            </div>
+            <Suspense fallback={<div className="p-8 flex items-center justify-center"><div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"/></div>}>
+              <ImportPackage />
+            </Suspense>
           );
         }} />
-        {/* TODO: Create RTOs page */}
         <Route path="/vet/rtos" component={() => {
+          const RTOsList = lazy(() => import("./pages/vet/rtos/index"));
           return (
-            <div className="p-8">
-              <h1 className="text-2xl font-bold mb-4">Registered Training Organizations</h1>
-              <p className="text-muted-foreground mb-4">This page is currently under development.</p>
-            </div>
+            <Suspense fallback={<div>Loading...</div>}>
+              <RTOsList />
+            </Suspense>
           );
         }} />
         <Route path="/vet/assessments" component={() => {
@@ -386,106 +384,87 @@ function Router() {
         
         {/* Contracts & Placements Routes */}
         <Route path="/contracts" component={ContractsList} />
-        {/* TODO: Create Contract creation page */}
         <Route path="/contracts/create" component={() => {
+          const CreateContract = lazy(() => import("./pages/contracts/create"));
           return (
-            <div className="p-8">
-              <h1 className="text-2xl font-bold mb-4">Create Training Contract</h1>
-              <p className="text-muted-foreground mb-4">This page is currently under development.</p>
-            </div>
+            <Suspense fallback={<div>Loading...</div>}>
+              <CreateContract />
+            </Suspense>
           );
         }} />
-        {/* TODO: Create Contract details page */}
         <Route path="/contracts/:id" component={() => {
-          const id = window.location.pathname.split('/').pop();
+          const ContractDetails = lazy(() => import("./pages/contracts/[id]"));
           return (
-            <div className="p-8">
-              <h1 className="text-2xl font-bold mb-4">Training Contract Details</h1>
-              <p className="text-muted-foreground mb-4">Contract ID: {id}</p>
-              <p className="text-muted-foreground mb-4">This page is currently under development.</p>
-            </div>
+            <Suspense fallback={<div>Loading...</div>}>
+              <ContractDetails />
+            </Suspense>
           );
         }} />
         <Route path="/placements" component={PlacementsList} />
-        {/* TODO: Create Placement creation page */}
         <Route path="/placements/create" component={() => {
+          const CreatePlacement = lazy(() => import("./pages/placements/create"));
           return (
-            <div className="p-8">
-              <h1 className="text-2xl font-bold mb-4">Create Placement</h1>
-              <p className="text-muted-foreground mb-4">This page is currently under development.</p>
-            </div>
+            <Suspense fallback={<div>Loading...</div>}>
+              <CreatePlacement />
+            </Suspense>
           );
         }} />
-        {/* TODO: Create Placement details page */}
         <Route path="/placements/:id" component={() => {
-          const id = window.location.pathname.split('/').pop();
+          const PlacementDetails = lazy(() => import("./pages/placements/[id]"));
           return (
-            <div className="p-8">
-              <h1 className="text-2xl font-bold mb-4">Placement Details</h1>
-              <p className="text-muted-foreground mb-4">Placement ID: {id}</p>
-              <p className="text-muted-foreground mb-4">This page is currently under development.</p>
-            </div>
+            <Suspense fallback={<div>Loading...</div>}>
+              <PlacementDetails />
+            </Suspense>
           );
         }} />
         
         {/* Document Routes */}
         <Route path="/documents" component={DocumentsList} />
-        {/* TODO: Create Document upload page */}
         <Route path="/documents/upload" component={() => {
+          const UploadDocument = lazy(() => import("./pages/documents/upload"));
           return (
-            <div className="p-8">
-              <h1 className="text-2xl font-bold mb-4">Upload Document</h1>
-              <p className="text-muted-foreground mb-4">This page is currently under development.</p>
-            </div>
+            <Suspense fallback={<div>Loading...</div>}>
+              <UploadDocument />
+            </Suspense>
           );
         }} />
-        {/* TODO: Create Document details page */}
         <Route path="/documents/:id" component={() => {
-          const id = window.location.pathname.split('/').pop();
+          const DocumentDetails = lazy(() => import("./pages/documents/[id]"));
           return (
-            <div className="p-8">
-              <h1 className="text-2xl font-bold mb-4">Document Details</h1>
-              <p className="text-muted-foreground mb-4">Document ID: {id}</p>
-              <p className="text-muted-foreground mb-4">This page is currently under development.</p>
-            </div>
+            <Suspense fallback={<div>Loading...</div>}>
+              <DocumentDetails />
+            </Suspense>
           );
         }} />
         
         {/* Compliance Routes */}
         <Route path="/compliance" component={ComplianceList} />
         <Route path="/compliance/create" component={CreateComplianceRecord} />
-        {/* TODO: Create Compliance details page */}
         <Route path="/compliance/:id" component={() => {
-          const id = window.location.pathname.split('/').pop();
+          const ComplianceDetails = lazy(() => import("./pages/compliance/[id]"));
           return (
-            <div className="p-8">
-              <h1 className="text-2xl font-bold mb-4">Compliance Record Details</h1>
-              <p className="text-muted-foreground mb-4">Compliance Record ID: {id}</p>
-              <p className="text-muted-foreground mb-4">This page is currently under development.</p>
-            </div>
+            <Suspense fallback={<div>Loading...</div>}>
+              <ComplianceDetails />
+            </Suspense>
           );
         }} />
         
         {/* Timesheet Routes */}
         <Route path="/timesheets" component={TimesheetsList} />
-        {/* TODO: Create Timesheet creation page */}
         <Route path="/timesheets/create" component={() => {
+          const CreateTimesheet = lazy(() => import("./pages/timesheets/create"));
           return (
-            <div className="p-8">
-              <h1 className="text-2xl font-bold mb-4">Create Timesheet</h1>
-              <p className="text-muted-foreground mb-4">This page is currently under development.</p>
-            </div>
+            <Suspense fallback={<div>Loading...</div>}>
+              <CreateTimesheet />
+            </Suspense>
           );
         }} />
-        {/* TODO: Create Timesheet details page */}
         <Route path="/timesheets/:id" component={() => {
-          const id = window.location.pathname.split('/').pop();
+          const TimesheetDetails = lazy(() => import("./pages/timesheets/[id]"));
           return (
-            <div className="p-8">
-              <h1 className="text-2xl font-bold mb-4">Timesheet Details</h1>
-              <p className="text-muted-foreground mb-4">Timesheet ID: {id}</p>
-              <p className="text-muted-foreground mb-4">This page is currently under development.</p>
-            </div>
+            <Suspense fallback={<div>Loading...</div>}>
+              <TimesheetDetails />
+            </Suspense>
           );
         }} />
         
