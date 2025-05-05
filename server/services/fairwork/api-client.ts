@@ -125,7 +125,7 @@ export class FairWorkApiClient {
       baseURL: config.baseUrl,
       timeout: config.timeout || 10000,
       headers: {
-        Authorization: `Bearer ${config.apiKey}`,
+        'Ocp-Apim-Subscription-Key': config.apiKey,
         'Content-Type': 'application/json',
         'X-Environment': config.environment || 'production',
       },
@@ -154,11 +154,11 @@ export class FairWorkApiClient {
   }
 
   /**
-   * Get all active awards
+   * Get all modern awards (as per API documentation endpoint: GET /api/v1/awards)
    */
   async getActiveAwards(): Promise<Award[]> {
     try {
-      return await this.request<Award[]>('/awards/active');
+      return await this.request<Award[]>('/api/v1/awards');
     } catch (error) {
       logger.error('Failed to fetch active awards', { error });
       throw error;
@@ -181,13 +181,27 @@ export class FairWorkApiClient {
   }
 
   /**
-   * Get classifications for an award
+   * Get classifications for all awards (as per API documentation endpoint: GET /api/v1/classifications)
    */
-  async getClassifications(awardCode: string): Promise<Classification[]> {
+  async getClassifications(): Promise<Classification[]> {
     try {
-      return await this.request<Classification[]>(`/awards/${awardCode}/classifications`);
+      return await this.request<Classification[]>('/api/v1/classifications');
     } catch (error) {
-      logger.error('Failed to fetch classifications', { error, awardCode });
+      logger.error('Failed to fetch classifications', { error });
+      throw error;
+    }
+  }
+
+  /**
+   * Get classifications for a specific award
+   */
+  async getAwardClassifications(awardCode: string): Promise<Classification[]> {
+    try {
+      // Filter classifications by award code
+      const allClassifications = await this.getClassifications();
+      return allClassifications.filter(c => c.award_id === awardCode);
+    } catch (error) {
+      logger.error('Failed to fetch award classifications', { error, awardCode });
       throw error;
     }
   }
@@ -201,6 +215,42 @@ export class FairWorkApiClient {
     } catch (error) {
       logger.error('Failed to fetch classification hierarchy', { error, awardCode });
       return null;
+    }
+  }
+
+  /**
+   * Get wage allowances (as per API documentation endpoint: GET /api/v1/wage-allowances)
+   */
+  async getWageAllowances(): Promise<any[]> {
+    try {
+      return await this.request<any[]>('/api/v1/wage-allowances');
+    } catch (error) {
+      logger.error('Failed to fetch wage allowances', { error });
+      return [];
+    }
+  }
+
+  /**
+   * Get expense allowances (as per API documentation endpoint: GET /api/v1/expense-allowances)
+   */
+  async getExpenseAllowances(): Promise<any[]> {
+    try {
+      return await this.request<any[]>('/api/v1/expense-allowances');
+    } catch (error) {
+      logger.error('Failed to fetch expense allowances', { error });
+      return [];
+    }
+  }
+
+  /**
+   * Get penalties (as per API documentation endpoint: GET /api/v1/penalties)
+   */
+  async getPenalties(): Promise<any[]> {
+    try {
+      return await this.request<any[]>('/api/v1/penalties');
+    } catch (error) {
+      logger.error('Failed to fetch penalties', { error });
+      return [];
     }
   }
 
