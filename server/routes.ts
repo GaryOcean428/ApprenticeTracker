@@ -42,6 +42,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/api/auth', authRouter); // Authentication routes (login, register, verify)
   app.use('/api/payroll', payrollRouter); // Payroll routes
   app.use('/api/enrichment', enrichmentRouter); // Enrichment routes
+  app.use('/api/progress-reviews', progressReviewsRouter); // Progress Reviews routes
   
   // Register host employer routes
   registerHostRoutes(app);
