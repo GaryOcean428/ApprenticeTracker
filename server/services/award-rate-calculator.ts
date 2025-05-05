@@ -548,9 +548,10 @@ export class AwardRateCalculator {
       const validationResult = await this.fairworkClient.validateRateTemplate(validationRequest);
       
       // Log the result for auditing purposes
+      // Use the schema fields properly
       await db.insert(fairworkComplianceLogs).values({
         awardCode,
-        classificationCode, 
+        classificationCode,
         requestedRate: hourlyRate,
         minimumRate: validationResult.minimum_rate,
         isValid: validationResult.is_valid,
@@ -609,17 +610,18 @@ export class AwardRateCalculator {
             code: fwAward.code,
             name: fwAward.name,
             fairWorkReference: fwAward.fair_work_reference,
-            publishedYear: fwAward.published_year,
-            versionNumber: fwAward.version_number,
-            effectiveDate: fwAward.effective_date
+            fairWorkTitle: fwAward.fair_work_title || `${fwAward.name} ${fwAward.version_number || ''}`,
+            description: fwAward.description,
+            effectiveDate: fwAward.effective_date,
+            isActive: true
           })
           .onConflictDoUpdate({
             target: awards.code,
             set: {
               name: fwAward.name,
               fairWorkReference: fwAward.fair_work_reference,
-              publishedYear: fwAward.published_year,
-              versionNumber: fwAward.version_number,
+              fairWorkTitle: fwAward.fair_work_title || `${fwAward.name} ${fwAward.version_number || ''}`,
+              description: fwAward.description,
               effectiveDate: fwAward.effective_date,
               updatedAt: new Date()
             }
@@ -643,17 +645,16 @@ export class AwardRateCalculator {
               name: classification.name,
               level: classification.level,
               description: classification.description,
-              parentClassificationName: classification.parent_classification_name,
-              classificationLevel: classification.classification_level,
-              fairWorkLevelCode: classification.fair_work_level_code
+              fairWorkLevelCode: classification.fair_work_level_code,
+              fairWorkLevelDesc: classification.classification_level ? classification.classification_level.toString() : undefined,
+              isActive: true
             })
             .onConflictDoUpdate({
               target: [awardClassifications.awardId, awardClassifications.name, awardClassifications.level],
               set: {
                 description: classification.description,
-                parentClassificationName: classification.parent_classification_name,
-                classificationLevel: classification.classification_level,
                 fairWorkLevelCode: classification.fair_work_level_code,
+                fairWorkLevelDesc: classification.classification_level ? classification.classification_level.toString() : undefined,
                 updatedAt: new Date()
               }
             })
