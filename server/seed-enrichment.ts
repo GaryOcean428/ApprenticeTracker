@@ -251,11 +251,11 @@ export async function seedEnrichmentData() {
           workshopId: insertedWorkshops[1].id,
           apprenticeId: apprentice.id,
           status: 'registered',
-          registrationDate: new Date('2025-06-05'),
+          registrationDate: '2025-06-05',
           feedback: null,
           notes: null,
-          createdAt: new Date(),
-          updatedAt: new Date()
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
         });
       });
       
