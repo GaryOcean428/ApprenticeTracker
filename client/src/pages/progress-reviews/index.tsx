@@ -1,36 +1,9 @@
-import React, { useEffect, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import React from 'react';
 import { Link } from 'wouter';
-import { ChevronRight, PlusCircle, AlignLeft, FileText, CheckCircle2, Clock, BarChart4 } from 'lucide-react';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Calendar, FileText, CheckCircle, PlusCircle, Clock, AlertCircle, FileHeart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useToast } from '@/hooks/use-toast';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Badge } from '@/components/ui/badge';
-import { formatDate } from '@/lib/utils';
-
-interface ReviewStats {
-  reviews: {
-    scheduled: number;
-    inProgress: number;
-    completed: number;
-    cancelled: number;
-  };
-  actionItems: {
-    pending: number;
-    inProgress: number;
-    completed: number;
-    cancelled: number;
-  };
-}
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { useQuery } from '@tanstack/react-query';
 
 interface ProgressReview {
   id: number;
@@ -57,7 +30,7 @@ interface ProgressReview {
   updatedAt: string;
 }
 
-interface ProgressReviewTemplate {
+interface Template {
   id: number;
   templateName: string;
   description: string;
@@ -69,309 +42,222 @@ interface ProgressReviewTemplate {
   updatedAt: string;
 }
 
-export default function ProgressReviewsDashboard() {
-  const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState('overview');
-
-  // Fetch stats
-  const { data: stats, isLoading: isLoadingStats } = useQuery<ReviewStats>({
-    queryKey: ['/api/progress-reviews/dashboard/stats'],
+export default function ProgressReviewsPage() {
+  // Fetch reviews
+  const { data: reviews, isLoading: reviewsLoading } = useQuery<ProgressReview[]>({
+    queryKey: ['/api/progress-reviews/reviews'],
   });
-
-  // Fetch upcoming reviews
-  const { data: upcomingReviews, isLoading: isLoadingUpcoming } = useQuery<ProgressReview[]>({
-    queryKey: ['/api/progress-reviews/dashboard/upcoming'],
-  });
-
+  
   // Fetch templates
-  const { data: templates, isLoading: isLoadingTemplates } = useQuery<ProgressReviewTemplate[]>({
+  const { data: templates, isLoading: templatesLoading } = useQuery<Template[]>({
     queryKey: ['/api/progress-reviews/templates'],
   });
 
-  // Fetch recent reviews
-  const { data: reviews, isLoading: isLoadingReviews } = useQuery<ProgressReview[]>({
-    queryKey: ['/api/progress-reviews/reviews', { limit: 5 }],
-  });
+  // Calculate statistics
+  const stats = {
+    completedReviews: reviews?.filter(r => r.status === 'completed').length || 0,
+    scheduledReviews: reviews?.filter(r => r.status === 'scheduled').length || 0,
+    inProgressReviews: reviews?.filter(r => r.status === 'in_progress').length || 0,
+    totalReviews: reviews?.length || 0,
+    activeTemplates: templates?.filter(t => t.isActive).length || 0,
+    totalTemplates: templates?.length || 0,
+  };
 
-  if (isLoadingStats && isLoadingUpcoming && isLoadingTemplates && isLoadingReviews) {
-    return (
-      <div className="container mx-auto py-6">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold">Progress Reviews</h1>
-          <Skeleton className="h-10 w-32" />
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-          <Skeleton className="h-40" />
-          <Skeleton className="h-40" />
-          <Skeleton className="h-40" />
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Skeleton className="h-80" />
-          <Skeleton className="h-80" />
-        </div>
-      </div>
-    );
-  }
+  // Check if there are upcoming reviews (within 7 days)
+  const upcomingReviews = reviews?.filter(review => {
+    if (review.status !== 'scheduled') return false;
+    const reviewDate = new Date(review.scheduledDate);
+    const today = new Date();
+    const sevenDaysLater = new Date();
+    sevenDaysLater.setDate(today.getDate() + 7);
+    return reviewDate >= today && reviewDate <= sevenDaysLater;
+  });
 
   return (
     <div className="container mx-auto py-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Progress Reviews</h1>
-        <div className="flex gap-2">
-          <Link href="/progress-reviews/templates/create">
-            <Button variant="outline">
-              <AlignLeft className="mr-2 h-4 w-4" /> New Template
-            </Button>
-          </Link>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+        <div>
+          <h1 className="text-3xl font-bold">Progress Reviews</h1>
+          <p className="text-muted-foreground mt-1">Manage apprentice progress review sessions</p>
+        </div>
+        <div className="flex space-x-4">
           <Link href="/progress-reviews/reviews/create">
             <Button>
               <PlusCircle className="mr-2 h-4 w-4" /> New Review
             </Button>
           </Link>
+          <Link href="/progress-reviews/templates/create">
+            <Button variant="outline">
+              <FileText className="mr-2 h-4 w-4" /> New Template
+            </Button>
+          </Link>
         </div>
       </div>
 
-      <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="reviews">Reviews</TabsTrigger>
-          <TabsTrigger value="templates">Templates</TabsTrigger>
-        </TabsList>
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Total Reviews</CardTitle>
+            <FileText className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.totalReviews}</div>
+            <p className="text-xs text-muted-foreground mt-1">
+              {stats.completedReviews} completed, {stats.scheduledReviews} scheduled
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Upcoming Reviews</CardTitle>
+            <Calendar className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{upcomingReviews?.length || 0}</div>
+            <p className="text-xs text-muted-foreground mt-1">
+              Scheduled in the next 7 days
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">In Progress</CardTitle>
+            <Clock className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.inProgressReviews}</div>
+            <p className="text-xs text-muted-foreground mt-1">
+              Reviews currently in progress
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Active Templates</CardTitle>
+            <FileHeart className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.activeTemplates}</div>
+            <p className="text-xs text-muted-foreground mt-1">
+              Of {stats.totalTemplates} total templates
+            </p>
+          </CardContent>
+        </Card>
+      </div>
 
-        <TabsContent value="overview" className="space-y-6 pt-4">
-          {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">Scheduled Reviews</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold">{stats?.reviews.scheduled || 0}</div>
-                <div className="text-xs text-muted-foreground mt-1">Upcoming reviews</div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">In Progress</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold">{stats?.reviews.inProgress || 0}</div>
-                <div className="text-xs text-muted-foreground mt-1">Currently being conducted</div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">Completed</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold">{stats?.reviews.completed || 0}</div>
-                <div className="text-xs text-muted-foreground mt-1">Reviews finalized</div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">Action Items</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold">{stats?.actionItems.pending || 0}</div>
-                <div className="text-xs text-muted-foreground mt-1">Pending actions</div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Upcoming Reviews & Active Templates */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card className="col-span-1">
-              <CardHeader>
-                <CardTitle>Upcoming Reviews</CardTitle>
-                <CardDescription>Reviews scheduled for the near future</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                {upcomingReviews && upcomingReviews.length > 0 ? (
-                  upcomingReviews.map((review) => (
-                    <div key={review.id} className="flex items-center justify-between p-3 border rounded-lg">
-                      <div>
-                        <div className="font-medium">Review #{review.id}</div>
-                        <div className="text-sm text-muted-foreground">
-                          Scheduled: {formatDate(review.scheduledDate || review.reviewDate)}
-                        </div>
-                      </div>
-                      <Link href={`/progress-reviews/reviews/${review.id}`}>
-                        <Button variant="ghost" size="sm">
-                          <ChevronRight className="h-4 w-4" />
-                        </Button>
-                      </Link>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Upcoming Reviews Section */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Upcoming Reviews</CardTitle>
+            <CardDescription>Reviews scheduled in the next 7 days</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {reviewsLoading ? (
+              <div className="flex items-center justify-center p-6">
+                <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"/>
+              </div>
+            ) : upcomingReviews && upcomingReviews.length > 0 ? (
+              <div className="space-y-4">
+                {upcomingReviews.map((review) => (
+                  <div key={review.id} className="flex items-start p-4 border rounded-md">
+                    <div className="bg-primary/10 p-2 rounded-lg mr-3">
+                      <Calendar className="h-5 w-5 text-primary" />
                     </div>
-                  ))
-                ) : (
-                  <div className="text-center py-6 text-muted-foreground">
-                    No upcoming reviews scheduled
+                    <div className="flex-1">
+                      <div className="font-medium">Review #{review.id}</div>
+                      <div className="text-sm text-muted-foreground">
+                        Scheduled for {new Date(review.scheduledDate).toLocaleDateString()}
+                      </div>
+                    </div>
+                    <Link href={`/progress-reviews/reviews/${review.id}`}>
+                      <Button variant="outline" size="sm">View</Button>
+                    </Link>
                   </div>
-                )}
-              </CardContent>
-              <CardFooter>
-                <Link href="/progress-reviews/reviews">
-                  <Button variant="outline" className="w-full">View All Reviews</Button>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center p-6 border border-dashed rounded-md text-muted-foreground">
+                <Calendar className="h-10 w-10 mx-auto mb-2 opacity-50" />
+                <p>No reviews scheduled in the next 7 days</p>
+                <Link href="/progress-reviews/reviews/create">
+                  <Button variant="link" className="mt-2">
+                    Schedule a review
+                  </Button>
                 </Link>
-              </CardFooter>
-            </Card>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
-            <Card className="col-span-1">
-              <CardHeader>
-                <CardTitle>Active Templates</CardTitle>
-                <CardDescription>Available review templates</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                {templates && templates.filter(t => t.isActive).length > 0 ? (
-                  templates.filter(t => t.isActive).slice(0, 5).map((template) => (
-                    <div key={template.id} className="flex items-center justify-between p-3 border rounded-lg">
-                      <div>
+        {/* Recent Templates Section */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Review Templates</CardTitle>
+            <CardDescription>Your active review templates</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {templatesLoading ? (
+              <div className="flex items-center justify-center p-6">
+                <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"/>
+              </div>
+            ) : templates && templates.filter(t => t.isActive).length > 0 ? (
+              <div className="space-y-4">
+                {templates
+                  .filter(t => t.isActive)
+                  .slice(0, 5)
+                  .map((template) => (
+                    <div key={template.id} className="flex items-start p-4 border rounded-md">
+                      <div className="bg-primary/10 p-2 rounded-lg mr-3">
+                        <FileText className="h-5 w-5 text-primary" />
+                      </div>
+                      <div className="flex-1">
                         <div className="font-medium">{template.templateName}</div>
                         <div className="text-sm text-muted-foreground">
-                          v{template.templateVersion}
+                          Version: {template.templateVersion}
                         </div>
                       </div>
-                      <Link href={`/progress-reviews/templates/${template.id}`}>
-                        <Button variant="ghost" size="sm">
-                          <ChevronRight className="h-4 w-4" />
-                        </Button>
+                      <Link href={`/progress-reviews/reviews/create?templateId=${template.id}`}>
+                        <Button variant="outline" size="sm">Use</Button>
                       </Link>
                     </div>
-                  ))
-                ) : (
-                  <div className="text-center py-6 text-muted-foreground">
-                    No active templates found
-                  </div>
-                )}
-              </CardContent>
-              <CardFooter>
-                <Link href="/progress-reviews/templates">
-                  <Button variant="outline" className="w-full">View All Templates</Button>
+                  ))}
+              </div>
+            ) : (
+              <div className="text-center p-6 border border-dashed rounded-md text-muted-foreground">
+                <FileText className="h-10 w-10 mx-auto mb-2 opacity-50" />
+                <p>No active templates found</p>
+                <Link href="/progress-reviews/templates/create">
+                  <Button variant="link" className="mt-2">
+                    Create a template
+                  </Button>
                 </Link>
-              </CardFooter>
-            </Card>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="reviews" className="space-y-6 pt-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Recent Reviews</CardTitle>
-              <CardDescription>Latest progress reviews conducted</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {reviews && reviews.length > 0 ? (
-                  reviews.map((review) => (
-                    <div key={review.id} className="flex items-center justify-between p-4 border rounded-lg">
-                      <div className="flex items-center">
-                        <div className="mr-4">
-                          {review.status === 'scheduled' && <Clock className="h-8 w-8 text-blue-500" />}
-                          {review.status === 'in_progress' && <AlignLeft className="h-8 w-8 text-amber-500" />}
-                          {review.status === 'completed' && <CheckCircle2 className="h-8 w-8 text-green-500" />}
-                          {review.status === 'cancelled' && <FileText className="h-8 w-8 text-gray-400" />}
-                        </div>
-                        <div>
-                          <div className="font-medium">Review #{review.id}</div>
-                          <div className="text-sm text-muted-foreground">
-                            {review.reviewDate && `Conducted: ${formatDate(review.reviewDate)}`}
-                          </div>
-                          <Badge
-                            className={`mt-1 ${review.status === 'scheduled' ? 'bg-blue-100 text-blue-800' : 
-                              review.status === 'in_progress' ? 'bg-amber-100 text-amber-800' :
-                              review.status === 'completed' ? 'bg-green-100 text-green-800' : 
-                              'bg-gray-100 text-gray-800'}`}
-                          >
-                            {review.status.replace('_', ' ')}
-                          </Badge>
-                        </div>
-                      </div>
-                      <Link href={`/progress-reviews/reviews/${review.id}`}>
-                        <Button>
-                          View Details
-                        </Button>
-                      </Link>
-                    </div>
-                  ))
-                ) : (
-                  <div className="text-center py-10 text-muted-foreground">
-                    No reviews found
-                  </div>
-                )}
               </div>
-            </CardContent>
-            <CardFooter className="flex justify-between">
-              <Link href="/progress-reviews/reviews">
-                <Button variant="outline">View All Reviews</Button>
-              </Link>
-              <Link href="/progress-reviews/reviews/create">
-                <Button>
-                  <PlusCircle className="mr-2 h-4 w-4" /> New Review
-                </Button>
-              </Link>
-            </CardFooter>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="templates" className="space-y-6 pt-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Review Templates</CardTitle>
-              <CardDescription>Templates used for conducting reviews</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {templates && templates.length > 0 ? (
-                  templates.map((template) => (
-                    <div key={template.id} className="flex items-center justify-between p-4 border rounded-lg">
-                      <div className="flex items-center">
-                        <div className="mr-4">
-                          <FileText className={`h-8 w-8 ${template.isActive ? 'text-blue-500' : 'text-gray-400'}`} />
-                        </div>
-                        <div>
-                          <div className="font-medium">{template.templateName}</div>
-                          <div className="text-sm text-muted-foreground">
-                            Version: {template.templateVersion}
-                          </div>
-                          <Badge className={template.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>
-                            {template.isActive ? 'Active' : 'Inactive'}
-                          </Badge>
-                        </div>
-                      </div>
-                      <div className="flex gap-2">
-                        <Link href={`/progress-reviews/templates/${template.id}`}>
-                          <Button variant="outline">
-                            View Template
-                          </Button>
-                        </Link>
-                        <Link href={`/progress-reviews/reviews/create?templateId=${template.id}`}>
-                          <Button>
-                            Use Template
-                          </Button>
-                        </Link>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <div className="text-center py-10 text-muted-foreground">
-                    No templates found
-                  </div>
-                )}
-              </div>
-            </CardContent>
-            <CardFooter className="flex justify-between">
+            )}
+            <div className="mt-4 text-center">
               <Link href="/progress-reviews/templates">
-                <Button variant="outline">View All Templates</Button>
-              </Link>
-              <Link href="/progress-reviews/templates/create">
-                <Button>
-                  <PlusCircle className="mr-2 h-4 w-4" /> New Template
+                <Button variant="link">
+                  View all templates
                 </Button>
               </Link>
-            </CardFooter>
-          </Card>
-        </TabsContent>
-      </Tabs>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="mt-8 text-center">
+        <Link href="/progress-reviews/reviews">
+          <Button className="mr-2">
+            View All Reviews
+          </Button>
+        </Link>
+        <Link href="/progress-reviews/templates">
+          <Button variant="outline">
+            Manage Templates
+          </Button>
+        </Link>
+      </div>
     </div>
   );
 }

@@ -1,7 +1,9 @@
-// Utility functions for progress reviews
+/**
+ * Utility functions for the progress reviews module
+ */
 
 /**
- * Get status badge color based on review status
+ * Get status color based on review status
  */
 export function getStatusColor(status: string) {
   switch (status) {
@@ -9,31 +11,36 @@ export function getStatusColor(status: string) {
       return {
         bg: 'bg-blue-100',
         text: 'text-blue-800',
-        icon: 'text-blue-500',
+        icon: 'text-blue-600',
+        border: 'border-blue-200'
       };
     case 'in_progress':
       return {
         bg: 'bg-amber-100',
         text: 'text-amber-800',
-        icon: 'text-amber-500',
+        icon: 'text-amber-600',
+        border: 'border-amber-200'
       };
     case 'completed':
       return {
         bg: 'bg-green-100',
         text: 'text-green-800',
-        icon: 'text-green-500',
+        icon: 'text-green-600',
+        border: 'border-green-200'
       };
     case 'cancelled':
       return {
         bg: 'bg-red-100',
         text: 'text-red-800',
-        icon: 'text-red-500',
+        icon: 'text-red-600',
+        border: 'border-red-200'
       };
     default:
       return {
         bg: 'bg-gray-100',
         text: 'text-gray-800',
-        icon: 'text-gray-500',
+        icon: 'text-gray-600',
+        border: 'border-gray-200'
       };
   }
 }
@@ -43,30 +50,33 @@ export function getStatusColor(status: string) {
  */
 export function getPriorityColor(priority: string) {
   switch (priority) {
+    case 'high':
+      return {
+        bg: 'bg-red-100',
+        text: 'text-red-800',
+        icon: 'text-red-600',
+        border: 'border-red-200'
+      };
+    case 'medium':
+      return {
+        bg: 'bg-amber-100',
+        text: 'text-amber-800',
+        icon: 'text-amber-600',
+        border: 'border-amber-200'
+      };
     case 'low':
       return {
         bg: 'bg-green-100',
         text: 'text-green-800',
-      };
-    case 'medium':
-      return {
-        bg: 'bg-blue-100',
-        text: 'text-blue-800',
-      };
-    case 'high':
-      return {
-        bg: 'bg-amber-100',
-        text: 'text-amber-800',
-      };
-    case 'critical':
-      return {
-        bg: 'bg-red-100',
-        text: 'text-red-800',
+        icon: 'text-green-600',
+        border: 'border-green-200'
       };
     default:
       return {
         bg: 'bg-gray-100',
         text: 'text-gray-800',
+        icon: 'text-gray-600',
+        border: 'border-gray-200'
       };
   }
 }
@@ -75,7 +85,6 @@ export function getPriorityColor(priority: string) {
  * Format rating to stars (★)
  */
 export function formatRating(rating: number): string {
-  if (!rating || rating < 1) return 'Not rated';
   return '★'.repeat(rating) + '☆'.repeat(5 - rating);
 }
 
@@ -83,11 +92,10 @@ export function formatRating(rating: number): string {
  * Get color class for rating
  */
 export function getRatingColor(rating: number): string {
-  if (!rating || rating < 1) return 'text-gray-400';
-  if (rating <= 2) return 'text-red-500';
-  if (rating === 3) return 'text-amber-500';
-  if (rating >= 4) return 'text-green-500';
-  return 'text-gray-500';
+  if (rating >= 4) return 'text-green-600';
+  if (rating >= 3) return 'text-blue-600';
+  if (rating >= 2) return 'text-amber-600';
+  return 'text-red-600';
 }
 
 /**
@@ -97,116 +105,76 @@ export function getDefaultFormStructure() {
   return {
     sections: [
       {
-        title: 'Apprentice Performance',
-        description: 'Evaluate the apprentice\'s performance in various key areas',
+        title: 'Apprentice Competency Assessment',
+        description: 'Evaluate the apprentice\'s competency and progress',
         questions: [
           {
-            id: 'technical_skills',
+            id: `question_${Date.now()}`,
             type: 'rating',
             label: 'Technical Skills',
-            description: 'Ability to apply technical knowledge in practice',
+            description: 'Assessment of technical skills related to their qualification',
             required: true,
           },
           {
-            id: 'communication',
+            id: `question_${Date.now() + 1}`,
             type: 'rating',
-            label: 'Communication Skills',
-            description: 'Ability to communicate effectively with team and stakeholders',
+            label: 'Communication',
+            description: 'Ability to communicate effectively with team members and clients',
             required: true,
           },
           {
-            id: 'teamwork',
+            id: `question_${Date.now() + 2}`,
             type: 'rating',
-            label: 'Teamwork',
-            description: 'Ability to work collaboratively with others',
+            label: 'Work Quality',
+            description: 'Overall quality of work produced',
             required: true,
           },
           {
-            id: 'initiative',
-            type: 'rating',
-            label: 'Initiative & Problem-Solving',
-            description: 'Ability to identify issues and take initiative',
-            required: true,
-          },
-          {
-            id: 'reliability',
-            type: 'rating',
-            label: 'Reliability',
-            description: 'Punctuality, attendance, and task completion',
-            required: true,
-          },
-          {
-            id: 'details',
+            id: `question_${Date.now() + 3}`,
             type: 'textarea',
-            label: 'Performance Details',
-            description: 'Provide specific examples and feedback about performance',
-            required: false,
-          },
-        ],
-      },
-      {
-        title: 'Progress on Training Requirements',
-        description: 'Assessment of progress towards qualification requirements',
-        questions: [
-          {
-            id: 'training_progress',
-            type: 'rating',
-            label: 'Progress in Training',
-            description: 'Overall progress towards completing training requirements',
+            label: 'Strengths',
+            description: 'Notable strengths demonstrated during this review period',
             required: true,
           },
           {
-            id: 'training_details',
-            type: 'textarea',
-            label: 'Training Progress Details',
-            description: 'Details about units completed and areas requiring attention',
-            required: false,
-          },
-        ],
-      },
-      {
-        title: 'Workplace Integration',
-        description: 'Assess how well the apprentice has integrated into the workplace',
-        questions: [
-          {
-            id: 'workplace_integration',
-            type: 'rating',
-            label: 'Workplace Integration',
-            description: 'How well the apprentice has adapted to the workplace environment',
-            required: true,
-          },
-          {
-            id: 'supervisor_feedback',
-            type: 'textarea',
-            label: 'Supervisor Feedback',
-            description: 'Feedback provided by the workplace supervisor',
-            required: false,
-          },
-        ],
-      },
-      {
-        title: 'Goals and Improvement',
-        description: 'Set goals for the next review period',
-        questions: [
-          {
-            id: 'strengths',
-            type: 'textarea',
-            label: 'Key Strengths',
-            description: 'Identify the apprentice\'s key strengths',
-            required: true,
-          },
-          {
-            id: 'improvement_areas',
+            id: `question_${Date.now() + 4}`,
             type: 'textarea',
             label: 'Areas for Improvement',
-            description: 'Identify areas where the apprentice needs to improve',
+            description: 'Skills or behaviors that need development',
+            required: true,
+          },
+        ],
+      },
+      {
+        title: 'Progress Towards Qualification',
+        description: 'Assessment of progress towards completing the qualification',
+        questions: [
+          {
+            id: `question_${Date.now() + 5}`,
+            type: 'rating',
+            label: 'Overall Progress',
+            description: 'Progress towards completing qualification requirements',
             required: true,
           },
           {
-            id: 'goals',
+            id: `question_${Date.now() + 6}`,
             type: 'textarea',
-            label: 'Goals for Next Period',
-            description: 'Specific goals to be achieved before the next review',
+            label: 'Units Completed',
+            description: 'List units of competency completed during this review period',
+            required: false,
+          },
+          {
+            id: `question_${Date.now() + 7}`,
+            type: 'textarea',
+            label: 'Units In Progress',
+            description: 'List units of competency currently in progress',
+            required: false,
+          },
+          {
+            id: `question_${Date.now() + 8}`,
+            type: 'checkbox',
+            label: 'On Track for Completion',
+            description: 'Is the apprentice on track to complete their qualification within the expected timeframe?',
             required: true,
           },
         ],

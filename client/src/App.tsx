@@ -61,6 +61,12 @@ import HostApprenticePage from "./pages/public/host-apprentice";
 import ContactPage from "./pages/public/contact";
 import PortalPage from "./pages/portal/index";
 
+// Progress Reviews Pages
+import ProgressReviewsPage from "./pages/progress-reviews";
+import TemplatesListPage from "./pages/progress-reviews/templates";
+import CreateTemplatePage from "./pages/progress-reviews/templates/create";
+import ReviewsListPage from "./pages/progress-reviews/reviews";
+
 function Router() {
   const [location] = useLocation();
   const isPublicRoute = [
@@ -490,6 +496,20 @@ function Router() {
           return (
             <div className="p-8">
               <h1 className="text-2xl font-bold mb-4">Export Options</h1>
+              <p className="text-muted-foreground mb-4">This page is currently under development.</p>
+            </div>
+          );
+        }} />
+
+        {/* Progress Reviews Module */}
+        <ProtectedRoute path="/progress-reviews" component={ProgressReviewsPage} />
+        <ProtectedRoute path="/progress-reviews/templates" component={TemplatesListPage} />
+        <ProtectedRoute path="/progress-reviews/templates/create" component={CreateTemplatePage} />
+        <ProtectedRoute path="/progress-reviews/reviews" component={ReviewsListPage} />
+        <ProtectedRoute path="/progress-reviews/reviews/create" component={() => {
+          return (
+            <div className="p-8">
+              <h1 className="text-2xl font-bold mb-4">Create Progress Review</h1>
               <p className="text-muted-foreground mb-4">This page is currently under development.</p>
             </div>
           );
