@@ -480,11 +480,19 @@ export const insertPublicHolidaySchema = createInsertSchema(publicHolidays).omit
 // Fair Work Compliance Logs
 export const fairworkComplianceLogs = pgTable("fairwork_compliance_logs", {
   id: serial("id").primaryKey(),
-  employeeId: integer("employee_id").references(() => apprentices.id).notNull(),
+  employeeId: integer("employee_id").references(() => apprentices.id),
   timesheetId: integer("timesheet_id").references(() => timesheets.id),
   payRateId: integer("pay_rate_id").references(() => payRates.id),
-  complianceCheck: text("compliance_check"),     // JSON or text describing checks performed
-  outcome: text("outcome"),                     // 'compliant', 'adjustment_needed', etc.
+  awardCode: text("award_code"),                    // Award code from Fair Work
+  classificationCode: text("classification_code"),    // Classification code from Fair Work
+  requestedRate: numeric("requested_rate", { precision: 10, scale: 2 }),
+  minimumRate: numeric("minimum_rate", { precision: 10, scale: 2 }),
+  isValid: boolean("is_valid"),                     // Whether the rate meets or exceeds minimum
+  complianceCheck: text("compliance_check"),        // JSON or text describing checks performed
+  message: text("message"),                        // Validation result message
+  source: text("source"),                          // 'fair_work_api', 'internal', etc.
+  verifiedDate: timestamp("verified_date"),        // When the verification was performed
+  outcome: text("outcome"),                        // 'compliant', 'adjustment_needed', etc.
   notes: text("notes"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });

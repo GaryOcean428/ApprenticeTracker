@@ -96,7 +96,7 @@ export class AwardRateCalculator {
           const [publicHoliday] = await db
             .select()
             .from(publicHolidays)
-            .where(eq(publicHolidays.date, shift.date));
+            .where(eq(publicHolidays.holidayDate, shift.date));
 
           if (publicHoliday) {
             dayType = 'public_holiday';

@@ -47,7 +47,7 @@ export async function getAwardById(req: Request, res: Response) {
     
     return res.status(200).json(award);
   } catch (error) {
-    logger.error('Error fetching award:', error);
+    logger.error('Error fetching award:', { error: error instanceof Error ? error.message : String(error) });
     return res.status(500).json({ message: 'Failed to fetch award' });
   }
 }
@@ -71,7 +71,7 @@ export async function getAwardClassifications(req: Request, res: Response) {
     
     return res.status(200).json(classifications);
   } catch (error) {
-    logger.error('Error fetching award classifications:', error);
+    logger.error('Error fetching award classifications:', { error: error instanceof Error ? error.message : String(error) });
     return res.status(500).json({ message: 'Failed to fetch classifications' });
   }
 }
@@ -95,7 +95,7 @@ export async function getClassificationRates(req: Request, res: Response) {
     
     return res.status(200).json(rates);
   } catch (error) {
-    logger.error('Error fetching classification rates:', error);
+    logger.error('Error fetching classification rates:', { error: error instanceof Error ? error.message : String(error) });
     return res.status(500).json({ message: 'Failed to fetch rates' });
   }
 }
@@ -119,7 +119,7 @@ export async function getAwardPenalties(req: Request, res: Response) {
     
     return res.status(200).json(penalties);
   } catch (error) {
-    logger.error('Error fetching award penalties:', error);
+    logger.error('Error fetching award penalties:', { error: error instanceof Error ? error.message : String(error) });
     return res.status(500).json({ message: 'Failed to fetch penalties' });
   }
 }
@@ -143,7 +143,7 @@ export async function getAwardAllowances(req: Request, res: Response) {
     
     return res.status(200).json(allowances);
   } catch (error) {
-    logger.error('Error fetching award allowances:', error);
+    logger.error('Error fetching award allowances:', { error: error instanceof Error ? error.message : String(error) });
     return res.status(500).json({ message: 'Failed to fetch allowances' });
   }
 }
@@ -176,7 +176,7 @@ export async function calculateTimesheetPay(req: Request, res: Response) {
     
     return res.status(200).json(result);
   } catch (error) {
-    logger.error('Error calculating timesheet pay:', error);
+    logger.error('Error calculating timesheet pay:', { error: error instanceof Error ? error.message : String(error) });
     return res.status(500).json({ 
       message: 'Failed to calculate timesheet pay', 
       error: error instanceof Error ? error.message : 'Unknown error' 
@@ -207,7 +207,7 @@ export async function getTimesheetCalculation(req: Request, res: Response) {
     
     return res.status(200).json(calculation);
   } catch (error) {
-    logger.error('Error fetching timesheet calculation:', error);
+    logger.error('Error fetching timesheet calculation:', { error: error instanceof Error ? error.message : String(error) });
     return res.status(500).json({ message: 'Failed to fetch calculation' });
   }
 }
@@ -239,7 +239,7 @@ export async function validateAwardRate(req: Request, res: Response) {
     
     return res.status(200).json(validationResult);
   } catch (error) {
-    logger.error('Error validating award rate:', error);
+    logger.error('Error validating award rate:', { error: error instanceof Error ? error.message : String(error) });
     return res.status(500).json({
       message: 'Failed to validate award rate',
       error: error instanceof Error ? error.message : 'Unknown error'
@@ -264,7 +264,7 @@ export async function importModernAwardsData(req: Request, res: Response) {
       stats: result
     });
   } catch (error) {
-    logger.error('Error importing modern awards data:', error);
+    logger.error('Error importing modern awards data:', { error: error instanceof Error ? error.message : String(error) });
     return res.status(500).json({
       message: 'Failed to import modern awards data',
       error: error instanceof Error ? error.message : 'Unknown error'
