@@ -34,8 +34,8 @@ export async function seedEnrichmentData() {
         maxParticipants: 20,
         cost: 1500.00,
         fundingSource: 'GTO Development Grant',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        createdAt: new Date(),
+        updatedAt: new Date()
       },
       {
         name: 'Safety First Workshop Series',
@@ -50,8 +50,8 @@ export async function seedEnrichmentData() {
         maxParticipants: 30,
         cost: 800.00,
         fundingSource: 'Workplace Safety Fund',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        createdAt: new Date(),
+        updatedAt: new Date()
       },
       {
         name: 'Digital Skills Bootcamp',
@@ -66,8 +66,8 @@ export async function seedEnrichmentData() {
         maxParticipants: 25,
         cost: 1200.00,
         fundingSource: 'Digital Transformation Grant',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        createdAt: new Date(),
+        updatedAt: new Date()
       },
       {
         name: 'Professional Communication Skills',
@@ -82,8 +82,8 @@ export async function seedEnrichmentData() {
         maxParticipants: 20,
         cost: 900.00,
         fundingSource: 'Apprentice Development Fund',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        createdAt: new Date(),
+        updatedAt: new Date()
       },
       {
         name: 'Financial Literacy for Apprentices',
@@ -98,8 +98,8 @@ export async function seedEnrichmentData() {
         maxParticipants: 40,
         cost: 500.00,
         fundingSource: 'Financial Education Grant',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        createdAt: new Date(),
+        updatedAt: new Date()
       }
     ];
     
@@ -125,8 +125,8 @@ export async function seedEnrichmentData() {
           feedback: null,
           rating: null,
           notes: 'Enrolled through field officer recommendation',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
+          createdAt: new Date(),
+          updatedAt: new Date()
         });
       });
       
@@ -141,8 +141,8 @@ export async function seedEnrichmentData() {
           feedback: null,
           rating: null,
           notes: 'Self-enrolled through portal',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
+          createdAt: new Date(),
+          updatedAt: new Date()
         });
       });
       
@@ -157,8 +157,8 @@ export async function seedEnrichmentData() {
           feedback: 'Very helpful program with practical skills I can use at work immediately',
           rating: 4,
           notes: 'Finished all modules and presented final project',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
+          createdAt: new Date(),
+          updatedAt: new Date()
         });
       });
       
@@ -178,8 +178,8 @@ export async function seedEnrichmentData() {
           facilitator: 'Michael Thompson',
           maxAttendees: 20,
           notes: 'Includes practical exercises and site walk-through',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
+          createdAt: new Date(),
+          updatedAt: new Date()
         },
         {
           programId: insertedPrograms[1].id,
@@ -192,8 +192,8 @@ export async function seedEnrichmentData() {
           facilitator: 'James Wilson',
           maxAttendees: 30,
           notes: 'Equipment will be provided for hands-on practice',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
+          createdAt: new Date(),
+          updatedAt: new Date()
         },
         {
           programId: insertedPrograms[1].id,
