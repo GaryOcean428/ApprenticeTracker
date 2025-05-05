@@ -23,6 +23,7 @@ import { settingsRouter } from "./api/settings-routes";
 import { registerHostRoutes } from "./api/host-routes";
 import { registerTGARoutes } from "./api/tga-routes";
 import { fairWorkRouter } from "./api/fair-work-routes";
+import { authRouter, isAuthenticated, hasRole } from "./api/auth-routes";
 import { eq, and } from "drizzle-orm";
 import { db } from "./db"; // Assuming db connection is defined here
 import { users, gtoOrganizations } from "@shared/schema";
