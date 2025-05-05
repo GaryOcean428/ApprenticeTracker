@@ -140,7 +140,7 @@ export default function PortalPage() {
     <div className="flex min-h-screen flex-col items-center justify-center p-6 bg-gray-50">
       <div className="w-full max-w-4xl">
         <h1 className="text-4xl font-bold text-center mb-2 bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
-          Braden Group Portal Access
+          Portal Access
         </h1>
         <p className="text-center text-gray-600 mb-8">
           Select the appropriate portal to access your dashboard
