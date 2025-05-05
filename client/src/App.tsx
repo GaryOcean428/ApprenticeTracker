@@ -437,10 +437,10 @@ function Router() {
         }} />
         
         {/* Compliance Routes */}
-        <Route path="/compliance" component={ComplianceList} />
-        <Route path="/compliance/create" component={CreateComplianceRecord} />
+        <ProtectedRoute path="/compliance" component={ComplianceList} />
+        <ProtectedRoute path="/compliance/create" component={CreateComplianceRecord} />
         {/* TODO: Create Compliance details page */}
-        <Route path="/compliance/:id" component={() => {
+        <ProtectedRoute path="/compliance/:id" component={() => {
           const id = window.location.pathname.split('/').pop();
           return (
             <div className="p-8">
@@ -452,9 +452,9 @@ function Router() {
         }} />
         
         {/* Timesheet Routes */}
-        <Route path="/timesheets" component={TimesheetsList} />
+        <ProtectedRoute path="/timesheets" component={TimesheetsList} />
         {/* TODO: Create Timesheet creation page */}
-        <Route path="/timesheets/create" component={() => {
+        <ProtectedRoute path="/timesheets/create" component={() => {
           return (
             <div className="p-8">
               <h1 className="text-2xl font-bold mb-4">Create Timesheet</h1>
@@ -463,7 +463,7 @@ function Router() {
           );
         }} />
         {/* TODO: Create Timesheet details page */}
-        <Route path="/timesheets/:id" component={() => {
+        <ProtectedRoute path="/timesheets/:id" component={() => {
           const id = window.location.pathname.split('/').pop();
           return (
             <div className="p-8">
@@ -475,8 +475,8 @@ function Router() {
         }} />
         
         {/* Report Routes */}
-        <Route path="/reports" component={ReportsList} />
-        <Route path="/reports/apprentices" component={() => {
+        <ProtectedRoute path="/reports" component={ReportsList} />
+        <ProtectedRoute path="/reports/apprentices" component={() => {
           return (
             <div className="p-8">
               <h1 className="text-2xl font-bold mb-4">Apprentice Reports</h1>
@@ -484,7 +484,7 @@ function Router() {
             </div>
           );
         }} />
-        <Route path="/reports/export" component={() => {
+        <ProtectedRoute path="/reports/export" component={() => {
           return (
             <div className="p-8">
               <h1 className="text-2xl font-bold mb-4">Export Options</h1>
