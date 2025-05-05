@@ -5,6 +5,7 @@ import { seedDatabase } from "./seed-db";
 import { migrateFairWorkSchema } from "./migrate-db";
 import { migrateGtoComplianceSchema } from "./migrate-gto-compliance";
 import { seedGtoComplianceStandards } from "./seed-gto-compliance";
+import { seedEnrichmentData } from "./seed-enrichment";
 import { migrateVetSchema } from "./migrate-vet";
 import { migrateRolesSchema } from "./migrate-roles";
 import { migrateHostPreferredQualifications } from "./migrate-host-preferred-quals";
@@ -84,6 +85,10 @@ app.use((req, res, next) => {
     // Seed GTO Compliance Standards
     await seedGtoComplianceStandards();
     log("GTO Compliance Standards seeded successfully");
+    
+    // Seed Enrichment Program data
+    await seedEnrichmentData();
+    log("Enrichment Program data seeded successfully");
   } catch (error) {
     log("Error seeding database: " + error);
   }
