@@ -1,0 +1,165 @@
+# Version Requirements & Core Dependencies
+
+# Framework Dependencies
+NEXTJS_MIN_VERSION="15.1.6" or 
+REACT_MIN_VERSION="react@^19.0.0"
+REACT_DOM_MIN_VERSION="react-dom@^19.0.0"
+NODE_MIN_VERSION="20.11.1"  # LTS version for stability
+TYPESCRIPT_MIN_VERSION="5.3.3"
+PNPM_VERSION="10.2.1"
+
+
+# Database Dependencies
+SUPABASE_MIN_VERSION="2.48.1" @supabase/ssr and @supabase/supabase-js packages:
+
+# Type Safety Rules
+TYPE_SAFETY_RULES=[
+  "no_void_async=true",  # Prevent void returns on async functions
+  "explicit_return_types=true",  # Require explicit return types
+  "no_type_assertions=warn",  # Warn on type assertions
+  "strict_null_checks=true",
+  "strict_property_initialization=true",
+  "no_implicit_any=true"
+]
+
+# Class Implementation Rules
+CLASS_RULES=[
+  "extend_dont_implement=true",  # Prefer extending base classes
+  "preserve_access_modifiers=true",  # Maintain private/protected
+  "require_super_call=true",  # Enforce super() calls
+  "mock_minimum_methods=true"  # Mock only necessary methods
+]
+
+# Environment Variable Rules
+ENV_RULES=[
+  "validate_on_startup=true",
+  "require_fallbacks=true",
+  "type_safe_env=true",
+  "document_all_vars=true"
+]
+
+# Response Type Rules
+RESPONSE_RULES=[
+  "use_next_response=true",  # Standardize on NextResponse
+  "type_safe_responses=true",
+  "validate_response_data=true",
+  "handle_all_errors=true"
+]
+
+# Testing Rules
+TEST_RULES=[
+  "use_vitest=true",  # Use Vitest instead of Jest
+  "extend_base_classes=true",
+  "preserve_modifiers=true",
+  "mock_minimum=true",
+  "type_safe_mocks=true",
+  "validate_states=true",
+  "use_vi_spy=true",  # Use vi.spyOn() instead of jest.spyOn
+  "use_vi_mock=true",  # Use vi.mock() instead of jest.mock
+  "use_vi_fn=true"    # Use vi.fn() instead of jest.fn
+]
+
+
+# Error Handling Rules
+ERROR_RULES=[
+  "proper_inheritance=true",
+  "include_context=true",
+  "type_safe_errors=true",
+  "async_error_handling=true"
+]
+
+# Cline AI Assistant Coding Rules
+AI_RULES=[
+  "review_types_first=true",  # Review type definitions before implementation
+  "explicit_returns=true",  # Always specify return types
+  "no_type_assertions=true",  # Avoid type assertions
+  "extend_base_classes=true",  # Extend don't implement
+  "validate_env=true",  # Validate environment variables
+  "proper_error_chain=true",  # Use proper error inheritance
+  "define_pairs=true",  # Define request/response pairs
+  "follow_patterns=true",  # Follow framework patterns
+  "use_type_guards=true",  # Use type guards over assertions
+  "preserve_modifiers=true"  # Preserve access modifiers
+]
+
+# Code Style Rules
+STYLE_RULES=[
+  "consistent_naming=true",
+  "meaningful_comments=true",
+  "max_line_length=100",
+  "indent_size=2",
+  "trailing_comma=true",
+  "single_quotes=true",
+  "semi_colons=true"
+]
+
+# Documentation Rules
+DOC_RULES=[
+  "jsdoc_required=true",
+  "example_usage=true",
+  "param_descriptions=true",
+  "return_descriptions=true",
+  "error_documentation=true"
+]
+
+# Performance Rules
+PERF_RULES=[
+  "lazy_loading=true",
+  "memo_expensive=true",
+  "debounce_events=true",
+  "optimize_rerenders=true",
+  "bundle_size_limits=true"
+]
+
+# Security Rules
+SECURITY_RULES=[
+  "validate_input=true",
+  "sanitize_output=true",
+  "prevent_xss=true",
+  "secure_headers=true",
+  "rate_limiting=true"
+]
+
+# Accessibility Rules
+A11Y_RULES=[
+  "semantic_html=true",
+  "aria_labels=true",
+  "keyboard_nav=true",
+  "color_contrast=true",
+  "screen_reader=true"
+]
+
+# State Management Rules
+STATE_RULES=[
+  "immutable_updates=true",
+  "single_source=true",
+  "type_safe_state=true",
+  "handle_loading=true",
+  "handle_errors=true"
+]
+
+# API Integration Rules
+API_RULES=[
+  "type_safe_requests=true",
+  "handle_errors=true",
+  "validate_responses=true",
+  "retry_strategy=true",
+  "timeout_handling=true"
+]
+
+# Build & Deploy Rules
+BUILD_RULES=[
+  "strict_typescript=true",
+  "lint_on_commit=true",
+  "test_coverage=true",
+  "bundle_analysis=true",
+  "env_validation=true"
+]
+
+# Continuous Integration Rules
+CI_RULES=[
+  "continuous_integration=true",
+  "test_coverage=true",
+  "bundle_analysis=true",
+  "env_validation=true"
+]
