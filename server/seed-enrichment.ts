@@ -32,7 +32,7 @@ export async function seedEnrichmentData() {
         facilitator: 'Sarah Johnson',
         location: 'Main Training Center',
         maxParticipants: 20,
-        cost: 1500.00,
+        cost: '1500.00',
         fundingSource: 'GTO Development Grant',
         createdAt: new Date(),
         updatedAt: new Date()
@@ -206,8 +206,8 @@ export async function seedEnrichmentData() {
           facilitator: 'Michael Thompson',
           maxAttendees: 30,
           notes: 'Includes first aid certification component',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
+          createdAt: new Date(),
+          updatedAt: new Date()
         },
         {
           programId: insertedPrograms[1].id,
@@ -220,8 +220,8 @@ export async function seedEnrichmentData() {
           facilitator: 'Michael Thompson',
           maxAttendees: 30,
           notes: 'Bring identification and arrive 15 minutes early',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
+          createdAt: new Date(),
+          updatedAt: new Date()
         }
       ];
       
@@ -240,8 +240,8 @@ export async function seedEnrichmentData() {
           registrationDate: '2025-06-01',
           feedback: null,
           notes: null,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
+          createdAt: new Date(),
+          updatedAt: new Date()
         });
       });
       
@@ -254,8 +254,8 @@ export async function seedEnrichmentData() {
           registrationDate: '2025-06-05',
           feedback: null,
           notes: null,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
+          createdAt: new Date(),
+          updatedAt: new Date()
         });
       });
       
