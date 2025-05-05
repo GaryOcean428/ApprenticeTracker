@@ -4,7 +4,7 @@ import { users } from '@shared/schema';
 import { eq } from 'drizzle-orm';
 import { z } from 'zod';
 import { compare, hash } from 'bcrypt';
-import * as jwt from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 
 export const authRouter = Router();
 
