@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
+import { useAuth } from '@/hooks/use-auth';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useLocation, Link } from 'wouter';
@@ -34,6 +35,14 @@ export default function LoginPage() {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   const [showPassword, setShowPassword] = useState(false);
+  const { user, isLoading } = useAuth();
+  
+  // Redirect to portal if already authenticated
+  useEffect(() => {
+    if (user && !isLoading) {
+      setLocation('/portal');
+    }
+  }, [user, isLoading, setLocation]);
 
   const form = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -71,8 +80,8 @@ export default function LoginPage() {
         description: `Welcome back, ${data.user.firstName}!`,
       });
       
-      // Redirect to dashboard
-      setLocation('/');
+      // Redirect to portal
+      setLocation('/portal');
     },
     onError: (error: Error) => {
       toast({

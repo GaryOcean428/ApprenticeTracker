@@ -96,6 +96,7 @@ function Router() {
     <MainLayout>
       <Switch>
         {/* Protected Dashboard Routes */}
+        <ProtectedRoute path="/portal" component={PortalPage} />
         <ProtectedRoute path="/admin" component={Dashboard} />
         
         {/* Apprentice Routes */}
