@@ -18,7 +18,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { DownloadCloud, FileInput, FilePlus, FileUp, Upload, ArrowDownToLine, FileText, FileIcon, AlertTriangle, Database, CheckCircle2, Trash2, Settings, Columns, UploadCloud, Eye, Paperclip, X } from 'lucide-react';
+import { DownloadCloud, FileInput, FilePlus, FileUp, Upload, ArrowDownToLine, FileText, FileIcon, AlertTriangle, Database, CheckCircle2, Trash2, Settings, Columns, UploadCloud, Eye, Paperclip, X, Wand2, Check } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Switch } from '@/components/ui/switch';
