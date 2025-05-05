@@ -52,7 +52,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const token = localStorage.getItem('authToken');
     if (token) {
-      queryClient.setQueryData(userQueryKey, undefined);
+      // Trigger a refetch instead of setting undefined
+      queryClient.invalidateQueries({ queryKey: userQueryKey });
     }
   }, []);
 
@@ -62,11 +63,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     error,
     isLoading,
     refetch,
-  } = useQuery<User | undefined, Error>({
+  } = useQuery<User | null, Error>({
     queryKey: userQueryKey,
     queryFn: async () => {
       const token = localStorage.getItem('authToken');
-      if (!token) return undefined;
+      if (!token) return null;
 
       try {
         const response = await apiRequest('GET', '/api/auth/verify');
@@ -74,7 +75,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           if (response.status === 401) {
             // Clear invalid token
             localStorage.removeItem('authToken');
-            return undefined;
+            return null;
           }
           throw new Error('Failed to verify authentication');
         }
@@ -89,6 +90,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     retry: false,
     refetchOnWindowFocus: false,
     staleTime: 5 * 60 * 1000, // 5 minutes
+    initialData: null
   });
 
   const loginMutation = useMutation({
