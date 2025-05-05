@@ -21,10 +21,12 @@ import {
   qualifications,
 } from "@shared/schema";
 import { z } from "zod";
+import { isAuthenticated } from "../api/auth-routes";
+import { hasPermission, hasAnyPermission } from "../middleware/permissions";
 
 export function registerHostRoutes(app: Express) {
   // Get all host employers
-  app.get("/api/hosts", async (req, res) => {
+  app.get("/api/hosts", isAuthenticated, hasPermission('view:hosts'), async (req, res) => {
     try {
       const hosts = await storage.getAllHostEmployers();
       res.json(hosts);
@@ -35,7 +37,7 @@ export function registerHostRoutes(app: Express) {
   });
 
   // Get a specific host employer by ID
-  app.get("/api/hosts/:id", async (req, res) => {
+  app.get("/api/hosts/:id", isAuthenticated, hasPermission('view:hosts'), async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const host = await storage.getHostEmployer(id);
@@ -107,7 +109,7 @@ export function registerHostRoutes(app: Express) {
   });
   
   // Create a new agreement
-  app.post("/api/host-agreements", async (req, res) => {
+  app.post("/api/host-agreements", isAuthenticated, hasPermission('manage:hosts'), async (req, res) => {
     try {
       const agreementData = req.body;
       
