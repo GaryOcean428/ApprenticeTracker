@@ -209,7 +209,7 @@ fairWorkRouter.post('/awards/:id/classifications', async (req: Request, res: Res
 // GET /api/enterprise-agreements - Get all enterprise agreements
 fairWorkRouter.get('/enterprise-agreements', async (req: Request, res: Response) => {
   try {
-    const result = await db.select().from(enterpriseAgreements).orderBy(enterpriseAgreements.name);
+    const result = await db.select().from(enterpriseAgreements).orderBy(enterpriseAgreements.agreementName);
     res.json(result);
   } catch (error) {
     console.error('Error fetching enterprise agreements:', error);

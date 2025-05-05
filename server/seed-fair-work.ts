@@ -1,5 +1,5 @@
 import { db } from "./db";
-import { awards, awardClassifications } from "@shared/schema";
+import { awards, awardClassifications, enterpriseAgreements } from "@shared/schema";
 
 /**
  * Seeds the database with sample Fair Work data (awards, classifications, etc.)
@@ -9,7 +9,9 @@ export async function seedFairWorkData() {
   
   // Check if awards exist already
   const existingAwards = await db.select({ count: { value: awards.id } }).from(awards);
-  if (existingAwards[0]?.count.value > 0) {
+  const existingEAs = await db.select({ count: { value: enterpriseAgreements.id } }).from(enterpriseAgreements);
+  
+  if (existingAwards[0]?.count.value > 0 && existingEAs[0]?.count.value > 0) {
     console.log("Fair Work data already seeded. Skipping...");
     return;
   }
@@ -155,6 +157,60 @@ export async function seedFairWorkData() {
       
       console.log(`Added ${classifications.length} classifications for award ID ${awardId}`);
     }
+  }
+
+  // Sample enterprise agreements
+  const sampleEnterpriseAgreements = [
+    {
+      agreementName: "ABC Construction Enterprise Agreement",
+      agreementCode: "EA2023-001",
+      description: "Enterprise agreement for ABC Construction covering all construction trades and support staff.",
+      effectiveDate: new Date("2023-01-01"),
+      expiryDate: new Date("2026-12-31"),
+      agreementStatus: "active",
+      notes: "Includes special provisions for remote site work",
+      createdAt: new Date(),
+      updatedAt: new Date()
+    },
+    {
+      agreementName: "XYZ Manufacturing Enterprise Agreement",
+      agreementCode: "EA2022-045",
+      description: "Enterprise agreement for XYZ Manufacturing covering production workers, maintenance, and warehouse staff.",
+      effectiveDate: new Date("2022-07-01"),
+      expiryDate: new Date("2025-06-30"),
+      agreementStatus: "active",
+      notes: "Includes productivity bonus structure",
+      createdAt: new Date(),
+      updatedAt: new Date()
+    },
+    {
+      agreementName: "City Metro Services Agreement",
+      agreementCode: "EA2021-112",
+      description: "Enterprise agreement for City Metro Services covering administrative and customer service staff.",
+      effectiveDate: new Date("2021-10-01"),
+      expiryDate: new Date("2024-09-30"),
+      agreementStatus: "active",
+      notes: "Special allowances for inner city work",
+      createdAt: new Date(),
+      updatedAt: new Date()
+    },
+    {
+      agreementName: "TechSolve IT Staff Agreement",
+      agreementCode: "EA2023-089",
+      description: "Enterprise agreement for TechSolve covering developers, analysts, and IT support staff.",
+      effectiveDate: new Date("2023-03-15"),
+      expiryDate: new Date("2026-03-14"),
+      agreementStatus: "active",
+      notes: "Includes flexible work arrangements and training provisions",
+      createdAt: new Date(),
+      updatedAt: new Date()
+    }
+  ];
+
+  // Insert enterprise agreements
+  for (const agreement of sampleEnterpriseAgreements) {
+    const inserted = await db.insert(enterpriseAgreements).values(agreement).returning();
+    console.log(`Enterprise Agreement created: ${inserted[0].agreementName} (ID: ${inserted[0].id})`);
   }
 
   console.log("Fair Work data seeding completed!");
