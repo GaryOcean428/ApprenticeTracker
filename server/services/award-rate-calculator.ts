@@ -154,7 +154,6 @@ export class AwardRateCalculator {
           .update(timesheetCalculations)
           .set({
             grossTotal: totalAmount.toString(),
-            calculationDetails: JSON.stringify(shiftResults),
             calculatedAt: new Date()
           })
           .where(eq(timesheetCalculations.id, existingCalculation.id));
@@ -212,8 +211,7 @@ export class AwardRateCalculator {
             grossTotal: totalAmount.toString(),
             awardName,
             classificationName,
-            awardCode,
-            calculationDetails: JSON.stringify(shiftResults)
+            awardCode
           });
       }
 
@@ -551,15 +549,22 @@ export class AwardRateCalculator {
       
       // Log the result for auditing purposes
       await db.insert(fairworkComplianceLogs).values({
+        awardCode,
+        classificationCode, 
+        requestedRate: hourlyRate,
+        minimumRate: validationResult.minimum_rate,
+        isValid: validationResult.is_valid,
         message: validationResult.message || '',
-        details: JSON.stringify({
-          awardCode,
-          classificationCode, 
-          requestedRate: hourlyRate,
-          minimumRate: validationResult.minimum_rate,
-          isValid: validationResult.is_valid
+        complianceCheck: JSON.stringify({
+          validationRequest: {
+            award_code: awardCode,
+            classification_code: classificationCode,
+            hourly_rate: hourlyRate,
+            date: today
+          },
+          validationResponse: validationResult
         }),
-        timestamp: new Date(),
+        verifiedDate: new Date(),
         outcome: validationResult.is_valid ? 'compliant' : 'non_compliant',
         source: 'fair_work_api'
       });
