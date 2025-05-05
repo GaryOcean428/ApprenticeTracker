@@ -497,7 +497,15 @@ export class AwardRateCalculator {
    * Parse time string in HH:MM format to seconds since midnight
    */
   private parseTime(timeStr: string): number {
-    const [hours, minutes] = timeStr.split(':').map(Number);
+    // Safely parse hours and minutes to ensure they're numbers
+    const parts = timeStr.split(':');
+    const hours = parseInt(parts[0], 10);
+    const minutes = parseInt(parts[1], 10);
+    
+    if (isNaN(hours) || isNaN(minutes)) {
+      throw new Error(`Invalid time format: ${timeStr}. Expected format: HH:MM`);
+    }
+    
     return (hours * 3600) + (minutes * 60);
   }
 
@@ -548,21 +556,15 @@ export class AwardRateCalculator {
       const validationResult = await this.fairworkClient.validateRateTemplate(validationRequest);
       
       // Log the result for auditing purposes
-      // Use the schema fields properly
       await db.insert(fairworkComplianceLogs).values({
-        awardCode,
-        classificationCode,
+        awardCode: awardCode,
+        classificationCode: classificationCode,
         requestedRate: hourlyRate,
         minimumRate: validationResult.minimum_rate,
         isValid: validationResult.is_valid,
         message: validationResult.message || '',
         complianceCheck: JSON.stringify({
-          validationRequest: {
-            award_code: awardCode,
-            classification_code: classificationCode,
-            hourly_rate: hourlyRate,
-            date: today
-          },
+          validationRequest,
           validationResponse: validationResult
         }),
         verifiedDate: new Date(),

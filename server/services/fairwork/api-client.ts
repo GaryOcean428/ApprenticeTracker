@@ -17,6 +17,7 @@ export interface Award {
   published_year?: number;
   version_number?: number;
   effective_date?: string;
+  description?: string;
 }
 
 export interface Classification {
