@@ -6,6 +6,10 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import ErrorBoundary from "@/components/error-boundary";
 import { withIdValidation } from "@/components/route-validator";
+import { AuthProvider } from "@/hooks/use-auth";
+import { ProtectedRoute } from "@/components/auth/protected-route";
+import LoginPage from "@/pages/auth/login";
+import RegisterPage from "@/pages/auth/register";
 import NotFound from "@/pages/not-found";
 import MainLayout from "./layouts/main-layout";
 import Dashboard from "./pages/dashboard";
@@ -65,7 +69,9 @@ function Router() {
     '/find-apprenticeship',
     '/host-apprentice',
     '/contact',
-    '/portal'
+    '/portal',
+    '/auth/login',
+    '/auth/register'
   ].includes(location);
 
   // If on a public route, we don't need to wrap it in MainLayout
@@ -80,6 +86,10 @@ function Router() {
         <Route path="/host-apprentice" component={HostApprenticePage} />
         <Route path="/contact" component={ContactPage} />
         <Route path="/portal" component={PortalPage} />
+        
+        {/* Auth Routes */}
+        <Route path="/auth/login" component={LoginPage} />
+        <Route path="/auth/register" component={RegisterPage} />
       </Switch>
     );
   }
@@ -88,11 +98,12 @@ function Router() {
   return (
     <MainLayout>
       <Switch>
-        <Route path="/admin" component={Dashboard} />
+        {/* Protected Dashboard Routes */}
+        <ProtectedRoute path="/admin" component={Dashboard} />
         
         {/* Apprentice Routes */}
-        <Route path="/apprentices" component={ApprenticesList} />
-        <Route path="/apprentices/create" component={CreateApprentice} />
+        <ProtectedRoute path="/apprentices" component={ApprenticesList} />
+        <ProtectedRoute path="/apprentices/create" component={CreateApprentice} />
         <Route path="/apprentices/recruitment" component={() => {
           const ApprenticeRecruitment = lazy(() => import("./pages/apprentices/recruitment/index"));
           return (
@@ -136,8 +147,8 @@ function Router() {
         <Route path="/apprentices/:id" component={ApprenticeDetails} />
       
         {/* Host Routes */}
-        <Route path="/hosts" component={HostsList} />
-        <Route path="/hosts/create" component={CreateHost} />
+        <ProtectedRoute path="/hosts" component={HostsList} />
+        <ProtectedRoute path="/hosts/create" component={CreateHost} />
         <Route path="/hosts/agreements" component={() => {
           const HostAgreements = lazy(() => import("./pages/hosts/agreements"));
           return (
@@ -258,15 +269,15 @@ function Router() {
         }} />
         
         {/* Settings Routes */}
-        <Route path="/settings/users" component={UserManagement} />
-        <Route path="/settings/permissions" component={PermissionsManagement} />
-        <Route path="/settings/configuration" component={SystemConfiguration} />
-        <Route path="/settings/integrations" component={IntegrationsSettings} />
-        <Route path="/settings/import-export" component={ImportExportSettings} />
+        <ProtectedRoute path="/settings/users" component={UserManagement} />
+        <ProtectedRoute path="/settings/permissions" component={PermissionsManagement} />
+        <ProtectedRoute path="/settings/configuration" component={SystemConfiguration} />
+        <ProtectedRoute path="/settings/integrations" component={IntegrationsSettings} />
+        <ProtectedRoute path="/settings/import-export" component={ImportExportSettings} />
         
         {/* VET Training Routes */}
-        <Route path="/vet/units" component={UnitsOfCompetencyList} />
-        <Route path="/vet/units/create" component={CreateUnitOfCompetency} />
+        <ProtectedRoute path="/vet/units" component={UnitsOfCompetencyList} />
+        <ProtectedRoute path="/vet/units/create" component={CreateUnitOfCompetency} />
         <Route path="/vet/units/:id" component={() => {
           const UnitDetail = lazy(() => import("./pages/vet/units/[id]/index"));
           return (
@@ -283,8 +294,8 @@ function Router() {
             </Suspense>
           );
         }} />
-        <Route path="/vet/qualifications" component={QualificationsList} />
-        <Route path="/vet/qualifications/create" component={CreateQualification} />
+        <ProtectedRoute path="/vet/qualifications" component={QualificationsList} />
+        <ProtectedRoute path="/vet/qualifications/create" component={CreateQualification} />
         <Route path="/vet/qualifications/import" component={() => {
           const ImportQualifications = lazy(() => import("./pages/vet/qualifications/import"));
           return (
@@ -495,10 +506,12 @@ function App() {
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
-          <Toaster />
-          <Router />
-        </TooltipProvider>
+        <AuthProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Router />
+          </TooltipProvider>
+        </AuthProvider>
       </QueryClientProvider>
     </ErrorBoundary>
   );
