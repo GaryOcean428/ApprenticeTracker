@@ -780,10 +780,12 @@ const ImportExportSettings = () => {
     if (file) {
       setEAFile(file);
       
-      // Automatically start extraction if it's a PDF
-      if (file.type === 'application/pdf') {
-        extractPayRates(file);
-      } else {
+      // Reset extracted rates when file changes
+      setShowExtractedRates(false);
+      setExtractedRates([]);
+      
+      // Show a warning if not a PDF
+      if (file.type !== 'application/pdf') {
         toast({
           title: 'Warning',
           description: 'File is not a PDF. Extraction may not work correctly.',
@@ -794,9 +796,11 @@ const ImportExportSettings = () => {
   };
   
   // Extract pay rates from EA file
-  const extractPayRates = (file: File) => {
+  const extractPayRates = () => {
+    if (!eaFile) return;
+    
     const formData = new FormData();
-    formData.append('file', file);
+    formData.append('file', eaFile);
     extractPayRatesMutation.mutate(formData);
   };
   
@@ -1214,7 +1218,19 @@ const ImportExportSettings = () => {
                   className="mb-2"
                 />
                 {eaFile && (
-                  <p className="text-sm text-muted-foreground">{eaFile.name} ({Math.round(eaFile.size / 1024)} KB)</p>
+                  <div className="flex items-center justify-between mt-2">
+                    <p className="text-sm text-muted-foreground">{eaFile.name} ({Math.round(eaFile.size / 1024)} KB)</p>
+                    <Button 
+                      type="button" 
+                      size="sm" 
+                      variant="secondary" 
+                      onClick={extractPayRates}
+                      disabled={isExtracting}
+                    >
+                      <Wand2 className="h-4 w-4 mr-2" />
+                      Extract Pay Rates
+                    </Button>
+                  </div>
                 )}
               </div>
               
