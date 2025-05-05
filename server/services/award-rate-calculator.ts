@@ -115,7 +115,7 @@ export class AwardRateCalculator {
           date: new Date(shift.date),
           startTime: shift.startTime || '',
           endTime: shift.endTime || '',
-          breakDuration: typeof shift.breakDuration === 'number' ? shift.breakDuration : 0,
+          breakDuration: typeof shift.breakDuration === 'string' ? parseFloat(shift.breakDuration) || 0 : (shift.breakDuration || 0),
           dayType: dayType
         };
 
@@ -499,13 +499,21 @@ export class AwardRateCalculator {
    * Parse time string in HH:MM format to seconds since midnight
    */
   private parseTime(timeStr: string): number {
+    if (!timeStr || timeStr.trim() === '') {
+      throw new Error('Empty time string provided');
+    }
+    
     // Safely parse hours and minutes to ensure they're numbers
     const parts = timeStr.split(':');
+    if (parts.length !== 2) {
+      throw new Error(`Invalid time format: ${timeStr}. Expected format: HH:MM`);
+    }
+    
     const hours = parseInt(parts[0], 10);
     const minutes = parseInt(parts[1], 10);
     
-    if (isNaN(hours) || isNaN(minutes)) {
-      throw new Error(`Invalid time format: ${timeStr}. Expected format: HH:MM`);
+    if (isNaN(hours) || isNaN(minutes) || hours < 0 || hours > 23 || minutes < 0 || minutes > 59) {
+      throw new Error(`Invalid time values in: ${timeStr}. Hours must be 0-23, minutes 0-59`);
     }
     
     return (hours * 3600) + (minutes * 60);
