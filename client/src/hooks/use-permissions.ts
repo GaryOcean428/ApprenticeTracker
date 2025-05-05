@@ -1,5 +1,5 @@
-import { useAuth } from '@/hooks/use-auth';
-import { hasPermission, hasAnyPermission, hasAllPermissions } from '@/lib/permissions';
+import { useAuth } from './use-auth';
+import { checkPermission, checkAnyPermission, checkAllPermissions } from '@/lib/permissions';
 
 /**
  * Custom hook for checking user permissions
@@ -17,9 +17,9 @@ export function usePermissions() {
    */
   const can = (permission: string): boolean => {
     if (!user) return false;
-    return hasPermission(user.role, permission);
+    return checkPermission(user.role, permission);
   };
-  
+
   /**
    * Check if the current user has any of the specified permissions
    * 
@@ -28,9 +28,9 @@ export function usePermissions() {
    */
   const canAny = (permissions: string[]): boolean => {
     if (!user) return false;
-    return hasAnyPermission(user.role, permissions);
+    return checkAnyPermission(user.role, permissions);
   };
-  
+
   /**
    * Check if the current user has all of the specified permissions
    * 
@@ -39,9 +39,9 @@ export function usePermissions() {
    */
   const canAll = (permissions: string[]): boolean => {
     if (!user) return false;
-    return hasAllPermissions(user.role, permissions);
+    return checkAllPermissions(user.role, permissions);
   };
-  
+
   /**
    * Check if the current user cannot perform a specific action
    * 
@@ -51,11 +51,11 @@ export function usePermissions() {
   const cannot = (permission: string): boolean => {
     return !can(permission);
   };
-  
+
   return {
     can,
     canAny,
     canAll,
-    cannot,
+    cannot
   };
 }

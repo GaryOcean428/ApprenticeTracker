@@ -279,6 +279,7 @@ const Sidebar = () => {
             children={[
               { label: "User Management", href: "/settings/users" },
               { label: "Permissions & Roles", href: "/settings/permissions" },
+              { label: "Permissions Demo", href: "/settings/permissions-demo" },
               { label: "System Configuration", href: "/settings/configuration" },
               { label: "Integrations", href: "/settings/integrations" },
               { label: "Import/Export", href: "/settings/import-export" }
