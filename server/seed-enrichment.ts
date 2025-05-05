@@ -135,14 +135,14 @@ export async function seedEnrichmentData() {
         participants.push({
           programId: insertedPrograms[2].id,
           apprenticeId: apprentice.id,
-          enrollmentDate: new Date('2025-05-01'),
+          enrollmentDate: '2025-05-01',
           status: 'enrolled',
           completionDate: null,
           feedback: null,
           rating: null,
           notes: 'Self-enrolled through portal',
-          createdAt: new Date(),
-          updatedAt: new Date()
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
         });
       });
       
@@ -151,14 +151,14 @@ export async function seedEnrichmentData() {
         participants.push({
           programId: insertedPrograms[3].id,
           apprenticeId: apprentice.id,
-          enrollmentDate: new Date('2025-02-20'),
+          enrollmentDate: '2025-02-20',
           status: 'completed',
-          completionDate: new Date('2025-04-15'),
+          completionDate: '2025-04-15',
           feedback: 'Very helpful program with practical skills I can use at work immediately',
           rating: 4,
           notes: 'Finished all modules and presented final project',
-          createdAt: new Date(),
-          updatedAt: new Date()
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
         });
       });
       
@@ -171,57 +171,57 @@ export async function seedEnrichmentData() {
           programId: insertedPrograms[1].id,
           name: 'Workplace Hazard Identification',
           description: 'Learn to identify common workplace hazards in construction environments and implement proper risk mitigation strategies.',
-          workshopDate: new Date('2025-07-15'),
+          workshopDate: '2025-07-15',
           startTime: '09:00',
           endTime: '12:00',
           location: 'Safety Training Room A',
           facilitator: 'Michael Thompson',
           maxAttendees: 20,
           notes: 'Includes practical exercises and site walk-through',
-          createdAt: new Date(),
-          updatedAt: new Date()
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
         },
         {
           programId: insertedPrograms[1].id,
           name: 'Personal Protective Equipment',
           description: 'Comprehensive overview of PPE requirements, proper usage, maintenance, and when different types of protection are required by law.',
-          workshopDate: new Date('2025-07-20'),
+          workshopDate: '2025-07-20',
           startTime: '09:00',
           endTime: '15:00',
           location: 'Safety Training Room B',
           facilitator: 'James Wilson',
           maxAttendees: 30,
           notes: 'Equipment will be provided for hands-on practice',
-          createdAt: new Date(),
-          updatedAt: new Date()
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
         },
         {
           programId: insertedPrograms[1].id,
           name: 'Emergency Response Procedures',
           description: 'Training on proper responses to workplace emergencies including injuries, fires, structural issues, and evacuation protocols.',
-          workshopDate: new Date('2025-07-25'),
+          workshopDate: '2025-07-25',
           startTime: '09:00',
           endTime: '13:00',
           location: 'Safety Training Center',
           facilitator: 'Michael Thompson',
           maxAttendees: 30,
           notes: 'Includes first aid certification component',
-          createdAt: new Date(),
-          updatedAt: new Date()
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
         },
         {
           programId: insertedPrograms[1].id,
           name: 'Safety Certification Exam',
           description: 'Final assessment for the Safety First Workshop Series. Successful completion results in a recognized safety certification.',
-          workshopDate: new Date('2025-07-30'),
+          workshopDate: '2025-07-30',
           startTime: '10:00',
           endTime: '12:00',
           location: 'Testing Center',
           facilitator: 'Michael Thompson',
           maxAttendees: 30,
           notes: 'Bring identification and arrive 15 minutes early',
-          createdAt: new Date(),
-          updatedAt: new Date()
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
         }
       ];
       
@@ -237,11 +237,11 @@ export async function seedEnrichmentData() {
           workshopId: insertedWorkshops[0].id,
           apprenticeId: apprentice.id,
           status: 'registered',
-          registrationDate: new Date('2025-06-01'),
+          registrationDate: '2025-06-01',
           feedback: null,
           notes: null,
-          createdAt: new Date(),
-          updatedAt: new Date()
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
         });
       });
       
