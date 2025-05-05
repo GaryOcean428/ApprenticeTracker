@@ -1,0 +1,184 @@
+import { Request, Response, NextFunction } from 'express';
+
+/**
+ * Middleware to check if the user has the required permission
+ * 
+ * @param permission The permission to check
+ * @returns Middleware function
+ */
+export function hasPermission(permission: string) {
+  return (req: Request, res: Response, next: NextFunction) => {
+    const user = (req as any).user;
+    
+    // If no user is attached to the request, they're not authenticated
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: 'Authentication required',
+      });
+    }
+    
+    // Developer role has all permissions
+    if (user.role === 'developer') {
+      return next();
+    }
+    
+    // Check if the user's role has the required permission
+    // This would ideally query a permissions database or cache
+    const hasAccess = checkPermission(user.role, permission);
+    
+    if (!hasAccess) {
+      return res.status(403).json({
+        success: false,
+        message: 'Insufficient permissions',
+      });
+    }
+    
+    next();
+  };
+}
+
+/**
+ * Check if a role has a specific permission
+ * 
+ * @param role The user role
+ * @param permission The permission to check
+ * @returns boolean indicating if the role has the permission
+ */
+function checkPermission(role: string, permission: string): boolean {
+  // Define role permissions - this would ideally come from a database
+  const permissions: Record<string, string[]> = {
+    'admin': ['*'], // Admin has all permissions
+    'developer': ['*'], // Developer has all permissions
+    'organization_admin': [
+      'view:dashboard',
+      'view:apprentices',
+      'manage:apprentices',
+      'view:hosts',
+      'manage:hosts',
+      'view:contracts',
+      'manage:contracts',
+      'view:placements',
+      'manage:placements',
+      'view:field_officers',
+      'manage:field_officers',
+      'view:activities',
+      'manage:activities',
+      'view:compliance',
+      'manage:compliance',
+      'view:documents',
+      'manage:documents',
+      'view:timesheets',
+      'manage:timesheets',
+      'view:reports',
+      'generate:reports',
+      'view:vet_qualifications',
+      'view:fair_work',
+      'view:organization_settings',
+      'manage:users',
+    ],
+    'field_officer': [
+      'view:dashboard',
+      'view:apprentices',
+      'view:hosts',
+      'view:contracts',
+      'view:placements',
+      'view:activities',
+      'manage:activities',
+      'view:compliance',
+      'manage:compliance',
+      'view:documents',
+      'manage:documents',
+      'view:timesheets',
+      'manage:timesheets',
+      'view:reports',
+      'view:vet_qualifications',
+      'view:fair_work',
+    ],
+    'host_employer': [
+      'view:dashboard',
+      'view:apprentices',
+      'view:contracts',
+      'view:placements',
+      'view:activities',
+      'view:compliance',
+      'view:documents',
+      'upload:documents',
+      'view:timesheets',
+      'approve:timesheets',
+      'view:vet_qualifications',
+    ],
+    'apprentice': [
+      'view:dashboard',
+      'view:contracts',
+      'view:placements',
+      'view:activities',
+      'view:documents',
+      'upload:documents',
+      'view:timesheets',
+      'submit:timesheets',
+      'view:vet_qualifications',
+      'view:fair_work',
+    ],
+    'rto_admin': [
+      'view:dashboard',
+      'view:apprentices',
+      'view:vet_qualifications',
+      'manage:vet_qualifications',
+      'view:documents',
+      'manage:documents',
+    ],
+  };
+  
+  // If the role doesn't exist in our permissions map
+  if (!permissions[role]) {
+    return false;
+  }
+  
+  // Check for wildcard permission
+  if (permissions[role].includes('*')) {
+    return true;
+  }
+  
+  // Check for specific permission
+  return permissions[role].includes(permission);
+}
+
+/**
+ * Middleware to check if the user has any of the required permissions
+ * 
+ * @param permissionList Array of permissions to check
+ * @returns Middleware function
+ */
+export function hasAnyPermission(permissionList: string[]) {
+  return (req: Request, res: Response, next: NextFunction) => {
+    const user = (req as any).user;
+    
+    // If no user is attached to the request, they're not authenticated
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: 'Authentication required',
+      });
+    }
+    
+    // Developer role has all permissions
+    if (user.role === 'developer') {
+      return next();
+    }
+    
+    // Check if the user has any of the required permissions
+    const hasAccess = permissionList.some(permission => 
+      checkPermission(user.role, permission)
+    );
+    
+    if (!hasAccess) {
+      return res.status(403).json({
+        success: false,
+        message: 'Insufficient permissions',
+      });
+    }
+    
+    next();
+  };
+}
