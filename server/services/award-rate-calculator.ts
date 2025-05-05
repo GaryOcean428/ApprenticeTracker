@@ -261,6 +261,9 @@ export class AwardRateCalculator {
     shiftDetails: ShiftDetails
   ): Promise<CalculationResult> {
     try {
+      // Format date to YYYY-MM-DD string for PostgreSQL date comparison
+      const dateStr = shiftDetails.date.toISOString().split('T')[0];
+      
       // Get base pay rate
       const [payRate] = await db.select()
         .from(payRates)
@@ -269,10 +272,10 @@ export class AwardRateCalculator {
             eq(payRates.classificationId, classificationId),
             eq(payRates.isApprenticeRate, true),
             eq(payRates.apprenticeshipYear, apprenticeshipYear),
-            lte(payRates.effectiveFrom, shiftDetails.date),
+            lte(payRates.effectiveFrom, dateStr),
             or(
-              eq(payRates.effectiveTo, null),
-              gte(payRates.effectiveTo, shiftDetails.date)
+              sql`${payRates.effectiveTo} IS NULL`,
+              gte(payRates.effectiveTo, dateStr)
             )
           )
         );
@@ -333,7 +336,7 @@ export class AwardRateCalculator {
             eq(allowanceRules.awardId, awardId),
             or(
               eq(allowanceRules.classificationId, classificationId),
-              eq(allowanceRules.classificationId, null)
+              sql`${allowanceRules.classificationId} IS NULL`
             )
           )
         );
@@ -495,7 +498,7 @@ export class AwardRateCalculator {
             eq(penaltyRules.awardId, award.id),
             or(
               eq(penaltyRules.classificationId, finalClassification.id),
-              eq(penaltyRules.classificationId, null)
+              sql`${penaltyRules.classificationId} IS NULL`
             ),
             eq(penaltyRules.penaltyType, 'saturday')
           )
