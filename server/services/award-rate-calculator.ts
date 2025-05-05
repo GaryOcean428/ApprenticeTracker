@@ -13,7 +13,8 @@ import {
   placements,
   timesheetCalculations,
   fairworkComplianceLogs,
-  hostEmployers
+  hostEmployers,
+  InsertFairworkComplianceLog
 } from "@shared/schema";
 import { FairWorkApiClient } from "../services/fairwork/api-client";
 import logger from "../utils/logger";
@@ -109,11 +110,12 @@ export class AwardRateCalculator {
           }
         }
 
+        // Make sure we handle any null values or conversions for all fields
         const shiftDetails: ShiftDetails = {
           date: new Date(shift.date),
-          startTime: shift.startTime,
-          endTime: shift.endTime,
-          breakDuration: shift.breakDuration || 0,
+          startTime: shift.startTime || '',
+          endTime: shift.endTime || '',
+          breakDuration: typeof shift.breakDuration === 'number' ? shift.breakDuration : 0,
           dayType: dayType
         };
 
@@ -555,21 +557,21 @@ export class AwardRateCalculator {
       // Use the Fair Work API client to validate the rate
       const validationResult = await this.fairworkClient.validateRateTemplate(validationRequest);
       
-      // Log the result for auditing purposes
+      // Log the result for auditing purposes using direct column references
       await db.insert(fairworkComplianceLogs).values({
-        awardCode: awardCode,
-        classificationCode: classificationCode,
-        requestedRate: hourlyRate,
-        minimumRate: validationResult.minimum_rate,
-        isValid: validationResult.is_valid,
-        message: validationResult.message || '',
-        complianceCheck: JSON.stringify({
+        [fairworkComplianceLogs.awardCode.name]: awardCode,
+        [fairworkComplianceLogs.classificationCode.name]: classificationCode,
+        [fairworkComplianceLogs.requestedRate.name]: hourlyRate.toString(),
+        [fairworkComplianceLogs.minimumRate.name]: validationResult.minimum_rate.toString(),
+        [fairworkComplianceLogs.isValid.name]: validationResult.is_valid,
+        [fairworkComplianceLogs.message.name]: validationResult.message || '',
+        [fairworkComplianceLogs.complianceCheck.name]: JSON.stringify({
           validationRequest,
           validationResponse: validationResult
         }),
-        verifiedDate: new Date(),
-        outcome: validationResult.is_valid ? 'compliant' : 'non_compliant',
-        source: 'fair_work_api'
+        [fairworkComplianceLogs.verifiedDate.name]: new Date(),
+        [fairworkComplianceLogs.outcome.name]: validationResult.is_valid ? 'compliant' : 'non_compliant',
+        [fairworkComplianceLogs.source.name]: 'fair_work_api'
       });
 
       return validationResult;
