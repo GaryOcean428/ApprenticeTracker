@@ -36,6 +36,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/api/vet', vetRouter);
   app.use('/api/settings', settingsRouter);
   app.use('/api', fairWorkRouter); // Routes like /api/awards, /api/enterprise-agreements
+  app.use('/api/auth', authRouter); // Authentication routes (login, register, verify)
   
   // Register host employer routes
   registerHostRoutes(app);
