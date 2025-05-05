@@ -778,7 +778,58 @@ const ImportExportSettings = () => {
       columns: selectedColumns,
     };
     createExportJobMutation.mutate(exportData);
+  }
+  
+  // EA file change handler
+  const handleEAFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setEAFile(file);
+      
+      // Automatically start extraction if it's a PDF
+      if (file.type === 'application/pdf') {
+        extractPayRates(file);
+      } else {
+        toast({
+          title: 'Warning',
+          description: 'File is not a PDF. Extraction may not work correctly.',
+          variant: 'default',
+        });
+      }
+    }
   };
+  
+  // Extract pay rates from EA file
+  const extractPayRates = (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    extractPayRatesMutation.mutate(formData);
+  };
+  
+  // Handle EA form submission
+  const onEnterpriseAgreementSubmit = (data: EnterpriseAgreementFormValues) => {
+    if (!eaFile) {
+      toast({
+        title: 'Error',
+        description: 'Please upload an Enterprise Agreement document',
+        variant: 'destructive',
+      });
+      return;
+    }
+    
+    if (extractedRates.length === 0) {
+      toast({
+        title: 'Warning',
+        description: 'No pay rates were extracted. You can continue but no rates will be associated with this agreement.',
+        variant: 'default',
+      });
+    }
+    
+    saveEnterpriseAgreementMutation.mutate({
+      agreement: data,
+      rates: extractedRates
+    });
+  };;
   
   // Toggle column selection for export
   const toggleColumnSelection = (columnValue: string) => {
@@ -1041,6 +1092,183 @@ const ImportExportSettings = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      
+      {/* Enterprise Agreement Upload Dialog */}
+      <Dialog open={showEAUploadDialog} onOpenChange={setShowEAUploadDialog}>
+        <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
+          <DialogHeader>
+            <DialogTitle className="flex items-center">
+              <FileText className="mr-2 h-5 w-5" />
+              Upload Enterprise Agreement
+            </DialogTitle>
+            <DialogDescription>
+              Upload an Enterprise Agreement document to extract pay rates. PDF documents work best.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <Form {...eaForm}>
+            <form onSubmit={eaForm.handleSubmit(onEnterpriseAgreementSubmit)} className="space-y-6">
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={eaForm.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Agreement Name</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="e.g. Retail Enterprise Agreement 2024" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={eaForm.control}
+                  name="organization"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Organization</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="e.g. ABC Retail Pty Ltd" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={eaForm.control}
+                  name="start_date"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Start Date</FormLabel>
+                      <FormControl>
+                        <Input type="date" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={eaForm.control}
+                  name="end_date"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>End Date</FormLabel>
+                      <FormControl>
+                        <Input type="date" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={eaForm.control}
+                  name="industry"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Industry</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="e.g. Retail" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={eaForm.control}
+                  name="status"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Status</FormLabel>
+                      <Select
+                        value={field.value}
+                        onValueChange={field.onChange}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select status" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="active">Active</SelectItem>
+                          <SelectItem value="expired">Expired</SelectItem>
+                          <SelectItem value="pending">Pending</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              
+              <div className="p-4 border rounded-md">
+                <Label htmlFor="ea-file" className="block mb-2">Upload Enterprise Agreement Document</Label>
+                <Input
+                  id="ea-file"
+                  type="file"
+                  onChange={handleEAFileChange}
+                  accept=".pdf,.docx,.doc,.txt"
+                  className="mb-2"
+                />
+                {eaFile && (
+                  <p className="text-sm text-muted-foreground">{eaFile.name} ({Math.round(eaFile.size / 1024)} KB)</p>
+                )}
+              </div>
+              
+              {isExtracting && (
+                <div className="flex justify-center items-center p-4">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                  <span className="ml-2">Extracting pay rates...</span>
+                </div>
+              )}
+              
+              {showExtractedRates && extractedRates.length > 0 && (
+                <div className="border rounded-md p-4">
+                  <h3 className="text-lg font-medium mb-2">Extracted Pay Rates</h3>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Classification</TableHead>
+                        <TableHead>Rate</TableHead>
+                        <TableHead>Effective Date</TableHead>
+                        <TableHead>Notes</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {extractedRates.map((rate, index) => (
+                        <TableRow key={index}>
+                          <TableCell>{rate.classification}</TableCell>
+                          <TableCell>${rate.rate.toFixed(2)}</TableCell>
+                          <TableCell>{rate.effective_date}</TableCell>
+                          <TableCell>{rate.notes || '-'}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+              
+              <DialogFooter>
+                <Button type="button" variant="outline" onClick={() => setShowEAUploadDialog(false)}>
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={isExtracting || !eaFile}>
+                  Save Agreement
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-2 mb-8">
@@ -1228,6 +1456,28 @@ const ImportExportSettings = () => {
                       </Button>
                     )}
                   </div>
+                  
+                  {/* Enterprise Agreement upload section */}
+                  {importForm.watch('entityType') === 'enterprise_agreements' && (
+                    <div className="mt-4 p-4 border rounded-md bg-muted/30">
+                      <h3 className="text-md font-medium mb-2 flex items-center">
+                        <FileText className="h-4 w-4 mr-2" />
+                        Enterprise Agreement Special Upload
+                      </h3>
+                      <p className="text-sm text-muted-foreground mb-4">
+                        Enterprise Agreements require special handling to extract pay rates from documents.
+                        Use this tool to upload and extract data from Enterprise Agreement documents.
+                      </p>
+                      <Button 
+                        type="button" 
+                        onClick={() => setShowEAUploadDialog(true)} 
+                        variant="secondary"
+                      >
+                        <FileUp className="mr-2 h-4 w-4" />
+                        Upload Enterprise Agreement
+                      </Button>
+                    </div>
+                  )}
                 </form>
               </Form>
             </CardContent>
