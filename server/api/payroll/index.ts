@@ -1,14 +1,22 @@
 import { Router } from 'express';
-import { getAwards, getAwardRates } from './award-rates';
+import { getAllAwards, getAwardById, getAwardClassifications, getClassificationRates, getAwardPenalties, getAwardAllowances, calculateTimesheetPay, getTimesheetCalculation } from './award-rates';
 import { getTimesheets, getTimesheet, approveTimesheet, rejectTimesheet } from './timesheets';
 import { isAuthenticated, hasRole } from '../auth-routes';
 import { hasPermission } from '../../middleware/permissions';
 
 const router = Router();
 
-// Award routes
-router.get('/awards', isAuthenticated, hasPermission('view:award_rates'), getAwards);
-router.get('/rates/:awardCode', isAuthenticated, hasPermission('view:award_rates'), getAwardRates);
+// Award and payroll routes
+router.get('/awards', isAuthenticated, hasPermission('view:award_rates'), getAllAwards);
+router.get('/awards/:id', isAuthenticated, hasPermission('view:award_rates'), getAwardById);
+router.get('/awards/:awardId/classifications', isAuthenticated, hasPermission('view:award_rates'), getAwardClassifications);
+router.get('/classifications/:classificationId/rates', isAuthenticated, hasPermission('view:award_rates'), getClassificationRates);
+router.get('/awards/:awardId/penalties', isAuthenticated, hasPermission('view:award_rates'), getAwardPenalties);
+router.get('/awards/:awardId/allowances', isAuthenticated, hasPermission('view:award_rates'), getAwardAllowances);
+
+// Award calculation routes
+router.post('/timesheets/:timesheetId/calculate', isAuthenticated, hasPermission('manage:timesheets'), calculateTimesheetPay);
+router.get('/timesheets/:timesheetId/calculation', isAuthenticated, hasPermission('view:timesheets'), getTimesheetCalculation);
 
 // Timesheet routes
 router.get('/timesheets', isAuthenticated, hasPermission('view:timesheets'), getTimesheets);
