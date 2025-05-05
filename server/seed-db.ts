@@ -2,6 +2,7 @@ import { storage } from "./storage";
 import { InsertUser, InsertApprentice, InsertHostEmployer, InsertTrainingContract, InsertPlacement, InsertDocument, InsertComplianceRecord, InsertTask, InsertActivityLog, apprentices, trainingContracts } from "@shared/schema";
 import { db } from "./db";
 import { eq } from "drizzle-orm";
+import { seedFairWorkData } from "./seed-fair-work";
 
 // Helper function to convert JavaScript Date to ISO string (date part only)
 function formatDate(date: Date): string {
@@ -562,6 +563,9 @@ export async function seedDatabase() {
       const created = await storage.createActivityLog(log);
       console.log("Activity log created:", created.id);
     }
+    
+    // Seed Fair Work data (awards, classifications, etc.)
+    await seedFairWorkData();
     
     console.log("Database seeding completed successfully!");
     return true;
