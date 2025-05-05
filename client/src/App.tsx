@@ -69,7 +69,6 @@ function Router() {
     '/find-apprenticeship',
     '/host-apprentice',
     '/contact',
-    '/portal',
     '/auth/login',
     '/auth/register'
   ].includes(location);
@@ -85,8 +84,6 @@ function Router() {
         <Route path="/find-apprenticeship" component={FindApprenticeshipPage} />
         <Route path="/host-apprentice" component={HostApprenticePage} />
         <Route path="/contact" component={ContactPage} />
-        <Route path="/portal" component={PortalPage} />
-        
         {/* Auth Routes */}
         <Route path="/auth/login" component={LoginPage} />
         <Route path="/auth/register" component={RegisterPage} />
