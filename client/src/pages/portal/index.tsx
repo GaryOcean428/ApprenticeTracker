@@ -192,11 +192,6 @@ export default function PortalPage() {
               </Card>
             </div>
           </TabsContent>
-          
-
-          
-
-          
 
           <TabsContent value="admin">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
