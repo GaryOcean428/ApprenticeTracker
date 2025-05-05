@@ -194,30 +194,32 @@ const ImportExportSettings = () => {
   // Download export file mutation
   const downloadExportMutation = useMutation({
     mutationFn: async (jobId: string) => {
-      const response = await apiRequest('GET', `/api/export-jobs/${jobId}/download`, null, { responseType: 'blob' });
+      const response = await apiRequest('GET', `/api/export-jobs/${jobId}/download`);
       return response;
     },
     onSuccess: (response, jobId) => {
       const job = exportJobs?.find(j => j.id === jobId);
       if (job) {
-        // Create a blob from the response
-        const blob = new Blob([response], { type: getContentType(job.fileType) });
-        const url = window.URL.createObjectURL(blob);
+        // Get the response text and create a blob
+        response.text().then(text => {
+          const blob = new Blob([text], { type: getContentType(job.fileType) });
+          const url = window.URL.createObjectURL(blob);
         
-        // Create a link and click it to trigger download
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = job.fileName || `export-${job.entityType}.${job.fileType}`;
-        document.body.appendChild(a);
-        a.click();
-        
-        // Clean up
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
-        
-        toast({
-          title: 'Success',
-          description: 'Export file downloaded successfully',
+          // Create a link and click it to trigger download
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = job.fileName || `export-${job.entityType}.${job.fileType}`;
+          document.body.appendChild(a);
+          a.click();
+          
+          // Clean up
+          window.URL.revokeObjectURL(url);
+          document.body.removeChild(a);
+          
+          toast({
+            title: 'Success',
+            description: 'Export file downloaded successfully',
+          });
         });
       }
     },

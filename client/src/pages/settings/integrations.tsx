@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { apiRequest, queryClient } from '@/lib/queryClient';
@@ -65,11 +66,21 @@ interface ApiIntegration extends Integration {
   apiKeyHeader: string;
 }
 
+// Type guard for API integration
+function isApiIntegration(integration: Integration): integration is ApiIntegration {
+  return 'baseUrl' in integration && 'apiKey' in integration;
+}
+
 interface WebhookIntegration extends Integration {
   url: string;
   events: string[];
   secret?: string;
   headers?: Record<string, string>;
+}
+
+// Type guard for webhook integration
+function isWebhookIntegration(integration: Integration): integration is WebhookIntegration {
+  return 'url' in integration && 'events' in integration;
 }
 
 interface StorageIntegration extends Integration {
@@ -137,19 +148,19 @@ const IntegrationCard = ({
         </div>
       </CardHeader>
       <CardContent className="pb-2">
-        {'url' in integration && (
+        {isWebhookIntegration(integration) && (
           <div className="text-sm mb-2 flex items-center gap-1">
             <ExternalLink className="h-3 w-3 text-muted-foreground" />
             <span className="text-muted-foreground truncate">{integration.url}</span>
           </div>
         )}
-        {'baseUrl' in integration && (
+        {isApiIntegration(integration) && (
           <div className="text-sm mb-2 flex items-center gap-1">
             <Globe className="h-3 w-3 text-muted-foreground" />
             <span className="text-muted-foreground truncate">{integration.baseUrl}</span>
           </div>
         )}
-        {'events' in integration && integration.events.length > 0 && (
+        {isWebhookIntegration(integration) && integration.events.length > 0 && (
           <div className="flex flex-wrap gap-1 mt-2">
             {integration.events.map((event) => (
               <Badge key={event} variant="outline" className="text-xs">
