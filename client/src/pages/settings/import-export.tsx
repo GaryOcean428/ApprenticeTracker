@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
@@ -17,13 +17,36 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { DownloadCloud, FileInput, FilePlus, FileUp, Upload, ArrowDownToLine, FileText, FileIcon, AlertTriangle, Database, CheckCircle2, Trash2 } from 'lucide-react';
+import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { DownloadCloud, FileInput, FilePlus, FileUp, Upload, ArrowDownToLine, FileText, FileIcon, AlertTriangle, Database, CheckCircle2, Trash2, Settings, Columns, UploadCloud, Eye, Paperclip, X } from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Switch } from '@/components/ui/switch';
+
+// Enhanced schemas for column customization
+interface ColumnMapping {
+  sourceColumn: string;
+  targetField: string;
+  required: boolean;
+  transform?: string;
+}
+
+interface ImportPreview {
+  columns: string[];
+  sampleRows: any[];
+}
 
 const importSchema = z.object({
   fileType: z.enum(['csv', 'json', 'xlsx']),
   entityType: z.string(),
   updateExisting: z.boolean().default(false),
   skipErrors: z.boolean().default(false),
+  columnMapping: z.array(z.object({
+    sourceColumn: z.string(),
+    targetField: z.string(),
+    required: z.boolean().default(false),
+    transform: z.string().optional()
+  })).optional(),
 });
 
 const exportSchema = z.object({
@@ -31,6 +54,7 @@ const exportSchema = z.object({
   entityType: z.string(),
   includeRelated: z.boolean().default(false),
   filter: z.string().optional(),
+  columns: z.array(z.string()).optional(),
 });
 
 type ImportFormValues = z.infer<typeof importSchema>;
@@ -82,6 +106,12 @@ const ImportExportSettings = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [filePreview, setFilePreview] = useState<ImportPreview | null>(null);
+  const [showMappingDialog, setShowMappingDialog] = useState(false);
+  const [columnMapping, setColumnMapping] = useState<ColumnMapping[]>([]);
+  const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
+  const [previewData, setPreviewData] = useState<any[]>([]);
+  const [entityFields, setEntityFields] = useState<{label: string, value: string}[]>([]);
   
   // Forms
   const importForm = useForm<ImportFormValues>({
@@ -275,6 +305,176 @@ const ImportExportSettings = () => {
   });
 
   // Handle file selection
+  // Get entity fields for mapping based on entity type
+  useEffect(() => {
+    const entityType = importForm.getValues('entityType');
+    
+    // This would normally be an API call to get the entity schema
+    // For now, we'll use mock fields based on entity type
+    const getEntityFields = () => {
+      switch (entityType) {
+        case 'apprentices':
+          return [
+            { label: 'First Name', value: 'firstName' },
+            { label: 'Last Name', value: 'lastName' },
+            { label: 'Email', value: 'email' },
+            { label: 'Phone', value: 'phone' },
+            { label: 'Date of Birth', value: 'dateOfBirth' },
+            { label: 'Address', value: 'address' },
+            { label: 'City', value: 'city' },
+            { label: 'State', value: 'state' },
+            { label: 'Postal Code', value: 'postalCode' },
+            { label: 'Country', value: 'country' },
+          ];
+        case 'host_employers':
+          return [
+            { label: 'Company Name', value: 'companyName' },
+            { label: 'Contact Name', value: 'contactName' },
+            { label: 'Email', value: 'email' },
+            { label: 'Phone', value: 'phone' },
+            { label: 'ABN', value: 'abn' },
+            { label: 'Address', value: 'address' },
+            { label: 'City', value: 'city' },
+            { label: 'State', value: 'state' },
+            { label: 'Postal Code', value: 'postalCode' },
+            { label: 'Country', value: 'country' },
+          ];
+        case 'qualifications':
+          return [
+            { label: 'Code', value: 'code' },
+            { label: 'Title', value: 'title' },
+            { label: 'AQF Level', value: 'aqfLevel' },
+            { label: 'Description', value: 'description' },
+            { label: 'Status', value: 'status' },
+            { label: 'Release Date', value: 'releaseDate' },
+          ];
+        default:
+          return [];
+      }
+    };
+    
+    setEntityFields(getEntityFields());
+  }, [importForm.watch('entityType')]);
+
+  // Function to read file and generate preview
+  const readAndPreviewFile = (file: File) => {
+    const reader = new FileReader();
+    
+    reader.onload = (e) => {
+      const content = e.target?.result as string;
+      let preview: ImportPreview | null = null;
+      
+      try {
+        // Different parsing based on file type
+        if (file.name.endsWith('.csv')) {
+          // Simple CSV parsing for preview
+          const rows = content.split('\n').filter(row => row.trim().length > 0);
+          const headers = rows[0].split(',').map(h => h.trim());
+          const sampleData = rows.slice(1, 6).map(row => {
+            const values = row.split(',').map(v => v.trim());
+            return headers.reduce((obj, header, i) => {
+              obj[header] = values[i] || '';
+              return obj;
+            }, {} as Record<string, string>);
+          });
+          
+          preview = {
+            columns: headers,
+            sampleRows: sampleData,
+          };
+          
+          // Auto-generate column mapping
+          const initialMapping: ColumnMapping[] = headers.map(header => {
+            // Try to find matching field
+            const matchedField = entityFields.find(field => 
+              field.label.toLowerCase() === header.toLowerCase() ||
+              field.value.toLowerCase() === header.toLowerCase()
+            );
+            
+            return {
+              sourceColumn: header,
+              targetField: matchedField?.value || '',
+              required: false,
+            };
+          });
+          
+          setColumnMapping(initialMapping);
+          
+        } else if (file.name.endsWith('.json')) {
+          // JSON parsing
+          const jsonData = JSON.parse(content);
+          if (Array.isArray(jsonData) && jsonData.length > 0) {
+            const sampleData = jsonData.slice(0, 5);
+            const headers = Object.keys(sampleData[0]);
+            
+            preview = {
+              columns: headers,
+              sampleRows: sampleData,
+            };
+            
+            // Auto-generate column mapping
+            const initialMapping: ColumnMapping[] = headers.map(header => {
+              const matchedField = entityFields.find(field => 
+                field.label.toLowerCase() === header.toLowerCase() ||
+                field.value.toLowerCase() === header.toLowerCase()
+              );
+              
+              return {
+                sourceColumn: header,
+                targetField: matchedField?.value || '',
+                required: false,
+              };
+            });
+            
+            setColumnMapping(initialMapping);
+          }
+        }
+        
+        setFilePreview(preview);
+        if (preview) {
+          setShowMappingDialog(true);
+        }
+      } catch (error) {
+        console.error('Error parsing file:', error);
+        toast({
+          title: 'Error',
+          description: 'Failed to parse file. Please check the file format.',
+          variant: 'destructive',
+        });
+      }
+    };
+    
+    reader.onerror = () => {
+      toast({
+        title: 'Error',
+        description: 'Failed to read file',
+        variant: 'destructive',
+      });
+    };
+    
+    // Read the file based on type
+    if (file.name.endsWith('.csv')) {
+      reader.readAsText(file);
+    } else if (file.name.endsWith('.json')) {
+      reader.readAsText(file);
+    } else if (file.name.endsWith('.xlsx')) {
+      // For XLSX, we would normally use a library like xlsx
+      // In this demo, we'll just show an error
+      toast({
+        title: 'Excel Parsing',
+        description: 'Excel file parsing would need an additional library in a real application.',
+        variant: 'default',
+      });
+    }
+  };
+  
+  // Handle column mapping updates
+  const updateColumnMapping = (index: number, field: keyof ColumnMapping, value: any) => {
+    const newMapping = [...columnMapping];
+    newMapping[index] = { ...newMapping[index], [field]: value };
+    setColumnMapping(newMapping);
+  };
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -284,10 +484,13 @@ const ImportExportSettings = () => {
       const extension = file.name.split('.').pop()?.toLowerCase();
       if (extension === 'csv') {
         importForm.setValue('fileType', 'csv');
+        readAndPreviewFile(file);
       } else if (extension === 'json') {
         importForm.setValue('fileType', 'json');
+        readAndPreviewFile(file);
       } else if (extension === 'xlsx') {
         importForm.setValue('fileType', 'xlsx');
+        // For XLSX, we might use a library like xlsx
       }
     }
   };
@@ -313,8 +516,92 @@ const ImportExportSettings = () => {
     createImportJobMutation.mutate(formData);
   };
 
+  // Handle column selection for export
+  useEffect(() => {
+    const entityType = exportForm.getValues('entityType');
+    // Get entity fields based on the selected entity type
+    // This function could be reused from the import section
+    const getEntityFields = () => {
+      switch (entityType) {
+        case 'apprentices':
+          return [
+            { label: 'First Name', value: 'firstName' },
+            { label: 'Last Name', value: 'lastName' },
+            { label: 'Email', value: 'email' },
+            { label: 'Phone', value: 'phone' },
+            { label: 'Date of Birth', value: 'dateOfBirth' },
+            { label: 'Address', value: 'address' },
+            { label: 'City', value: 'city' },
+            { label: 'State', value: 'state' },
+            { label: 'Postal Code', value: 'postalCode' },
+            { label: 'Country', value: 'country' },
+          ];
+        case 'host_employers':
+          return [
+            { label: 'Company Name', value: 'companyName' },
+            { label: 'Contact Name', value: 'contactName' },
+            { label: 'Email', value: 'email' },
+            { label: 'Phone', value: 'phone' },
+            { label: 'ABN', value: 'abn' },
+            { label: 'Address', value: 'address' },
+            { label: 'City', value: 'city' },
+            { label: 'State', value: 'state' },
+            { label: 'Postal Code', value: 'postalCode' },
+            { label: 'Country', value: 'country' },
+          ];
+        case 'qualifications':
+          return [
+            { label: 'Code', value: 'code' },
+            { label: 'Title', value: 'title' },
+            { label: 'AQF Level', value: 'aqfLevel' },
+            { label: 'Description', value: 'description' },
+            { label: 'Status', value: 'status' },
+            { label: 'Release Date', value: 'releaseDate' },
+          ];
+        default:
+          return [];
+      }
+    };
+    
+    setEntityFields(getEntityFields());
+    // Set default selected columns
+    setSelectedColumns(getEntityFields().map(field => field.value));
+  }, [exportForm.watch('entityType')]);
+  
   const onExportSubmit = (data: ExportFormValues) => {
-    createExportJobMutation.mutate(data);
+    // Add selected columns to the export data
+    const exportData = {
+      ...data,
+      columns: selectedColumns,
+    };
+    createExportJobMutation.mutate(exportData);
+  };
+  
+  // Toggle column selection for export
+  const toggleColumnSelection = (columnValue: string) => {
+    setSelectedColumns(prev => {
+      if (prev.includes(columnValue)) {
+        return prev.filter(value => value !== columnValue);
+      } else {
+        return [...prev, columnValue];
+      }
+    });
+  };
+  
+  // Check if all columns are selected
+  const areAllColumnsSelected = () => {
+    return entityFields.length > 0 && entityFields.every(field => 
+      selectedColumns.includes(field.value)
+    );
+  };
+  
+  // Toggle all columns
+  const toggleAllColumns = () => {
+    if (areAllColumnsSelected()) {
+      setSelectedColumns([]);
+    } else {
+      setSelectedColumns(entityFields.map(field => field.value));
+    }
   };
 
   // Handle download
@@ -354,9 +641,142 @@ const ImportExportSettings = () => {
     return new Date(dateString).toLocaleString();
   };
 
+  // Apply column mapping and continue with import
+  const applyColumnMapping = () => {
+    // Filter out unmapped columns
+    const validMapping = columnMapping.filter(mapping => mapping.targetField !== '');
+    
+    if (validMapping.length === 0) {
+      toast({
+        title: 'Error',
+        description: 'Please map at least one column to continue',
+        variant: 'destructive',
+      });
+      return;
+    }
+    
+    // Add column mapping to form data
+    importForm.setValue('columnMapping', validMapping);
+    setShowMappingDialog(false);
+    
+    toast({
+      title: 'Column Mapping Applied',
+      description: `${validMapping.length} columns mapped successfully`,
+    });
+  };
+
   return (
     <div className="p-8">
       <h1 className="text-3xl font-bold mb-6">Data Import & Export</h1>
+
+      {/* Column Mapping Dialog */}
+      <Dialog open={showMappingDialog} onOpenChange={setShowMappingDialog}>
+        <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col">
+          <DialogHeader>
+            <DialogTitle className="flex items-center">
+              <Columns className="mr-2 h-5 w-5" />
+              Column Mapping
+            </DialogTitle>
+            <DialogDescription>
+              Map columns from your import file to the appropriate fields in the system.
+              Required fields must be mapped to proceed.
+            </DialogDescription>
+          </DialogHeader>
+          
+          {filePreview && (
+            <div className="flex flex-col flex-1 overflow-hidden">
+              {/* Table headers preview */}
+              <div className="mb-4">
+                <h3 className="text-sm font-medium mb-2">Sample Data Preview</h3>
+                <ScrollArea className="h-48 border rounded">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        {filePreview.columns.map((column) => (
+                          <TableHead key={column}>{column}</TableHead>
+                        ))}
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filePreview.sampleRows.map((row, index) => (
+                        <TableRow key={index}>
+                          {filePreview.columns.map((column) => (
+                            <TableCell key={column}>{row[column]}</TableCell>
+                          ))}
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </ScrollArea>
+              </div>
+              
+              {/* Column mapping section */}
+              <div className="flex-1 overflow-auto">
+                <h3 className="text-sm font-medium mb-2">Column Mapping</h3>
+                <ScrollArea className="h-64 border rounded">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-1/3">Source Column</TableHead>
+                        <TableHead className="w-1/3">Target Field</TableHead>
+                        <TableHead className="w-1/6">Required</TableHead>
+                        <TableHead className="w-1/6">Transform</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {columnMapping.map((mapping, index) => (
+                        <TableRow key={mapping.sourceColumn}>
+                          <TableCell>{mapping.sourceColumn}</TableCell>
+                          <TableCell>
+                            <Select 
+                              value={mapping.targetField} 
+                              onValueChange={(value) => updateColumnMapping(index, 'targetField', value)}
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select field" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="">Skip this column</SelectItem>
+                                {entityFields.map((field) => (
+                                  <SelectItem key={field.value} value={field.value}>
+                                    {field.label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </TableCell>
+                          <TableCell>
+                            <Switch 
+                              checked={mapping.required} 
+                              onCheckedChange={(checked) => updateColumnMapping(index, 'required', checked)} 
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <Input 
+                              value={mapping.transform || ''} 
+                              onChange={(e) => updateColumnMapping(index, 'transform', e.target.value)} 
+                              placeholder="e.g., uppercase" 
+                            />
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </ScrollArea>
+              </div>
+            </div>
+          )}
+          
+          <DialogFooter className="mt-4">
+            <Button variant="outline" type="button" onClick={() => setShowMappingDialog(false)}>
+              Cancel
+            </Button>
+            <Button type="button" onClick={applyColumnMapping}>
+              Apply Mapping
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-2 mb-8">
@@ -682,6 +1102,49 @@ const ImportExportSettings = () => {
                         </FormItem>
                       )}
                     />
+                  </div>
+
+                  {/* Column selection section */}
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <div className="font-medium">Select Columns to Export</div>
+                      <div className="flex items-center">
+                        <Checkbox
+                          id="select-all-columns"
+                          checked={areAllColumnsSelected()}
+                          onCheckedChange={toggleAllColumns}
+                        />
+                        <Label htmlFor="select-all-columns" className="ml-2 text-sm font-medium">
+                          Select All
+                        </Label>
+                      </div>
+                    </div>
+                    
+                    <div className="border rounded-md p-4">
+                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+                        {entityFields.map((field) => (
+                          <div key={field.value} className="flex items-center space-x-2">
+                            <Checkbox
+                              id={`column-${field.value}`}
+                              checked={selectedColumns.includes(field.value)}
+                              onCheckedChange={() => toggleColumnSelection(field.value)}
+                            />
+                            <Label 
+                              htmlFor={`column-${field.value}`} 
+                              className="text-sm font-medium truncate"
+                            >
+                              {field.label}
+                            </Label>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    {selectedColumns.length === 0 && (
+                      <div className="text-destructive text-sm">
+                        Please select at least one column to export
+                      </div>
+                    )}
                   </div>
 
                   <div className="space-y-4">
