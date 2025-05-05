@@ -211,6 +211,12 @@ export const placements = pgTable("placements", {
   labourHireIndicator: boolean("labour_hire_indicator").default(false), // Distinguish direct hire vs. labour hire
   gtoPlacement: boolean("gto_placement").default(false),             // If placed by a GTO
   ebaId: integer("eba_id"),                                         // Link to enterprise agreement
+  
+  // Charge rate fields
+  chargeRate: numeric("charge_rate", { precision: 10, scale: 2 }),       // Current charge rate for host employer
+  negotiatedRate: numeric("negotiated_rate", { precision: 10, scale: 2 }), // Negotiated hourly rate for apprentice
+  lastChargeRateUpdate: timestamp("last_charge_rate_update"),           // When the charge rate was last updated
+  quoteId: integer("quote_id"),                                         // Link to the original quote if applicable
 });
 
 export const insertPlacementSchema = createInsertSchema(placements).omit({
@@ -477,6 +483,80 @@ export const insertPublicHolidaySchema = createInsertSchema(publicHolidays).omit
   updatedAt: true,
 });
 
+// Charge Rate Calculations
+export const chargeRateCalculations = pgTable("charge_rate_calculations", {
+  id: serial("id").primaryKey(),
+  apprenticeId: integer("apprentice_id").references(() => apprentices.id).notNull(),
+  hostEmployerId: integer("host_employer_id").references(() => hostEmployers.id).notNull(),
+  payRate: numeric("pay_rate", { precision: 10, scale: 2 }).notNull(),
+  totalHours: numeric("total_hours", { precision: 10, scale: 2 }).notNull(),
+  billableHours: numeric("billable_hours", { precision: 10, scale: 2 }).notNull(),
+  baseWage: numeric("base_wage", { precision: 10, scale: 2 }).notNull(),
+  onCosts: json("on_costs").notNull(),
+  totalCost: numeric("total_cost", { precision: 10, scale: 2 }).notNull(),
+  costPerHour: numeric("cost_per_hour", { precision: 10, scale: 2 }).notNull(),
+  chargeRate: numeric("charge_rate", { precision: 10, scale: 2 }).notNull(),
+  marginRate: numeric("margin_rate", { precision: 5, scale: 2 }).notNull(),
+  calculationDate: timestamp("calculation_date").notNull().defaultNow(),
+  approved: boolean("approved").default(false),
+  approvedBy: integer("approved_by").references(() => users.id),
+  approvedDate: timestamp("approved_date"),
+  applied: boolean("applied").default(false),
+  notes: text("notes"),
+});
+
+export const insertChargeRateCalculationSchema = createInsertSchema(chargeRateCalculations).omit({
+  id: true,
+  calculationDate: true,
+  approvedDate: true,
+});
+
+// Quote Management
+export const quotes = pgTable("quotes", {
+  id: serial("id").primaryKey(),
+  hostEmployerId: integer("host_employer_id").references(() => hostEmployers.id).notNull(),
+  quoteNumber: text("quote_number").notNull().unique(),
+  quoteDate: timestamp("quote_date").notNull().defaultNow(),
+  validUntil: timestamp("valid_until"),
+  quoteTitle: text("quote_title").notNull(),
+  totalAmount: numeric("total_amount", { precision: 10, scale: 2 }).notNull(),
+  status: text("status").notNull().default("draft"), // draft, sent, accepted, rejected, expired
+  acceptedDate: timestamp("accepted_date"),
+  acceptedBy: text("accepted_by"),
+  rejectionReason: text("rejection_reason"),
+  notes: text("notes"),
+  createdBy: integer("created_by").references(() => users.id),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertQuoteSchema = createInsertSchema(quotes).omit({
+  id: true,
+  quoteDate: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+// Quote Line Items
+export const quoteLineItems = pgTable("quote_line_items", {
+  id: serial("id").primaryKey(),
+  quoteId: integer("quote_id").references(() => quotes.id).notNull(),
+  apprenticeId: integer("apprentice_id").references(() => apprentices.id),
+  description: text("description").notNull(),
+  quantity: numeric("quantity", { precision: 10, scale: 2 }).notNull(),
+  unit: text("unit").notNull(), // hour, day, week, etc.
+  weeklyHours: numeric("weekly_hours", { precision: 5, scale: 2 }),
+  ratePerHour: numeric("rate_per_hour", { precision: 10, scale: 2 }).notNull(),
+  totalPrice: numeric("total_price", { precision: 10, scale: 2 }).notNull(),
+  costBreakdown: json("cost_breakdown"), // Optional detailed breakdown
+  notes: text("notes"),
+  sortOrder: integer("sort_order").default(0),
+});
+
+export const insertQuoteLineItemSchema = createInsertSchema(quoteLineItems).omit({
+  id: true,
+});
+
 // Fair Work Compliance Logs
 export const fairworkComplianceLogs = pgTable("fairwork_compliance_logs", {
   id: serial("id").primaryKey(),
@@ -660,6 +740,15 @@ export type InsertAllowanceRule = z.infer<typeof insertAllowanceRuleSchema>;
 
 export type PublicHoliday = typeof publicHolidays.$inferSelect;
 export type InsertPublicHoliday = z.infer<typeof insertPublicHolidaySchema>;
+
+export type ChargeRateCalculation = typeof chargeRateCalculations.$inferSelect;
+export type InsertChargeRateCalculation = z.infer<typeof insertChargeRateCalculationSchema>;
+
+export type Quote = typeof quotes.$inferSelect;
+export type InsertQuote = z.infer<typeof insertQuoteSchema>;
+
+export type QuoteLineItem = typeof quoteLineItems.$inferSelect;
+export type InsertQuoteLineItem = z.infer<typeof insertQuoteLineItemSchema>;
 
 export type FairworkComplianceLog = typeof fairworkComplianceLogs.$inferSelect;
 export type InsertFairworkComplianceLog = z.infer<typeof insertFairworkComplianceLogSchema>;
