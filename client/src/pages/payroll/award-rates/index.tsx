@@ -21,12 +21,12 @@ const AwardRatesPage: React.FC = () => {
   const [selectedAward, setSelectedAward] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState<string>('');
 
-  const { data: awards, isLoading: awardsLoading, error: awardsError } = useQuery({
-    queryKey: ['/api/fairwork/awards'],
+  const { data: awards = [], isLoading: awardsLoading, error: awardsError } = useQuery<any[]>({
+    queryKey: ['/api/payroll/awards'],
   });
 
-  const { data: rates, isLoading: ratesLoading, error: ratesError } = useQuery({
-    queryKey: ['/api/fairwork/rates', selectedAward],
+  const { data: rates = [], isLoading: ratesLoading, error: ratesError } = useQuery<AwardRate[]>({
+    queryKey: ['/api/payroll/rates', selectedAward],
     enabled: !!selectedAward,
   });
 

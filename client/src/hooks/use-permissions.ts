@@ -56,6 +56,7 @@ export function usePermissions() {
     can,
     canAny,
     canAll,
-    cannot
+    cannot,
+    hasPermission: can // Alias for compatibility
   };
 }

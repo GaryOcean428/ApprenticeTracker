@@ -24,8 +24,9 @@ const inputVariants = cva(
   }
 );
 
+// Omit the size from HTMLInputElement to avoid conflict with size from VariantProps
 export interface InputProps
-  extends InputHTMLAttributes<HTMLInputElement>,
+  extends Omit<InputHTMLAttributes<HTMLInputElement>, 'size'>,
     VariantProps<typeof inputVariants> {
   error?: string;
   label?: string;
