@@ -2,445 +2,416 @@ import { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Separator } from '@/components/ui/separator';
-import { Badge } from '@/components/ui/badge';
-import { 
-  Link, 
-  ExternalLink, 
-  Webhook, 
-  Plus, 
-  RefreshCw, 
-  CheckCircle2, 
-  XCircle, 
-  AlertTriangle,
-  CloudCog, 
-  Database, 
-  MailCheck,
-  FileText
-} from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { AlertTriangle, Check, Cloud, Database, Edit, ExternalLink, FileText, Globe, HardDrive, Plus, Server, Settings, Trash2, Webhook } from 'lucide-react';
 
+// API Integration schema
+const apiIntegrationSchema = z.object({
+  name: z.string().min(2, 'Name is required'),
+  type: z.string(),
+  baseUrl: z.string().url('Must be a valid URL'),
+  apiKey: z.string().min(1, 'API key is required'),
+  apiKeyHeader: z.string().min(1, 'API key header name is required'),
+  isActive: z.boolean().default(true),
+  description: z.string().optional(),
+});
+
+// Webhook schema
+const webhookSchema = z.object({
+  name: z.string().min(2, 'Name is required'),
+  url: z.string().url('Must be a valid URL'),
+  events: z.array(z.string()).min(1, 'At least one event must be selected'),
+  secret: z.string().optional(),
+  headers: z.record(z.string()).optional(),
+  isActive: z.boolean().default(true),
+});
+
+// Document storage schema
+const documentStorageSchema = z.object({
+  name: z.string().min(2, 'Name is required'),
+  type: z.string(),
+  config: z.record(z.string()).optional(),
+  isActive: z.boolean().default(true),
+  isDefault: z.boolean().default(false),
+});
+
+// Interface definitions
 interface Integration {
   id: number;
   name: string;
-  provider: string;
   type: string;
-  status: 'active' | 'inactive' | 'error';
-  lastSynced: string | null;
-  apiKey: string | null;
-  apiUrl: string | null;
-  config: Record<string, any> | null;
-  createdAt: Date;
-  updatedAt: Date;
+  config: Record<string, any>;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
-const fairWorkSchema = z.object({
-  apiKey: z.string().min(1, { message: 'API Key is required' }),
-  apiUrl: z.string().url({ message: 'Must be a valid URL' }),
-  enabled: z.boolean().default(false),
-  syncAwards: z.boolean().default(true),
-  syncPayRates: z.boolean().default(true),
-  syncHolidays: z.boolean().default(true),
-});
+interface ApiIntegration extends Integration {
+  baseUrl: string;
+  apiKey: string;
+  apiKeyHeader: string;
+}
 
-const emailServiceSchema = z.object({
-  provider: z.enum(['smtp', 'sendgrid', 'mailgun', 'ses']),
-  apiKey: z.string().min(1, { message: 'API Key is required' }),
-  from: z.string().email({ message: 'Must be a valid email address' }),
-  smtpHost: z.string().optional(),
-  smtpPort: z.string().optional(),
-  smtpUsername: z.string().optional(),
-  smtpPassword: z.string().optional(),
-  enabled: z.boolean().default(false),
-});
+interface WebhookIntegration extends Integration {
+  url: string;
+  events: string[];
+  secret?: string;
+  headers?: Record<string, string>;
+}
 
-const smsServiceSchema = z.object({
-  provider: z.enum(['twilio', 'messagebird', 'sns']),
-  accountSid: z.string().min(1, { message: 'Account SID is required' }).optional(),
-  authToken: z.string().min(1, { message: 'Auth Token is required' }).optional(),
-  apiKey: z.string().min(1, { message: 'API Key is required' }).optional(),
-  from: z.string().min(1, { message: 'From number is required' }),
-  enabled: z.boolean().default(false),
-});
+interface StorageIntegration extends Integration {
+  isDefault: boolean;
+}
 
-const webhookSchema = z.object({
-  name: z.string().min(1, { message: 'Name is required' }),
-  url: z.string().url({ message: 'Must be a valid URL' }),
-  secret: z.string().optional(),
-  events: z.array(z.string()).min(1, { message: 'Select at least one event' }),
-  enabled: z.boolean().default(true),
-});
-
-const documentServiceSchema = z.object({
-  provider: z.enum(['local', 's3', 'gcs', 'azure']),
-  apiKey: z.string().optional(),
-  secretKey: z.string().optional(),
-  bucketName: z.string().optional(),
-  region: z.string().optional(),
-  baseUrl: z.string().optional(),
-  enabled: z.boolean().default(false),
-});
-
-type FairWorkFormValues = z.infer<typeof fairWorkSchema>;
-type EmailServiceFormValues = z.infer<typeof emailServiceSchema>;
-type SmsServiceFormValues = z.infer<typeof smsServiceSchema>;
+type ApiIntegrationFormValues = z.infer<typeof apiIntegrationSchema>;
 type WebhookFormValues = z.infer<typeof webhookSchema>;
-type DocumentServiceFormValues = z.infer<typeof documentServiceSchema>;
+type DocumentStorageFormValues = z.infer<typeof documentStorageSchema>;
 
-const IntegrationCard = ({ integration, onTestConnection, onSync, onEdit, onToggle }: {
-  integration: Integration;
-  onTestConnection: (id: number) => void;
-  onSync: (id: number) => void;
-  onEdit: (integration: Integration) => void;
-  onToggle: (id: number, enabled: boolean) => void;
+const IntegrationCard = ({ 
+  integration, 
+  onEdit, 
+  onDelete, 
+  onToggleActive
+}: { 
+  integration: Integration; 
+  onEdit: (integration: Integration) => void; 
+  onDelete: (id: number) => void; 
+  onToggleActive: (id: number, isActive: boolean) => void; 
 }) => {
+  const getIconByType = (type: string) => {
+    switch (type) {
+      case 'tga':
+        return <FileText className="h-6 w-6 text-blue-500" />;
+      case 'fairwork':
+        return <Globe className="h-6 w-6 text-green-500" />;
+      case 'sms':
+        return <FileText className="h-6 w-6 text-orange-500" />;
+      case 'rto':
+        return <FileText className="h-6 w-6 text-purple-500" />;
+      case 'webhook':
+        return <Webhook className="h-6 w-6 text-red-500" />;
+      case 's3':
+        return <Cloud className="h-6 w-6 text-blue-400" />;
+      case 'local':
+        return <HardDrive className="h-6 w-6 text-gray-500" />;
+      default:
+        return <Server className="h-6 w-6 text-gray-500" />;
+    }
+  };
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            {integration.name}
-            <Badge variant={integration.status === 'active' ? 'success' : 
-                           integration.status === 'error' ? 'destructive' : 
-                           'outline'}>
-              {integration.status === 'active' ? 'Active' : 
-               integration.status === 'error' ? 'Error' : 
-               'Inactive'}
-            </Badge>
+    <Card className="overflow-hidden">
+      <CardHeader className="pb-4">
+        <div className="flex justify-between items-start">
+          <div className="flex items-center gap-3">
+            {getIconByType(integration.type)}
+            <div>
+              <CardTitle className="text-lg">{integration.name}</CardTitle>
+              <CardDescription className="text-sm">
+                {integration.type === 'webhook' ? 'Webhook' : 
+                 integration.type === 's3' || integration.type === 'local' ? 'Storage Service' : 
+                 'API Integration'}
+              </CardDescription>
+            </div>
           </div>
-          <Switch
-            checked={integration.status === 'active'}
-            onCheckedChange={(checked) => onToggle(integration.id, checked)}
-          />
-        </CardTitle>
-        <CardDescription>
-          {integration.provider} ({integration.type})
-          {integration.lastSynced && (
-            <div className="text-xs mt-1">Last synced: {new Date(integration.lastSynced).toLocaleString()}</div>
-          )}
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={() => onTestConnection(integration.id)}>
-            <CheckCircle2 className="h-4 w-4 mr-1" /> Test Connection
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => onSync(integration.id)}>
-            <RefreshCw className="h-4 w-4 mr-1" /> Sync
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => onEdit(integration)}>
-            <Link className="h-4 w-4 mr-1" /> Configure
-          </Button>
+          <div>
+            {integration.isActive ? (
+              <Badge className="bg-green-100 text-green-800 hover:bg-green-100">Active</Badge>
+            ) : (
+              <Badge variant="outline" className="text-muted-foreground">Inactive</Badge>
+            )}
+          </div>
         </div>
+      </CardHeader>
+      <CardContent className="pb-2">
+        {'url' in integration && (
+          <div className="text-sm mb-2 flex items-center gap-1">
+            <ExternalLink className="h-3 w-3 text-muted-foreground" />
+            <span className="text-muted-foreground truncate">{integration.url}</span>
+          </div>
+        )}
+        {'baseUrl' in integration && (
+          <div className="text-sm mb-2 flex items-center gap-1">
+            <Globe className="h-3 w-3 text-muted-foreground" />
+            <span className="text-muted-foreground truncate">{integration.baseUrl}</span>
+          </div>
+        )}
+        {'events' in integration && integration.events.length > 0 && (
+          <div className="flex flex-wrap gap-1 mt-2">
+            {integration.events.map((event) => (
+              <Badge key={event} variant="outline" className="text-xs">
+                {event}
+              </Badge>
+            ))}
+          </div>
+        )}
+        {'isDefault' in integration && integration.isDefault && (
+          <Badge className="mt-2 bg-blue-100 text-blue-800 hover:bg-blue-100">Default Storage</Badge>
+        )}
       </CardContent>
+      <CardFooter className="flex justify-end gap-2 pt-2">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => onToggleActive(integration.id, !integration.isActive)}
+        >
+          {integration.isActive ? (
+            <><AlertTriangle className="h-4 w-4 mr-1" /> Disable</>
+          ) : (
+            <><Check className="h-4 w-4 mr-1" /> Enable</>
+          )}
+        </Button>
+        <Button variant="ghost" size="sm" onClick={() => onEdit(integration)}>
+          <Edit className="h-4 w-4 mr-1" /> Edit
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="text-destructive"
+          onClick={() => onDelete(integration.id)}
+        >
+          <Trash2 className="h-4 w-4 mr-1" /> Delete
+        </Button>
+      </CardFooter>
     </Card>
   );
 };
 
-const IntegrationsManagement = () => {
+const IntegrationsSettings = () => {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('api');
   const [selectedIntegration, setSelectedIntegration] = useState<Integration | null>(null);
-  const [showFairWorkConfig, setShowFairWorkConfig] = useState(false);
-  const [showEmailConfig, setShowEmailConfig] = useState(false);
-  const [showSmsConfig, setShowSmsConfig] = useState(false);
+  const [showApiConfig, setShowApiConfig] = useState(false);
   const [showWebhookConfig, setShowWebhookConfig] = useState(false);
   const [showDocumentConfig, setShowDocumentConfig] = useState(false);
 
-  // Fair Work Integration form
-  const fairWorkForm = useForm<FairWorkFormValues>({
-    resolver: zodResolver(fairWorkSchema),
+  // Forms
+  const apiForm = useForm<ApiIntegrationFormValues>({
+    resolver: zodResolver(apiIntegrationSchema),
     defaultValues: {
+      name: '',
+      type: 'custom',
+      baseUrl: '',
       apiKey: '',
-      apiUrl: 'https://api.fairwork.gov.au/v1',
-      enabled: false,
-      syncAwards: true,
-      syncPayRates: true,
-      syncHolidays: true,
+      apiKeyHeader: 'X-API-Key',
+      isActive: true,
+      description: '',
     },
   });
 
-  // Email Service form
-  const emailServiceForm = useForm<EmailServiceFormValues>({
-    resolver: zodResolver(emailServiceSchema),
-    defaultValues: {
-      provider: 'smtp',
-      apiKey: '',
-      from: 'noreply@example.com',
-      smtpHost: '',
-      smtpPort: '587',
-      smtpUsername: '',
-      smtpPassword: '',
-      enabled: false,
-    },
-  });
-
-  // SMS Service form
-  const smsServiceForm = useForm<SmsServiceFormValues>({
-    resolver: zodResolver(smsServiceSchema),
-    defaultValues: {
-      provider: 'twilio',
-      accountSid: '',
-      authToken: '',
-      apiKey: '',
-      from: '',
-      enabled: false,
-    },
-  });
-
-  // Webhook form
   const webhookForm = useForm<WebhookFormValues>({
     resolver: zodResolver(webhookSchema),
     defaultValues: {
       name: '',
       url: '',
-      secret: '',
       events: [],
-      enabled: true,
+      secret: '',
+      headers: {},
+      isActive: true,
     },
   });
 
-  // Document Service form
-  const documentServiceForm = useForm<DocumentServiceFormValues>({
-    resolver: zodResolver(documentServiceSchema),
+  const documentServiceForm = useForm<DocumentStorageFormValues>({
+    resolver: zodResolver(documentStorageSchema),
     defaultValues: {
-      provider: 'local',
-      apiKey: '',
-      secretKey: '',
-      bucketName: '',
-      region: '',
-      baseUrl: '',
-      enabled: false,
+      name: '',
+      type: 'local',
+      config: {},
+      isActive: true,
+      isDefault: false,
     },
   });
 
-  // Fetch integrations
+  // Query for integrations
   const { data: integrations, isLoading: isLoadingIntegrations } = useQuery<Integration[]>({
     queryKey: ['/api/integrations'],
-    // Temporarily handle mock data until API is implemented
-    queryFn: async () => {
-      // This is a fallback for development. In production, the actual API endpoint would be called.
-      return [
-        {
-          id: 1,
-          name: 'Fair Work Australia',
-          provider: 'Fair Work',
-          type: 'api',
-          status: 'inactive',
-          lastSynced: null,
-          apiKey: null,
-          apiUrl: 'https://api.fairwork.gov.au/v1',
-          config: null,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-        {
-          id: 2,
-          name: 'Email Service',
-          provider: 'SMTP',
-          type: 'notification',
-          status: 'active',
-          lastSynced: new Date().toISOString(),
-          apiKey: null,
-          apiUrl: null,
-          config: {
-            smtpHost: 'smtp.example.com',
-            smtpPort: 587,
-          },
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-        {
-          id: 3,
-          name: 'Document Storage',
-          provider: 'Local Storage',
-          type: 'storage',
-          status: 'active',
-          lastSynced: null,
-          apiKey: null,
-          apiUrl: null,
-          config: null,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-      ];
-    },
   });
 
-  // Save Fair Work Integration
-  const saveFairWorkMutation = useMutation({
-    mutationFn: async (data: FairWorkFormValues) => {
-      const response = await apiRequest('POST', '/api/integrations/fairwork', data);
+  // Create API integration mutation
+  const createApiIntegrationMutation = useMutation({
+    mutationFn: async (data: ApiIntegrationFormValues) => {
+      const response = await apiRequest('POST', '/api/integrations/api', data);
       return await response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/integrations'] });
-      setShowFairWorkConfig(false);
+      apiForm.reset();
+      setShowApiConfig(false);
       toast({
         title: 'Success',
-        description: 'Fair Work integration saved successfully',
+        description: 'API integration created successfully',
       });
     },
     onError: (error: Error) => {
       toast({
         title: 'Error',
-        description: `Failed to save integration: ${error.message}`,
+        description: `Failed to create API integration: ${error.message}`,
         variant: 'destructive',
       });
     },
   });
 
-  // Save Email Service
-  const saveEmailServiceMutation = useMutation({
-    mutationFn: async (data: EmailServiceFormValues) => {
-      const response = await apiRequest('POST', '/api/integrations/email', data);
+  // Update API integration mutation
+  const updateApiIntegrationMutation = useMutation({
+    mutationFn: async (data: { id: number; integrationData: ApiIntegrationFormValues }) => {
+      const response = await apiRequest('PATCH', `/api/integrations/${data.id}`, data.integrationData);
       return await response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/integrations'] });
-      setShowEmailConfig(false);
+      apiForm.reset();
+      setSelectedIntegration(null);
+      setShowApiConfig(false);
       toast({
         title: 'Success',
-        description: 'Email service integration saved successfully',
+        description: 'API integration updated successfully',
       });
     },
     onError: (error: Error) => {
       toast({
         title: 'Error',
-        description: `Failed to save integration: ${error.message}`,
+        description: `Failed to update API integration: ${error.message}`,
         variant: 'destructive',
       });
     },
   });
 
-  // Save SMS Service
-  const saveSmsServiceMutation = useMutation({
-    mutationFn: async (data: SmsServiceFormValues) => {
-      const response = await apiRequest('POST', '/api/integrations/sms', data);
-      return await response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/integrations'] });
-      setShowSmsConfig(false);
-      toast({
-        title: 'Success',
-        description: 'SMS service integration saved successfully',
-      });
-    },
-    onError: (error: Error) => {
-      toast({
-        title: 'Error',
-        description: `Failed to save integration: ${error.message}`,
-        variant: 'destructive',
-      });
-    },
-  });
-
-  // Save Webhook
-  const saveWebhookMutation = useMutation({
+  // Create webhook mutation
+  const createWebhookMutation = useMutation({
     mutationFn: async (data: WebhookFormValues) => {
-      const response = await apiRequest('POST', '/api/integrations/webhooks', data);
+      const response = await apiRequest('POST', '/api/integrations/webhook', data);
       return await response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/integrations'] });
+      webhookForm.reset();
       setShowWebhookConfig(false);
       toast({
         title: 'Success',
-        description: 'Webhook saved successfully',
+        description: 'Webhook created successfully',
       });
     },
     onError: (error: Error) => {
       toast({
         title: 'Error',
-        description: `Failed to save webhook: ${error.message}`,
+        description: `Failed to create webhook: ${error.message}`,
         variant: 'destructive',
       });
     },
   });
 
-  // Save Document Service
-  const saveDocumentServiceMutation = useMutation({
-    mutationFn: async (data: DocumentServiceFormValues) => {
-      const response = await apiRequest('POST', '/api/integrations/documents', data);
+  // Update webhook mutation
+  const updateWebhookMutation = useMutation({
+    mutationFn: async (data: { id: number; webhookData: WebhookFormValues }) => {
+      const response = await apiRequest('PATCH', `/api/integrations/${data.id}`, data.webhookData);
       return await response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/integrations'] });
+      webhookForm.reset();
+      setSelectedIntegration(null);
+      setShowWebhookConfig(false);
+      toast({
+        title: 'Success',
+        description: 'Webhook updated successfully',
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: 'Error',
+        description: `Failed to update webhook: ${error.message}`,
+        variant: 'destructive',
+      });
+    },
+  });
+
+  // Create document storage mutation
+  const createDocumentStorageMutation = useMutation({
+    mutationFn: async (data: DocumentStorageFormValues) => {
+      const response = await apiRequest('POST', '/api/integrations/storage', data);
+      return await response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/integrations'] });
+      documentServiceForm.reset();
       setShowDocumentConfig(false);
       toast({
         title: 'Success',
-        description: 'Document service integration saved successfully',
+        description: 'Document storage service created successfully',
       });
     },
     onError: (error: Error) => {
       toast({
         title: 'Error',
-        description: `Failed to save integration: ${error.message}`,
+        description: `Failed to create document storage service: ${error.message}`,
         variant: 'destructive',
       });
     },
   });
 
-  // Test Integration Connection
-  const testConnectionMutation = useMutation({
-    mutationFn: async (id: number) => {
-      const response = await apiRequest('POST', `/api/integrations/${id}/test`);
+  // Update document storage mutation
+  const updateDocumentStorageMutation = useMutation({
+    mutationFn: async (data: { id: number; storageData: DocumentStorageFormValues }) => {
+      const response = await apiRequest('PATCH', `/api/integrations/${data.id}`, data.storageData);
       return await response.json();
     },
-    onSuccess: (data) => {
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/integrations'] });
+      documentServiceForm.reset();
+      setSelectedIntegration(null);
+      setShowDocumentConfig(false);
       toast({
-        title: 'Connection Test',
-        description: data.success ? 'Connection successful!' : `Connection failed: ${data.message}`,
-        variant: data.success ? 'default' : 'destructive',
+        title: 'Success',
+        description: 'Document storage service updated successfully',
       });
     },
     onError: (error: Error) => {
       toast({
         title: 'Error',
-        description: `Connection test failed: ${error.message}`,
+        description: `Failed to update document storage service: ${error.message}`,
         variant: 'destructive',
       });
     },
   });
 
-  // Sync Integration
-  const syncIntegrationMutation = useMutation({
+  // Delete integration mutation
+  const deleteIntegrationMutation = useMutation({
     mutationFn: async (id: number) => {
-      const response = await apiRequest('POST', `/api/integrations/${id}/sync`);
-      return await response.json();
+      await apiRequest('DELETE', `/api/integrations/${id}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/integrations'] });
       toast({
         title: 'Success',
-        description: 'Integration synchronized successfully',
+        description: 'Integration deleted successfully',
       });
     },
     onError: (error: Error) => {
       toast({
         title: 'Error',
-        description: `Synchronization failed: ${error.message}`,
+        description: `Failed to delete integration: ${error.message}`,
         variant: 'destructive',
       });
     },
   });
 
-  // Toggle Integration Status
+  // Toggle integration active status mutation
   const toggleIntegrationMutation = useMutation({
-    mutationFn: async ({ id, enabled }: { id: number; enabled: boolean }) => {
-      const response = await apiRequest('PATCH', `/api/integrations/${id}`, { status: enabled ? 'active' : 'inactive' });
+    mutationFn: async (data: { id: number; isActive: boolean }) => {
+      const response = await apiRequest('PATCH', `/api/integrations/${data.id}/toggle`, { isActive: data.isActive });
       return await response.json();
     },
     onSuccess: () => {
@@ -453,214 +424,293 @@ const IntegrationsManagement = () => {
     onError: (error: Error) => {
       toast({
         title: 'Error',
-        description: `Failed to update status: ${error.message}`,
+        description: `Failed to update integration status: ${error.message}`,
         variant: 'destructive',
       });
     },
   });
 
-  const handleSaveFairWork = (data: FairWorkFormValues) => {
-    saveFairWorkMutation.mutate(data);
+  // Handle form submissions
+  const onApiSubmit = (data: ApiIntegrationFormValues) => {
+    if (selectedIntegration) {
+      updateApiIntegrationMutation.mutate({ id: selectedIntegration.id, integrationData: data });
+    } else {
+      createApiIntegrationMutation.mutate(data);
+    }
   };
 
-  const handleSaveEmailService = (data: EmailServiceFormValues) => {
-    saveEmailServiceMutation.mutate(data);
+  const onWebhookSubmit = (data: WebhookFormValues) => {
+    if (selectedIntegration) {
+      updateWebhookMutation.mutate({ id: selectedIntegration.id, webhookData: data });
+    } else {
+      createWebhookMutation.mutate(data);
+    }
   };
 
-  const handleSaveSmsService = (data: SmsServiceFormValues) => {
-    saveSmsServiceMutation.mutate(data);
+  const onDocumentStorageSubmit = (data: DocumentStorageFormValues) => {
+    if (selectedIntegration) {
+      updateDocumentStorageMutation.mutate({ id: selectedIntegration.id, storageData: data });
+    } else {
+      createDocumentStorageMutation.mutate(data);
+    }
   };
 
-  const handleSaveWebhook = (data: WebhookFormValues) => {
-    saveWebhookMutation.mutate(data);
-  };
-
-  const handleSaveDocumentService = (data: DocumentServiceFormValues) => {
-    saveDocumentServiceMutation.mutate(data);
-  };
-
-  const handleTestConnection = (id: number) => {
-    testConnectionMutation.mutate(id);
-  };
-
-  const handleSync = (id: number) => {
-    syncIntegrationMutation.mutate(id);
-  };
-
-  const handleToggleIntegration = (id: number, enabled: boolean) => {
-    toggleIntegrationMutation.mutate({ id, enabled });
-  };
-
+  // Handle edit integration
   const handleEditIntegration = (integration: Integration) => {
     setSelectedIntegration(integration);
-    
-    // Set the appropriate form values based on integration type
-    if (integration.name === 'Fair Work Australia') {
-      fairWorkForm.reset({
-        apiKey: integration.apiKey || '',
-        apiUrl: integration.apiUrl || 'https://api.fairwork.gov.au/v1',
-        enabled: integration.status === 'active',
-        syncAwards: integration.config?.syncAwards ?? true,
-        syncPayRates: integration.config?.syncPayRates ?? true,
-        syncHolidays: integration.config?.syncHolidays ?? true,
+
+    if (integration.type === 'webhook') {
+      const webhookIntegration = integration as WebhookIntegration;
+      webhookForm.reset({
+        name: integration.name,
+        url: webhookIntegration.url,
+        events: webhookIntegration.events || [],
+        secret: webhookIntegration.secret || '',
+        headers: webhookIntegration.headers || {},
+        isActive: integration.isActive,
       });
-      setShowFairWorkConfig(true);
-    } else if (integration.name === 'Email Service') {
-      const config = integration.config || {};
-      emailServiceForm.reset({
-        provider: config.provider || 'smtp',
-        apiKey: integration.apiKey || '',
-        from: config.from || 'noreply@example.com',
-        smtpHost: config.smtpHost || '',
-        smtpPort: config.smtpPort?.toString() || '587',
-        smtpUsername: config.smtpUsername || '',
-        smtpPassword: config.smtpPassword || '',
-        enabled: integration.status === 'active',
-      });
-      setShowEmailConfig(true);
-    } else if (integration.name === 'Document Storage') {
-      const config = integration.config || {};
+      setShowWebhookConfig(true);
+    } else if (integration.type === 's3' || integration.type === 'local') {
+      const storageIntegration = integration as StorageIntegration;
       documentServiceForm.reset({
-        provider: config.provider || 'local',
-        apiKey: integration.apiKey || '',
-        secretKey: config.secretKey || '',
-        bucketName: config.bucketName || '',
-        region: config.region || '',
-        baseUrl: config.baseUrl || '',
-        enabled: integration.status === 'active',
+        name: integration.name,
+        type: integration.type,
+        config: integration.config || {},
+        isActive: integration.isActive,
+        isDefault: storageIntegration.isDefault || false,
       });
       setShowDocumentConfig(true);
+    } else {
+      const apiIntegration = integration as ApiIntegration;
+      apiForm.reset({
+        name: integration.name,
+        type: integration.type,
+        baseUrl: apiIntegration.baseUrl,
+        apiKey: apiIntegration.apiKey,
+        apiKeyHeader: apiIntegration.apiKeyHeader,
+        isActive: integration.isActive,
+        description: integration.config?.description || '',
+      });
+      setShowApiConfig(true);
     }
+  };
+
+  // Handle delete integration
+  const handleDeleteIntegration = (id: number) => {
+    if (confirm('Are you sure you want to delete this integration?')) {
+      deleteIntegrationMutation.mutate(id);
+    }
+  };
+
+  // Handle toggle integration active status
+  const handleToggleIntegration = (id: number, isActive: boolean) => {
+    toggleIntegrationMutation.mutate({ id, isActive });
   };
 
   return (
     <div className="p-8">
-      <h1 className="text-3xl font-bold mb-6">Integrations Management</h1>
-      
+      <h1 className="text-3xl font-bold mb-6">External Integrations</h1>
+
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-4 mb-8">
+        <TabsList className="grid w-full grid-cols-3 mb-8">
           <TabsTrigger value="api">
-            <CloudCog className="h-4 w-4 mr-2" /> API Integrations
-          </TabsTrigger>
-          <TabsTrigger value="notifications">
-            <MailCheck className="h-4 w-4 mr-2" /> Notification Services
+            <Settings className="h-4 w-4 mr-2" /> API Services
           </TabsTrigger>
           <TabsTrigger value="webhooks">
             <Webhook className="h-4 w-4 mr-2" /> Webhooks
           </TabsTrigger>
           <TabsTrigger value="storage">
-            <Database className="h-4 w-4 mr-2" /> Storage Services
+            <Database className="h-4 w-4 mr-2" /> Storage
           </TabsTrigger>
         </TabsList>
-        
+
         {/* API Integrations Tab */}
         <TabsContent value="api">
           <div className="space-y-4">
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-semibold">API Integrations</h2>
               <Button onClick={() => {
-                fairWorkForm.reset();
-                setShowFairWorkConfig(true);
+                apiForm.reset();
+                setSelectedIntegration(null);
+                setShowApiConfig(true);
               }}>
-                <Plus className="h-4 w-4 mr-2" /> Add Integration
+                <Plus className="h-4 w-4 mr-2" /> Add API Integration
               </Button>
             </div>
             
-            <Alert>
-              <AlertTriangle className="h-4 w-4" />
-              <AlertTitle>Important</AlertTitle>
-              <AlertDescription>
-                API keys are sensitive. Never share them publicly and store them securely.
-              </AlertDescription>
-            </Alert>
-            
             {isLoadingIntegrations ? (
-              <div className="text-center py-8">Loading integrations...</div>
-            ) : integrations && integrations.filter(i => i.type === 'api').length > 0 ? (
+              <div className="text-center py-8">Loading API integrations...</div>
+            ) : integrations && integrations.filter(i => i.type !== 'webhook' && i.type !== 's3' && i.type !== 'local').length > 0 ? (
               <div className="grid md:grid-cols-2 gap-4">
                 {integrations
-                  .filter(i => i.type === 'api')
+                  .filter(i => i.type !== 'webhook' && i.type !== 's3' && i.type !== 'local')
                   .map(integration => (
                     <IntegrationCard
                       key={integration.id}
-                      integration={integration}
-                      onTestConnection={handleTestConnection}
-                      onSync={handleSync}
+                      integration={integration as ApiIntegration}
                       onEdit={handleEditIntegration}
-                      onToggle={handleToggleIntegration}
+                      onDelete={handleDeleteIntegration}
+                      onToggleActive={handleToggleIntegration}
                     />
                   ))}
               </div>
             ) : (
-              <div className="text-center py-8 border rounded-lg p-6 bg-muted/10">
-                <div className="mx-auto w-10 h-10 rounded-full bg-muted flex items-center justify-center mb-4">
-                  <CloudCog className="h-5 w-5 text-muted-foreground" />
+              <Card className="p-8 text-center">
+                <div className="flex flex-col items-center space-y-3">
+                  <Server className="h-10 w-10 text-muted-foreground" />
+                  <h3 className="text-lg font-medium">No API Integrations</h3>
+                  <p className="text-muted-foreground">
+                    You haven't added any API integrations yet.
+                  </p>
+                  <Button onClick={() => {
+                    apiForm.reset();
+                    setSelectedIntegration(null);
+                    setShowApiConfig(true);
+                  }}>
+                    <Plus className="h-4 w-4 mr-2" /> Add API Integration
+                  </Button>
                 </div>
-                <h3 className="text-lg font-medium mb-2">No API Integrations</h3>
-                <p className="text-muted-foreground mb-4">Connect external APIs to enhance your system capabilities.</p>
-                <Button onClick={() => {
-                  fairWorkForm.reset();
-                  setShowFairWorkConfig(true);
-                }}>
-                  <Plus className="h-4 w-4 mr-2" /> Add API Integration
-                </Button>
-              </div>
+              </Card>
             )}
-            
-            {showFairWorkConfig && (
+
+            {showApiConfig && (
               <Card>
                 <CardHeader>
-                  <CardTitle>{selectedIntegration ? 'Edit' : 'Add'} Fair Work Integration</CardTitle>
+                  <CardTitle>{selectedIntegration ? 'Edit API Integration' : 'Add New API Integration'}</CardTitle>
                   <CardDescription>
-                    Connect to Fair Work Australia's API for award information and compliance checking.
+                    Configure connections to external API services such as Training.gov.au, Fair Work, and other third-party systems.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <Form {...fairWorkForm}>
-                    <form onSubmit={fairWorkForm.handleSubmit(handleSaveFairWork)} className="space-y-4">
+                  <Form {...apiForm}>
+                    <form onSubmit={apiForm.handleSubmit(onApiSubmit)} className="space-y-4">
                       <FormField
-                        control={fairWorkForm.control}
-                        name="apiKey"
+                        control={apiForm.control}
+                        name="name"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>API Key</FormLabel>
+                            <FormLabel>Integration Name</FormLabel>
                             <FormControl>
-                              <Input placeholder="Enter your Fair Work API key" {...field} />
+                              <Input placeholder="e.g., Training.gov.au API" {...field} />
                             </FormControl>
                             <FormDescription>
-                              Obtain from the Fair Work Developer Portal
+                              A descriptive name for this integration
                             </FormDescription>
                             <FormMessage />
                           </FormItem>
                         )}
                       />
-                      
+
                       <FormField
-                        control={fairWorkForm.control}
-                        name="apiUrl"
+                        control={apiForm.control}
+                        name="type"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>API URL</FormLabel>
-                            <FormControl>
-                              <Input placeholder="https://api.fairwork.gov.au/v1" {...field} />
-                            </FormControl>
+                            <FormLabel>Integration Type</FormLabel>
+                            <Select
+                              value={field.value}
+                              onValueChange={field.onChange}
+                              disabled={!!selectedIntegration}
+                            >
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select an integration type" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="tga">Training.gov.au API</SelectItem>
+                                <SelectItem value="fairwork">Fair Work Ombudsman API</SelectItem>
+                                <SelectItem value="sms">SMS Gateway</SelectItem>
+                                <SelectItem value="rto">RTO Portal</SelectItem>
+                                <SelectItem value="custom">Custom API</SelectItem>
+                              </SelectContent>
+                            </Select>
                             <FormDescription>
-                              The base URL for Fair Work API requests
+                              The type of integration you're configuring
                             </FormDescription>
                             <FormMessage />
                           </FormItem>
                         )}
                       />
-                      
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <FormField
+                          control={apiForm.control}
+                          name="baseUrl"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Base URL</FormLabel>
+                              <FormControl>
+                                <Input placeholder="https://api.example.com" {...field} />
+                              </FormControl>
+                              <FormDescription>
+                                The base URL for API requests
+                              </FormDescription>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={apiForm.control}
+                          name="apiKey"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>API Key</FormLabel>
+                              <FormControl>
+                                <Input type="password" placeholder="Your API key" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+
                       <FormField
-                        control={fairWorkForm.control}
-                        name="enabled"
+                        control={apiForm.control}
+                        name="apiKeyHeader"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>API Key Header Name</FormLabel>
+                            <FormControl>
+                              <Input placeholder="X-API-Key" {...field} />
+                            </FormControl>
+                            <FormDescription>
+                              The header name used for sending the API key (e.g., X-API-Key, Authorization)
+                            </FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={apiForm.control}
+                        name="description"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Description</FormLabel>
+                            <FormControl>
+                              <Textarea 
+                                placeholder="Briefly describe what this integration is used for" 
+                                className="min-h-[100px]" 
+                                {...field} 
+                                value={field.value || ''}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={apiForm.control}
+                        name="isActive"
                         render={({ field }) => (
                           <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                             <div className="space-y-0.5">
-                              <FormLabel className="text-base">Enable Integration</FormLabel>
+                              <FormLabel className="text-base">Active</FormLabel>
                               <FormDescription>
-                                Turn on/off the Fair Work integration
+                                Enable or disable this integration
                               </FormDescription>
                             </div>
                             <FormControl>
@@ -672,88 +722,12 @@ const IntegrationsManagement = () => {
                           </FormItem>
                         )}
                       />
-                      
-                      <Separator className="my-4" />
-                      
-                      <div className="space-y-4">
-                        <h3 className="text-lg font-medium">Sync Options</h3>
-                        <div className="grid md:grid-cols-3 gap-4">
-                          <FormField
-                            control={fairWorkForm.control}
-                            name="syncAwards"
-                            render={({ field }) => (
-                              <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                                <FormControl>
-                                  <Switch
-                                    checked={field.value}
-                                    onCheckedChange={field.onChange}
-                                  />
-                                </FormControl>
-                                <div className="space-y-1 leading-none">
-                                  <FormLabel>
-                                    Sync Awards
-                                  </FormLabel>
-                                  <FormDescription>
-                                    Automatically sync awards data
-                                  </FormDescription>
-                                </div>
-                              </FormItem>
-                            )}
-                          />
-                          
-                          <FormField
-                            control={fairWorkForm.control}
-                            name="syncPayRates"
-                            render={({ field }) => (
-                              <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                                <FormControl>
-                                  <Switch
-                                    checked={field.value}
-                                    onCheckedChange={field.onChange}
-                                  />
-                                </FormControl>
-                                <div className="space-y-1 leading-none">
-                                  <FormLabel>
-                                    Sync Pay Rates
-                                  </FormLabel>
-                                  <FormDescription>
-                                    Automatically sync pay rate data
-                                  </FormDescription>
-                                </div>
-                              </FormItem>
-                            )}
-                          />
-                          
-                          <FormField
-                            control={fairWorkForm.control}
-                            name="syncHolidays"
-                            render={({ field }) => (
-                              <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                                <FormControl>
-                                  <Switch
-                                    checked={field.value}
-                                    onCheckedChange={field.onChange}
-                                  />
-                                </FormControl>
-                                <div className="space-y-1 leading-none">
-                                  <FormLabel>
-                                    Sync Holidays
-                                  </FormLabel>
-                                  <FormDescription>
-                                    Automatically sync public holidays
-                                  </FormDescription>
-                                </div>
-                              </FormItem>
-                            )}
-                          />
-                        </div>
-                      </div>
-                      
-                      <CardFooter className="px-0 pb-0 pt-6 flex gap-2">
-                        <Button variant="outline" type="button" onClick={() => setShowFairWorkConfig(false)}>
+
+                      <CardFooter className="px-0 pt-4">
+                        <Button variant="outline" type="button" onClick={() => setShowApiConfig(false)}>
                           Cancel
                         </Button>
-                        <Button type="submit">
+                        <Button type="submit" className="ml-2">
                           {selectedIntegration ? 'Update' : 'Add'} Integration
                         </Button>
                       </CardFooter>
@@ -764,390 +738,7 @@ const IntegrationsManagement = () => {
             )}
           </div>
         </TabsContent>
-        
-        {/* Notification Services Tab */}
-        <TabsContent value="notifications">
-          <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <h2 className="text-xl font-semibold">Notification Services</h2>
-              <div className="space-x-2">
-                <Button onClick={() => {
-                  emailServiceForm.reset();
-                  setShowEmailConfig(true);
-                }}>
-                  <Plus className="h-4 w-4 mr-2" /> Email Service
-                </Button>
-                <Button onClick={() => {
-                  smsServiceForm.reset();
-                  setShowSmsConfig(true);
-                }}>
-                  <Plus className="h-4 w-4 mr-2" /> SMS Service
-                </Button>
-              </div>
-            </div>
-            
-            {isLoadingIntegrations ? (
-              <div className="text-center py-8">Loading notification services...</div>
-            ) : integrations && integrations.filter(i => i.type === 'notification').length > 0 ? (
-              <div className="grid md:grid-cols-2 gap-4">
-                {integrations
-                  .filter(i => i.type === 'notification')
-                  .map(integration => (
-                    <IntegrationCard
-                      key={integration.id}
-                      integration={integration}
-                      onTestConnection={handleTestConnection}
-                      onSync={handleSync}
-                      onEdit={handleEditIntegration}
-                      onToggle={handleToggleIntegration}
-                    />
-                  ))}
-              </div>
-            ) : (
-              <div className="text-center py-8 border rounded-lg p-6 bg-muted/10">
-                <div className="mx-auto w-10 h-10 rounded-full bg-muted flex items-center justify-center mb-4">
-                  <MailCheck className="h-5 w-5 text-muted-foreground" />
-                </div>
-                <h3 className="text-lg font-medium mb-2">No Notification Services</h3>
-                <p className="text-muted-foreground mb-4">Configure email and SMS providers to send notifications.</p>
-                <div className="flex gap-2 justify-center">
-                  <Button onClick={() => {
-                    emailServiceForm.reset();
-                    setShowEmailConfig(true);
-                  }}>
-                    <Plus className="h-4 w-4 mr-2" /> Email Service
-                  </Button>
-                  <Button onClick={() => {
-                    smsServiceForm.reset();
-                    setShowSmsConfig(true);
-                  }}>
-                    <Plus className="h-4 w-4 mr-2" /> SMS Service
-                  </Button>
-                </div>
-              </div>
-            )}
-            
-            {showEmailConfig && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>{selectedIntegration ? 'Edit' : 'Add'} Email Service</CardTitle>
-                  <CardDescription>
-                    Configure the email service provider for sending system notifications.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Form {...emailServiceForm}>
-                    <form onSubmit={emailServiceForm.handleSubmit(handleSaveEmailService)} className="space-y-4">
-                      <FormField
-                        control={emailServiceForm.control}
-                        name="provider"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Email Provider</FormLabel>
-                            <Select
-                              onValueChange={field.onChange}
-                              defaultValue={field.value}
-                            >
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select email provider" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                <SelectItem value="smtp">SMTP Server</SelectItem>
-                                <SelectItem value="sendgrid">SendGrid</SelectItem>
-                                <SelectItem value="mailgun">Mailgun</SelectItem>
-                                <SelectItem value="ses">Amazon SES</SelectItem>
-                              </SelectContent>
-                            </Select>
-                            <FormDescription>
-                              The email provider to use for sending emails
-                            </FormDescription>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      {emailServiceForm.watch('provider') !== 'smtp' ? (
-                        <FormField
-                          control={emailServiceForm.control}
-                          name="apiKey"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>API Key</FormLabel>
-                              <FormControl>
-                                <Input type="password" {...field} />
-                              </FormControl>
-                              <FormDescription>
-                                API key for the selected email provider
-                              </FormDescription>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      ) : (
-                        <div className="grid grid-cols-2 gap-4">
-                          <FormField
-                            control={emailServiceForm.control}
-                            name="smtpHost"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>SMTP Host</FormLabel>
-                                <FormControl>
-                                  <Input placeholder="smtp.example.com" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                          
-                          <FormField
-                            control={emailServiceForm.control}
-                            name="smtpPort"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>SMTP Port</FormLabel>
-                                <FormControl>
-                                  <Input placeholder="587" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                          
-                          <FormField
-                            control={emailServiceForm.control}
-                            name="smtpUsername"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>SMTP Username</FormLabel>
-                                <FormControl>
-                                  <Input {...field} />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                          
-                          <FormField
-                            control={emailServiceForm.control}
-                            name="smtpPassword"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>SMTP Password</FormLabel>
-                                <FormControl>
-                                  <Input type="password" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </div>
-                      )}
-                      
-                      <FormField
-                        control={emailServiceForm.control}
-                        name="from"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>From Email</FormLabel>
-                            <FormControl>
-                              <Input placeholder="noreply@example.com" {...field} />
-                            </FormControl>
-                            <FormDescription>
-                              The email address that will appear in the From field
-                            </FormDescription>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={emailServiceForm.control}
-                        name="enabled"
-                        render={({ field }) => (
-                          <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                            <div className="space-y-0.5">
-                              <FormLabel className="text-base">Enable Email Service</FormLabel>
-                              <FormDescription>
-                                Turn on/off this email provider
-                              </FormDescription>
-                            </div>
-                            <FormControl>
-                              <Switch
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                              />
-                            </FormControl>
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <CardFooter className="px-0 pb-0 pt-6 flex gap-2">
-                        <Button variant="outline" type="button" onClick={() => setShowEmailConfig(false)}>
-                          Cancel
-                        </Button>
-                        <Button type="submit">
-                          {selectedIntegration ? 'Update' : 'Add'} Email Service
-                        </Button>
-                      </CardFooter>
-                    </form>
-                  </Form>
-                </CardContent>
-              </Card>
-            )}
-            
-            {showSmsConfig && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>{selectedIntegration ? 'Edit' : 'Add'} SMS Service</CardTitle>
-                  <CardDescription>
-                    Configure the SMS service provider for sending text notifications.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Form {...smsServiceForm}>
-                    <form onSubmit={smsServiceForm.handleSubmit(handleSaveSmsService)} className="space-y-4">
-                      <FormField
-                        control={smsServiceForm.control}
-                        name="provider"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>SMS Provider</FormLabel>
-                            <Select
-                              onValueChange={field.onChange}
-                              defaultValue={field.value}
-                            >
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select SMS provider" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                <SelectItem value="twilio">Twilio</SelectItem>
-                                <SelectItem value="messagebird">MessageBird</SelectItem>
-                                <SelectItem value="sns">Amazon SNS</SelectItem>
-                              </SelectContent>
-                            </Select>
-                            <FormDescription>
-                              The SMS provider to use for sending text messages
-                            </FormDescription>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      {smsServiceForm.watch('provider') === 'twilio' && (
-                        <>
-                          <FormField
-                            control={smsServiceForm.control}
-                            name="accountSid"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Account SID</FormLabel>
-                                <FormControl>
-                                  <Input {...field} />
-                                </FormControl>
-                                <FormDescription>
-                                  Twilio Account SID
-                                </FormDescription>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                          
-                          <FormField
-                            control={smsServiceForm.control}
-                            name="authToken"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Auth Token</FormLabel>
-                                <FormControl>
-                                  <Input type="password" {...field} />
-                                </FormControl>
-                                <FormDescription>
-                                  Twilio Auth Token
-                                </FormDescription>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </>
-                      )}
-                      
-                      {smsServiceForm.watch('provider') !== 'twilio' && (
-                        <FormField
-                          control={smsServiceForm.control}
-                          name="apiKey"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>API Key</FormLabel>
-                              <FormControl>
-                                <Input type="password" {...field} />
-                              </FormControl>
-                              <FormDescription>
-                                API key for the selected SMS provider
-                              </FormDescription>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      )}
-                      
-                      <FormField
-                        control={smsServiceForm.control}
-                        name="from"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>From Number</FormLabel>
-                            <FormControl>
-                              <Input placeholder="+61412345678" {...field} />
-                            </FormControl>
-                            <FormDescription>
-                              The phone number that will appear as the sender
-                            </FormDescription>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={smsServiceForm.control}
-                        name="enabled"
-                        render={({ field }) => (
-                          <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                            <div className="space-y-0.5">
-                              <FormLabel className="text-base">Enable SMS Service</FormLabel>
-                              <FormDescription>
-                                Turn on/off this SMS provider
-                              </FormDescription>
-                            </div>
-                            <FormControl>
-                              <Switch
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                              />
-                            </FormControl>
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <CardFooter className="px-0 pb-0 pt-6 flex gap-2">
-                        <Button variant="outline" type="button" onClick={() => setShowSmsConfig(false)}>
-                          Cancel
-                        </Button>
-                        <Button type="submit">
-                          {selectedIntegration ? 'Update' : 'Add'} SMS Service
-                        </Button>
-                      </CardFooter>
-                    </form>
-                  </Form>
-                </CardContent>
-              </Card>
-            )}
-          </div>
-        </TabsContent>
-        
+
         {/* Webhooks Tab */}
         <TabsContent value="webhooks">
           <div className="space-y-4">
@@ -1155,32 +746,59 @@ const IntegrationsManagement = () => {
               <h2 className="text-xl font-semibold">Webhooks</h2>
               <Button onClick={() => {
                 webhookForm.reset();
+                setSelectedIntegration(null);
                 setShowWebhookConfig(true);
               }}>
                 <Plus className="h-4 w-4 mr-2" /> Add Webhook
               </Button>
             </div>
             
-            <Alert>
-              <AlertTriangle className="h-4 w-4" />
-              <AlertTitle>Webhook Security</AlertTitle>
-              <AlertDescription>
-                Webhooks send data to external endpoints. Ensure these endpoints are secure and use the webhook secret for verification.
-              </AlertDescription>
-            </Alert>
-            
-            {/* Webhook form goes here */}
+            {isLoadingIntegrations ? (
+              <div className="text-center py-8">Loading webhooks...</div>
+            ) : integrations && integrations.filter(i => i.type === 'webhook').length > 0 ? (
+              <div className="grid md:grid-cols-2 gap-4">
+                {integrations
+                  .filter(i => i.type === 'webhook')
+                  .map(integration => (
+                    <IntegrationCard
+                      key={integration.id}
+                      integration={integration as WebhookIntegration}
+                      onEdit={handleEditIntegration}
+                      onDelete={handleDeleteIntegration}
+                      onToggleActive={handleToggleIntegration}
+                    />
+                  ))}
+              </div>
+            ) : (
+              <Card className="p-8 text-center">
+                <div className="flex flex-col items-center space-y-3">
+                  <Webhook className="h-10 w-10 text-muted-foreground" />
+                  <h3 className="text-lg font-medium">No Webhooks</h3>
+                  <p className="text-muted-foreground">
+                    You haven't configured any webhooks yet.
+                  </p>
+                  <Button onClick={() => {
+                    webhookForm.reset();
+                    setSelectedIntegration(null);
+                    setShowWebhookConfig(true);
+                  }}>
+                    <Plus className="h-4 w-4 mr-2" /> Add Webhook
+                  </Button>
+                </div>
+              </Card>
+            )}
+
             {showWebhookConfig && (
               <Card>
                 <CardHeader>
-                  <CardTitle>{selectedIntegration ? 'Edit' : 'Add'} Webhook</CardTitle>
+                  <CardTitle>{selectedIntegration ? 'Edit Webhook' : 'Add New Webhook'}</CardTitle>
                   <CardDescription>
-                    Configure an endpoint to receive event notifications from the system.
+                    Configure webhooks to notify external systems when events occur in your application.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <Form {...webhookForm}>
-                    <form onSubmit={webhookForm.handleSubmit(handleSaveWebhook)} className="space-y-4">
+                    <form onSubmit={webhookForm.handleSubmit(onWebhookSubmit)} className="space-y-4">
                       <FormField
                         control={webhookForm.control}
                         name="name"
@@ -1188,33 +806,30 @@ const IntegrationsManagement = () => {
                           <FormItem>
                             <FormLabel>Webhook Name</FormLabel>
                             <FormControl>
-                              <Input placeholder="My Application Webhook" {...field} />
+                              <Input placeholder="e.g., New Apprentice Notification" {...field} />
                             </FormControl>
-                            <FormDescription>
-                              A descriptive name for this webhook
-                            </FormDescription>
                             <FormMessage />
                           </FormItem>
                         )}
                       />
-                      
+
                       <FormField
                         control={webhookForm.control}
                         name="url"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Endpoint URL</FormLabel>
+                            <FormLabel>Webhook URL</FormLabel>
                             <FormControl>
                               <Input placeholder="https://example.com/webhook" {...field} />
                             </FormControl>
                             <FormDescription>
-                              The URL that will receive webhook payloads
+                              The URL that will receive webhook notifications
                             </FormDescription>
                             <FormMessage />
                           </FormItem>
                         )}
                       />
-                      
+
                       <FormField
                         control={webhookForm.control}
                         name="secret"
@@ -1222,98 +837,71 @@ const IntegrationsManagement = () => {
                           <FormItem>
                             <FormLabel>Webhook Secret</FormLabel>
                             <FormControl>
-                              <Input placeholder="Optional: Used to verify webhook payloads" {...field} value={field.value || ''} />
+                              <Input type="password" placeholder="Secret key for signature verification" {...field} value={field.value || ''} />
                             </FormControl>
                             <FormDescription>
-                              Used to sign payloads. Keep this value secret.
+                              Optional secret used to sign webhook payloads
                             </FormDescription>
                             <FormMessage />
                           </FormItem>
                         )}
                       />
-                      
-                      <div className="space-y-2">
-                        <FormLabel>Events to Subscribe</FormLabel>
-                        <div className="grid grid-cols-2 gap-2">
-                          <div className="flex items-center space-x-2">
-                            <input
-                              type="checkbox"
-                              id="user.created"
-                              value="user.created"
-                              onChange={(e) => {
-                                const events = webhookForm.getValues('events') || [];
-                                if (e.target.checked) {
-                                  webhookForm.setValue('events', [...events, e.target.value]);
-                                } else {
-                                  webhookForm.setValue('events', events.filter(event => event !== e.target.value));
-                                }
-                              }}
-                            />
-                            <label htmlFor="user.created">User Created</label>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <input
-                              type="checkbox"
-                              id="apprentice.created"
-                              value="apprentice.created"
-                              onChange={(e) => {
-                                const events = webhookForm.getValues('events') || [];
-                                if (e.target.checked) {
-                                  webhookForm.setValue('events', [...events, e.target.value]);
-                                } else {
-                                  webhookForm.setValue('events', events.filter(event => event !== e.target.value));
-                                }
-                              }}
-                            />
-                            <label htmlFor="apprentice.created">Apprentice Created</label>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <input
-                              type="checkbox"
-                              id="contract.signed"
-                              value="contract.signed"
-                              onChange={(e) => {
-                                const events = webhookForm.getValues('events') || [];
-                                if (e.target.checked) {
-                                  webhookForm.setValue('events', [...events, e.target.value]);
-                                } else {
-                                  webhookForm.setValue('events', events.filter(event => event !== e.target.value));
-                                }
-                              }}
-                            />
-                            <label htmlFor="contract.signed">Contract Signed</label>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <input
-                              type="checkbox"
-                              id="compliance.alert"
-                              value="compliance.alert"
-                              onChange={(e) => {
-                                const events = webhookForm.getValues('events') || [];
-                                if (e.target.checked) {
-                                  webhookForm.setValue('events', [...events, e.target.value]);
-                                } else {
-                                  webhookForm.setValue('events', events.filter(event => event !== e.target.value));
-                                }
-                              }}
-                            />
-                            <label htmlFor="compliance.alert">Compliance Alert</label>
-                          </div>
+
+                      <div>
+                        <Label>Events to Trigger Webhook</Label>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2">
+                          {[
+                            'apprentice.created',
+                            'apprentice.updated',
+                            'host.created',
+                            'host.updated',
+                            'placement.created',
+                            'placement.completed',
+                            'contract.signed',
+                            'document.uploaded',
+                            'user.created',
+                            'timesheet.submitted',
+                            'timesheet.approved',
+                            'payment.processed',
+                          ].map(event => (
+                            <div key={event} className="flex items-center space-x-2">
+                              <Checkbox
+                                id={`event-${event}`}
+                                checked={webhookForm.watch('events')?.includes(event)}
+                                onCheckedChange={(checked) => {
+                                  const currentEvents = webhookForm.watch('events') || [];
+                                  if (checked) {
+                                    webhookForm.setValue('events', [...currentEvents, event]);
+                                  } else {
+                                    webhookForm.setValue('events', currentEvents.filter(e => e !== event));
+                                  }
+                                }}
+                              />
+                              <label
+                                htmlFor={`event-${event}`}
+                                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                              >
+                                {event}
+                              </label>
+                            </div>
+                          ))}
                         </div>
                         {webhookForm.formState.errors.events && (
-                          <p className="text-sm font-medium text-destructive">{webhookForm.formState.errors.events.message}</p>
+                          <p className="text-sm font-medium text-destructive mt-2">
+                            {webhookForm.formState.errors.events.message}
+                          </p>
                         )}
                       </div>
-                      
+
                       <FormField
                         control={webhookForm.control}
-                        name="enabled"
+                        name="isActive"
                         render={({ field }) => (
                           <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                             <div className="space-y-0.5">
-                              <FormLabel className="text-base">Enable Webhook</FormLabel>
+                              <FormLabel className="text-base">Active</FormLabel>
                               <FormDescription>
-                                Activate this webhook to start receiving events
+                                Enable or disable this webhook
                               </FormDescription>
                             </div>
                             <FormControl>
@@ -1325,12 +913,12 @@ const IntegrationsManagement = () => {
                           </FormItem>
                         )}
                       />
-                      
-                      <CardFooter className="px-0 pb-0 pt-6 flex gap-2">
+
+                      <CardFooter className="px-0 pt-4">
                         <Button variant="outline" type="button" onClick={() => setShowWebhookConfig(false)}>
                           Cancel
                         </Button>
-                        <Button type="submit">
+                        <Button type="submit" className="ml-2">
                           {selectedIntegration ? 'Update' : 'Add'} Webhook
                         </Button>
                       </CardFooter>
@@ -1349,6 +937,7 @@ const IntegrationsManagement = () => {
               <h2 className="text-xl font-semibold">Storage Services</h2>
               <Button onClick={() => {
                 documentServiceForm.reset();
+                setSelectedIntegration(null);
                 setShowDocumentConfig(true);
               }}>
                 <Plus className="h-4 w-4 mr-2" /> Add Storage Service
@@ -1357,191 +946,239 @@ const IntegrationsManagement = () => {
             
             {isLoadingIntegrations ? (
               <div className="text-center py-8">Loading storage services...</div>
-            ) : integrations && integrations.filter(i => i.type === 'storage').length > 0 ? (
+            ) : integrations && integrations.filter(i => i.type === 's3' || i.type === 'local').length > 0 ? (
               <div className="grid md:grid-cols-2 gap-4">
                 {integrations
-                  .filter(i => i.type === 'storage')
+                  .filter(i => i.type === 's3' || i.type === 'local')
                   .map(integration => (
                     <IntegrationCard
                       key={integration.id}
-                      integration={integration}
-                      onTestConnection={handleTestConnection}
-                      onSync={handleSync}
+                      integration={integration as StorageIntegration}
                       onEdit={handleEditIntegration}
-                      onToggle={handleToggleIntegration}
+                      onDelete={handleDeleteIntegration}
+                      onToggleActive={handleToggleIntegration}
                     />
                   ))}
               </div>
             ) : (
-              <div className="text-center py-8 border rounded-lg p-6 bg-muted/10">
-                <div className="mx-auto w-10 h-10 rounded-full bg-muted flex items-center justify-center mb-4">
-                  <FileText className="h-5 w-5 text-muted-foreground" />
+              <Card className="p-8 text-center">
+                <div className="flex flex-col items-center space-y-3">
+                  <Database className="h-10 w-10 text-muted-foreground" />
+                  <h3 className="text-lg font-medium">No Storage Services</h3>
+                  <p className="text-muted-foreground">
+                    You haven't configured any document storage services yet.
+                  </p>
+                  <Button onClick={() => {
+                    documentServiceForm.reset();
+                    setSelectedIntegration(null);
+                    setShowDocumentConfig(true);
+                  }}>
+                    <Plus className="h-4 w-4 mr-2" /> Add Storage Service
+                  </Button>
                 </div>
-                <h3 className="text-lg font-medium mb-2">No Storage Services</h3>
-                <p className="text-muted-foreground mb-4">Configure document storage providers for your system.</p>
-                <Button onClick={() => {
-                  documentServiceForm.reset();
-                  setShowDocumentConfig(true);
-                }}>
-                  <Plus className="h-4 w-4 mr-2" /> Add Storage Service
-                </Button>
-              </div>
+              </Card>
             )}
-            
+
             {showDocumentConfig && (
               <Card>
                 <CardHeader>
-                  <CardTitle>{selectedIntegration ? 'Edit' : 'Add'} Document Storage</CardTitle>
+                  <CardTitle>{selectedIntegration ? 'Edit Storage Service' : 'Add New Storage Service'}</CardTitle>
                   <CardDescription>
-                    Configure where documents and files will be stored in the system.
+                    Configure storage services for document uploads and file storage.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <Form {...documentServiceForm}>
-                    <form onSubmit={documentServiceForm.handleSubmit(handleSaveDocumentService)} className="space-y-4">
+                    <form onSubmit={documentServiceForm.handleSubmit(onDocumentStorageSubmit)} className="space-y-4">
                       <FormField
                         control={documentServiceForm.control}
-                        name="provider"
+                        name="name"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Storage Provider</FormLabel>
+                            <FormLabel>Service Name</FormLabel>
+                            <FormControl>
+                              <Input placeholder="e.g., Document Storage" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={documentServiceForm.control}
+                        name="type"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Storage Type</FormLabel>
                             <Select
-                              onValueChange={field.onChange}
-                              defaultValue={field.value}
+                              value={field.value}
+                              onValueChange={(value) => {
+                                field.onChange(value);
+                                // Reset config when changing type
+                                documentServiceForm.setValue('config', {});
+                              }}
+                              disabled={!!selectedIntegration}
                             >
                               <FormControl>
                                 <SelectTrigger>
-                                  <SelectValue placeholder="Select storage provider" />
+                                  <SelectValue placeholder="Select storage type" />
                                 </SelectTrigger>
                               </FormControl>
                               <SelectContent>
                                 <SelectItem value="local">Local Storage</SelectItem>
                                 <SelectItem value="s3">Amazon S3</SelectItem>
-                                <SelectItem value="gcs">Google Cloud Storage</SelectItem>
-                                <SelectItem value="azure">Azure Blob Storage</SelectItem>
                               </SelectContent>
                             </Select>
                             <FormDescription>
-                              Where to store uploaded documents and files
+                              The type of storage service to use
                             </FormDescription>
                             <FormMessage />
                           </FormItem>
                         )}
                       />
-                      
-                      {documentServiceForm.watch('provider') !== 'local' && (
-                        <>
-                          <div className="grid md:grid-cols-2 gap-4">
-                            <FormField
-                              control={documentServiceForm.control}
-                              name="apiKey"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>API Key / Access Key</FormLabel>
-                                  <FormControl>
-                                    <Input type="password" {...field} value={field.value || ''} />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                            
-                            <FormField
-                              control={documentServiceForm.control}
-                              name="secretKey"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Secret Key</FormLabel>
-                                  <FormControl>
-                                    <Input type="password" {...field} value={field.value || ''} />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                          </div>
-                          
-                          <div className="grid md:grid-cols-2 gap-4">
-                            <FormField
-                              control={documentServiceForm.control}
-                              name="bucketName"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Bucket Name</FormLabel>
-                                  <FormControl>
-                                    <Input {...field} value={field.value || ''} />
-                                  </FormControl>
-                                  <FormDescription>
-                                    Storage bucket or container name
-                                  </FormDescription>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                            
-                            <FormField
-                              control={documentServiceForm.control}
-                              name="region"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Region</FormLabel>
-                                  <FormControl>
-                                    <Input placeholder="ap-southeast-2" {...field} value={field.value || ''} />
-                                  </FormControl>
-                                  <FormDescription>
-                                    Storage service region
-                                  </FormDescription>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                          </div>
-                          
-                          <FormField
-                            control={documentServiceForm.control}
-                            name="baseUrl"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Base URL (Optional)</FormLabel>
-                                <FormControl>
-                                  <Input placeholder="https://example.com/files" {...field} value={field.value || ''} />
-                                </FormControl>
-                                <FormDescription>
-                                  Custom URL for accessing files (if using CDN)
-                                </FormDescription>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </>
-                      )}
-                      
-                      <FormField
-                        control={documentServiceForm.control}
-                        name="enabled"
-                        render={({ field }) => (
-                          <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                            <div className="space-y-0.5">
-                              <FormLabel className="text-base">Enable Storage Service</FormLabel>
-                              <FormDescription>
-                                Turn on/off this storage provider
-                              </FormDescription>
-                            </div>
-                            <FormControl>
-                              <Switch
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
+
+                      {documentServiceForm.watch('type') === 's3' && (
+                        <div className="space-y-4 border rounded-md p-4">
+                          <h3 className="text-sm font-medium">Amazon S3 Configuration</h3>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                              <Label htmlFor="s3-bucket">S3 Bucket</Label>
+                              <Input
+                                id="s3-bucket"
+                                placeholder="my-app-bucket"
+                                value={documentServiceForm.watch('config.bucket') || ''}
+                                onChange={(e) => {
+                                  const config = documentServiceForm.watch('config') || {};
+                                  documentServiceForm.setValue('config', {
+                                    ...config,
+                                    bucket: e.target.value,
+                                  });
+                                }}
                               />
-                            </FormControl>
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <CardFooter className="px-0 pb-0 pt-6 flex gap-2">
+                            </div>
+                            <div>
+                              <Label htmlFor="s3-region">AWS Region</Label>
+                              <Input
+                                id="s3-region"
+                                placeholder="ap-southeast-2"
+                                value={documentServiceForm.watch('config.region') || ''}
+                                onChange={(e) => {
+                                  const config = documentServiceForm.watch('config') || {};
+                                  documentServiceForm.setValue('config', {
+                                    ...config,
+                                    region: e.target.value,
+                                  });
+                                }}
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="s3-access-key">Access Key ID</Label>
+                              <Input
+                                id="s3-access-key"
+                                placeholder="AKIAIOSFODNN7EXAMPLE"
+                                value={documentServiceForm.watch('config.accessKeyId') || ''}
+                                onChange={(e) => {
+                                  const config = documentServiceForm.watch('config') || {};
+                                  documentServiceForm.setValue('config', {
+                                    ...config,
+                                    accessKeyId: e.target.value,
+                                  });
+                                }}
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="s3-secret-key">Secret Access Key</Label>
+                              <Input
+                                id="s3-secret-key"
+                                type="password"
+                                placeholder="wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
+                                value={documentServiceForm.watch('config.secretAccessKey') || ''}
+                                onChange={(e) => {
+                                  const config = documentServiceForm.watch('config') || {};
+                                  documentServiceForm.setValue('config', {
+                                    ...config,
+                                    secretAccessKey: e.target.value,
+                                  });
+                                }}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {documentServiceForm.watch('type') === 'local' && (
+                        <div className="space-y-4 border rounded-md p-4">
+                          <h3 className="text-sm font-medium">Local Storage Configuration</h3>
+                          <div>
+                            <Label htmlFor="storage-path">Storage Path</Label>
+                            <Input
+                              id="storage-path"
+                              placeholder="./uploads"
+                              value={documentServiceForm.watch('config.path') || './uploads'}
+                              onChange={(e) => {
+                                const config = documentServiceForm.watch('config') || {};
+                                documentServiceForm.setValue('config', {
+                                  ...config,
+                                  path: e.target.value,
+                                });
+                              }}
+                            />
+                            <p className="text-sm text-muted-foreground mt-1">
+                              Directory path for storing uploaded files
+                            </p>
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="flex flex-col gap-4">
+                        <FormField
+                          control={documentServiceForm.control}
+                          name="isDefault"
+                          render={({ field }) => (
+                            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                              <div className="space-y-0.5">
+                                <FormLabel className="text-base">Default Storage</FormLabel>
+                                <FormDescription>
+                                  Make this the default storage service for the application
+                                </FormDescription>
+                              </div>
+                              <FormControl>
+                                <Switch
+                                  checked={field.value}
+                                  onCheckedChange={field.onChange}
+                                />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={documentServiceForm.control}
+                          name="isActive"
+                          render={({ field }) => (
+                            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                              <div className="space-y-0.5">
+                                <FormLabel className="text-base">Active</FormLabel>
+                                <FormDescription>
+                                  Enable or disable this storage service
+                                </FormDescription>
+                              </div>
+                              <FormControl>
+                                <Switch
+                                  checked={field.value}
+                                  onCheckedChange={field.onChange}
+                                />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+
+                      <CardFooter className="px-0 pt-4">
                         <Button variant="outline" type="button" onClick={() => setShowDocumentConfig(false)}>
                           Cancel
                         </Button>
-                        <Button type="submit">
+                        <Button type="submit" className="ml-2">
                           {selectedIntegration ? 'Update' : 'Add'} Storage Service
                         </Button>
                       </CardFooter>
@@ -1557,4 +1194,4 @@ const IntegrationsManagement = () => {
   );
 };
 
-export default IntegrationsManagement;
+export default IntegrationsSettings;

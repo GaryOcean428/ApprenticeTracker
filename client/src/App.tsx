@@ -36,6 +36,10 @@ import ComplaintsManagement from "./pages/gto-compliance/complaints";
 
 // Settings Pages
 import UserManagement from "./pages/settings/user-management";
+import PermissionsManagement from "./pages/settings/permissions";
+import SystemConfiguration from "./pages/settings/configuration";
+import IntegrationsSettings from "./pages/settings/integrations";
+import ImportExportSettings from "./pages/settings/import-export";
 
 // VET Training Module
 import UnitsOfCompetencyList from "./pages/vet/units/index";
@@ -255,38 +259,10 @@ function Router() {
         
         {/* Settings Routes */}
         <Route path="/settings/users" component={UserManagement} />
-        <Route path="/settings/permissions" component={() => {
-          return (
-            <div className="p-8">
-              <h1 className="text-2xl font-bold mb-4">Permissions Management</h1>
-              <p className="text-muted-foreground mb-4">This page allows you to manage system permissions and configure access rights for different user roles.</p>
-            </div>
-          );
-        }} />
-        <Route path="/settings/configuration" component={() => {
-          return (
-            <div className="p-8">
-              <h1 className="text-2xl font-bold mb-4">System Configuration</h1>
-              <p className="text-muted-foreground mb-4">Configure system-wide settings and preferences for your organization.</p>
-            </div>
-          );
-        }} />
-        <Route path="/settings/integrations" component={() => {
-          return (
-            <div className="p-8">
-              <h1 className="text-2xl font-bold mb-4">External Integrations</h1>
-              <p className="text-muted-foreground mb-4">Manage connections to external systems and third-party services.</p>
-            </div>
-          );
-        }} />
-        <Route path="/settings/import-export" component={() => {
-          return (
-            <div className="p-8">
-              <h1 className="text-2xl font-bold mb-4">Data Import & Export</h1>
-              <p className="text-muted-foreground mb-4">Tools for importing and exporting data to and from the system.</p>
-            </div>
-          );
-        }} />
+        <Route path="/settings/permissions" component={PermissionsManagement} />
+        <Route path="/settings/configuration" component={SystemConfiguration} />
+        <Route path="/settings/integrations" component={IntegrationsSettings} />
+        <Route path="/settings/import-export" component={ImportExportSettings} />
         
         {/* VET Training Routes */}
         <Route path="/vet/units" component={UnitsOfCompetencyList} />
