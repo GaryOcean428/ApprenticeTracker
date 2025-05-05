@@ -277,12 +277,46 @@ export const timesheetDetails = pgTable("timesheet_details", {
   id: serial("id").primaryKey(),
   timesheetId: integer("timesheet_id").references(() => timesheets.id).notNull(),
   date: date("date").notNull(),
-  hoursWorked: integer("hours_worked").notNull(),
+  hoursWorked: numeric("hours_worked", { precision: 5, scale: 2 }).notNull(),
   description: text("description"),
+  startTime: text("start_time"),  // Format: HH:MM (24-hour)
+  endTime: text("end_time"),      // Format: HH:MM (24-hour)
+  breakDuration: numeric("break_duration", { precision: 5, scale: 2 }),  // Break duration in hours
+  dayType: text("day_type").default("weekday"),  // 'weekday', 'saturday', 'sunday', 'public_holiday'
+  // Pay calculation fields
+  awardRateId: integer("award_rate_id").references(() => payRates.id),
+  penaltyRuleId: integer("penalty_rule_id").references(() => penaltyRules.id),
+  baseRate: numeric("base_rate", { precision: 10, scale: 2 }),  // Hourly base rate for this shift
+  penaltyRate: numeric("penalty_rate", { precision: 10, scale: 2 }),  // Applied penalty rate (if any)
+  allowances: json("allowances").default([]),  // Array of applied allowances
+  calculatedAmount: numeric("calculated_amount", { precision: 10, scale: 2 }),  // Total calculated pay for this detail entry
 });
 
 export const insertTimesheetDetailSchema = createInsertSchema(timesheetDetails).omit({
   id: true,
+});
+
+// Timesheet Calculations
+export const timesheetCalculations = pgTable("timesheet_calculations", {
+  id: serial("id").primaryKey(),
+  timesheetId: integer("timesheet_id").references(() => timesheets.id).notNull(),
+  totalHours: numeric("total_hours", { precision: 10, scale: 2 }).notNull(),
+  basePayTotal: numeric("base_pay_total", { precision: 10, scale: 2 }).notNull(),
+  penaltyPayTotal: numeric("penalty_pay_total", { precision: 10, scale: 2 }),
+  allowancesTotal: numeric("allowances_total", { precision: 10, scale: 2 }),
+  grossTotal: numeric("gross_total", { precision: 10, scale: 2 }).notNull(),
+  awardName: text("award_name"),
+  classificationName: text("classification_name"),
+  awardCode: text("award_code"),
+  calculatedAt: timestamp("calculated_at").notNull().defaultNow(),
+  payrollProcessed: boolean("payroll_processed").default(false),
+  payrollProcessedDate: timestamp("payroll_processed_date"),
+});
+
+export const insertTimesheetCalculationSchema = createInsertSchema(timesheetCalculations).omit({
+  id: true,
+  calculatedAt: true,
+  payrollProcessedDate: true,
 });
 
 // Activity Logs
