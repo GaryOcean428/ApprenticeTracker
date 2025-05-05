@@ -24,6 +24,7 @@ import { registerHostRoutes } from "./api/host-routes";
 import { registerTGARoutes } from "./api/tga-routes";
 import { fairWorkRouter } from "./api/fair-work-routes";
 import { authRouter, isAuthenticated, hasRole } from "./api/auth-routes";
+import payrollRouter from "./api/payroll";
 import { eq, and } from "drizzle-orm";
 import { db } from "./db"; // Assuming db connection is defined here
 import { users, gtoOrganizations } from "@shared/schema";
@@ -37,6 +38,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/api/settings', settingsRouter);
   app.use('/api', fairWorkRouter); // Routes like /api/awards, /api/enterprise-agreements
   app.use('/api/auth', authRouter); // Authentication routes (login, register, verify)
+  app.use('/api/payroll', payrollRouter); // Payroll routes
   
   // Register host employer routes
   registerHostRoutes(app);
