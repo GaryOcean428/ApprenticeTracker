@@ -198,13 +198,13 @@ function Router() {
         <Route path="/hosts/:id" component={HostDetails} />
         
         {/* Fair Work Routes */}
-        <Route path="/awards" component={AwardsList} />
-        <Route path="/awards/create" component={CreateAward} />
+        <ProtectedRoute path="/awards" component={AwardsList} />
+        <ProtectedRoute path="/awards/create" component={CreateAward} />
         
         {/* Field Officer Routes */}
-        <Route path="/field-officers" component={FieldOfficerActivities} />
-        <Route path="/field-officers/site-assessment" component={SiteAssessment} />
-        <Route path="/field-officers/case-notes" component={() => {
+        <ProtectedRoute path="/field-officers" component={FieldOfficerActivities} />
+        <ProtectedRoute path="/field-officers/site-assessment" component={SiteAssessment} />
+        <ProtectedRoute path="/field-officers/case-notes" component={() => {
           const CaseNotes = lazy(() => import("./pages/field-officers/case-notes/index"));
           return (
             <Suspense fallback={<div>Loading...</div>}>
@@ -212,7 +212,7 @@ function Router() {
             </Suspense>
           );
         }} />
-        <Route path="/field-officers/competency" component={() => {
+        <ProtectedRoute path="/field-officers/competency" component={() => {
           const CompetencyReview = lazy(() => import("./pages/field-officers/competency/index"));
           return (
             <Suspense fallback={<div>Loading...</div>}>
@@ -220,7 +220,7 @@ function Router() {
             </Suspense>
           );
         }} />
-        <Route path="/field-officers/incidents" component={() => {
+        <ProtectedRoute path="/field-officers/incidents" component={() => {
           const Incidents = lazy(() => import("./pages/field-officers/incidents/index"));
           return (
             <Suspense fallback={<div>Loading...</div>}>
@@ -238,10 +238,10 @@ function Router() {
         }} />
         
         {/* GTO Compliance Routes */}
-        <Route path="/gto-compliance" component={GtoComplianceDashboard} />
-        <Route path="/gto-compliance/standard-assessment" component={StandardAssessment} />
-        <Route path="/gto-compliance/complaints" component={ComplaintsManagement} />
-        <Route path="/gto-compliance/access-equity" component={() => {
+        <ProtectedRoute path="/gto-compliance" component={GtoComplianceDashboard} />
+        <ProtectedRoute path="/gto-compliance/standard-assessment" component={StandardAssessment} />
+        <ProtectedRoute path="/gto-compliance/complaints" component={ComplaintsManagement} />
+        <ProtectedRoute path="/gto-compliance/access-equity" component={() => {
           const AccessEquity = lazy(() => import("./pages/gto-compliance/access-equity"));
           return (
             <Suspense fallback={<div>Loading...</div>}>
@@ -249,7 +249,7 @@ function Router() {
             </Suspense>
           );
         }} />
-        <Route path="/gto-compliance/records-management" component={() => {
+        <ProtectedRoute path="/gto-compliance/records-management" component={() => {
           const RecordsManagement = lazy(() => import("./pages/gto-compliance/records-management"));
           return (
             <Suspense fallback={<div>Loading...</div>}>
@@ -257,7 +257,7 @@ function Router() {
             </Suspense>
           );
         }} />
-        <Route path="/gto-compliance/risk-management" component={() => {
+        <ProtectedRoute path="/gto-compliance/risk-management" component={() => {
           const RiskManagement = lazy(() => import("./pages/gto-compliance/risk-management"));
           return (
             <Suspense fallback={<div>Loading...</div>}>
