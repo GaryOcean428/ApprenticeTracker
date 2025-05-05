@@ -153,19 +153,67 @@ export class AwardRateCalculator {
         await db
           .update(timesheetCalculations)
           .set({
-            totalAmount,
+            grossTotal: totalAmount.toString(),
             calculationDetails: JSON.stringify(shiftResults),
-            updatedAt: new Date()
+            calculatedAt: new Date()
           })
           .where(eq(timesheetCalculations.id, existingCalculation.id));
       } else {
+        // Gather award and classification info
+        let awardName = 'Unknown';
+        let awardCode = 'Unknown';
+        let classificationName = 'Unknown';
+        let totalHoursWorked = 0;
+        let totalBaseAmount = 0;
+        let totalPenaltyAmount = 0;
+        let totalAllowancesAmount = 0;
+        
+        // Get award info
+        if (shiftResults.length > 0) {
+          // Find applicable award and classification
+          const applicable = await this.determineApplicableAward(
+            timesheet.apprenticeId,
+            timesheet.placementId
+          );
+          
+          if (applicable) {
+            const [award] = await db.select().from(awards).where(eq(awards.id, applicable.awardId));
+            const [classification] = await db.select().from(awardClassifications).where(eq(awardClassifications.id, applicable.classificationId));
+            
+            if (award) {
+              awardName = award.name;
+              awardCode = award.code;
+            }
+            
+            if (classification) {
+              classificationName = classification.name;
+            }
+          }
+          
+          // Calculate totals from all shifts
+          for (const shift of shiftResults) {
+            const result = shift.result;
+            totalHoursWorked += result.hoursWorked;
+            totalBaseAmount += result.baseAmount;
+            totalPenaltyAmount += result.penaltyAmount;
+            totalAllowancesAmount += result.allowances.reduce((sum, allowance) => sum + allowance.amount, 0);
+          }
+        }
+        
         // Create new calculation
         await db
           .insert(timesheetCalculations)
           .values({
             timesheetId,
-            totalAmount,
-            calculationDetails: JSON.stringify(shiftResults),
+            totalHours: totalHoursWorked.toString(),
+            basePayTotal: totalBaseAmount.toString(),
+            penaltyPayTotal: totalPenaltyAmount.toString(),
+            allowancesTotal: totalAllowancesAmount.toString(),
+            grossTotal: totalAmount.toString(),
+            awardName,
+            classificationName,
+            awardCode,
+            calculationDetails: JSON.stringify(shiftResults)
           });
       }
 
@@ -503,13 +551,16 @@ export class AwardRateCalculator {
       
       // Log the result for auditing purposes
       await db.insert(fairworkComplianceLogs).values({
-        awardCode,
-        classificationCode, 
-        requestedRate: hourlyRate,
-        minimumRate: validationResult.minimum_rate,
-        isValid: validationResult.is_valid,
         message: validationResult.message || '',
-        verifiedDate: new Date(),
+        details: JSON.stringify({
+          awardCode,
+          classificationCode, 
+          requestedRate: hourlyRate,
+          minimumRate: validationResult.minimum_rate,
+          isValid: validationResult.is_valid
+        }),
+        timestamp: new Date(),
+        outcome: validationResult.is_valid ? 'compliant' : 'non_compliant',
         source: 'fair_work_api'
       });
 
