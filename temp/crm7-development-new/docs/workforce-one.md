@@ -1,0 +1,55 @@
+# Competitor → CRM Feature Mapping
+
+| **Competitor Feature**                          | **AnyTime / WF1**                            | **Our CRM Module / Sub-category**                                 | **Status & Recommendations**                                  |
+|-------------------------------------------------|-----------------------------------------------|-------------------------------------------------------------------|--------------------------------------------------------------|
+| 1. Pay Item & Award Configuration               | Define pay items, award rules, loadings       | **Timesheets & Payroll › Pay Items & Awards**                    | ✅ Covered                                                |
+| 2. Pay Schedule Setup                           | Configure pay frequencies (weekly/fortnight)  | **Timesheets & Payroll › Payroll Export**                         | 📌 _Missing:_ Add **“Pay Schedule Settings”** under Timesheets & Payroll to define pay periods, cut-off and publish dates. |
+| 3. Deduction & Allowance Types                  | Set up deductions (loans, unions) & allowances| **Timesheets & Payroll › Pay Items & Awards**                    | 📌 _Missing:_ Separate sub-category **“Deduction & Allowance Configuration”**. |
+| 4. Tax & Superannuation Table Maintenance       | Upload/update ATO tax tables; super rules     | **Settings › Integrations & API Manager**                         | 📌 _Missing:_ New **“Tax & Super Settings”** under Settings. |
+| 5. Timesheet Management & Approval Workflow     | Create, edit, approve timesheets             | **Timesheets & Payroll › Timesheet Management / Approval Workflow** | ✅ Covered                                                |
+| 6. Bulk Import / Data Upload                    | CSV import of employees & timesheets         | **Settings › Import/Export**                                      | ✅ Covered                                                |
+| 7. Payroll Export (including STP)               | Export to payroll systems & Single Touch Payroll | **Timesheets & Payroll › Payroll Export** / **Integrations & API Manager** | ✅ Covered (add “STP Reporting” under Integrations if not explicit) |
+| 8. Leave Accruals & Leave Types                 | Configure leave categories and accrual rules  | **Timesheets & Payroll › Leave Management**                       | ✅ Covered                                                |
+| 9. Rostering / Shift Scheduling                 | Employee rosters, shift patterns             | **Placements & Rosters**                                          | 📌 _Missing:_ Enhance to **“Shift Patterns & Rosters”** for detailed schedules. |
+| 10. Public Holiday & Non-Work Calendars         | Define public-holiday rates & calendars       | **Settings › System Configuration**                               | 📌 _Missing:_ Add **“Holiday & Calendar Settings”** under Settings. |
+| 11. Reporting Library & Scheduled Reports       | Built-in report templates + scheduling       | **Reporting & Analytics**                                         | ✅ Covered (ensure “Schedule Email” supports all reports) |
+| 12. Audit & System Logs                         | View audit trail of changes                  | **Settings › Permissions & Roles**                                | 📌 _Missing:_ New **“Audit Logs”** section under Settings. |
+| 13. Notifications & Alerts Configuration        | Configure auto-reminders & email templates    | **Portals & Self-Service › Usage Analytics**                      | 📌 _Missing:_ Add **“Notification Templates”** under Settings. |
+| 14. User & Role Management                      | Create users, assign roles and permissions    | **Settings › User Management / Permissions & Roles**              | ✅ Covered                                                |
+| 15. API & Integration Configuration             | Manage connectors to ADMS, payroll, RTO systems | **Integrations & API Manager**                                    | ✅ Covered                                                |
+| 16. Help & Contextual Documentation             | In-app help links, context help tooltips      | **Settings › System Configuration**                               | 📌 _Missing:_ Add **“Contextual Help & Documentation”** under Settings. |
+| 17. Mobile / Tablet Responsiveness              | Mobile-friendly agent interface               | *n/a (UI-agnostic nav)*                                           | ✅ Implicit (design must be responsive)                   |
+| 18. Multi-Entity / Branch Management            | Separate codes for branches / regions         | **Settings › System Configuration**                               | 📌 _Missing:_ New **“Multi-Entity / Branch Settings”**.  |
+
+---
+
+## Next Steps
+
+1. **Enhance Navigation**  
+   - **Timesheets & Payroll** › add:
+     - **Pay Schedule Settings**  
+     - **Deduction & Allowance Configuration**  
+   - **Placements & Rosters** › rename to **“Placements & Rosters / Shift Patterns”**  
+   - **Settings** › add:
+     - **Holiday & Calendar Settings**  
+     - **Tax & Super Settings**  
+     - **Audit Logs**  
+     - **Notification Templates**  
+     - **Contextual Help & Documentation**  
+     - **Multi-Entity / Branch Settings**  
+
+2. **Wireframe Updates**  
+   - Sketch each new screen (e.g. Pay Schedule form, Holiday Calendar setup, Audit Log viewer).  
+   - Ensure consistent filter-table-form patterns.
+
+3. **Stakeholder Validation**  
+   - Review with payroll, compliance, field officers and IT to confirm completeness.
+
+4. **Phased Rollout**  
+   - Phase 1: Payroll & Scheduling enhancements  
+   - Phase 2: Compliance, Audit & Notifications  
+   - Phase 3: Multi-Entity and advanced portal settings  
+
+---
+
+By adding these missing areas, your CRM will match—if not exceed—the full breadth of **AnyTime (WorkforceOne)** administrator features while keeping everything modular and user-focused.

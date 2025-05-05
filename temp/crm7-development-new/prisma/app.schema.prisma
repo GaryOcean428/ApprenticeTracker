@@ -1,0 +1,192 @@
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["multiSchema", "postgresqlExtensions"]
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+  schemas   = ["public", "auth"]
+}
+
+// App-specific models
+model opportunities {
+  id          String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name        String
+  value       Decimal       @db.Decimal
+  status      String
+  org_id      String        @db.Uuid
+  user_id     String?       @db.Uuid
+  created_at  DateTime      @default(now())
+  updated_at  DateTime      @updatedAt
+  organization organizations @relation(fields: [org_id], references: [id], onDelete: Cascade)
+
+  @@index([org_id])
+  @@index([user_id])
+  @@index([status])
+  @@index([org_id, status])
+  @@schema("public")
+}
+
+model organizations {
+  id              String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name            String
+  is_gto          Boolean?        @default(false)
+  parent_org_id   String?         @db.Uuid
+  created_at      DateTime        @default(now())
+  updated_at      DateTime        @updatedAt
+  opportunities   opportunities[]
+  leads           leads[]
+  parent_org      organizations?  @relation("OrgHierarchy", fields: [parent_org_id], references: [id])
+  child_orgs      organizations[] @relation("OrgHierarchy")
+
+  @@index([parent_org_id])
+  @@index([is_gto])
+  @@schema("public")
+}
+
+model leads {
+  id          String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name        String
+  email       String?
+  status      String
+  org_id      String        @db.Uuid
+  created_at  DateTime      @default(now())
+  updated_at  DateTime      @updatedAt
+  organization organizations @relation(fields: [org_id], references: [id], onDelete: Cascade)
+
+  @@index([org_id])
+  @@index([status])
+  @@index([org_id, status])
+  @@schema("public")
+}
+
+// Rate calculation models
+model rate_templates {
+  id                String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name              String
+  description       String?
+  org_id           String              @db.Uuid
+  award_code        String              // e.g. MA000025
+  classification    String              // Award classification level
+  effective_from    DateTime
+  effective_to      DateTime?
+  is_active        Boolean             @default(true)
+  created_at       DateTime            @default(now())
+  updated_at       DateTime            @updatedAt
+  base_rates       rate_base_values[]
+  calculations     rate_calculations[]
+
+  @@index([org_id])
+  @@index([award_code])
+  @@index([effective_from, effective_to])
+  @@schema("public")
+}
+
+model rate_base_values {
+  id                String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  template_id       String          @db.Uuid
+  category          String          // e.g. 'hourly_rate', 'leave_loading', etc
+  value            Decimal         @db.Decimal(10,4)
+  unit             String          // e.g. 'hourly', 'daily', 'percentage'
+  created_at       DateTime        @default(now())
+  updated_at       DateTime        @updatedAt
+  template         rate_templates   @relation(fields: [template_id], references: [id], onDelete: Cascade)
+
+  @@index([template_id])
+  @@index([category])
+  @@schema("public")
+}
+
+model rate_calculations {
+  id                String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  template_id       String          @db.Uuid
+  worker_id         String          @db.Uuid
+  host_org_id       String          @db.Uuid
+  effective_date    DateTime
+  base_rate         Decimal         @db.Decimal(10,4)
+  annual_leave      Decimal         @db.Decimal(10,4)
+  leave_loading     Decimal         @db.Decimal(10,4)
+  public_holidays   Decimal         @db.Decimal(10,4)
+  sick_leave        Decimal         @db.Decimal(10,4)
+  training_leave    Decimal         @db.Decimal(10,4)
+  study_costs       Decimal         @db.Decimal(10,4)
+  protective_equip  Decimal         @db.Decimal(10,4)
+  superannuation    Decimal         @db.Decimal(10,4)
+  workers_comp      Decimal         @db.Decimal(10,4)
+  payroll_tax       Decimal         @db.Decimal(10,4)
+  admin_fee         Decimal         @db.Decimal(10,4)
+  total_cost        Decimal         @db.Decimal(10,4)
+  markup_percent    Decimal         @db.Decimal(10,4)
+  charge_rate       Decimal         @db.Decimal(10,4)
+  created_at        DateTime        @default(now())
+  updated_at        DateTime        @updatedAt
+  template          rate_templates  @relation(fields: [template_id], references: [id])
+
+  @@index([template_id])
+  @@index([worker_id])
+  @@index([host_org_id])
+  @@index([effective_date])
+  @@schema("public")
+}
+
+model timesheet_entries {
+  id                String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  worker_id         String          @db.Uuid
+  host_org_id       String          @db.Uuid
+  date             DateTime
+  hours_worked      Decimal         @db.Decimal(10,2)
+  rate_type        String          // e.g. 'standard', 'overtime', 'training'
+  rate_amount      Decimal         @db.Decimal(10,4)
+  total_amount     Decimal         @db.Decimal(10,4)
+  status           String          // e.g. 'pending', 'approved', 'rejected'
+  approved_at      DateTime?
+  approved_by      String?         @db.Uuid
+  created_at       DateTime        @default(now())
+  updated_at       DateTime        @updatedAt
+
+  @@index([worker_id])
+  @@index([host_org_id])
+  @@index([date])
+  @@index([status])
+  @@schema("public")
+}
+
+model billing_cycles {
+  id                String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  host_org_id       String          @db.Uuid
+  start_date       DateTime
+  end_date         DateTime
+  status           String          // e.g. 'draft', 'pending', 'approved', 'invoiced'
+  total_hours      Decimal         @db.Decimal(10,2)
+  total_amount     Decimal         @db.Decimal(10,4)
+  invoice_number   String?
+  invoice_date     DateTime?
+  created_at       DateTime        @default(now())
+  updated_at       DateTime        @updatedAt
+
+  @@index([host_org_id])
+  @@index([start_date, end_date])
+  @@index([status])
+  @@schema("public")
+}
+
+model rate_adjustments {
+  id                String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  worker_id         String          @db.Uuid
+  host_org_id       String          @db.Uuid
+  adjustment_type   String          // e.g. 'discount', 'surcharge', 'special_rate'
+  amount           Decimal         @db.Decimal(10,4)
+  percentage       Decimal?        @db.Decimal(10,4)
+  reason           String
+  effective_from   DateTime
+  effective_to     DateTime?
+  created_at       DateTime        @default(now())
+  updated_at       DateTime        @updatedAt
+
+  @@index([worker_id])
+  @@index([host_org_id])
+  @@index([effective_from, effective_to])
+  @@schema("public")
+}

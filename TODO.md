@@ -8,6 +8,10 @@
 - [ ] Develop multi-factor authentication (MFA) for admin users
 - [ ] Integrate real-time notification system for alerts and messages
 - [ ] Implement file upload and document management system
+- [ ] Implement payroll system with award rate integration
+- [ ] Add enrichment program management functionality
+- [ ] Create progress reviews system with standardized assessment forms
+- [ ] Integrate schedule and calendar system for field officers
 
 ### Code Quality & Standards
 - [x] Fix TypeScript errors in tga-service.ts focusing on type safety
@@ -70,6 +74,10 @@
 - [ ] Apprentice recruitment and onboarding workflow
 - [ ] Qualification progress visualization
 - [ ] Performance review and reporting tools
+- [ ] Training plans development and tracking
+- [ ] Apprentice skills development system
+- [ ] Certifications management for apprentices
+- [ ] Apprentice assessment records and reporting
 
 ### Host Employer Management
 - [ ] Host employer monitoring dashboard
