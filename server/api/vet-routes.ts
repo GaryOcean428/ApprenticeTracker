@@ -19,6 +19,16 @@ import {
   insertApprenticeUnitProgressSchema,
   insertApprenticeQualificationSchema
 } from '@shared/schema';
+import {
+  validateQuery,
+  validateParams,
+  validateBody,
+  vetUnitSearchSchema,
+  vetQualificationSearchSchema,
+  vetIdParamSchema,
+  vetQualUnitAssignSchema,
+  vetUnitOrderSchema
+} from '../utils/validation';
 
 export const vetRouter = Router();
 
@@ -27,7 +37,7 @@ export const vetRouter = Router();
 // ==========================================
 
 // Get all units of competency
-vetRouter.get('/units', async (req, res) => {
+vetRouter.get('/units', validateQuery(vetUnitSearchSchema), async (req, res) => {
   try {
     // Support filtering by training package, status, and search term
     const trainingPackage = req.query.trainingPackage as string | undefined;
@@ -45,10 +55,11 @@ vetRouter.get('/units', async (req, res) => {
     }
     
     if (search) {
+      // Use parameterized queries for search to prevent SQL injection
       query = query.where(
         or(
-          like(unitsOfCompetency.unitCode, `%${search}%`),
-          like(unitsOfCompetency.unitTitle, `%${search}%`)
+          like(unitsOfCompetency.unitCode, sql`CONCAT('%', ${search}, '%')`),
+          like(unitsOfCompetency.unitTitle, sql`CONCAT('%', ${search}, '%')`)
         )
       );
     }
@@ -132,7 +143,7 @@ vetRouter.patch('/units/:id', async (req, res) => {
 // ==========================================
 
 // Get all qualifications
-vetRouter.get('/qualifications', async (req, res) => {
+vetRouter.get('/qualifications', validateQuery(vetQualificationSearchSchema), async (req, res) => {
   try {
     // Support filtering by training package, AQF level, and search term
     const trainingPackage = req.query.trainingPackage as string | undefined;
@@ -157,10 +168,11 @@ vetRouter.get('/qualifications', async (req, res) => {
     }
     
     if (search) {
+      // Use parameterized queries for search to prevent SQL injection
       query = query.where(
         or(
-          like(qualifications.qualificationCode, `%${search}%`),
-          like(qualifications.qualificationTitle, `%${search}%`)
+          like(qualifications.qualificationCode, sql`CONCAT('%', ${search}, '%')`),
+          like(qualifications.qualificationTitle, sql`CONCAT('%', ${search}, '%')`)
         )
       );
     }
@@ -175,7 +187,7 @@ vetRouter.get('/qualifications', async (req, res) => {
 });
 
 // Get qualification by ID
-vetRouter.get('/qualifications/:id', async (req, res) => {
+vetRouter.get('/qualifications/:id', validateParams(vetIdParamSchema), async (req, res) => {
   try {
     const id = parseInt(req.params.id);
     const [qualification] = await db
@@ -317,7 +329,7 @@ vetRouter.delete('/qualifications/:id/units/:unitStructureId', async (req, res) 
 });
 
 // Update unit order in qualification structure
-vetRouter.patch('/qualifications/:id/units/:unitStructureId/order', async (req, res) => {
+vetRouter.patch('/qualifications/:id/units/:unitStructureId/order', validateParams(vetIdParamSchema), validateBody(vetUnitOrderSchema), async (req, res) => {
   try {
     const qualificationId = parseInt(req.params.id);
     const unitStructureId = parseInt(req.params.unitStructureId);
@@ -491,7 +503,7 @@ vetRouter.patch('/qualifications/:id', async (req, res) => {
 // ==========================================
 
 // Get qualifications for an apprentice
-vetRouter.get('/apprentices/:id/qualifications', async (req, res) => {
+vetRouter.get('/apprentices/:id/qualifications', validateParams(vetIdParamSchema), async (req, res) => {
   try {
     const apprenticeId = parseInt(req.params.id);
     

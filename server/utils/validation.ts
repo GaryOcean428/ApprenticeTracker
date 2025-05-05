@@ -131,3 +131,34 @@ export const tgaSyncAllSchema = z.object({
 export const qualificationSearchSchema = z.object({
   q: z.string().min(2, 'Search query must be at least 2 characters').max(100, 'Search query too long')
 });
+
+// VET API validation schemas
+export const vetUnitSearchSchema = z.object({
+  trainingPackage: z.string().optional(),
+  isActive: z.enum(['true', 'false']).optional(),
+  search: z.string().min(2, 'Search query must be at least 2 characters').max(100, 'Search query too long').optional()
+});
+
+export const vetQualificationSearchSchema = z.object({
+  trainingPackage: z.string().optional(),
+  aqfLevel: z.string().optional(),
+  isApprenticeshipQualification: z.enum(['true', 'false']).optional(),
+  search: z.string().min(2, 'Search query must be at least 2 characters').max(100, 'Search query too long').optional()
+});
+
+export const vetIdParamSchema = z.object({
+  id: z.string().transform(val => parseInt(val, 10))
+});
+
+export const vetQualUnitAssignSchema = z.object({
+  units: z.array(z.object({
+    unitId: z.number(),
+    isCore: z.boolean(),
+    groupName: z.string().nullable().optional(),
+    isMandatoryElective: z.boolean().optional()
+  })).min(1, 'At least one unit must be provided')
+});
+
+export const vetUnitOrderSchema = z.object({
+  direction: z.enum(['up', 'down'])
+});
