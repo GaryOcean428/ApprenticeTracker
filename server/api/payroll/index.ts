@@ -1,5 +1,16 @@
 import { Router } from 'express';
-import { getAllAwards, getAwardById, getAwardClassifications, getClassificationRates, getAwardPenalties, getAwardAllowances, calculateTimesheetPay, getTimesheetCalculation } from './award-rates';
+import { 
+  getAllAwards, 
+  getAwardById, 
+  getAwardClassifications, 
+  getClassificationRates, 
+  getAwardPenalties, 
+  getAwardAllowances, 
+  calculateTimesheetPay, 
+  getTimesheetCalculation, 
+  validateAwardRate,
+  importModernAwardsData
+} from './award-rates';
 import { getTimesheets, getTimesheet, approveTimesheet, rejectTimesheet } from './timesheets';
 import { isAuthenticated, hasRole } from '../auth-routes';
 import { hasPermission } from '../../middleware/permissions';
@@ -13,6 +24,10 @@ router.get('/awards/:awardId/classifications', isAuthenticated, hasPermission('v
 router.get('/classifications/:classificationId/rates', isAuthenticated, hasPermission('view:award_rates'), getClassificationRates);
 router.get('/awards/:awardId/penalties', isAuthenticated, hasPermission('view:award_rates'), getAwardPenalties);
 router.get('/awards/:awardId/allowances', isAuthenticated, hasPermission('view:award_rates'), getAwardAllowances);
+
+// Fair Work API integration routes
+router.post('/awards/validate-rate', isAuthenticated, hasPermission('manage:award_rates'), validateAwardRate);
+router.post('/awards/import', isAuthenticated, hasRole('admin'), importModernAwardsData);
 
 // Award calculation routes
 router.post('/timesheets/:timesheetId/calculate', isAuthenticated, hasPermission('manage:timesheets'), calculateTimesheetPay);

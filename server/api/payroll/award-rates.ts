@@ -22,7 +22,7 @@ export async function getAllAwards(req: Request, res: Response) {
     const awardsList = await db.select().from(awards);
     return res.status(200).json(awardsList);
   } catch (error) {
-    logger.error('Error fetching awards:', error);
+    logger.error('Error fetching awards:', { error: error instanceof Error ? error.message : String(error) });
     return res.status(500).json({ message: 'Failed to fetch awards' });
   }
 }
@@ -209,5 +209,65 @@ export async function getTimesheetCalculation(req: Request, res: Response) {
   } catch (error) {
     logger.error('Error fetching timesheet calculation:', error);
     return res.status(500).json({ message: 'Failed to fetch calculation' });
+  }
+}
+
+/**
+ * Validate a pay rate against Fair Work Awards
+ * @route POST /api/payroll/awards/validate-rate
+ */
+export async function validateAwardRate(req: Request, res: Response) {
+  const { awardCode, classificationCode, hourlyRate } = req.body;
+  
+  if (!awardCode || !classificationCode || hourlyRate === undefined) {
+    return res.status(400).json({
+      message: 'awardCode, classificationCode, and hourlyRate are all required'
+    });
+  }
+
+  try {
+    // Create FairWork API client - in production this would be configured from environment variables
+    // Here we rely on the fallback behavior in validateAwardRates when no client is provided
+    const calculator = new AwardRateCalculator();
+    
+    // Validate the rate against Fair Work API
+    const validationResult = await calculator.validateAwardRates(
+      awardCode,
+      classificationCode,
+      parseFloat(hourlyRate)
+    );
+    
+    return res.status(200).json(validationResult);
+  } catch (error) {
+    logger.error('Error validating award rate:', error);
+    return res.status(500).json({
+      message: 'Failed to validate award rate',
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+}
+
+/**
+ * Import modern awards data from Fair Work API
+ * @route POST /api/payroll/awards/import
+ */
+export async function importModernAwardsData(req: Request, res: Response) {
+  try {
+    // This would be properly configured in production
+    // For now, use the award rate calculator without an API client 
+    // which will return appropriate error message
+    const calculator = new AwardRateCalculator();
+    const result = await calculator.importModernAwardsData();
+    
+    return res.status(200).json({
+      message: 'Modern awards data imported successfully',
+      stats: result
+    });
+  } catch (error) {
+    logger.error('Error importing modern awards data:', error);
+    return res.status(500).json({
+      message: 'Failed to import modern awards data',
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
   }
 }

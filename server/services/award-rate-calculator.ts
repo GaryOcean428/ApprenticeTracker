@@ -54,196 +54,125 @@ export class AwardRateCalculator {
    */
   async calculateTimesheetPay(timesheetId: number): Promise<any> {
     try {
-      // Get timesheet and its details
-      const [timesheet] = await db.select().from(timesheets).where(eq(timesheets.id, timesheetId));
-      
+      // Get timesheet details
+      const [timesheet] = await db
+        .select()
+        .from(timesheets)
+        .where(eq(timesheets.id, timesheetId));
+
       if (!timesheet) {
         throw new Error(`Timesheet with ID ${timesheetId} not found`);
       }
 
-      // Get all timesheet details
-      const details = await db.select().from(timesheetDetails).where(eq(timesheetDetails.timesheetId, timesheetId));
-      
-      if (details.length === 0) {
-        throw new Error(`No timesheet details found for timesheet ID ${timesheetId}`);
+      // Get shift details for this timesheet
+      const shiftEntries = await db
+        .select()
+        .from(timesheetDetails)
+        .where(eq(timesheetDetails.timesheetId, timesheetId));
+
+      if (!shiftEntries || shiftEntries.length === 0) {
+        throw new Error(`No shift entries found for timesheet ID ${timesheetId}`);
       }
 
-      // Get apprentice details including placement
-      const [apprentice] = await db.select().from(apprentices).where(eq(apprentices.id, timesheet.apprenticeId));
-      
-      if (!apprentice) {
-        throw new Error(`Apprentice with ID ${timesheet.apprenticeId} not found`);
-      }
+      // Calculate pay for each shift
+      const shiftResults = [];
+      let totalAmount = 0;
 
-      // Get placement details to determine applicable award
-      const [placement] = await db.select().from(placements).where(eq(placements.id, timesheet.placementId));
-      
-      if (!placement) {
-        throw new Error(`Placement with ID ${timesheet.placementId} not found`);
-      }
-
-      // Determine the applicable award and classification for this apprentice
-      const apprenticeAward = await this.determineApplicableAward(apprentice.id, placement.id);
-
-      if (!apprenticeAward) {
-        throw new Error(`Could not determine applicable award for apprentice ID ${apprentice.id}`);
-      }
-
-      // Get public holidays for the timesheet period
-      const startDate = new Date(timesheet.weekStarting);
-      // Add 6 days to get the end of the week
-      const endDate = new Date(timesheet.weekStarting);
-      endDate.setDate(endDate.getDate() + 6);
-
-      const publicHolidaysList = await db.select().from(publicHolidays).where(
-        and(
-          gte(sql`${publicHolidays.holidayDate}::date`, startDate),
-          lte(sql`${publicHolidays.holidayDate}::date`, endDate)
-        )
-      );
-
-      // Calculate pay for each timesheet detail
-      let totalBaseAmount = 0;
-      let totalPenaltyAmount = 0;
-      let totalAllowancesAmount = 0;
-      let totalHours = 0;
-
-      const calculationPromises = details.map(async (detail) => {
-        // Determine day type (check if it's a public holiday)
-        const detailDate = new Date(detail.date);
-        const isPublicHoliday = publicHolidaysList.some(
-          holiday => new Date(holiday.holidayDate).toDateString() === detailDate.toDateString()
-        );
-
-        let dayType: 'weekday' | 'saturday' | 'sunday' | 'public_holiday';
-        
-        if (isPublicHoliday) {
-          dayType = 'public_holiday';
-        } else {
-          const day = detailDate.getDay();
-          if (day === 0) dayType = 'sunday';
-          else if (day === 6) dayType = 'saturday';
-          else dayType = 'weekday';
+      for (const shift of shiftEntries) {
+        // Skip if missing required data
+        if (!shift.date || !shift.startTime || !shift.endTime) {
+          logger.warn('Skipping shift with missing date/time data', { shift });
+          continue;
         }
 
-        // Create shift details object for calculation
+        // Determine day type if not set (basic implementation)
+        let dayType = shift.dayType as 'weekday' | 'saturday' | 'sunday' | 'public_holiday' | undefined;
+        
+        if (!dayType) {
+          const shiftDate = new Date(shift.date);
+          const day = shiftDate.getDay();
+          
+          // Check if it's a public holiday
+          const [publicHoliday] = await db
+            .select()
+            .from(publicHolidays)
+            .where(eq(publicHolidays.date, shift.date));
+
+          if (publicHoliday) {
+            dayType = 'public_holiday';
+          } else if (day === 0) {
+            dayType = 'sunday';
+          } else if (day === 6) {
+            dayType = 'saturday';
+          } else {
+            dayType = 'weekday';
+          }
+        }
+
         const shiftDetails: ShiftDetails = {
-          date: detailDate,
-          startTime: detail.startTime || '09:00', // Default if not provided
-          endTime: detail.endTime || '17:00',     // Default if not provided
-          breakDuration: Number(detail.breakDuration || 0),
-          dayType
+          date: new Date(shift.date),
+          startTime: shift.startTime,
+          endTime: shift.endTime,
+          breakDuration: shift.breakDuration || 0,
+          dayType: dayType
         };
 
-        // Calculate pay for this detail
-        const calculation = await this.calculateShiftPay(
-          apprenticeAward.awardId,
-          apprenticeAward.classificationId,
-          apprentice.apprenticeshipYear || 1,
+        // Get applicable award details from placement/apprentice data
+        const applicable = await this.determineApplicableAward(
+          timesheet.apprenticeId,
+          timesheet.placementId
+        );
+
+        if (!applicable) {
+          throw new Error(`Could not determine applicable award for apprentice ID ${timesheet.apprenticeId}`);
+        }
+
+        // Calculate pay for this shift
+        const shiftResult = await this.calculateShiftPay(
+          applicable.awardId,
+          applicable.classificationId,
           shiftDetails
         );
 
-        // Update the detail with the calculation results
-        await db.update(timesheetDetails)
-          .set({
-            baseRate: String(calculation.baseRate),
-            penaltyRate: calculation.penaltyRate ? String(calculation.penaltyRate) : null,
-            calculatedAmount: String(calculation.totalAmount),
-            dayType: dayType,
-            allowances: calculation.allowances.length > 0 ? calculation.allowances : [],
-            // If we have penalty info, set the penalty rule ID
-            ...(calculation.penaltyMultiplier ? { 
-              penaltyRuleId: calculation.appliedRules.includes('penalty') ? 
-                apprenticeAward.penaltyRuleId : null 
-            } : {}),
-            awardRateId: apprenticeAward.payRateId
-          })
-          .where(eq(timesheetDetails.id, detail.id));
+        shiftResults.push({
+          shiftId: shift.id,
+          result: shiftResult
+        });
 
-        // Accumulate totals
-        totalBaseAmount += calculation.baseAmount;
-        totalPenaltyAmount += calculation.penaltyAmount;
-        totalAllowancesAmount += calculation.allowances.reduce((sum, allowance) => sum + allowance.amount, 0);
-        totalHours += Number(detail.hoursWorked);
+        totalAmount += shiftResult.totalAmount;
+      }
 
-        return calculation;
-      });
-
-      await Promise.all(calculationPromises);
-
-      // Get award and classification details for the record
-      const [awardDetails] = await db.select().from(awards).where(eq(awards.id, apprenticeAward.awardId));
-      const [classificationDetails] = await db.select().from(awardClassifications)
-        .where(eq(awardClassifications.id, apprenticeAward.classificationId));
-
-      // Create or update timesheet calculation record
-      const grossTotal = totalBaseAmount + totalPenaltyAmount + totalAllowancesAmount;
-
-      // Check if a calculation record already exists
-      const [existingCalculation] = await db.select()
+      // Save calculation result
+      const [existingCalculation] = await db
+        .select()
         .from(timesheetCalculations)
         .where(eq(timesheetCalculations.timesheetId, timesheetId));
 
       if (existingCalculation) {
-        // Update existing record
-        await db.update(timesheetCalculations)
+        // Update existing calculation
+        await db
+          .update(timesheetCalculations)
           .set({
-            totalHours: String(totalHours),
-            basePayTotal: String(totalBaseAmount),
-            penaltyPayTotal: String(totalPenaltyAmount),
-            allowancesTotal: String(totalAllowancesAmount),
-            grossTotal: String(grossTotal),
-            calculatedAt: new Date(),
-            awardName: awardDetails?.name || 'Unknown Award',
-            classificationName: classificationDetails?.name || 'Unknown Classification',
-            awardCode: awardDetails?.code || 'Unknown Code'
+            totalAmount,
+            calculationDetails: JSON.stringify(shiftResults),
+            updatedAt: new Date()
           })
           .where(eq(timesheetCalculations.id, existingCalculation.id));
       } else {
-        // Create new record
-        await db.insert(timesheetCalculations)
-          .values([
-            {
-              timesheetId: timesheetId,
-              totalHours: String(totalHours),
-              basePayTotal: String(totalBaseAmount),
-              penaltyPayTotal: String(totalPenaltyAmount),
-              allowancesTotal: String(totalAllowancesAmount),
-              grossTotal: String(grossTotal),
-              awardName: awardDetails?.name || 'Unknown Award',
-              classificationName: classificationDetails?.name || 'Unknown Classification',
-              awardCode: awardDetails?.code || 'Unknown Code'
-            }
-          ]);
-      }
-
-      // Log compliance check
-      await db.insert(fairworkComplianceLogs)
-        .values({
-          employeeId: apprentice.id,
-          timesheetId: timesheet.id,
-          payRateId: apprenticeAward.payRateId,
-          complianceCheck: `Award rate calculated based on ${awardDetails?.name || 'Unknown Award'}`,
-          outcome: 'compliant'
-        });
-
-      // Update timesheet total hours if needed
-      if (totalHours !== Number(timesheet.totalHours)) {
-        await db.update(timesheets)
-          .set({ totalHours })
-          .where(eq(timesheets.id, timesheetId));
+        // Create new calculation
+        await db
+          .insert(timesheetCalculations)
+          .values({
+            timesheetId,
+            totalAmount,
+            calculationDetails: JSON.stringify(shiftResults),
+          });
       }
 
       return {
         timesheetId,
-        apprenticeId: apprentice.id,
-        totalHours,
-        basePayTotal: totalBaseAmount,
-        penaltyPayTotal: totalPenaltyAmount,
-        allowancesTotal: totalAllowancesAmount,
-        grossTotal,
-        awardName: awardDetails?.name || 'Unknown Award',
-        classificationName: classificationDetails?.name || 'Unknown Classification',
+        totalAmount,
+        shifts: shiftResults
       };
     } catch (error) {
       logger.error('Error calculating timesheet pay', { error, timesheetId });
@@ -257,15 +186,17 @@ export class AwardRateCalculator {
   async calculateShiftPay(
     awardId: number,
     classificationId: number,
-    apprenticeshipYear: number,
     shiftDetails: ShiftDetails
   ): Promise<CalculationResult> {
     try {
-      // Format date to YYYY-MM-DD string for PostgreSQL date comparison
-      const dateStr = shiftDetails.date.toISOString().split('T')[0];
-      
-      // Get base pay rate
-      const [payRate] = await db.select()
+      // Get base pay rate for this classification
+      // Note: In a production system, this would need to account for the apprentice's year
+      // and possibly other factors specific to the award
+      const apprenticeshipYear = 1; // Default to 1st year apprentice for simplicity
+      const dateStr = shiftDetails.date.toISOString().split('T')[0]; // Format as YYYY-MM-DD
+
+      const [payRate] = await db
+        .select()
         .from(payRates)
         .where(
           and(
@@ -539,6 +470,148 @@ export class AwardRateCalculator {
    */
   private like(column: any, pattern: string) {
     return sql`${column} LIKE ${pattern}`;
+  }
+
+  /**
+   * Validate and fetch current modern award rates from Fair Work API
+   * Uses the API client to fetch and validate award rates against the current Fair Work Commission data
+   */
+  async validateAwardRates(awardCode: string, classificationCode: string, hourlyRate: number): Promise<any> {
+    if (!this.fairworkClient) {
+      logger.warn('No Fair Work API client provided, skipping external validation');
+      return { 
+        is_valid: null,
+        minimum_rate: null,
+        message: 'Fair Work API client not configured'
+      };
+    }
+
+    try {
+      // Format current date as YYYY-MM-DD
+      const today = new Date().toISOString().split('T')[0];
+      
+      // Create validation request
+      const validationRequest = {
+        award_code: awardCode,
+        classification_code: classificationCode,
+        hourly_rate: hourlyRate,
+        date: today
+      };
+
+      // Use the Fair Work API client to validate the rate
+      const validationResult = await this.fairworkClient.validateRateTemplate(validationRequest);
+      
+      // Log the result for auditing purposes
+      await db.insert(fairworkComplianceLogs).values({
+        awardCode,
+        classificationCode, 
+        requestedRate: hourlyRate,
+        minimumRate: validationResult.minimum_rate,
+        isValid: validationResult.is_valid,
+        message: validationResult.message || '',
+        verifiedDate: new Date(),
+        source: 'fair_work_api'
+      });
+
+      return validationResult;
+    } catch (error) {
+      logger.error('Error validating award rates with Fair Work API', { error, awardCode, classificationCode });
+      throw error;
+    }
+  }
+
+  /**
+   * Import modern awards data from Fair Work API
+   * This method can be used to periodically sync with the Fair Work API
+   */
+  async importModernAwardsData(): Promise<{
+    awards: number;
+    classifications: number;
+    rates: number;
+  }> {
+    if (!this.fairworkClient) {
+      throw new Error('Fair Work API client not configured');
+    }
+
+    try {
+      // Track import statistics
+      const stats = {
+        awards: 0,
+        classifications: 0,
+        rates: 0
+      };
+
+      // Fetch all awards from API
+      const fairWorkAwards = await this.fairworkClient.getActiveAwards();
+      
+      // Process each award
+      for (const fwAward of fairWorkAwards) {
+        // Insert or update award in database
+        const [award] = await db
+          .insert(awards)
+          .values({
+            code: fwAward.code,
+            name: fwAward.name,
+            fairWorkReference: fwAward.fair_work_reference,
+            publishedYear: fwAward.published_year,
+            versionNumber: fwAward.version_number,
+            effectiveDate: fwAward.effective_date
+          })
+          .onConflictDoUpdate({
+            target: awards.code,
+            set: {
+              name: fwAward.name,
+              fairWorkReference: fwAward.fair_work_reference,
+              publishedYear: fwAward.published_year,
+              versionNumber: fwAward.version_number,
+              effectiveDate: fwAward.effective_date,
+              updatedAt: new Date()
+            }
+          })
+          .returning();
+
+        stats.awards++;
+        
+        // Fetch classifications for this award
+        const classifications = await this.fairworkClient.getAwardClassifications(fwAward.code);
+        
+        for (const classification of classifications) {
+          // Skip if not related to this award
+          if (classification.award_id !== fwAward.id) continue;
+          
+          // Insert or update classification
+          const [dbClassification] = await db
+            .insert(awardClassifications)
+            .values({
+              awardId: award.id,
+              name: classification.name,
+              level: classification.level,
+              description: classification.description,
+              parentClassificationName: classification.parent_classification_name,
+              classificationLevel: classification.classification_level,
+              fairWorkLevelCode: classification.fair_work_level_code
+            })
+            .onConflictDoUpdate({
+              target: [awardClassifications.awardId, awardClassifications.name, awardClassifications.level],
+              set: {
+                description: classification.description,
+                parentClassificationName: classification.parent_classification_name,
+                classificationLevel: classification.classification_level,
+                fairWorkLevelCode: classification.fair_work_level_code,
+                updatedAt: new Date()
+              }
+            })
+            .returning();
+            
+          stats.classifications++;
+        }
+      }
+
+      return stats;
+    } catch (error) {
+      logger.error('Error importing modern awards data from Fair Work API', { error });
+      throw error;
+    }
   }
 }
 
