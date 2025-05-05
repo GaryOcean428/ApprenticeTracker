@@ -1,136 +1,63 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Shield, Plus, Pencil, Trash2, Check, X, Filter, FileDown, FileUp } from 'lucide-react';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { PlusCircle, Trash2, Edit, Shield, Lock, Layers } from 'lucide-react';
 
-interface Permission {
-  id: number;
-  name: string;
-  resource: string;
-  action: string;
-  category: string | null;
-  description: string | null;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
+// Define types based on schema
 interface Role {
   id: number;
   name: string;
   description: string | null;
-  isSystem: boolean | null;
-  createdAt: Date;
-  updatedAt: Date;
+  isSystem: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
-interface RolePermission {
+interface Permission {
   id: number;
-  roleId: number;
-  permissionId: number;
-  createdAt: Date;
-  updatedAt: Date;
-  role?: Role;
-  permission?: Permission;
+  name: string;
+  description: string | null;
+  category: string | null;
+  action: string;
+  resource: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
+// Form schemas
 const permissionFormSchema = z.object({
-  name: z.string().min(3, { message: 'Name must be at least 3 characters' }),
-  resource: z.string().min(2, { message: 'Resource is required' }),
-  action: z.string().min(2, { message: 'Action is required' }),
-  category: z.string().nullable().optional(),
-  description: z.string().nullable().optional(),
+  name: z.string().min(3, 'Name must be at least 3 characters'),
+  resource: z.string().min(2, 'Resource is required'),
+  action: z.string().min(2, 'Action is required'),
+  category: z.string().optional().nullable(),
+  description: z.string().optional().nullable(),
 });
 
-type PermissionFormValues = z.infer<typeof permissionFormSchema>;
-
 const roleFormSchema = z.object({
-  name: z.string().min(3, { message: 'Name must be at least 3 characters' }),
-  description: z.string().nullable().optional(),
+  name: z.string().min(3, 'Name must be at least 3 characters'),
+  description: z.string().optional().nullable(),
   isSystem: z.boolean().default(false),
 });
 
+type PermissionFormValues = z.infer<typeof permissionFormSchema>;
 type RoleFormValues = z.infer<typeof roleFormSchema>;
-
-const PermissionRow = ({ permission, onEdit, onDelete }: { 
-  permission: Permission;
-  onEdit: (permission: Permission) => void;
-  onDelete: (id: number) => void;
-}) => {
-  return (
-    <TableRow>
-      <TableCell className="font-medium">{permission.name}</TableCell>
-      <TableCell>
-        <Badge variant="outline">{permission.resource}</Badge>
-      </TableCell>
-      <TableCell>
-        <Badge variant="secondary">{permission.action}</Badge>
-      </TableCell>
-      <TableCell>{permission.category || 'General'}</TableCell>
-      <TableCell>{permission.description || '-'}</TableCell>
-      <TableCell className="text-right">
-        <Button variant="ghost" size="sm" onClick={() => onEdit(permission)}>
-          <Pencil className="h-4 w-4 mr-1" /> Edit
-        </Button>
-        <Button variant="ghost" size="sm" className="text-destructive" onClick={() => onDelete(permission.id)}>
-          <Trash2 className="h-4 w-4 mr-1" /> Delete
-        </Button>
-      </TableCell>
-    </TableRow>
-  );
-};
-
-const RoleRow = ({ role, onEdit, onDelete, onManagePermissions }: { 
-  role: Role;
-  onEdit: (role: Role) => void;
-  onDelete: (id: number) => void;
-  onManagePermissions: (role: Role) => void;
-}) => {
-  return (
-    <TableRow>
-      <TableCell className="font-medium">{role.name}</TableCell>
-      <TableCell>{role.description || '-'}</TableCell>
-      <TableCell>
-        {role.isSystem ? (
-          <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">System</Badge>
-        ) : (
-          <Badge variant="outline">Custom</Badge>
-        )}
-      </TableCell>
-      <TableCell className="text-right">
-        <Button variant="ghost" size="sm" onClick={() => onManagePermissions(role)}>
-          <Shield className="h-4 w-4 mr-1" /> Permissions
-        </Button>
-        <Button variant="ghost" size="sm" onClick={() => onEdit(role)}>
-          <Pencil className="h-4 w-4 mr-1" /> Edit
-        </Button>
-        {!role.isSystem && (
-          <Button variant="ghost" size="sm" className="text-destructive" onClick={() => onDelete(role.id)}>
-            <Trash2 className="h-4 w-4 mr-1" /> Delete
-          </Button>
-        )}
-      </TableCell>
-    </TableRow>
-  );
-};
 
 const PermissionsManagement = () => {
   const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState('permissions');
+  const [activeTab, setActiveTab] = useState('roles');
   const [isPermissionDialogOpen, setIsPermissionDialogOpen] = useState(false);
   const [isRoleDialogOpen, setIsRoleDialogOpen] = useState(false);
   const [isRolePermissionsDialogOpen, setIsRolePermissionsDialogOpen] = useState(false);
@@ -170,23 +97,10 @@ const PermissionsManagement = () => {
     queryKey: ['/api/roles'],
   });
 
-  // Fetch role permissions when a role is selected
-  const { data: rolePermissionsData, refetch: refetchRolePermissions } = useQuery<Permission[]>({
-    queryKey: ['/api/roles', selectedRole?.id, 'permissions'],
-    enabled: !!selectedRole,
-  });
-
-  // Update role permissions in state when data changes
-  useEffect(() => {
-    if (rolePermissionsData) {
-      setRolePermissions(rolePermissionsData);
-    }
-  }, [rolePermissionsData]);
-
   // Create permission mutation
   const createPermissionMutation = useMutation({
-    mutationFn: async (data: PermissionFormValues) => {
-      const response = await apiRequest('POST', '/api/permissions', data);
+    mutationFn: async (permissionData: PermissionFormValues) => {
+      const response = await apiRequest('POST', '/api/permissions', permissionData);
       return await response.json();
     },
     onSuccess: () => {
@@ -209,9 +123,8 @@ const PermissionsManagement = () => {
 
   // Update permission mutation
   const updatePermissionMutation = useMutation({
-    mutationFn: async (data: PermissionFormValues & { id: number }) => {
-      const { id, ...permissionData } = data;
-      const response = await apiRequest('PATCH', `/api/permissions/${id}`, permissionData);
+    mutationFn: async (data: { id: number; permissionData: PermissionFormValues }) => {
+      const response = await apiRequest('PATCH', `/api/permissions/${data.id}`, data.permissionData);
       return await response.json();
     },
     onSuccess: () => {
@@ -235,9 +148,8 @@ const PermissionsManagement = () => {
 
   // Delete permission mutation
   const deletePermissionMutation = useMutation({
-    mutationFn: async (id: number) => {
-      const response = await apiRequest('DELETE', `/api/permissions/${id}`);
-      return await response.json();
+    mutationFn: async (permissionId: number) => {
+      await apiRequest('DELETE', `/api/permissions/${permissionId}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/permissions'] });
@@ -257,8 +169,8 @@ const PermissionsManagement = () => {
 
   // Create role mutation
   const createRoleMutation = useMutation({
-    mutationFn: async (data: RoleFormValues) => {
-      const response = await apiRequest('POST', '/api/roles', data);
+    mutationFn: async (roleData: RoleFormValues) => {
+      const response = await apiRequest('POST', '/api/roles', roleData);
       return await response.json();
     },
     onSuccess: () => {
@@ -281,9 +193,8 @@ const PermissionsManagement = () => {
 
   // Update role mutation
   const updateRoleMutation = useMutation({
-    mutationFn: async (data: RoleFormValues & { id: number }) => {
-      const { id, ...roleData } = data;
-      const response = await apiRequest('PATCH', `/api/roles/${id}`, roleData);
+    mutationFn: async (data: { id: number; roleData: RoleFormValues }) => {
+      const response = await apiRequest('PATCH', `/api/roles/${data.id}`, data.roleData);
       return await response.json();
     },
     onSuccess: () => {
@@ -307,9 +218,8 @@ const PermissionsManagement = () => {
 
   // Delete role mutation
   const deleteRoleMutation = useMutation({
-    mutationFn: async (id: number) => {
-      const response = await apiRequest('DELETE', `/api/roles/${id}`);
-      return await response.json();
+    mutationFn: async (roleId: number) => {
+      await apiRequest('DELETE', `/api/roles/${roleId}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/roles'] });
@@ -327,263 +237,248 @@ const PermissionsManagement = () => {
     },
   });
 
-  // Update role permissions mutation
-  const updateRolePermissionsMutation = useMutation({
-    mutationFn: async ({ roleId, permissionIds }: { roleId: number; permissionIds: number[] }) => {
-      const response = await apiRequest('POST', `/api/roles/${roleId}/permissions`, { permissionIds });
+  // Fetch role permissions
+  const fetchRolePermissions = async (roleId: number) => {
+    try {
+      const response = await apiRequest('GET', `/api/roles/${roleId}/permissions`);
+      const permissions = await response.json();
+      setRolePermissions(permissions);
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to fetch role permissions',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  // Assign permission to role mutation
+  const assignPermissionMutation = useMutation({
+    mutationFn: async (data: { roleId: number; permissionId: number }) => {
+      const response = await apiRequest('POST', `/api/roles/${data.roleId}/permissions`, { permissionId: data.permissionId });
       return await response.json();
     },
     onSuccess: () => {
       if (selectedRole) {
-        queryClient.invalidateQueries({ queryKey: ['/api/roles', selectedRole.id, 'permissions'] });
+        fetchRolePermissions(selectedRole.id);
       }
-      setIsRolePermissionsDialogOpen(false);
       toast({
         title: 'Success',
-        description: 'Role permissions updated successfully',
+        description: 'Permission assigned to role',
       });
     },
     onError: (error: Error) => {
       toast({
         title: 'Error',
-        description: `Failed to update role permissions: ${error.message}`,
+        description: `Failed to assign permission: ${error.message}`,
         variant: 'destructive',
       });
     },
   });
 
-  const handleSubmitPermission = (data: PermissionFormValues) => {
+  // Remove permission from role mutation
+  const removePermissionMutation = useMutation({
+    mutationFn: async (data: { roleId: number; permissionId: number }) => {
+      await apiRequest('DELETE', `/api/roles/${data.roleId}/permissions/${data.permissionId}`);
+    },
+    onSuccess: () => {
+      if (selectedRole) {
+        fetchRolePermissions(selectedRole.id);
+      }
+      toast({
+        title: 'Success',
+        description: 'Permission removed from role',
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: 'Error',
+        description: `Failed to remove permission: ${error.message}`,
+        variant: 'destructive',
+      });
+    },
+  });
+
+  // Handle form submissions
+  const onPermissionSubmit = (data: PermissionFormValues) => {
     if (selectedPermission) {
-      updatePermissionMutation.mutate({ ...data, id: selectedPermission.id });
+      updatePermissionMutation.mutate({ id: selectedPermission.id, permissionData: data });
     } else {
       createPermissionMutation.mutate(data);
     }
   };
 
-  const handleSubmitRole = (data: RoleFormValues) => {
+  const onRoleSubmit = (data: RoleFormValues) => {
     if (selectedRole) {
-      updateRoleMutation.mutate({ ...data, id: selectedRole.id });
+      updateRoleMutation.mutate({ id: selectedRole.id, roleData: data });
     } else {
       createRoleMutation.mutate(data);
     }
   };
 
+  // Handle edit permission
   const handleEditPermission = (permission: Permission) => {
     setSelectedPermission(permission);
     permissionForm.reset({
       name: permission.name,
       resource: permission.resource,
       action: permission.action,
-      category: permission.category || '',
-      description: permission.description || '',
+      category: permission.category,
+      description: permission.description,
     });
     setIsPermissionDialogOpen(true);
   };
 
-  const handleDeletePermission = (id: number) => {
+  // Handle delete permission
+  const handleDeletePermission = (permissionId: number) => {
     if (confirm('Are you sure you want to delete this permission?')) {
-      deletePermissionMutation.mutate(id);
+      deletePermissionMutation.mutate(permissionId);
     }
   };
 
-  const handleAddNewPermission = () => {
-    setSelectedPermission(null);
-    permissionForm.reset({
-      name: '',
-      resource: '',
-      action: '',
-      category: '',
-      description: '',
-    });
-    setIsPermissionDialogOpen(true);
-  };
-
+  // Handle edit role
   const handleEditRole = (role: Role) => {
     setSelectedRole(role);
     roleForm.reset({
       name: role.name,
-      description: role.description || '',
-      isSystem: role.isSystem || false,
+      description: role.description,
+      isSystem: role.isSystem,
     });
     setIsRoleDialogOpen(true);
   };
 
-  const handleDeleteRole = (id: number) => {
+  // Handle delete role
+  const handleDeleteRole = (roleId: number) => {
     if (confirm('Are you sure you want to delete this role?')) {
-      deleteRoleMutation.mutate(id);
+      deleteRoleMutation.mutate(roleId);
     }
   };
 
-  const handleAddNewRole = () => {
-    setSelectedRole(null);
-    roleForm.reset({
-      name: '',
-      description: '',
-      isSystem: false,
-    });
-    setIsRoleDialogOpen(true);
-  };
-
+  // Handle open role permissions dialog
   const handleManageRolePermissions = (role: Role) => {
     setSelectedRole(role);
-    refetchRolePermissions();
+    fetchRolePermissions(role.id);
     setIsRolePermissionsDialogOpen(true);
   };
 
-  const handleSaveRolePermissions = () => {
+  // Handle assign permission to role
+  const handleAssignPermission = (permissionId: number) => {
     if (!selectedRole) return;
-    
-    const selectedPermissionIds = rolePermissions.map(p => p.id);
-    updateRolePermissionsMutation.mutate({
-      roleId: selectedRole.id,
-      permissionIds: selectedPermissionIds,
-    });
+    assignPermissionMutation.mutate({ roleId: selectedRole.id, permissionId });
   };
 
-  const togglePermissionForRole = (permission: Permission) => {
-    const isSelected = rolePermissions.some(p => p.id === permission.id);
-    
-    if (isSelected) {
-      setRolePermissions(rolePermissions.filter(p => p.id !== permission.id));
-    } else {
-      setRolePermissions([...rolePermissions, permission]);
-    }
+  // Handle remove permission from role
+  const handleRemovePermission = (permissionId: number) => {
+    if (!selectedRole) return;
+    removePermissionMutation.mutate({ roleId: selectedRole.id, permissionId });
   };
 
-  const isPermissionSelected = (permission: Permission) => {
-    return rolePermissions.some(p => p.id === permission.id);
+  // Check if permission is assigned to role
+  const isPermissionAssigned = (permissionId: number) => {
+    return rolePermissions.some(permission => permission.id === permissionId);
   };
+
+  // Render permission row
+  const PermissionRow = ({ permission }: { permission: Permission }) => (
+    <TableRow key={permission.id}>
+      <TableCell className="font-medium">{permission.name}</TableCell>
+      <TableCell>{permission.category || 'General'}</TableCell>
+      <TableCell>
+        <Badge variant="outline">{permission.action}</Badge>
+      </TableCell>
+      <TableCell>{permission.resource}</TableCell>
+      <TableCell className="text-right">
+        <Button variant="ghost" size="sm" onClick={() => handleEditPermission(permission)}>
+          <Edit className="h-4 w-4 mr-1" /> Edit
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="text-destructive"
+          onClick={() => handleDeletePermission(permission.id)}
+        >
+          <Trash2 className="h-4 w-4 mr-1" /> Delete
+        </Button>
+      </TableCell>
+    </TableRow>
+  );
+
+  // Render role row
+  const RoleRow = ({ role }: { role: Role }) => (
+    <TableRow key={role.id}>
+      <TableCell className="font-medium">{role.name}</TableCell>
+      <TableCell>{role.description || '-'}</TableCell>
+      <TableCell>
+        {role.isSystem ? (
+          <Badge>System Role</Badge>
+        ) : (
+          <Badge variant="outline">Custom Role</Badge>
+        )}
+      </TableCell>
+      <TableCell className="text-right">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => handleManageRolePermissions(role)}
+          className="mr-2"
+        >
+          <Lock className="h-4 w-4 mr-1" /> Permissions
+        </Button>
+        <Button variant="ghost" size="sm" onClick={() => handleEditRole(role)}>
+          <Edit className="h-4 w-4 mr-1" /> Edit
+        </Button>
+        {!role.isSystem && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-destructive"
+            onClick={() => handleDeleteRole(role.id)}
+          >
+            <Trash2 className="h-4 w-4 mr-1" /> Delete
+          </Button>
+        )}
+      </TableCell>
+    </TableRow>
+  );
 
   return (
     <div className="p-8">
       <h1 className="text-3xl font-bold mb-6">Permissions Management</h1>
-      
+
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-2 mb-8">
-          <TabsTrigger value="permissions">
-            <Shield className="h-4 w-4 mr-2" /> Permissions
-          </TabsTrigger>
           <TabsTrigger value="roles">
             <Shield className="h-4 w-4 mr-2" /> Roles
           </TabsTrigger>
+          <TabsTrigger value="permissions">
+            <Layers className="h-4 w-4 mr-2" /> Permissions
+          </TabsTrigger>
         </TabsList>
-        
-        {/* Permissions Tab */}
-        <TabsContent value="permissions">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex justify-between items-center">
-                <span>System Permissions</span>
-                <Button onClick={handleAddNewPermission}>
-                  <Plus className="h-4 w-4 mr-2" /> Add New Permission
-                </Button>
-              </CardTitle>
-              <CardDescription>
-                Manage system permissions that can be assigned to roles.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex justify-between mb-4">
-                <div className="flex gap-2">
-                  <Input
-                    placeholder="Search permissions..."
-                    className="w-64"
-                  />
-                  <Button variant="outline" size="icon">
-                    <Filter className="h-4 w-4" />
-                  </Button>
-                </div>
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm">
-                    <FileDown className="h-4 w-4 mr-2" /> Export
-                  </Button>
-                  <Button variant="outline" size="sm">
-                    <FileUp className="h-4 w-4 mr-2" /> Import
-                  </Button>
-                </div>
-              </div>
-              
-              <Table>
-                <TableCaption>List of system permissions</TableCaption>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Resource</TableHead>
-                    <TableHead>Action</TableHead>
-                    <TableHead>Category</TableHead>
-                    <TableHead>Description</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {isLoadingPermissions ? (
-                    <TableRow>
-                      <TableCell colSpan={6} className="text-center py-8">
-                        Loading permissions...
-                      </TableCell>
-                    </TableRow>
-                  ) : permissions && permissions.length > 0 ? (
-                    permissions.map((permission) => (
-                      <PermissionRow
-                        key={permission.id}
-                        permission={permission}
-                        onEdit={handleEditPermission}
-                        onDelete={handleDeletePermission}
-                      />
-                    ))
-                  ) : (
-                    <TableRow>
-                      <TableCell colSpan={6} className="text-center py-8">
-                        No permissions found. Add your first permission to get started.
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
+
         {/* Roles Tab */}
         <TabsContent value="roles">
           <Card>
             <CardHeader>
               <CardTitle className="flex justify-between items-center">
-                <span>System Roles</span>
-                <Button onClick={handleAddNewRole}>
-                  <Plus className="h-4 w-4 mr-2" /> Add New Role
+                <span>Role Management</span>
+                <Button onClick={() => {
+                  setSelectedRole(null);
+                  roleForm.reset();
+                  setIsRoleDialogOpen(true);
+                }}>
+                  <PlusCircle className="h-4 w-4 mr-2" /> Add New Role
                 </Button>
               </CardTitle>
               <CardDescription>
-                Manage roles and their assigned permissions.
+                Manage user roles and their associated permissions within the system.
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="flex justify-between mb-4">
-                <div className="flex gap-2">
-                  <Input
-                    placeholder="Search roles..."
-                    className="w-64"
-                  />
-                  <Button variant="outline" size="icon">
-                    <Filter className="h-4 w-4" />
-                  </Button>
-                </div>
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm">
-                    <FileDown className="h-4 w-4 mr-2" /> Export
-                  </Button>
-                  <Button variant="outline" size="sm">
-                    <FileUp className="h-4 w-4 mr-2" /> Import
-                  </Button>
-                </div>
-              </div>
-              
               <Table>
-                <TableCaption>List of system roles</TableCaption>
+                <TableCaption>List of available roles</TableCaption>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Name</TableHead>
+                    <TableHead>Role Name</TableHead>
                     <TableHead>Description</TableHead>
                     <TableHead>Type</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
@@ -597,19 +492,63 @@ const PermissionsManagement = () => {
                       </TableCell>
                     </TableRow>
                   ) : roles && roles.length > 0 ? (
-                    roles.map((role) => (
-                      <RoleRow
-                        key={role.id}
-                        role={role}
-                        onEdit={handleEditRole}
-                        onDelete={handleDeleteRole}
-                        onManagePermissions={handleManageRolePermissions}
-                      />
-                    ))
+                    roles.map(role => <RoleRow key={role.id} role={role} />)
                   ) : (
                     <TableRow>
                       <TableCell colSpan={4} className="text-center py-8">
-                        No roles found. Add your first role to get started.
+                        No roles found. Add a new role to get started.
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Permissions Tab */}
+        <TabsContent value="permissions">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex justify-between items-center">
+                <span>Permission Management</span>
+                <Button onClick={() => {
+                  setSelectedPermission(null);
+                  permissionForm.reset();
+                  setIsPermissionDialogOpen(true);
+                }}>
+                  <PlusCircle className="h-4 w-4 mr-2" /> Add New Permission
+                </Button>
+              </CardTitle>
+              <CardDescription>
+                Define granular permissions that control access to system resources.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableCaption>List of available permissions</TableCaption>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Permission Name</TableHead>
+                    <TableHead>Category</TableHead>
+                    <TableHead>Action</TableHead>
+                    <TableHead>Resource</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {isLoadingPermissions ? (
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-center py-8">
+                        Loading permissions...
+                      </TableCell>
+                    </TableRow>
+                  ) : permissions && permissions.length > 0 ? (
+                    permissions.map(permission => <PermissionRow key={permission.id} permission={permission} />)
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-center py-8">
+                        No permissions found. Add a new permission to get started.
                       </TableCell>
                     </TableRow>
                   )}
@@ -619,21 +558,20 @@ const PermissionsManagement = () => {
           </Card>
         </TabsContent>
       </Tabs>
-      
-      {/* Permission Form Dialog */}
+
+      {/* Add/Edit Permission Dialog */}
       <Dialog open={isPermissionDialogOpen} onOpenChange={setIsPermissionDialogOpen}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
             <DialogTitle>{selectedPermission ? 'Edit Permission' : 'Add New Permission'}</DialogTitle>
             <DialogDescription>
               {selectedPermission
-                ? 'Update the details of an existing permission'
-                : 'Create a new permission in the system'}
+                ? 'Update the permission details below'
+                : 'Fill in the details to create a new permission'}
             </DialogDescription>
           </DialogHeader>
-          
           <Form {...permissionForm}>
-            <form onSubmit={permissionForm.handleSubmit(handleSubmitPermission)} className="space-y-4">
+            <form onSubmit={permissionForm.handleSubmit(onPermissionSubmit)} className="space-y-4">
               <FormField
                 control={permissionForm.control}
                 name="name"
@@ -641,51 +579,49 @@ const PermissionsManagement = () => {
                   <FormItem>
                     <FormLabel>Permission Name</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g., View Users" {...field} />
+                      <Input placeholder="e.g., view-users" {...field} />
                     </FormControl>
                     <FormDescription>
-                      A descriptive name for this permission
+                      A unique name for this permission
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
               />
               
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={permissionForm.control}
-                  name="resource"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Resource</FormLabel>
-                      <FormControl>
-                        <Input placeholder="e.g., users" {...field} />
-                      </FormControl>
-                      <FormDescription>
-                        The entity this permission applies to
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={permissionForm.control}
-                  name="action"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Action</FormLabel>
-                      <FormControl>
-                        <Input placeholder="e.g., view" {...field} />
-                      </FormControl>
-                      <FormDescription>
-                        The operation allowed by this permission
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+              <FormField
+                control={permissionForm.control}
+                name="resource"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Resource</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g., users" {...field} />
+                    </FormControl>
+                    <FormDescription>
+                      The resource that this permission applies to
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={permissionForm.control}
+                name="action"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Action</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g., read, create, update, delete" {...field} />
+                    </FormControl>
+                    <FormDescription>
+                      The action allowed on the resource
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               
               <FormField
                 control={permissionForm.control}
@@ -694,10 +630,10 @@ const PermissionsManagement = () => {
                   <FormItem>
                     <FormLabel>Category</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g., User Management" {...field} value={field.value || ''} />
+                      <Input placeholder="e.g., user-management" {...field} value={field.value || ''} />
                     </FormControl>
                     <FormDescription>
-                      Group similar permissions together
+                      Optional category to group related permissions
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -713,41 +649,37 @@ const PermissionsManagement = () => {
                     <FormControl>
                       <Input placeholder="Describe what this permission allows" {...field} value={field.value || ''} />
                     </FormControl>
-                    <FormDescription>
-                      A clear explanation of what this permission does
-                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
               />
               
               <DialogFooter>
-                <Button type="button" variant="outline" onClick={() => setIsPermissionDialogOpen(false)}>
+                <Button variant="outline" type="button" onClick={() => setIsPermissionDialogOpen(false)}>
                   Cancel
                 </Button>
                 <Button type="submit">
-                  {selectedPermission ? 'Update Permission' : 'Create Permission'}
+                  {selectedPermission ? 'Update' : 'Create'} Permission
                 </Button>
               </DialogFooter>
             </form>
           </Form>
         </DialogContent>
       </Dialog>
-      
-      {/* Role Form Dialog */}
+
+      {/* Add/Edit Role Dialog */}
       <Dialog open={isRoleDialogOpen} onOpenChange={setIsRoleDialogOpen}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
             <DialogTitle>{selectedRole ? 'Edit Role' : 'Add New Role'}</DialogTitle>
             <DialogDescription>
               {selectedRole
-                ? 'Update the details of an existing role'
-                : 'Create a new role in the system'}
+                ? 'Update the role details below'
+                : 'Fill in the details to create a new role'}
             </DialogDescription>
           </DialogHeader>
-          
           <Form {...roleForm}>
-            <form onSubmit={roleForm.handleSubmit(handleSubmitRole)} className="space-y-4">
+            <form onSubmit={roleForm.handleSubmit(onRoleSubmit)} className="space-y-4">
               <FormField
                 control={roleForm.control}
                 name="name"
@@ -755,10 +687,10 @@ const PermissionsManagement = () => {
                   <FormItem>
                     <FormLabel>Role Name</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g., Content Editor" {...field} />
+                      <Input placeholder="e.g., Field Officer" {...field} />
                     </FormControl>
                     <FormDescription>
-                      A descriptive name for this role
+                      A unique name for this role
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -798,7 +730,7 @@ const PermissionsManagement = () => {
                         System Role
                       </FormLabel>
                       <FormDescription>
-                        System roles cannot be deleted and are essential for application functionality
+                        System roles cannot be deleted and have special privileges
                       </FormDescription>
                     </div>
                   </FormItem>
@@ -806,82 +738,77 @@ const PermissionsManagement = () => {
               />
               
               <DialogFooter>
-                <Button type="button" variant="outline" onClick={() => setIsRoleDialogOpen(false)}>
+                <Button variant="outline" type="button" onClick={() => setIsRoleDialogOpen(false)}>
                   Cancel
                 </Button>
                 <Button type="submit">
-                  {selectedRole ? 'Update Role' : 'Create Role'}
+                  {selectedRole ? 'Update' : 'Create'} Role
                 </Button>
               </DialogFooter>
             </form>
           </Form>
         </DialogContent>
       </Dialog>
-      
+
       {/* Role Permissions Dialog */}
       <Dialog open={isRolePermissionsDialogOpen} onOpenChange={setIsRolePermissionsDialogOpen}>
-        <DialogContent className="sm:max-w-[700px]">
+        <DialogContent className="sm:max-w-[650px]">
           <DialogHeader>
-            <DialogTitle>Manage Permissions for {selectedRole?.name}</DialogTitle>
+            <DialogTitle>Manage Permissions: {selectedRole?.name}</DialogTitle>
             <DialogDescription>
-              Select the permissions to assign to this role. Users with this role will inherit all these permissions.
+              Select permissions to assign to this role. Users with this role will inherit all assigned permissions.
             </DialogDescription>
           </DialogHeader>
-          
-          <div className="max-h-[400px] overflow-y-auto">
+          <div className="max-h-[400px] overflow-y-auto border rounded-md">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[50px]">Select</TableHead>
                   <TableHead>Permission</TableHead>
                   <TableHead>Resource</TableHead>
                   <TableHead>Action</TableHead>
-                  <TableHead>Category</TableHead>
+                  <TableHead className="text-right">Assigned</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {isLoadingPermissions ? (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center py-4">
+                    <TableCell colSpan={4} className="text-center py-8">
                       Loading permissions...
                     </TableCell>
                   </TableRow>
                 ) : permissions && permissions.length > 0 ? (
-                  permissions.map((permission) => (
+                  permissions.map(permission => (
                     <TableRow key={permission.id}>
-                      <TableCell>
+                      <TableCell className="font-medium">{permission.name}</TableCell>
+                      <TableCell>{permission.resource}</TableCell>
+                      <TableCell>{permission.action}</TableCell>
+                      <TableCell className="text-right">
                         <Checkbox
-                          checked={isPermissionSelected(permission)}
-                          onCheckedChange={() => togglePermissionForRole(permission)}
+                          checked={isPermissionAssigned(permission.id)}
+                          onCheckedChange={(checked) => {
+                            if (checked) {
+                              handleAssignPermission(permission.id);
+                            } else {
+                              handleRemovePermission(permission.id);
+                            }
+                          }}
                         />
                       </TableCell>
-                      <TableCell>{permission.name}</TableCell>
-                      <TableCell>
-                        <Badge variant="outline">{permission.resource}</Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="secondary">{permission.action}</Badge>
-                      </TableCell>
-                      <TableCell>{permission.category || 'General'}</TableCell>
                     </TableRow>
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center py-4">
-                      No permissions available
+                    <TableCell colSpan={4} className="text-center py-8">
+                      No permissions available. Create permissions first.
                     </TableCell>
                   </TableRow>
                 )}
               </TableBody>
             </Table>
           </div>
-          
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setIsRolePermissionsDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleSaveRolePermissions}>
-              Save Permissions
+            <Button onClick={() => setIsRolePermissionsDialogOpen(false)}>
+              Done
             </Button>
           </DialogFooter>
         </DialogContent>
