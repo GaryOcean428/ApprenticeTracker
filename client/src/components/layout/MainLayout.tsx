@@ -1,17 +1,5 @@
-import React from 'react';
-import { UnifiedNavigation } from '../navigation/UnifiedNavigation';
-
-interface MainLayoutProps {
-  children: React.ReactNode;
-}
-
-export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
-  return (
-    <div className="flex h-screen overflow-hidden bg-background">
-      <UnifiedNavigation />
-      <main className="flex-1 overflow-auto p-6">
-        {children}
-      </main>
-    </div>
-  );
-};
+// This file is deprecated in favor of client/src/layouts/main-layout.tsx
+// This stub is kept for backward compatibility
+import MainLayout from '@/layouts/main-layout';
+export { MainLayout };
+export default MainLayout;
