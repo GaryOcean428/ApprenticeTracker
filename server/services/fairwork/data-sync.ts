@@ -731,12 +731,11 @@ export class FairWorkDataSync {
   ): Promise<void> {
     try {
       const logEntry: InsertFairworkComplianceLog = {
-        syncType,
-        syncDate: new Date(),
-        success,
-        errorMessage: errorMessage || null,
-        recordsProcessed: 0, // Would normally count records
-        metadata: {}
+        source: syncType, // Use 'source' field instead of non-existent 'syncType'
+        message: success ? 'Sync completed successfully' : 'Sync failed',
+        notes: errorMessage || null,
+        isValid: success,
+        verifiedDate: new Date()
       };
       
       await db.insert(fairworkComplianceLogs).values(logEntry);
