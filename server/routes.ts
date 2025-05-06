@@ -32,7 +32,103 @@ import { eq, and } from "drizzle-orm";
 import { db } from "./db"; // Assuming db connection is defined here
 import { users, gtoOrganizations } from "@shared/schema";
 
+// Special test endpoints for Fair Work API that won't be intercepted by Vite
+const fairworkTestEndpoints = (app: Express) => {
+  // Add penalty rules endpoint
+  app.get('/___direct_test_fairwork_penalties/:awardId', async (req, res) => {
+    try {
+      const { awardId } = req.params;
+      const { penaltyRules } = (await import('../shared/schema'));
+      const { db } = (await import('./db'));
+      const { eq } = (await import('drizzle-orm'));
+      
+      console.log(`Testing direct penalties API for award ID ${awardId}`);
+      
+      // Get penalty rules for this award
+      const penalties = await db
+        .select()
+        .from(penaltyRules)
+        .where(eq(penaltyRules.awardId, parseInt(awardId)));
+      
+      console.log(`Found ${penalties.length} penalty rules for award ID ${awardId}`);
+      
+      return res.json({
+        success: true,
+        message: 'Direct penalty rules test API',
+        data: {
+          penalties,
+        },
+      });
+    } catch (error) {
+      console.error('Error in direct penalties test API', error);
+      return res.status(500).json({
+        success: false,
+        error: 'Failed to test direct penalties API',
+      });
+    }
+  });
+
+  app.get('/___direct_test_fairwork_awards', async (req, res) => {
+    try {
+      const { awards } = (await import('../shared/schema'));
+      const { db } = (await import('./db'));
+      
+      console.log('Testing direct awards API');
+      const allAwards = await db.select().from(awards).limit(10);
+      
+      return res.json({
+        success: true,
+        message: 'Direct awards test API',
+        data: {
+          awards: allAwards,
+        },
+      });
+    } catch (error) {
+      console.error('Error in direct awards test API', error);
+      return res.status(500).json({
+        success: false,
+        error: 'Failed to test direct awards API',
+      });
+    }
+  });
+  
+  app.get('/___direct_test_fairwork_classifications/:awardId', async (req, res) => {
+    try {
+      const { awardId } = req.params;
+      const { awardClassifications } = (await import('../shared/schema'));
+      const { db } = (await import('./db'));
+      const { eq } = (await import('drizzle-orm'));
+      
+      console.log(`Testing direct classifications API for award ID ${awardId}`);
+      
+      // Get classifications for this award
+      const classifications = await db
+        .select()
+        .from(awardClassifications)
+        .where(eq(awardClassifications.awardId, parseInt(awardId)));
+      
+      console.log(`Found ${classifications.length} classifications for award ID ${awardId}`);
+      
+      return res.json({
+        success: true,
+        message: 'Direct classifications test API',
+        data: {
+          classifications,
+        },
+      });
+    } catch (error) {
+      console.error('Error in direct classifications test API', error);
+      return res.status(500).json({
+        success: false,
+        error: 'Failed to test direct classifications API',
+      });
+    }
+  });
+};
+
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Register special test endpoints for Fair Work API
+  fairworkTestEndpoints(app);
   // API Routes - prefix all routes with /api
 
   // Register specialized route handlers
