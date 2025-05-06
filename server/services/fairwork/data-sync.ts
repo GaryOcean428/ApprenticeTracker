@@ -241,9 +241,9 @@ export class FairWorkDataSync {
     apiClassification: any, 
     options: SyncOptions = {}
   ): Promise<void> {
-    // In a real implementation, we would fetch pay rates from the API for this classification
-    // and update our database. For simplicity, we'll just use a dummy rate based on apprenticeship year.
     try {
+      logger.info(`Fetching actual pay rates from Fair Work API for classification ${classificationId}`);
+      
       const [classification] = await db
         .select()
         .from(awardClassifications)
@@ -253,21 +253,36 @@ export class FairWorkDataSync {
         throw new Error(`Classification with ID ${classificationId} not found`);
       }
       
+      // Get the award for this classification
+      const [award] = await db
+        .select()
+        .from(awards)
+        .where(eq(awards.id, classification.awardId));
+      
+      if (!award) {
+        throw new Error(`Award not found for classification ${classificationId}`);
+      }
+      
+      // Calculate base rate using the Fair Work API
+      // The API requires the classification code to calculate the appropriate rate
+      const calculatedRate = await this.apiClient.calculateBaseRate(classification.code);
+      
+      if (!calculatedRate) {
+        logger.warn(`Could not get base rate from Fair Work API for classification ${classification.code}. Using fallback method.`);
+        // Fallback to award-specific calculation based on classification attributes
+        await this.calculateFallbackRate(classification, award);
+        return;
+      }
+      
+      logger.info(`Received base rate of $${calculatedRate} for classification ${classification.name}`);
+      
       // Check if this is an apprentice classification
+      const today = new Date();
+      const nextYear = new Date();
+      nextYear.setFullYear(today.getFullYear() + 1);
+      
       if (classification.isApprentice) {
-        // Base hourly rate varies by apprenticeship year
-        // (simplified logic - real implementation would use API data)
         const year = classification.apprenticeshipYear || 1;
-        let hourlyRate = 15.0; // Default starting rate
-        
-        // Apply simplified progression: 65% in year 1, 75% in year 2, 85% in year 3, 95% in year 4
-        switch(year) {
-          case 1: hourlyRate = 15.0; break;
-          case 2: hourlyRate = 18.5; break;
-          case 3: hourlyRate = 22.0; break;
-          case 4: hourlyRate = 25.5; break;
-          default: hourlyRate = 15.0;
-        }
         
         // Check if a rate already exists for this classification and year
         const [existingRate] = await db
@@ -286,43 +301,36 @@ export class FairWorkDataSync {
           return;
         }
         
-        const today = new Date();
-        const nextYear = new Date();
-        nextYear.setFullYear(today.getFullYear() + 1);
-        
         if (existingRate) {
           // Update existing rate
           await db
             .update(payRates)
             .set({
-              hourlyRate: hourlyRate.toString(),
+              hourlyRate: calculatedRate.toString(),
               updatedAt: today
             })
             .where(eq(payRates.id, existingRate.id));
             
-          logger.debug(`Updated pay rate for classification ${classificationId} year ${year}`);
+          logger.debug(`Updated pay rate for apprentice classification ${classification.name} year ${year} to $${calculatedRate}`);
         } else {
           // Insert new rate
           await db
             .insert(payRates)
             .values({
               classificationId,
-              hourlyRate: hourlyRate.toString(),
+              hourlyRate: calculatedRate.toString(),
               effectiveFrom: today,
               effectiveTo: nextYear,
               payRateType: 'award',
               isApprenticeRate: true,
               apprenticeshipYear: year,
-              notes: 'Auto-generated from Fair Work sync'
+              notes: 'Updated from Fair Work API'
             });
             
-          logger.debug(`Inserted pay rate for classification ${classificationId} year ${year}`);
+          logger.debug(`Inserted pay rate for apprentice classification ${classification.name} year ${year}: $${calculatedRate}`);
         }
       } else {
-        // Non-apprentice rate - simplified placeholder
-        const hourlyRate = 27.5;
-        
-        // Check if a rate already exists for this classification
+        // Handle non-apprentice rate
         const [existingRate] = await db
           .select()
           .from(payRates)
@@ -338,40 +346,130 @@ export class FairWorkDataSync {
           return;
         }
         
-        const today = new Date();
-        const nextYear = new Date();
-        nextYear.setFullYear(today.getFullYear() + 1);
-        
         if (existingRate) {
           // Update existing rate
           await db
             .update(payRates)
             .set({
-              hourlyRate: hourlyRate.toString(),
+              hourlyRate: calculatedRate.toString(),
               updatedAt: today
             })
             .where(eq(payRates.id, existingRate.id));
             
-          logger.debug(`Updated pay rate for classification ${classificationId}`);
+          logger.debug(`Updated pay rate for classification ${classification.name} to $${calculatedRate}`);
         } else {
           // Insert new rate
           await db
             .insert(payRates)
             .values({
               classificationId,
-              hourlyRate: hourlyRate.toString(),
+              hourlyRate: calculatedRate.toString(),
               effectiveFrom: today,
               effectiveTo: nextYear,
               payRateType: 'award',
               isApprenticeRate: false,
-              notes: 'Auto-generated from Fair Work sync'
+              notes: 'Updated from Fair Work API'
             });
             
-          logger.debug(`Inserted pay rate for classification ${classificationId}`);
+          logger.debug(`Inserted pay rate for classification ${classification.name}: $${calculatedRate}`);
         }
       }
     } catch (error) {
       logger.error(`Error syncing pay rates for classification ${classificationId}`, { error });
+      throw error;
+    }
+  }
+  
+  /**
+   * Calculate a fallback rate when the API doesn't provide one
+   */
+  private async calculateFallbackRate(
+    classification: any,
+    award: any
+  ): Promise<void> {
+    try {
+      logger.info(`Using fallback rate calculation for ${classification.name}`);
+      
+      // Calculate based on apprenticeship year if applicable
+      let hourlyRate = 27.5; // Default adult rate
+      
+      if (classification.isApprentice) {
+        const year = classification.apprenticeshipYear || 1;
+        
+        // These rates are industry standard approximations for apprentices
+        // Proper implementation would use formulas from the actual award
+        // We're calculating them as a percentage of the standard adult rate
+        switch(year) {
+          case 1: hourlyRate = 27.5 * 0.55; break; // 55% of adult rate
+          case 2: hourlyRate = 27.5 * 0.65; break; // 65% of adult rate 
+          case 3: hourlyRate = 27.5 * 0.80; break; // 80% of adult rate
+          case 4: hourlyRate = 27.5 * 0.95; break; // 95% of adult rate
+          default: hourlyRate = 27.5 * 0.55; // Default to first year
+        }
+      }
+      
+      const today = new Date();
+      const nextYear = new Date();
+      nextYear.setFullYear(today.getFullYear() + 1);
+      
+      // Check if a rate already exists
+      const [existingRate] = classification.isApprentice ?
+        await db
+          .select()
+          .from(payRates)
+          .where(
+            and(
+              eq(payRates.classificationId, classification.id),
+              eq(payRates.isApprenticeRate, true),
+              eq(payRates.apprenticeshipYear, classification.apprenticeshipYear || 1)
+            )
+          ) :
+        await db
+          .select()
+          .from(payRates)
+          .where(
+            and(
+              eq(payRates.classificationId, classification.id),
+              eq(payRates.isApprenticeRate, false)
+            )
+          );
+      
+      if (existingRate) {
+        // Update existing rate
+        await db
+          .update(payRates)
+          .set({
+            hourlyRate: hourlyRate.toFixed(2),
+            updatedAt: today,
+            notes: 'Fallback calculation - API data unavailable'
+          })
+          .where(eq(payRates.id, existingRate.id));
+          
+        logger.debug(`Updated fallback pay rate for classification ${classification.name} to $${hourlyRate.toFixed(2)}`);
+      } else {
+        // Insert new rate
+        const values: any = {
+          classificationId: classification.id,
+          hourlyRate: hourlyRate.toFixed(2),
+          effectiveFrom: today,
+          effectiveTo: nextYear,
+          payRateType: 'award',
+          isApprenticeRate: classification.isApprentice,
+          notes: 'Fallback calculation - API data unavailable'
+        };
+        
+        if (classification.isApprentice) {
+          values.apprenticeshipYear = classification.apprenticeshipYear || 1;
+        }
+        
+        await db
+          .insert(payRates)
+          .values(values);
+          
+        logger.debug(`Inserted fallback pay rate for classification ${classification.name}: $${hourlyRate.toFixed(2)}`);
+      }
+    } catch (error) {
+      logger.error(`Error calculating fallback rate for classification ${classification.id}`, { error });
       throw error;
     }
   }
