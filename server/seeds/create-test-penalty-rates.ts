@@ -58,9 +58,18 @@ export async function createTestPenaltyRates() {
 
   // Create Building and Construction Award penalties
   try {
-    for (const penalty of buildingPenalties) {
-      await db.insert(penaltyRules).values(penalty);
-    }
+    await Promise.all(buildingPenalties.map(penalty => {
+      return db.insert(penaltyRules).values({
+        awardId: penalty.awardId,
+        penaltyName: penalty.penaltyName,
+        penaltyType: penalty.penaltyType,
+        multiplier: penalty.multiplier,
+        daysOfWeek: penalty.daysOfWeek ? JSON.stringify(penalty.daysOfWeek) : null,
+        startTime: penalty.startTime || null,
+        endTime: penalty.endTime || null,
+        notes: penalty.notes
+      });
+    }));
     console.log(`Created ${buildingPenalties.length} penalty rules for Building and Construction Award`);
   } catch (error) {
     console.error('Error creating Building and Construction Award penalty rules:', error);
@@ -112,9 +121,18 @@ export async function createTestPenaltyRates() {
   
   // Create Manufacturing Award penalties
   try {
-    for (const penalty of manufacturingPenalties) {
-      await db.insert(penaltyRules).values(penalty);
-    }
+    await Promise.all(manufacturingPenalties.map(penalty => {
+      return db.insert(penaltyRules).values({
+        awardId: penalty.awardId,
+        penaltyName: penalty.penaltyName,
+        penaltyType: penalty.penaltyType,
+        multiplier: penalty.multiplier,
+        daysOfWeek: penalty.daysOfWeek ? JSON.stringify(penalty.daysOfWeek) : null,
+        startTime: penalty.startTime || null,
+        endTime: penalty.endTime || null,
+        notes: penalty.notes
+      });
+    }));
     console.log(`Created ${manufacturingPenalties.length} penalty rules for Manufacturing Award`);
   } catch (error) {
     console.error('Error creating Manufacturing Award penalty rules:', error);
@@ -124,61 +142,63 @@ export async function createTestPenaltyRates() {
   const hospitalityPenalties = [
     {
       awardId: 6,
-      name: 'Weekend - Saturday',
-      description: 'Saturday work penalty for Hospitality Award',
-      appliesTo: 'all',
-      applyWhen: '{"dayOfWeek": 6}',
-      penaltyType: 'percentage',
-      penaltyValue: 25,
-      isActive: true
+      penaltyName: 'Weekend - Saturday',
+      penaltyType: 'weekend',
+      multiplier: 1.25, // 25% loading
+      daysOfWeek: [6], // Saturday
+      notes: 'Saturday work penalty for Hospitality Award'
     },
     {
       awardId: 6,
-      name: 'Weekend - Sunday',
-      description: 'Sunday work penalty for Hospitality Award',
-      appliesTo: 'all',
-      applyWhen: '{"dayOfWeek": 0}',
-      penaltyType: 'percentage',
-      penaltyValue: 50,
-      isActive: true
+      penaltyName: 'Weekend - Sunday',
+      penaltyType: 'weekend',
+      multiplier: 1.5, // 50% loading
+      daysOfWeek: [0], // Sunday
+      notes: 'Sunday work penalty for Hospitality Award'
     },
     {
       awardId: 6,
-      name: 'Public Holiday',
-      description: 'Public holiday penalty for Hospitality Award',
-      appliesTo: 'all',
-      applyWhen: '{"isPublicHoliday": true}',
-      penaltyType: 'percentage',
-      penaltyValue: 125,
-      isActive: true
+      penaltyName: 'Public Holiday',
+      penaltyType: 'public_holiday',
+      multiplier: 2.25, // 125% loading
+      notes: 'Public holiday penalty for Hospitality Award'
     },
     {
       awardId: 6,
-      name: 'Evening Work (Mon-Fri)',
-      description: 'Evening work penalty for Hospitality Award (Monday to Friday)',
-      appliesTo: 'all',
-      applyWhen: '{"dayOfWeek": [1, 2, 3, 4, 5], "timeOfDay": {"startHour": 19, "endHour": 24}}',
-      penaltyType: 'percentage',
-      penaltyValue: 10,
-      isActive: true
+      penaltyName: 'Evening Work (Mon-Fri)',
+      penaltyType: 'evening_shift',
+      multiplier: 1.1, // 10% loading
+      daysOfWeek: [1, 2, 3, 4, 5], // Monday to Friday
+      startTime: '19:00',
+      endTime: '24:00',
+      notes: 'Evening work penalty for Hospitality Award (Monday to Friday)'
     },
     {
       awardId: 6,
-      name: 'Overnight Work (Mon-Fri)',
-      description: 'Overnight work penalty for Hospitality Award (Monday to Friday)',
-      appliesTo: 'all',
-      applyWhen: '{"dayOfWeek": [1, 2, 3, 4, 5], "timeOfDay": {"startHour": 0, "endHour": 6}}',
-      penaltyType: 'percentage',
-      penaltyValue: 15,
-      isActive: true
+      penaltyName: 'Overnight Work (Mon-Fri)',
+      penaltyType: 'night_shift',
+      multiplier: 1.15, // 15% loading
+      daysOfWeek: [1, 2, 3, 4, 5], // Monday to Friday
+      startTime: '00:00',
+      endTime: '06:00',
+      notes: 'Overnight work penalty for Hospitality Award (Monday to Friday)'
     }
   ];
   
   // Create Hospitality Award penalties
   try {
-    for (const penalty of hospitalityPenalties) {
-      await db.insert(penaltyRules).values(penalty);
-    }
+    await Promise.all(hospitalityPenalties.map(penalty => {
+      return db.insert(penaltyRules).values({
+        awardId: penalty.awardId,
+        penaltyName: penalty.penaltyName,
+        penaltyType: penalty.penaltyType,
+        multiplier: penalty.multiplier,
+        daysOfWeek: penalty.daysOfWeek ? JSON.stringify(penalty.daysOfWeek) : null,
+        startTime: penalty.startTime || null,
+        endTime: penalty.endTime || null,
+        notes: penalty.notes
+      });
+    }));
     console.log(`Created ${hospitalityPenalties.length} penalty rules for Hospitality Award`);
   } catch (error) {
     console.error('Error creating Hospitality Award penalty rules:', error);
