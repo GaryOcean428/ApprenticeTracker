@@ -299,23 +299,23 @@ export class ChargeRateCalculator {
         const weeklyPrice = calculation.chargeRate * hoursPerWeek;
         const totalPrice = (weeklyPrice * 52).toString();
         
-        // Add line item to quote - using raw column names from database
+        // Add line item to quote
         const [lineItem] = await db
           .insert(quoteLineItems)
           .values({
-            quote_id: quote.id,
-            apprentice_id: apprenticeId,
+            quoteId: quote.id,
+            apprenticeId: apprenticeId,
             description: `${apprentice.firstName} ${apprentice.lastName} - Year ${apprentice.apprenticeshipYear || 1}`,
             quantity: '52', // 52 weeks
             unit: 'week',
-            weekly_hours: hoursPerWeek,
-            rate_per_hour: calculation.chargeRate.toString(),
-            total_price: totalPrice,
+            weeklyHours: hoursPerWeek.toString(),
+            ratePerHour: calculation.chargeRate.toString(),
+            totalPrice: totalPrice,
             notes: `Includes training, PPE, and administration costs`
           })
           .returning();
           
-        totalAmount += parseFloat(lineItem.total_price);
+        totalAmount += parseFloat(lineItem.totalPrice);
       }
       
       // Update the quote with the total amount
