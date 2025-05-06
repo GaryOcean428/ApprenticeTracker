@@ -8,13 +8,40 @@ import { Router } from "express";
 import { FairWorkApiClient } from "../../services/fairwork/api-client";
 import { createFairWorkSyncScheduler } from "../../services/fairwork/scheduler";
 import logger from "../../utils/logger";
-import { authenticateUser, requirePermission } from "../../middleware/permissions";
+import { authenticateUser, requirePermission, hasPermission } from "../../middleware/permissions";
 import { db } from "../../db";
 import { eq } from "drizzle-orm";
 import { awards, awardClassifications, penaltyRules, allowanceRules } from "@shared/schema";
 
 // Create router
 const router = Router();
+
+// Test route for development purposes - no authentication required
+router.get("/api_test_fairwork_dev", async (req, res) => {
+  try {
+    logger.info("Testing Fair Work API connection");
+    
+    // Get 10 most recent awards
+    const recentAwards = await db
+      .select()
+      .from(awards)
+      .limit(10);
+    
+    return res.json({
+      success: true,
+      message: "Fair Work API test route",
+      data: {
+        awards: recentAwards,
+      },
+    });
+  } catch (error) {
+    logger.error("Error testing Fair Work API", { error });
+    return res.status(500).json({
+      success: false,
+      error: "Failed to test Fair Work API",
+    });
+  }
+});
 
 // Initialize API client
 const apiClient = new FairWorkApiClient({
