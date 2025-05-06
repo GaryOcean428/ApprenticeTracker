@@ -52,6 +52,10 @@ import CreateUnitOfCompetency from "./pages/vet/units/create";
 import QualificationsList from "./pages/vet/qualifications/index";
 import CreateQualification from "./pages/vet/qualifications/create";
 
+// Charge Rates Module
+import ChargeRatesIndex from "./pages/charge-rates/index";
+import ChargeRatesCreate from "./pages/charge-rates/create";
+
 // Public pages
 import HomePage from "./pages/public/home";
 import AboutPage from "./pages/public/about";
@@ -296,6 +300,18 @@ function Router() {
         <ProtectedRoute path="/settings/configuration" component={SystemConfiguration} />
         <ProtectedRoute path="/settings/integrations" component={IntegrationsSettings} />
         <ProtectedRoute path="/settings/import-export" component={ImportExportSettings} />
+        
+        {/* Charge Rates Routes */}
+        <ProtectedRoute path="/charge-rates" component={ChargeRatesIndex} />
+        <ProtectedRoute path="/charge-rates/create" component={ChargeRatesCreate} />
+        <Route path="/charge-rates/:id" component={() => {
+          const ChargeRateDetail = lazy(() => import("./pages/charge-rates/[id]/index"));
+          return (
+            <Suspense fallback={<div className="p-8 flex items-center justify-center"><div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"/></div>}>
+              <ChargeRateDetail />
+            </Suspense>
+          );
+        }} />
         
         {/* VET Training Routes */}
         <ProtectedRoute path="/vet/units" component={UnitsOfCompetencyList} />
