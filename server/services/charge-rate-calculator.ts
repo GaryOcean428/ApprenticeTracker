@@ -202,12 +202,12 @@ export class ChargeRateCalculator {
         
         if (result && result.rows && result.rows.length > 0) {
           logger.debug('Detected values:', result.rows[0]);
-          if (result.rows[0].custom_margin_rate !== null) {
-            customMarginRate = parseFloat(result.rows[0].custom_margin_rate);
+          if (result.rows[0].custom_margin_rate !== null && result.rows[0].custom_margin_rate !== undefined) {
+            customMarginRate = parseFloat(result.rows[0].custom_margin_rate as string);
             logger.debug(`Setting custom margin rate: ${customMarginRate}`);
           }
-          if (result.rows[0].custom_admin_rate !== null) {
-            customAdminRate = parseFloat(result.rows[0].custom_admin_rate);
+          if (result.rows[0].custom_admin_rate !== null && result.rows[0].custom_admin_rate !== undefined) {
+            customAdminRate = parseFloat(result.rows[0].custom_admin_rate as string);
             logger.debug(`Setting custom admin rate: ${customAdminRate}`);
           }
         }
