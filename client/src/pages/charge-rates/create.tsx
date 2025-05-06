@@ -419,7 +419,7 @@ export default function CreateChargeRatePage() {
                                         min="0"
                                         max="1"
                                         {...field}
-                                        value={field.value * 100}
+                                        value={field.value !== undefined ? field.value * 100 : ''}
                                         onChange={(e) => field.onChange(parseFloat(e.target.value) / 100)}
                                       />
                                     </FormControl>
@@ -644,7 +644,7 @@ export default function CreateChargeRatePage() {
                       <div className="text-sm">
                         <p className="font-medium">{getApprenticeDisplayText(selectedApprentice)}</p>
                         <p className="text-muted-foreground">
-                          {selectedApprentice.email || 'No email available'}
+                          Trade: {selectedApprentice.trade || 'Not specified'}
                         </p>
                       </div>
                     ) : (
@@ -660,7 +660,7 @@ export default function CreateChargeRatePage() {
                       <div className="text-sm">
                         <p className="font-medium">{getHostEmployerDisplayText(selectedHostEmployer)}</p>
                         <p className="text-muted-foreground">
-                          {selectedHostEmployer.contactEmail || 'No email available'}
+                          Industry: {selectedHostEmployer.industry || 'Not specified'}
                         </p>
                       </div>
                     ) : (
