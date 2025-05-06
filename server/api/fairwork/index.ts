@@ -16,7 +16,12 @@ import { awards, awardClassifications, penaltyRules, allowanceRules } from "@sha
 // Create router
 const router = Router();
 
-// Test route for development purposes - no authentication required
+// Dedicated debug logger setup
+function debugLog(message: string, data?: any) {
+  console.log(`[FAIRWORK_DEBUG] ${message}`, data || '');
+}
+
+// Test routes for development purposes - no authentication required
 router.get("/api_test_fairwork_dev", async (req, res) => {
   try {
     logger.info("Testing Fair Work API connection");
@@ -39,6 +44,37 @@ router.get("/api_test_fairwork_dev", async (req, res) => {
     return res.status(500).json({
       success: false,
       error: "Failed to test Fair Work API",
+    });
+  }
+});
+
+// Test route for classifications - no authentication required
+router.get("/api_test_classifications/:awardId", async (req, res) => {
+  try {
+    const { awardId } = req.params;
+    logger.info(`Testing Fair Work API - getting classifications for award ID ${awardId}`);
+    debugLog(`Testing Fair Work API - getting classifications for award ID ${awardId}`);
+    
+    // Get classifications for this award
+    const classifications = await db
+      .select()
+      .from(awardClassifications)
+      .where(eq(awardClassifications.awardId, parseInt(awardId)));
+      
+    logger.info(`Found ${classifications.length} classifications for award ID ${awardId}`);
+    
+    return res.json({
+      success: true,
+      message: "Fair Work API classifications test route",
+      data: {
+        classifications,
+      },
+    });
+  } catch (error) {
+    logger.error("Error testing Fair Work API classifications", { error });
+    return res.status(500).json({
+      success: false,
+      error: "Failed to test Fair Work API classifications",
     });
   }
 });
