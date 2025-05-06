@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { chargeRateRouter } from './charge-rates';
+import chargeRateRouter from './charge-rates';
 
 const payrollRouter = Router();
 

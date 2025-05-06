@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Search, Industry, Filter } from 'lucide-react';
+import { Search, Building2, Filter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -221,7 +221,7 @@ export function AwardSelector({
               onValueChange={setIndustryFilter}
             >
               <SelectTrigger>
-                <Industry className="mr-2 h-4 w-4" />
+                <Building2 className="mr-2 h-4 w-4" />
                 <SelectValue placeholder="Industry" />
               </SelectTrigger>
               <SelectContent>
