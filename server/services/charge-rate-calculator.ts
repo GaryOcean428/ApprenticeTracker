@@ -245,7 +245,13 @@ export class ChargeRateCalculator {
       };
 
       // Calculate the charge rate
-      const calculation = this.calculateChargeRate(payRate, this.defaultWorkConfig, costConfig, this.defaultBillableOptions);
+      const calculation = this.calculateChargeRate(
+        payRate, 
+        this.defaultWorkConfig, 
+        costConfig, 
+        this.defaultBillableOptions,
+        customMargin // Pass the custom margin here
+      );
 
       // Save the calculation result
       const [savedCalculation] = await db
