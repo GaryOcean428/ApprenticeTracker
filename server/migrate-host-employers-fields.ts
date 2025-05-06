@@ -32,7 +32,12 @@ export async function migrateHostEmployersFields() {
         ADD COLUMN IF NOT EXISTS whs_policy BOOLEAN DEFAULT FALSE,
         ADD COLUMN IF NOT EXISTS whs_last_audit DATE,
         ADD COLUMN IF NOT EXISTS whs_next_audit DATE,
-        ADD COLUMN IF NOT EXISTS labour_hire_licence_expiry DATE
+        ADD COLUMN IF NOT EXISTS labour_hire_licence_expiry DATE,
+        ADD COLUMN IF NOT EXISTS custom_margin_rate NUMERIC(5,2),
+        ADD COLUMN IF NOT EXISTS custom_admin_rate NUMERIC(5,2),
+        ADD COLUMN IF NOT EXISTS charge_rate_agreement TEXT,
+        ADD COLUMN IF NOT EXISTS billing_cycle TEXT DEFAULT 'weekly',
+        ADD COLUMN IF NOT EXISTS agreement_expiry DATE
       `);
       console.log("Added AVETMISS and Fair Work fields to host_employers table");
     } else {

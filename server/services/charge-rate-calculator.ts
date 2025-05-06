@@ -175,6 +175,40 @@ export class ChargeRateCalculator {
         logger.error(`Host employer with ID ${hostEmployerId} not found`);
         throw new Error(`Host employer with ID ${hostEmployerId} not found`);
       }
+      
+      // Try to get custom margin and admin rates if they exist in the database
+      // Fetch the raw record to check if fields exist
+      let customMarginRate = null;
+      let customAdminRate = null;
+      try {
+        const result = await db.execute(sql`
+          SELECT 
+            CASE WHEN EXISTS (
+              SELECT 1 FROM information_schema.columns 
+              WHERE table_name = 'host_employers' AND column_name = 'custom_margin_rate'
+            ) THEN (SELECT custom_margin_rate FROM host_employers WHERE id = ${hostEmployerId})
+            ELSE NULL
+            END as custom_margin_rate,
+            
+            CASE WHEN EXISTS (
+              SELECT 1 FROM information_schema.columns 
+              WHERE table_name = 'host_employers' AND column_name = 'custom_admin_rate'
+            ) THEN (SELECT custom_admin_rate FROM host_employers WHERE id = ${hostEmployerId})
+            ELSE NULL
+            END as custom_admin_rate
+        `);
+        
+        if (result && result[0]) {
+          if (result[0].custom_margin_rate !== null) {
+            customMarginRate = parseFloat(result[0].custom_margin_rate);
+          }
+          if (result[0].custom_admin_rate !== null) {
+            customAdminRate = parseFloat(result[0].custom_admin_rate);
+          }
+        }
+      } catch (error) {
+        logger.warn('Could not fetch custom rates, using defaults', { error });
+      }
 
       // Get existing placements to determine if there are any special rate agreements
       const [existingPlacement] = await db
@@ -197,13 +231,17 @@ export class ChargeRateCalculator {
         payRate = parseFloat(existingPlacement.negotiatedRate.toString());
       }
 
-      // For now we're using default margins, but in the future this could come from host employer settings
-      const customMargin = this.defaultCostConfig.defaultMargin; // Default 15% margin
+      // Use custom rates from host employer if available, otherwise use default values
+      const customMargin = customMarginRate !== null ? customMarginRate : this.defaultCostConfig.defaultMargin;
+      const adminRate = customAdminRate !== null ? customAdminRate : this.defaultCostConfig.adminRate;
+      
+      logger.info(`Using custom margin rate: ${customMargin}, admin rate: ${adminRate} for host employer ${hostEmployerId}`);
       
       // Customize cost config based on host employer settings
       const costConfig = {
         ...this.defaultCostConfig,
-        defaultMargin: customMargin
+        defaultMargin: customMargin,
+        adminRate: adminRate
       };
 
       // Calculate the charge rate

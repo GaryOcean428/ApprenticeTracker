@@ -167,6 +167,12 @@ export const hostEmployers = pgTable("host_employers", {
   isGto: boolean("is_gto").default(false),                      // Indicates if this org is a Group Training Organisation
   labourHireLicenceNo: text("labour_hire_licence_no"),          // For orgs operating under labour hire licensing laws
   labourHireLicenceExpiry: date("labour_hire_licence_expiry"),  // Expiry date for labour hire license
+  // Charge rate customization fields
+  customMarginRate: numeric("custom_margin_rate", { precision: 5, scale: 2 }),  // Custom margin rate for this host employer
+  customAdminRate: numeric("custom_admin_rate", { precision: 5, scale: 2 }),    // Custom admin rate for this host employer
+  chargeRateAgreement: text("charge_rate_agreement"),            // Description of any special agreements
+  billingCycle: text("billing_cycle").default("weekly"),        // weekly, fortnightly, monthly
+  agreementExpiry: date("agreement_expiry")                     // When the charge rate agreement expires
 });
 
 export const insertHostEmployerSchema = createInsertSchema(hostEmployers).omit({
