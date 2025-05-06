@@ -207,22 +207,22 @@ function Router() {
         {/* Fair Work Routes */}
         <ProtectedRoute path="/awards" component={AwardsList} />
         <ProtectedRoute path="/awards/create" component={CreateAward} />
-        <Route path="/awards/:id" component={withIdValidation(() => {
+        <Route path="/awards/:id" component={() => {
           const AwardDetail = lazy(() => import("./pages/awards/[id]/index"));
           return (
             <Suspense fallback={<div className="p-8 flex items-center justify-center"><div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"/></div>}>
               <AwardDetail />
             </Suspense>
           );
-        })} />
-        <Route path="/awards/:id/edit" component={withIdValidation(() => {
+        }} />
+        <Route path="/awards/:id/edit" component={() => {
           const AwardEdit = lazy(() => import("./pages/awards/[id]/edit"));
           return (
             <Suspense fallback={<div className="p-8 flex items-center justify-center"><div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"/></div>}>
               <AwardEdit />
             </Suspense>
           );
-        })} />
+        }} />
         
         {/* Field Officer Routes */}
         <ProtectedRoute path="/field-officers" component={FieldOfficerActivities} />

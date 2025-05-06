@@ -9,8 +9,8 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 
-const AwardDetail = () => {
-  const { id } = useParams();
+const AwardDetail = ({ params }) => {
+  const { id } = params || useParams();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('details');
 

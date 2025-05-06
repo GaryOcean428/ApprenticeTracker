@@ -26,8 +26,8 @@ const formSchema = z.object({
   effectiveDate: z.string().optional().nullable(),
 });
 
-const EditAward = () => {
-  const { id } = useParams();
+const EditAward = ({ params }) => {
+  const { id } = params || useParams();
   const [_, navigate] = useLocation();
   const { toast } = useToast();
 
