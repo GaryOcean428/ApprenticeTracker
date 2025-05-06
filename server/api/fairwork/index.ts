@@ -49,7 +49,7 @@ router.get("/api_test_fairwork_dev", async (req, res) => {
 });
 
 // Test route for classifications - no authentication required
-router.get("/api_test_classifications/:awardId", async (req, res) => {
+router.get("/debug_test_only_classifications/:awardId", async (req, res) => {
   try {
     const { awardId } = req.params;
     logger.info(`Testing Fair Work API - getting classifications for award ID ${awardId}`);
