@@ -62,9 +62,9 @@ export const UnifiedNavigation: React.FC = () => {
                   )}
                 </div>
                 
-                {hasSubItems && isExpanded && (
+                {hasSubItems && isExpanded && section.subItems && (
                   <div className="pl-8 bg-background/50">
-                    {section.subItems.map((subItemGroup, groupIndex) => (
+                    {section.subItems?.map((subItemGroup, groupIndex) => (
                       <div key={groupIndex} className="py-1">
                         {subItemGroup.map((subItem) => {
                           const subItemActive = isActive(subItem.href);

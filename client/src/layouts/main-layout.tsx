@@ -1,6 +1,6 @@
 import { useState } from "react";
 import Header from "@/components/ui/header";
-import Sidebar from "@/components/ui/sidebar";
+import { UnifiedNavigation } from "@/components/navigation/UnifiedNavigation";
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -14,10 +14,10 @@ const MainLayout = ({ children }: MainLayoutProps) => {
   };
   
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="flex h-screen overflow-hidden bg-background">
       {/* Sidebar - hidden on mobile unless toggled */}
       <div className={`${mobileSidebarOpen ? 'block' : 'hidden'} md:block md:static fixed inset-0 z-40 md:z-auto`}>
-        <Sidebar />
+        <UnifiedNavigation />
         {/* Close overlay for mobile */}
         <div 
           className="md:hidden fixed inset-0 bg-black bg-opacity-50 z-[-1]"
@@ -28,7 +28,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
       <div className="flex flex-col flex-1 w-full">
         <Header onMenuToggle={toggleMobileSidebar} />
         
-        <main className="h-full overflow-y-auto bg-white dark:bg-[#111827]">
+        <main className="h-full overflow-y-auto">
           <div className="container px-6 mx-auto py-6">
             {children}
           </div>
