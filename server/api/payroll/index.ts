@@ -22,7 +22,8 @@ import {
 } from './charge-rates';
 import {
   testCalculateChargeRate,
-  testGenerateQuote
+  testGenerateQuote,
+  testGetQuote
 } from './test-routes';
 import { isAuthenticated, hasRole } from '../auth-routes';
 import { hasPermission } from '../../middleware/permissions';
@@ -63,6 +64,7 @@ router.patch('/quotes/:id/status', isAuthenticated, hasPermission('manage:quotes
 if (process.env.NODE_ENV !== 'production') {
   router.post('/test/charge-rates/calculate', testCalculateChargeRate);
   router.post('/test/quotes/generate', testGenerateQuote);
+  router.get('/test/quotes/:id', testGetQuote);
   console.log('WARNING: Test routes enabled in development mode');
 }
 

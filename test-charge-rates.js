@@ -8,7 +8,7 @@ async function testChargeRateAPI() {
     // 1. Calculate charge rate for an apprentice
     const calculateResponse = await axios.post('http://localhost:5000/api/payroll/test/charge-rates/calculate', {
       apprenticeId: 1,  // Replace with an existing apprentice ID
-      hostEmployerId: 913  // Using a host employer ID from the latest seeding
+      hostEmployerId: 921  // Using a host employer ID from the latest seeding
     });
     
     console.log('\nCharge Rate Calculation Result:');
@@ -16,7 +16,7 @@ async function testChargeRateAPI() {
     
     // 2. Generate a quote for a host employer
     const quoteResponse = await axios.post('http://localhost:5000/api/payroll/test/quotes/generate', {
-      hostEmployerId: 913,  // Using a host employer ID from the latest seeding
+      hostEmployerId: 921,  // Using a host employer ID from the latest seeding
       apprenticeIds: [1, 2]  // Replace with existing apprentice IDs
     });
     
@@ -27,7 +27,7 @@ async function testChargeRateAPI() {
     if (quoteResponse.data.success && quoteResponse.data.data.quoteId) {
       const quoteId = quoteResponse.data.data.quoteId;
       
-      const quoteDetailsResponse = await axios.get(`http://localhost:5000/api/payroll/quotes/${quoteId}`);
+      const quoteDetailsResponse = await axios.get(`http://localhost:5000/api/payroll/test/quotes/${quoteId}`);
       
       console.log('\nQuote Details:');
       console.log(JSON.stringify(quoteDetailsResponse.data, null, 2));
