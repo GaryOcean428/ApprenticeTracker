@@ -34,6 +34,8 @@ import { queryClient } from "@/lib/queryClient";
 // Extend schema with client-side validation
 const formSchema = insertAwardSchema.extend({
   effectiveDate: z.date().optional(),
+  industry: z.string().optional(),
+  sector: z.string().optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -49,6 +51,8 @@ export default function CreateAward() {
       code: "",
       fairWorkReference: "",
       fairWorkTitle: "",
+      industry: "",
+      sector: "",
       description: "",
       isActive: true,
     },
@@ -175,6 +179,48 @@ export default function CreateAward() {
                       </FormControl>
                       <FormDescription>
                         The official title from Fair Work Australia
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="industry"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Industry</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="e.g. Construction, Manufacturing, Healthcare" 
+                          {...field} 
+                          value={field.value || ''} 
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        The primary industry this award covers
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="sector"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Sector</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="e.g. Private, Public, Not-for-profit" 
+                          {...field} 
+                          value={field.value || ''} 
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        The economic sector this award applies to
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
