@@ -166,7 +166,7 @@ export class FairWorkApiClient {
       const awards = response.results || [];
       
       // Transform to our internal model
-      return awards.map(a => ({
+      return awards.map((a: any) => ({
         id: a.award_fixed_id?.toString() || '',
         code: a.code || '',
         name: a.name || '',
@@ -249,7 +249,7 @@ export class FairWorkApiClient {
       const classifications = response.results || [];
       
       // Transform to our internal model if needed
-      return classifications.map(c => ({
+      return classifications.map((c: any) => ({
         id: c.classification_fixed_id?.toString() || '',
         award_id: awardCode,
         name: c.classification || '',
@@ -277,41 +277,98 @@ export class FairWorkApiClient {
   }
 
   /**
-   * Get wage allowances (as per API documentation endpoint: GET /api/v1/wage-allowances)
+   * Get wage allowances for a specific award
+   * Endpoint: GET /api/v1/awards/{id_or_code}/wage-allowances
    */
-  async getWageAllowances(): Promise<any[]> {
+  async getWageAllowances(awardCode: string): Promise<any[]> {
     try {
-      return await this.request<any[]>('/api/v1/wage-allowances');
+      const response = await this.request<any>(`/awards/${awardCode}/wage-allowances`);
+      // Extract wage allowances from the response based on API structure
+      const allowances = response.results || [];
+      return allowances;
     } catch (error) {
-      logger.error('Failed to fetch wage allowances', { error });
+      logger.error('Failed to fetch wage allowances', { error, awardCode });
       return [];
     }
   }
 
   /**
-   * Get expense allowances (as per API documentation endpoint: GET /api/v1/expense-allowances)
+   * Get expense allowances for a specific award
+   * Endpoint: GET /api/v1/awards/{id_or_code}/expense-allowances
    */
-  async getExpenseAllowances(): Promise<any[]> {
+  async getExpenseAllowances(awardCode: string): Promise<any[]> {
     try {
-      return await this.request<any[]>('/api/v1/expense-allowances');
+      const response = await this.request<any>(`/awards/${awardCode}/expense-allowances`);
+      // Extract expense allowances from the response based on API structure
+      const allowances = response.results || [];
+      return allowances;
     } catch (error) {
-      logger.error('Failed to fetch expense allowances', { error });
+      logger.error('Failed to fetch expense allowances', { error, awardCode });
       return [];
     }
   }
 
   /**
-   * Get penalties (as per API documentation endpoint: GET /api/v1/penalties)
+   * Get penalties for a specific award
+   * Endpoint: GET /api/v1/awards/{id_or_code}/penalties
    */
-  async getPenalties(): Promise<any[]> {
+  async getPenalties(awardCode: string): Promise<any[]> {
     try {
-      return await this.request<any[]>('/api/v1/penalties');
+      const response = await this.request<any>(`/awards/${awardCode}/penalties`);
+      // Extract penalties from the response based on API structure
+      const penalties = response.results || [];
+      return penalties;
     } catch (error) {
-      logger.error('Failed to fetch penalties', { error });
+      logger.error('Failed to fetch penalties', { error, awardCode });
       return [];
     }
   }
 
+  /**
+   * Get pay rates for a specific award
+   * Endpoint: GET /api/v1/awards/{id_or_code}/pay-rates
+   */
+  async getPayRates(awardCode: string, options: {
+    classificationLevel?: number;
+    classificationFixedId?: number;
+    employeeRateTypeCode?: string;
+    operativeFrom?: string;
+    operativeTo?: string;
+  } = {}): Promise<PayRate[]> {
+    try {
+      // Build query parameters
+      const params: Record<string, string> = {};
+      if (options.classificationLevel) params.classification_level = options.classificationLevel.toString();
+      if (options.classificationFixedId) params.classification_fixed_id = options.classificationFixedId.toString();
+      if (options.employeeRateTypeCode) params.employee_rate_type_code = options.employeeRateTypeCode;
+      if (options.operativeFrom) params.operative_from = options.operativeFrom;
+      if (options.operativeTo) params.operative_to = options.operativeTo;
+      
+      // Make the request with query parameters
+      const queryString = new URLSearchParams(params).toString();
+      const url = `/awards/${awardCode}/pay-rates${queryString ? `?${queryString}` : ''}`;
+      
+      const response = await this.request<any>(url);
+      
+      // Extract pay rates from the response
+      const rates = response.results || [];
+      
+      // Transform to our internal model
+      return rates.map((r: any) => ({
+        id: r.calculated_pay_rate_id?.toString() || '',
+        classification_id: r.classification_fixed_id?.toString() || '',
+        hourly_rate: parseFloat(r.hourly_rate) || 0,
+        effective_from: r.operative_from || '',
+        effective_to: r.operative_to || undefined,
+        is_apprentice_rate: r.employee_rate_type_code === 'AP', // AP = Apprentice
+        apprenticeship_year: r.apprentice_year ? parseInt(r.apprentice_year) : undefined
+      }));
+    } catch (error) {
+      logger.error('Failed to fetch pay rates', { error, awardCode, options });
+      return [];
+    }
+  }
+  
   /**
    * Get rate templates for an award
    */

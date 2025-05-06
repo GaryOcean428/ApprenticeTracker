@@ -491,14 +491,10 @@ export class FairWorkDataSync {
         throw new Error(`Award with code ${awardCode} not found in database`);
       }
       
-      // Get allowances from the API
-      // Combine both wage and expense allowances
-      const wageAllowances = await this.apiClient.getWageAllowances();
-      const expenseAllowances = await this.apiClient.getExpenseAllowances();
-
-      // Filter only allowances for this award
-      const awardWageAllowances = wageAllowances.filter(a => a.code === awardCode);
-      const awardExpenseAllowances = expenseAllowances.filter(a => a.code === awardCode);
+      // Get allowances from the API for this specific award
+      // Using the new award-specific endpoints
+      const awardWageAllowances = await this.apiClient.getWageAllowances(awardCode);
+      const awardExpenseAllowances = await this.apiClient.getExpenseAllowances(awardCode);
       
       logger.info(`Retrieved ${awardWageAllowances.length} wage allowances and ${awardExpenseAllowances.length} expense allowances for award ${awardCode}`);
       
@@ -616,11 +612,9 @@ export class FairWorkDataSync {
         throw new Error(`Award with code ${awardCode} not found in database`);
       }
       
-      // Get penalties from the API
-      const penalties = await this.apiClient.getPenalties();
-      
-      // Filter penalties for this award
-      const awardPenalties = penalties.filter(p => p.code === awardCode);
+      // Get penalties from the API for this specific award
+      // Using the new award-specific endpoint
+      const awardPenalties = await this.apiClient.getPenalties(awardCode);
       logger.info(`Retrieved ${awardPenalties.length} penalties for award ${awardCode}`);
       
       // Process each penalty
