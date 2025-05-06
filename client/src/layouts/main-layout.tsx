@@ -16,13 +16,15 @@ const MainLayout = ({ children }: MainLayoutProps) => {
   return (
     <div className="flex h-screen overflow-hidden bg-background">
       {/* Sidebar - hidden on mobile unless toggled */}
-      <div className={`${mobileSidebarOpen ? 'block' : 'hidden'} md:block md:static fixed inset-0 z-40 md:z-auto`}>
-        <UnifiedNavigation />
-        {/* Close overlay for mobile */}
-        <div 
-          className="md:hidden fixed inset-0 bg-black bg-opacity-50 z-[-1]"
-          onClick={toggleMobileSidebar}
-        ></div>
+      <div className={`${mobileSidebarOpen ? 'block' : 'hidden'} md:block md:w-64 md:static fixed inset-0 z-40 md:z-auto`}>
+        <div className="h-full">
+          <UnifiedNavigation />
+          {/* Close overlay for mobile */}
+          <div 
+            className="md:hidden fixed inset-0 bg-black bg-opacity-50 z-[-1]"
+            onClick={toggleMobileSidebar}
+          ></div>
+        </div>
       </div>
       
       <div className="flex flex-col flex-1 w-full">

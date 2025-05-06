@@ -4,7 +4,7 @@ import { useLocation, Link } from 'wouter';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { ArrowLeft, Calculator, Info } from 'lucide-react';
+import { ArrowLeft, Calculator, Info, Upload, Users, FileCheck, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -17,6 +17,8 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { Switch } from '@/components/ui/switch';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Card,
   CardContent,
@@ -46,7 +48,7 @@ import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 import { AwardSelector } from '@/components/awards/AwardSelector';
 import { ChargeRateVisualizer } from '@/components/rates/ChargeRateVisualizer';
-import { MainLayout } from '@/components/layout/MainLayout';
+import MainLayout from '@/layouts/main-layout';
 
 // Default configuration values
 const DEFAULT_COST_CONFIG = {
@@ -81,14 +83,24 @@ const DEFAULT_BILLABLE_OPTIONS = {
 
 // Form schema
 const formSchema = z.object({
-  apprenticeId: z.number().int().positive({ message: 'Please select an apprentice' }),
-  hostEmployerId: z.number().int().positive({ message: 'Please select a host employer' }),
+  // Make apprentice and host employer optional
+  apprenticeId: z.number().int().positive({ message: 'Please select an apprentice' }).optional(),
+  hostEmployerId: z.number().int().positive({ message: 'Please select a host employer' }).optional(),
+  leadId: z.number().int().positive({ message: 'Please select a lead' }).optional(),
   payRate: z.number().positive({ message: 'Pay rate must be greater than zero' }),
+  rateSource: z.enum(['fairwork', 'enterprise_agreement', 'manual']).default('manual'),
+  enterpriseAgreementId: z.number().int().positive().optional(),
   awardId: z.number().int().positive().optional(),
   classificationId: z.number().int().positive().optional(),
   awardName: z.string().optional(),
   classificationName: z.string().optional(),
   customMargin: z.number().min(0).max(1).optional(),
+  isTemplate: z.boolean().default(false),
+  templateName: z.string().optional(),
+  isQuote: z.boolean().default(false),
+  isBulkOperation: z.boolean().default(false),
+  selectedApprentices: z.array(z.number()).optional(),
+  selectedHostEmployers: z.array(z.number()).optional(),
   notes: z.string().optional(),
 });
 
@@ -97,9 +109,9 @@ export default function CreateChargeRatePage() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('apprentice');
-  const [calculationResult, setCalculationResult] = useState<any>(null);
-  const [selectedAward, setSelectedAward] = useState<any>(null);
-  const [selectedClassification, setSelectedClassification] = useState<any>(null);
+  const [calculationResult, setCalculationResult] = useState(null);
+  const [selectedAward, setSelectedAward] = useState(null);
+  const [selectedClassification, setSelectedClassification] = useState(null);
   const [isCalculating, setIsCalculating] = useState(false);
   
   // Define apprentice and host employer types
@@ -117,23 +129,27 @@ export default function CreateChargeRatePage() {
   }
 
   // Fetch apprentices
-  const { data: apprentices } = useQuery<any, Error, Apprentice[]>({
+  const { data: apprentices } = useQuery({
     queryKey: ['/api/apprentices'],
-    select: (data: any) => data?.data || [],
+    select: (data) => data?.data || [],
   });
   
   // Fetch host employers
-  const { data: hostEmployers } = useQuery<any, Error, HostEmployer[]>({
+  const { data: hostEmployers } = useQuery({
     queryKey: ['/api/host-employers'],
-    select: (data: any) => data?.data || [],
+    select: (data) => data?.data || [],
   });
   
   // Set up form
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
       payRate: 25.0,
       customMargin: DEFAULT_COST_CONFIG.defaultMargin,
+      rateSource: 'manual',
+      isQuote: false,
+      isTemplate: false,
+      isBulkOperation: false,
       notes: '',
     },
   });
@@ -143,7 +159,7 @@ export default function CreateChargeRatePage() {
   
   // Mutation for saving calculation
   const saveMutation = useMutation({
-    mutationFn: async (data: z.infer<typeof formSchema>) => {
+    mutationFn: async (data) => {
       const response = await apiRequest('POST', '/api/payroll/charge-rates', data);
       return await response.json();
     },
@@ -165,7 +181,7 @@ export default function CreateChargeRatePage() {
   });
   
   // Handle award selection
-  const handleAwardSelect = (award: any, classification?: any) => {
+  const handleAwardSelect = (award, classification) => {
     setSelectedAward(award);
     setSelectedClassification(classification);
     
@@ -182,15 +198,6 @@ export default function CreateChargeRatePage() {
   const calculateChargeRate = async () => {
     try {
       setIsCalculating(true);
-      
-      // Validate form
-      await form.trigger(['payRate', 'apprenticeId', 'hostEmployerId']);
-      
-      if (form.formState.errors.payRate || 
-          form.formState.errors.apprenticeId || 
-          form.formState.errors.hostEmployerId) {
-        return;
-      }
       
       // Get form values
       const { payRate, awardId, customMargin } = form.getValues();
@@ -222,17 +229,17 @@ export default function CreateChargeRatePage() {
   };
   
   // Helper function for apprentice display text
-  const getApprenticeDisplayText = (apprentice: Apprentice) => {
+  const getApprenticeDisplayText = (apprentice) => {
     return `${apprentice.firstName} ${apprentice.lastName} - ${apprentice.tradeType || 'Apprentice'}`;
   };
   
   // Helper function for host employer display text
-  const getHostEmployerDisplayText = (hostEmployer: HostEmployer) => {
+  const getHostEmployerDisplayText = (hostEmployer) => {
     return hostEmployer.companyName || hostEmployer.businessName || 'Unknown Host';
   };
   
   // Handle form submission
-  const onSubmit = (data: z.infer<typeof formSchema>) => {
+  const onSubmit = (data) => {
     if (!calculationResult) {
       toast({
         title: 'Calculation Required',
@@ -249,7 +256,7 @@ export default function CreateChargeRatePage() {
   };
   
   // Format currency
-  const formatCurrency = (value: number) => {
+  const formatCurrency = (value) => {
     return new Intl.NumberFormat('en-AU', {
       style: 'currency',
       currency: 'AUD',
@@ -257,8 +264,8 @@ export default function CreateChargeRatePage() {
   };
   
   // Selected apprentice and host employer
-  const selectedApprentice = apprentices?.find((a: Apprentice) => a.id === watchedValues.apprenticeId);
-  const selectedHostEmployer = hostEmployers?.find((h: HostEmployer) => h.id === watchedValues.hostEmployerId);
+  const selectedApprentice = apprentices?.find((a) => a.id === watchedValues.apprenticeId);
+  const selectedHostEmployer = hostEmployers?.find((h) => h.id === watchedValues.hostEmployerId);
   
   return (
     <MainLayout>
@@ -303,75 +310,248 @@ export default function CreateChargeRatePage() {
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                       <TabsContent value="apprentice">
                         <div className="space-y-6 py-4">
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div className="space-y-4 mb-4">
                             <FormField
                               control={form.control}
-                              name="apprenticeId"
+                              name="isQuote"
                               render={({ field }) => (
-                                <FormItem className="flex flex-col">
-                                  <FormLabel>Apprentice</FormLabel>
-                                  <Select
-                                    value={field.value?.toString()}
-                                    onValueChange={(value) => field.onChange(parseInt(value))}
-                                  >
-                                    <FormControl>
-                                      <SelectTrigger>
-                                        <SelectValue placeholder="Select an apprentice" />
-                                      </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                      {apprentices?.map((apprentice) => (
-                                        <SelectItem key={apprentice.id} value={apprentice.id.toString()}>
-                                          {getApprenticeDisplayText(apprentice)}
-                                        </SelectItem>
-                                      ))}
-                                    </SelectContent>
-                                  </Select>
-                                  <FormDescription>
-                                    Select the apprentice for this charge rate calculation.
-                                  </FormDescription>
-                                  <FormMessage />
+                                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                                  <div className="space-y-0.5">
+                                    <FormLabel>Create as Quote</FormLabel>
+                                    <FormDescription>
+                                      Create this as a quote rather than assigning it to a specific apprentice or host.
+                                    </FormDescription>
+                                  </div>
+                                  <FormControl>
+                                    <Switch
+                                      checked={field.value}
+                                      onCheckedChange={field.onChange}
+                                    />
+                                  </FormControl>
                                 </FormItem>
                               )}
                             />
                             
                             <FormField
                               control={form.control}
-                              name="hostEmployerId"
+                              name="isBulkOperation"
                               render={({ field }) => (
-                                <FormItem className="flex flex-col">
-                                  <FormLabel>Host Employer</FormLabel>
-                                  <Select
-                                    value={field.value?.toString()}
-                                    onValueChange={(value) => field.onChange(parseInt(value))}
-                                  >
-                                    <FormControl>
-                                      <SelectTrigger>
-                                        <SelectValue placeholder="Select a host employer" />
-                                      </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                      {hostEmployers?.map((hostEmployer) => (
-                                        <SelectItem key={hostEmployer.id} value={hostEmployer.id.toString()}>
-                                          {getHostEmployerDisplayText(hostEmployer)}
-                                        </SelectItem>
-                                      ))}
-                                    </SelectContent>
-                                  </Select>
-                                  <FormDescription>
-                                    Select the host employer for this charge rate calculation.
-                                  </FormDescription>
-                                  <FormMessage />
+                                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                                  <div className="space-y-0.5">
+                                    <FormLabel>Bulk Operation</FormLabel>
+                                    <FormDescription>
+                                      Apply this rate calculation to multiple apprentices or host employers.
+                                    </FormDescription>
+                                  </div>
+                                  <FormControl>
+                                    <Switch
+                                      checked={field.value}
+                                      onCheckedChange={field.onChange}
+                                    />
+                                  </FormControl>
                                 </FormItem>
                               )}
                             />
                           </div>
                           
+                          {!watchedValues.isQuote && !watchedValues.isBulkOperation ? (
+                            // Regular single apprentice/host selection
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                              <FormField
+                                control={form.control}
+                                name="apprenticeId"
+                                render={({ field }) => (
+                                  <FormItem className="flex flex-col">
+                                    <FormLabel>Apprentice</FormLabel>
+                                    <Select
+                                      value={field.value?.toString()}
+                                      onValueChange={(value) => field.onChange(parseInt(value))}
+                                    >
+                                      <FormControl>
+                                        <SelectTrigger>
+                                          <SelectValue placeholder="Select an apprentice" />
+                                        </SelectTrigger>
+                                      </FormControl>
+                                      <SelectContent>
+                                        {apprentices?.map((apprentice) => (
+                                          <SelectItem key={apprentice.id} value={apprentice.id.toString()}>
+                                            {getApprenticeDisplayText(apprentice)}
+                                          </SelectItem>
+                                        ))}
+                                      </SelectContent>
+                                    </Select>
+                                    <FormDescription>
+                                      Select the apprentice for this charge rate calculation.
+                                    </FormDescription>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                              
+                              <FormField
+                                control={form.control}
+                                name="hostEmployerId"
+                                render={({ field }) => (
+                                  <FormItem className="flex flex-col">
+                                    <FormLabel>Host Employer</FormLabel>
+                                    <Select
+                                      value={field.value?.toString()}
+                                      onValueChange={(value) => field.onChange(parseInt(value))}
+                                    >
+                                      <FormControl>
+                                        <SelectTrigger>
+                                          <SelectValue placeholder="Select a host employer" />
+                                        </SelectTrigger>
+                                      </FormControl>
+                                      <SelectContent>
+                                        {hostEmployers?.map((hostEmployer) => (
+                                          <SelectItem key={hostEmployer.id} value={hostEmployer.id.toString()}>
+                                            {getHostEmployerDisplayText(hostEmployer)}
+                                          </SelectItem>
+                                        ))}
+                                      </SelectContent>
+                                    </Select>
+                                    <FormDescription>
+                                      Select the host employer for this charge rate calculation.
+                                    </FormDescription>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                            </div>
+                          ) : watchedValues.isQuote ? (
+                            // Quote options
+                            <div className="space-y-4">
+                              <FormField
+                                control={form.control}
+                                name="leadId"
+                                render={({ field }) => (
+                                  <FormItem className="flex flex-col">
+                                    <FormLabel>Attach to Lead</FormLabel>
+                                    <Select
+                                      value={field.value?.toString()}
+                                      onValueChange={(value) => field.onChange(parseInt(value))}
+                                    >
+                                      <FormControl>
+                                        <SelectTrigger>
+                                          <SelectValue placeholder="Select a lead" />
+                                        </SelectTrigger>
+                                      </FormControl>
+                                      <SelectContent>
+                                        <SelectItem value="1">Example Lead 1</SelectItem>
+                                        <SelectItem value="2">Example Lead 2</SelectItem>
+                                        <SelectItem value="3">Example Lead 3</SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                    <FormDescription>
+                                      Optionally attach this quote to a lead.
+                                    </FormDescription>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                              
+                              <FormField
+                                control={form.control}
+                                name="isTemplate"
+                                render={({ field }) => (
+                                  <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                                    <div className="space-y-0.5">
+                                      <FormLabel>Save as Template</FormLabel>
+                                      <FormDescription>
+                                        Save this as a reusable template for multiple hosts/apprentices.
+                                      </FormDescription>
+                                    </div>
+                                    <FormControl>
+                                      <Switch
+                                        checked={field.value}
+                                        onCheckedChange={field.onChange}
+                                      />
+                                    </FormControl>
+                                  </FormItem>
+                                )}
+                              />
+                              
+                              {watchedValues.isTemplate && (
+                                <FormField
+                                  control={form.control}
+                                  name="templateName"
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormLabel>Template Name</FormLabel>
+                                      <FormControl>
+                                        <Input placeholder="Enter template name" {...field} />
+                                      </FormControl>
+                                      <FormDescription>
+                                        Name for the template to identify it in the future.
+                                      </FormDescription>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+                              )}
+                            </div>
+                          ) : (
+                            // Bulk operation selection
+                            <div className="space-y-6">
+                              <div>
+                                <h3 className="text-sm font-medium mb-2">Select Apprentices</h3>
+                                <div className="border rounded-md p-4 h-40 overflow-y-auto">
+                                  {apprentices?.map((apprentice) => (
+                                    <div key={apprentice.id} className="flex items-center space-x-2 mb-2">
+                                      <Checkbox 
+                                        id={`apprentice-${apprentice.id}`} 
+                                        onCheckedChange={(checked) => {
+                                          const currentVal = form.getValues('selectedApprentices') || [];
+                                          if (checked) {
+                                            form.setValue('selectedApprentices', [...currentVal, apprentice.id]);
+                                          } else {
+                                            form.setValue('selectedApprentices', 
+                                              currentVal.filter(id => id !== apprentice.id)
+                                            );
+                                          }
+                                        }}
+                                      />
+                                      <label htmlFor={`apprentice-${apprentice.id}`} className="text-sm">
+                                        {getApprenticeDisplayText(apprentice)}
+                                      </label>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                              
+                              <div>
+                                <h3 className="text-sm font-medium mb-2">Select Host Employers</h3>
+                                <div className="border rounded-md p-4 h-40 overflow-y-auto">
+                                  {hostEmployers?.map((host) => (
+                                    <div key={host.id} className="flex items-center space-x-2 mb-2">
+                                      <Checkbox 
+                                        id={`host-${host.id}`} 
+                                        onCheckedChange={(checked) => {
+                                          const currentVal = form.getValues('selectedHostEmployers') || [];
+                                          if (checked) {
+                                            form.setValue('selectedHostEmployers', [...currentVal, host.id]);
+                                          } else {
+                                            form.setValue('selectedHostEmployers', 
+                                              currentVal.filter(id => id !== host.id)
+                                            );
+                                          }
+                                        }}
+                                      />
+                                      <label htmlFor={`host-${host.id}`} className="text-sm">
+                                        {getHostEmployerDisplayText(host)}
+                                      </label>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                          
                           <div className="flex justify-end">
                             <Button 
                               type="button" 
                               onClick={() => setActiveTab('rate')}
-                              disabled={!form.getValues().apprenticeId || !form.getValues().hostEmployerId}
                             >
                               Continue
                             </Button>
@@ -381,43 +561,100 @@ export default function CreateChargeRatePage() {
                       
                       <TabsContent value="rate">
                         <div className="space-y-6 py-4">
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                              <FormField
-                                control={form.control}
-                                name="payRate"
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormLabel>Pay Rate ($/hour)</FormLabel>
+                          <div className="space-y-4">
+                            <FormField
+                              control={form.control}
+                              name="rateSource"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Rate Source</FormLabel>
+                                  <Select
+                                    value={field.value}
+                                    onValueChange={field.onChange}
+                                  >
                                     <FormControl>
-                                      <Input 
-                                        type="number" 
-                                        step="0.01" 
-                                        min="0"
-                                        {...field}
-                                        onChange={(e) => field.onChange(parseFloat(e.target.value))}
-                                      />
+                                      <SelectTrigger>
+                                        <SelectValue placeholder="Select rate source" />
+                                      </SelectTrigger>
                                     </FormControl>
-                                    <FormDescription>
-                                      The hourly pay rate for the apprentice.
-                                    </FormDescription>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
-                              
-                              <FormField
-                                control={form.control}
-                                name="customMargin"
-                                render={({ field }) => (
-                                  <FormItem className="mt-6">
-                                    <FormLabel>Margin (%)</FormLabel>
+                                    <SelectContent>
+                                      <SelectItem value="fairwork">Fair Work Award</SelectItem>
+                                      <SelectItem value="enterprise_agreement">Enterprise Agreement</SelectItem>
+                                      <SelectItem value="manual">Manual Entry</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                  <FormDescription>
+                                    Select the source for the pay rate calculation.
+                                  </FormDescription>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+
+                            {watchedValues.rateSource === 'fairwork' ? (
+                              <div className="border rounded-md p-4 bg-muted/30">
+                                <h3 className="font-medium mb-2">Fair Work Award Rate</h3>
+                                <AwardSelector onAwardSelected={handleAwardSelect} />
+                              </div>
+                            ) : watchedValues.rateSource === 'enterprise_agreement' ? (
+                              <div className="border rounded-md p-4 bg-muted/30">
+                                <h3 className="font-medium mb-2">Enterprise Agreement</h3>
+                                <div className="mb-4">
+                                  <Alert>
+                                    <Info className="h-4 w-4 mr-2" />
+                                    <AlertTitle>Enterprise Agreement Support</AlertTitle>
+                                    <AlertDescription>
+                                      Upload and select an Enterprise Agreement to determine rates. Supported file types: PDF, DOCX.
+                                    </AlertDescription>
+                                  </Alert>
+                                </div>
+                                <Button variant="outline" className="mb-4">
+                                  <Upload className="h-4 w-4 mr-2" />
+                                  Upload Enterprise Agreement
+                                </Button>
+                              </div>
+                            ) : (
+                              <div className="border rounded-md p-4 bg-muted/30">
+                                <h3 className="font-medium mb-2">Manual Rate Entry</h3>
+                                <FormField
+                                  control={form.control}
+                                  name="payRate"
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormLabel>Pay Rate ($/hour)</FormLabel>
+                                      <FormControl>
+                                        <Input 
+                                          type="number" 
+                                          step="0.01" 
+                                          min="0"
+                                          {...field}
+                                          onChange={(e) => field.onChange(parseFloat(e.target.value))}
+                                        />
+                                      </FormControl>
+                                      <FormDescription>
+                                        Enter the hourly pay rate manually.
+                                      </FormDescription>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+                              </div>
+                            )}
+                          </div>
+                          
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <FormField
+                              control={form.control}
+                              name="customMargin"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Margin (%)</FormLabel>
                                     <FormControl>
                                       <Input 
                                         type="number" 
                                         step="0.01" 
                                         min="0"
-                                        max="1"
+                                        max="100"
                                         {...field}
                                         value={field.value !== undefined ? field.value * 100 : ''}
                                         onChange={(e) => field.onChange(parseFloat(e.target.value) / 100)}
@@ -430,46 +667,28 @@ export default function CreateChargeRatePage() {
                                   </FormItem>
                                 )}
                               />
-                            </div>
-                            
-                            <div>
-                              <FormLabel>Award & Classification</FormLabel>
-                              <div className="flex flex-col space-y-2">
-                                <AwardSelector 
-                                  onAwardSelected={handleAwardSelect}
-                                  buttonVariant="outline"
-                                  buttonLabel={selectedAward ? 
-                                    `${selectedAward.name} - ${selectedClassification?.name || 'No Classification'}` : 
-                                    'Select Award & Classification'
-                                  }
-                                />
-                                <FormDescription>
-                                  Optionally select an award and classification to apply penalty rates.
-                                </FormDescription>
-                              </div>
-                              
-                              <FormField
-                                control={form.control}
-                                name="notes"
-                                render={({ field }) => (
-                                  <FormItem className="mt-6">
-                                    <FormLabel>Notes</FormLabel>
-                                    <FormControl>
-                                      <Textarea 
-                                        placeholder="Add any additional notes for this calculation"
-                                        {...field}
-                                        rows={3}
-                                      />
-                                    </FormControl>
-                                    <FormDescription>
-                                      Optional notes that will be saved with this calculation.
-                                    </FormDescription>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
-                            </div>
                           </div>
+                          
+                          <FormField
+                            control={form.control}
+                            name="notes"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Notes</FormLabel>
+                                <FormControl>
+                                  <Textarea 
+                                    placeholder="Add any additional notes for this calculation"
+                                    {...field}
+                                    rows={3}
+                                  />
+                                </FormControl>
+                                <FormDescription>
+                                  Optional notes that will be saved with this calculation.
+                                </FormDescription>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
                           
                           <Accordion type="single" collapsible className="w-full">
                             <AccordionItem value="advanced">
@@ -517,33 +736,23 @@ export default function CreateChargeRatePage() {
                                     <ul className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
                                       <li>
                                         <span className="text-muted-foreground">Include Annual Leave:</span> 
-                                        <Badge variant="outline" className="ml-2">
-                                          {DEFAULT_BILLABLE_OPTIONS.includeAnnualLeave ? 'Yes' : 'No'}
-                                        </Badge>
+                                        {DEFAULT_BILLABLE_OPTIONS.includeAnnualLeave ? 'Yes' : 'No'}
                                       </li>
                                       <li>
-                                        <span className="text-muted-foreground">Include Public Holidays:</span>
-                                        <Badge variant="outline" className="ml-2">
-                                          {DEFAULT_BILLABLE_OPTIONS.includePublicHolidays ? 'Yes' : 'No'}
-                                        </Badge>
+                                        <span className="text-muted-foreground">Include Public Holidays:</span> 
+                                        {DEFAULT_BILLABLE_OPTIONS.includePublicHolidays ? 'Yes' : 'No'}
                                       </li>
                                       <li>
-                                        <span className="text-muted-foreground">Include Sick Leave:</span>
-                                        <Badge variant="outline" className="ml-2">
-                                          {DEFAULT_BILLABLE_OPTIONS.includeSickLeave ? 'Yes' : 'No'}
-                                        </Badge>
+                                        <span className="text-muted-foreground">Include Sick Leave:</span> 
+                                        {DEFAULT_BILLABLE_OPTIONS.includeSickLeave ? 'Yes' : 'No'}
                                       </li>
                                       <li>
-                                        <span className="text-muted-foreground">Include Training Time:</span>
-                                        <Badge variant="outline" className="ml-2">
-                                          {DEFAULT_BILLABLE_OPTIONS.includeTrainingTime ? 'Yes' : 'No'}
-                                        </Badge>
+                                        <span className="text-muted-foreground">Include Training Time:</span> 
+                                        {DEFAULT_BILLABLE_OPTIONS.includeTrainingTime ? 'Yes' : 'No'}
                                       </li>
                                       <li>
-                                        <span className="text-muted-foreground">Include Adverse Weather:</span>
-                                        <Badge variant="outline" className="ml-2">
-                                          {DEFAULT_BILLABLE_OPTIONS.includeAdverseWeather ? 'Yes' : 'No'}
-                                        </Badge>
+                                        <span className="text-muted-foreground">Include Adverse Weather:</span> 
+                                        {DEFAULT_BILLABLE_OPTIONS.includeAdverseWeather ? 'Yes' : 'No'}
                                       </li>
                                     </ul>
                                   </div>
@@ -552,7 +761,7 @@ export default function CreateChargeRatePage() {
                             </AccordionItem>
                           </Accordion>
                           
-                          <div className="flex justify-between">
+                          <div className="flex flex-col md:flex-row md:justify-between space-y-4 md:space-y-0">
                             <Button 
                               type="button" 
                               variant="outline" 
@@ -560,12 +769,22 @@ export default function CreateChargeRatePage() {
                             >
                               Back
                             </Button>
+                            
                             <Button 
                               type="button" 
                               onClick={calculateChargeRate}
-                              disabled={isCalculating || !form.getValues().payRate}
+                              disabled={isCalculating}
                             >
-                              {isCalculating ? 'Calculating...' : 'Calculate Charge Rate'}
+                              {isCalculating ? (
+                                <>
+                                  <span className="animate-spin mr-2">⧗</span> Calculating...
+                                </>
+                              ) : (
+                                <>
+                                  <Calculator className="h-4 w-4 mr-2" />
+                                  Calculate Charge Rate
+                                </>
+                              )}
                             </Button>
                           </div>
                         </div>
@@ -573,52 +792,198 @@ export default function CreateChargeRatePage() {
                       
                       <TabsContent value="review">
                         <div className="space-y-6 py-4">
-                          {calculationResult ? (
-                            <>
-                              <Alert>
-                                <Info className="h-4 w-4" />
-                                <AlertTitle>Calculation Result</AlertTitle>
-                                <AlertDescription>
-                                  Review the calculation results before saving. You can go back to adjust the inputs if needed.
-                                </AlertDescription>
-                              </Alert>
-                              
-                              <ChargeRateVisualizer 
-                                calculation={calculationResult}
-                                apprenticeName={selectedApprentice ? getApprenticeDisplayText(selectedApprentice) : undefined}
-                                hostEmployerName={selectedHostEmployer ? getHostEmployerDisplayText(selectedHostEmployer) : undefined}
-                                awardName={selectedAward?.name}
-                                classificationName={selectedClassification?.name}
-                              />
-                              
-                              <div className="flex justify-between">
-                                <Button 
-                                  type="button" 
-                                  variant="outline" 
-                                  onClick={() => setActiveTab('rate')}
-                                >
-                                  Back
-                                </Button>
-                                <Button 
-                                  type="submit"
-                                  disabled={saveMutation.isPending}
-                                >
-                                  {saveMutation.isPending ? 'Saving...' : 'Save Calculation'}
-                                </Button>
+                          <div className="border rounded-md p-4">
+                            {calculationResult ? (
+                              <div className="space-y-4">
+                                <div className="grid grid-cols-2 gap-4">
+                                  <div>
+                                    <h3 className="text-lg font-semibold">Calculation Summary</h3>
+                                    <ul className="space-y-2 mt-2">
+                                      <li className="flex justify-between">
+                                        <span className="text-muted-foreground">Pay Rate:</span>
+                                        <span className="font-medium">{formatCurrency(calculationResult.payRate)}/hr</span>
+                                      </li>
+                                      <li className="flex justify-between">
+                                        <span className="text-muted-foreground">Total Annual Hours:</span>
+                                        <span className="font-medium">{calculationResult.totalHours}</span>
+                                      </li>
+                                      <li className="flex justify-between">
+                                        <span className="text-muted-foreground">Billable Hours:</span>
+                                        <span className="font-medium">{calculationResult.billableHours}</span>
+                                      </li>
+                                      <li className="flex justify-between">
+                                        <span className="text-muted-foreground">Base Annual Wage:</span>
+                                        <span className="font-medium">{formatCurrency(calculationResult.baseWage)}</span>
+                                      </li>
+                                      <li className="flex justify-between">
+                                        <span className="text-muted-foreground">Total Annual Cost:</span>
+                                        <span className="font-medium">{formatCurrency(calculationResult.totalCost)}</span>
+                                      </li>
+                                      <li className="flex justify-between">
+                                        <span className="text-muted-foreground">Cost Per Hour:</span>
+                                        <span className="font-medium">{formatCurrency(calculationResult.costPerHour)}/hr</span>
+                                      </li>
+                                      <li className="flex justify-between">
+                                        <span className="text-muted-foreground">Profit Margin:</span>
+                                        <span className="font-medium">{(calculationResult.customMargin || DEFAULT_COST_CONFIG.defaultMargin) * 100}%</span>
+                                      </li>
+                                      <li className="flex justify-between font-semibold text-lg">
+                                        <span>Charge Rate:</span>
+                                        <span className="text-primary">{formatCurrency(calculationResult.chargeRate)}/hr</span>
+                                      </li>
+                                    </ul>
+                                  </div>
+                                  
+                                  <div>
+                                    <h3 className="text-lg font-semibold">On-costs Breakdown</h3>
+                                    <ul className="space-y-2 mt-2">
+                                      <li className="flex justify-between">
+                                        <span className="text-muted-foreground">Superannuation:</span>
+                                        <span className="font-medium">{formatCurrency(calculationResult.oncosts.superannuation)}</span>
+                                      </li>
+                                      <li className="flex justify-between">
+                                        <span className="text-muted-foreground">Workers Compensation:</span>
+                                        <span className="font-medium">{formatCurrency(calculationResult.oncosts.workersComp)}</span>
+                                      </li>
+                                      <li className="flex justify-between">
+                                        <span className="text-muted-foreground">Payroll Tax:</span>
+                                        <span className="font-medium">{formatCurrency(calculationResult.oncosts.payrollTax)}</span>
+                                      </li>
+                                      <li className="flex justify-between">
+                                        <span className="text-muted-foreground">Leave Loading:</span>
+                                        <span className="font-medium">{formatCurrency(calculationResult.oncosts.leaveLoading)}</span>
+                                      </li>
+                                      <li className="flex justify-between">
+                                        <span className="text-muted-foreground">Study Cost:</span>
+                                        <span className="font-medium">{formatCurrency(calculationResult.oncosts.studyCost)}</span>
+                                      </li>
+                                      <li className="flex justify-between">
+                                        <span className="text-muted-foreground">PPE Cost:</span>
+                                        <span className="font-medium">{formatCurrency(calculationResult.oncosts.ppeCost)}</span>
+                                      </li>
+                                      <li className="flex justify-between">
+                                        <span className="text-muted-foreground">Admin Cost:</span>
+                                        <span className="font-medium">{formatCurrency(calculationResult.oncosts.adminCost)}</span>
+                                      </li>
+                                      <li className="flex justify-between font-semibold pt-2 border-t">
+                                        <span>Total On-costs:</span>
+                                        <span>
+                                          {formatCurrency(
+                                            calculationResult.oncosts.superannuation +
+                                            calculationResult.oncosts.workersComp +
+                                            calculationResult.oncosts.payrollTax +
+                                            calculationResult.oncosts.leaveLoading +
+                                            calculationResult.oncosts.studyCost +
+                                            calculationResult.oncosts.ppeCost +
+                                            calculationResult.oncosts.adminCost
+                                          )}
+                                        </span>
+                                      </li>
+                                    </ul>
+                                  </div>
+                                </div>
+                                
+                                <div className="mt-6">
+                                  <h3 className="text-lg font-semibold">{watchedValues.isBulkOperation ? 'Bulk Application' : 'Application'}</h3>
+                                  {watchedValues.isBulkOperation ? (
+                                    <div className="mt-2 space-y-2">
+                                      <div>
+                                        <p className="text-sm font-semibold">Selected Apprentices:</p>
+                                        <div className="border rounded-md p-2 mt-1 text-sm">
+                                          {watchedValues.selectedApprentices?.length ? 
+                                            watchedValues.selectedApprentices.map(id => {
+                                              const apprentice = apprentices?.find(a => a.id === id);
+                                              return apprentice ? (
+                                                <Badge key={id} variant="outline" className="mr-1 mb-1">
+                                                  {getApprenticeDisplayText(apprentice)}
+                                                </Badge>
+                                              ) : null;
+                                            }) : 
+                                            <span className="text-muted-foreground">No apprentices selected</span>
+                                          }
+                                        </div>
+                                      </div>
+                                      <div>
+                                        <p className="text-sm font-semibold">Selected Host Employers:</p>
+                                        <div className="border rounded-md p-2 mt-1 text-sm">
+                                          {watchedValues.selectedHostEmployers?.length ? 
+                                            watchedValues.selectedHostEmployers.map(id => {
+                                              const host = hostEmployers?.find(h => h.id === id);
+                                              return host ? (
+                                                <Badge key={id} variant="outline" className="mr-1 mb-1">
+                                                  {getHostEmployerDisplayText(host)}
+                                                </Badge>
+                                              ) : null;
+                                            }) : 
+                                            <span className="text-muted-foreground">No host employers selected</span>
+                                          }
+                                        </div>
+                                      </div>
+                                    </div>
+                                  ) : watchedValues.isQuote ? (
+                                    <div className="mt-2">
+                                      {watchedValues.leadId ? (
+                                        <p>Quote will be attached to Lead ID: {watchedValues.leadId}</p>
+                                      ) : (
+                                        <p>Quote is not attached to any lead</p>
+                                      )}
+                                      {watchedValues.isTemplate && (
+                                        <p className="mt-1">Will be saved as template: {watchedValues.templateName || 'Unnamed Template'}</p>
+                                      )}
+                                    </div>
+                                  ) : (
+                                    <div className="mt-2">
+                                      <p>
+                                        <span className="font-medium">Apprentice:</span> {selectedApprentice ? 
+                                          getApprenticeDisplayText(selectedApprentice) : 'None selected'}
+                                      </p>
+                                      <p className="mt-1">
+                                        <span className="font-medium">Host Employer:</span> {selectedHostEmployer ? 
+                                          getHostEmployerDisplayText(selectedHostEmployer) : 'None selected'}
+                                      </p>
+                                    </div>
+                                  )}
+                                </div>
+                                
+                                {watchedValues.notes && (
+                                  <div className="mt-4">
+                                    <h3 className="text-lg font-semibold">Notes</h3>
+                                    <p className="mt-1 text-sm border rounded-md p-2">{watchedValues.notes}</p>
+                                  </div>
+                                )}
                               </div>
-                            </>
-                          ) : (
-                            <div className="text-center py-8">
-                              <Calculator className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-                              <h3 className="text-lg font-medium mb-2">No Calculation Yet</h3>
-                              <p className="text-muted-foreground mb-4">
-                                Please complete the previous steps and calculate the charge rate first.
-                              </p>
-                              <Button type="button" onClick={() => setActiveTab('rate')}>
-                                Go to Rate Information
-                              </Button>
-                            </div>
-                          )}
+                            ) : (
+                              <div className="text-center p-6">
+                                <p className="text-muted-foreground">Please calculate the charge rate first</p>
+                              </div>
+                            )}
+                          </div>
+                          
+                          <div className="flex flex-col md:flex-row md:justify-between space-y-4 md:space-y-0">
+                            <Button 
+                              type="button" 
+                              variant="outline" 
+                              onClick={() => setActiveTab('rate')}
+                            >
+                              Back
+                            </Button>
+                            
+                            <Button 
+                              type="submit"
+                              disabled={!calculationResult || saveMutation.isPending}
+                            >
+                              {saveMutation.isPending ? (
+                                <>
+                                  <span className="animate-spin mr-2">⧗</span> Saving...
+                                </>
+                              ) : (
+                                <>
+                                  <Check className="h-4 w-4 mr-2" />
+                                  Save Charge Rate
+                                </>
+                              )}
+                            </Button>
+                          </div>
                         </div>
                       </TabsContent>
                     </form>
@@ -631,111 +996,82 @@ export default function CreateChargeRatePage() {
           <div className="col-span-1">
             <Card>
               <CardHeader>
-                <CardTitle>Calculation Summary</CardTitle>
-                <CardDescription>
-                  Information about the current calculation.
-                </CardDescription>
+                <CardTitle>Charge Rate Summary</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  <div>
-                    <h3 className="text-sm font-medium mb-2">Apprentice</h3>
-                    {selectedApprentice ? (
-                      <div className="text-sm">
-                        <p className="font-medium">{getApprenticeDisplayText(selectedApprentice)}</p>
-                        <p className="text-muted-foreground">
-                          Status: {selectedApprentice.status || 'Not specified'}
-                        </p>
-                      </div>
-                    ) : (
-                      <p className="text-sm text-muted-foreground">No apprentice selected</p>
-                    )}
-                  </div>
-                  
-                  <Separator />
-                  
-                  <div>
-                    <h3 className="text-sm font-medium mb-2">Host Employer</h3>
-                    {selectedHostEmployer ? (
-                      <div className="text-sm">
-                        <p className="font-medium">{getHostEmployerDisplayText(selectedHostEmployer)}</p>
-                        <p className="text-muted-foreground">
-                          Industry: {selectedHostEmployer.industry || 'Not specified'}
-                        </p>
-                      </div>
-                    ) : (
-                      <p className="text-sm text-muted-foreground">No host employer selected</p>
-                    )}
-                  </div>
-                  
-                  <Separator />
-                  
-                  <div>
-                    <h3 className="text-sm font-medium mb-2">Award Information</h3>
-                    {selectedAward ? (
-                      <div className="text-sm">
-                        <p className="font-medium">{selectedAward.name}</p>
-                        <p className="text-muted-foreground">{selectedAward.code}</p>
-                        {selectedClassification && (
-                          <Badge className="mt-2">{selectedClassification.name}</Badge>
-                        )}
-                      </div>
-                    ) : (
-                      <p className="text-sm text-muted-foreground">No award selected</p>
-                    )}
-                  </div>
-                  
-                  <Separator />
-                  
-                  <div>
-                    <h3 className="text-sm font-medium mb-2">Rate Information</h3>
-                    <div className="space-y-2">
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm text-muted-foreground">Pay Rate:</span>
-                        <span className="text-sm font-medium">
-                          {formatCurrency(watchedValues.payRate || 0)}/hr
-                        </span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm text-muted-foreground">Margin:</span>
-                        <span className="text-sm font-medium">
-                          {((watchedValues.customMargin || DEFAULT_COST_CONFIG.defaultMargin) * 100).toFixed(1)}%
-                        </span>
-                      </div>
-                      {calculationResult && (
-                        <>
-                          <div className="flex justify-between items-center">
-                            <span className="text-sm text-muted-foreground">Cost Per Hour:</span>
-                            <span className="text-sm font-medium">
-                              {formatCurrency(calculationResult.costPerHour)}/hr
-                            </span>
-                          </div>
-                          <div className="flex justify-between items-center">
-                            <span className="text-sm text-muted-foreground">Charge Rate:</span>
-                            <span className="text-sm font-medium text-primary">
-                              {formatCurrency(calculationResult.chargeRate)}/hr
-                            </span>
-                          </div>
-                        </>
-                      )}
+                {calculationResult ? (
+                  <div className="space-y-4">
+                    <div className="flex flex-col items-center justify-center p-4 border rounded-md text-center">
+                      <span className="text-muted-foreground text-sm">Calculated Rate</span>
+                      <span className="text-4xl font-bold text-primary">{formatCurrency(calculationResult.chargeRate)}</span>
+                      <span className="text-muted-foreground text-sm">per hour</span>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-y-2 text-sm">
+                      <span className="text-muted-foreground">Pay Rate:</span>
+                      <span className="text-right">{formatCurrency(calculationResult.payRate)}/hr</span>
+                      
+                      <span className="text-muted-foreground">Cost Per Hour:</span>
+                      <span className="text-right">{formatCurrency(calculationResult.costPerHour)}/hr</span>
+                      
+                      <span className="text-muted-foreground">Margin:</span>
+                      <span className="text-right">{(calculationResult.customMargin || DEFAULT_COST_CONFIG.defaultMargin) * 100}%</span>
+                    </div>
+                    
+                    <div className="pt-4 border-t">
+                      <ChargeRateVisualizer 
+                        payRate={calculationResult.payRate}
+                        costPerHour={calculationResult.costPerHour}
+                        chargeRate={calculationResult.chargeRate}
+                        margin={calculationResult.customMargin || DEFAULT_COST_CONFIG.defaultMargin}
+                      />
                     </div>
                   </div>
-                </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center p-6 h-48 text-center text-muted-foreground">
+                    <Calculator className="h-10 w-10 mb-2 opacity-30" />
+                    <p>Complete the information and calculate to see the charge rate summary</p>
+                  </div>
+                )}
               </CardContent>
-              <CardFooter>
-                <Button 
-                  className="w-full" 
-                  variant={calculationResult ? 'default' : 'outline'}
-                  onClick={calculationResult ? form.handleSubmit(onSubmit) : calculateChargeRate}
-                  disabled={saveMutation.isPending || isCalculating}
-                >
-                  {calculationResult ? 
-                    (saveMutation.isPending ? 'Saving...' : 'Save Calculation') : 
-                    (isCalculating ? 'Calculating...' : 'Calculate Charge Rate')
-                  }
-                </Button>
-              </CardFooter>
             </Card>
+            
+            {calculationResult && (
+              <Card className="mt-6">
+                <CardHeader>
+                  <CardTitle>Annual Overview</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Total Hours:</span>
+                    <span>{calculationResult.totalHours}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Billable Hours:</span>
+                    <span>{calculationResult.billableHours}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Base Wage:</span>
+                    <span>{formatCurrency(calculationResult.baseWage)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Total Cost:</span>
+                    <span>{formatCurrency(calculationResult.totalCost)}</span>
+                  </div>
+                  <Separator className="my-2" />
+                  <div className="flex justify-between font-medium">
+                    <span>Annual Revenue:</span>
+                    <span>{formatCurrency(calculationResult.chargeRate * calculationResult.billableHours)}</span>
+                  </div>
+                  <div className="flex justify-between font-medium">
+                    <span>Annual Profit:</span>
+                    <span>{formatCurrency(
+                      (calculationResult.chargeRate * calculationResult.billableHours) - calculationResult.totalCost
+                    )}</span>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </div>
         </div>
       </div>
