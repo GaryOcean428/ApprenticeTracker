@@ -1,6 +1,66 @@
 import { Request, Response, NextFunction } from 'express';
 
 /**
+ * Authentication middleware to ensure the user is logged in
+ * 
+ * @returns Middleware function
+ */
+export function authenticateUser(req: Request, res: Response, next: NextFunction) {
+  const user = (req as any).user;
+  
+  // If no user is attached to the request, they're not authenticated
+  if (!user) {
+    return res.status(401).json({
+      success: false,
+      message: 'Authentication required',
+    });
+  }
+  
+  next();
+}
+
+/**
+ * Permission check middleware to ensure the user has the required permission on a resource
+ * 
+ * @param action The action being performed (e.g. 'read', 'update', 'delete')
+ * @param resource The resource being accessed (e.g. 'award', 'classification')
+ * @returns Middleware function
+ */
+export function requirePermission(action: string, resource: string) {
+  return (req: Request, res: Response, next: NextFunction) => {
+    const user = (req as any).user;
+    
+    // If no user is attached to the request, they're not authenticated
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: 'Authentication required',
+      });
+    }
+    
+    // Developer role has all permissions
+    if (user.role === 'developer') {
+      return next();
+    }
+    
+    // Format the permission string
+    const permission = `${action}:${resource}`;
+    
+    // Check if the user's role has the required permission
+    const hasAccess = checkPermission(user.role, permission);
+    
+    if (!hasAccess) {
+      return res.status(403).json({
+        success: false,
+        message: 'Insufficient permissions',
+      });
+    }
+    
+    next();
+  };
+}
+
+/**
  * Middleware to check if the user has the required permission
  * 
  * @param permission The permission to check
@@ -74,6 +134,8 @@ function checkPermission(role: string, permission: string): boolean {
       'generate:reports',
       'view:vet_qualifications',
       'view:fair_work',
+      'read:award',
+      'update:award',
       'view:organization_settings',
       'manage:users',
     ],
@@ -94,6 +156,7 @@ function checkPermission(role: string, permission: string): boolean {
       'view:reports',
       'view:vet_qualifications',
       'view:fair_work',
+      'read:award',
     ],
     'host_employer': [
       'view:dashboard',
@@ -107,6 +170,7 @@ function checkPermission(role: string, permission: string): boolean {
       'view:timesheets',
       'approve:timesheets',
       'view:vet_qualifications',
+      'read:award',
     ],
     'apprentice': [
       'view:dashboard',
@@ -119,6 +183,7 @@ function checkPermission(role: string, permission: string): boolean {
       'submit:timesheets',
       'view:vet_qualifications',
       'view:fair_work',
+      'read:award',
     ],
     'rto_admin': [
       'view:dashboard',
@@ -127,6 +192,7 @@ function checkPermission(role: string, permission: string): boolean {
       'manage:vet_qualifications',
       'view:documents',
       'manage:documents',
+      'read:award',
     ],
   };
   

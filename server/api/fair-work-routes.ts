@@ -1,10 +1,13 @@
 import { Router, Request, Response } from 'express';
 import { db } from '../db';
-import { awards, awardClassifications, enterpriseAgreements } from '@shared/schema';
+import { awards, awardClassifications, enterpriseAgreements, penaltyRules, allowanceRules } from '@shared/schema';
 import { eq, sql, ilike, or, and, inArray } from 'drizzle-orm';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
+import { FairWorkApiClient } from '../services/fairwork/api-client';
+import { createFairWorkSyncScheduler } from '../services/fairwork/scheduler';
+import logger from '../utils/logger';
 
 export const fairWorkRouter = Router();
 
@@ -296,4 +299,129 @@ fairWorkRouter.post('/enterprise-agreements/:id/rates', async (req: Request, res
       error: error instanceof Error ? error.message : String(error)
     });
   }
+});
+
+// Initialize Fair Work API client and sync scheduler
+const apiClient = new FairWorkApiClient({
+  baseUrl: process.env.FAIRWORK_API_URL || 'https://api.fairwork.gov.au',
+  apiKey: process.env.FAIRWORK_API_KEY || '',
+  environment: process.env.NODE_ENV === 'production' ? 'production' : 'sandbox'
+});
+
+const syncScheduler = createFairWorkSyncScheduler(apiClient);
+
+// GET /api/awards/:id/penalties - Get penalties for a specific award
+fairWorkRouter.get('/awards/:id/penalties', async (req: Request, res: Response) => {
+  try {
+    const awardId = parseInt(req.params.id);
+    
+    // Check if award exists
+    const existingAward = await db.select().from(awards).where(eq(awards.id, awardId));
+    if (existingAward.length === 0) {
+      return res.status(404).json({ message: 'Award not found' });
+    }
+    
+    // Get penalties for this award
+    const result = await db
+      .select()
+      .from(penaltyRules)
+      .where(eq(penaltyRules.awardId, awardId));
+    
+    res.json(result);
+  } catch (error) {
+    logger.error('Error fetching award penalties', { error, awardId: req.params.id });
+    res.status(500).json({ 
+      message: 'Error fetching award penalties', 
+      error: error instanceof Error ? error.message : String(error)
+    });
+  }
+});
+
+// GET /api/awards/:id/allowances - Get allowances for a specific award
+fairWorkRouter.get('/awards/:id/allowances', async (req: Request, res: Response) => {
+  try {
+    const awardId = parseInt(req.params.id);
+    
+    // Check if award exists
+    const existingAward = await db.select().from(awards).where(eq(awards.id, awardId));
+    if (existingAward.length === 0) {
+      return res.status(404).json({ message: 'Award not found' });
+    }
+    
+    // Get allowances for this award
+    const result = await db
+      .select()
+      .from(allowanceRules)
+      .where(eq(allowanceRules.awardId, awardId));
+    
+    res.json(result);
+  } catch (error) {
+    logger.error('Error fetching award allowances', { error, awardId: req.params.id });
+    res.status(500).json({ 
+      message: 'Error fetching award allowances', 
+      error: error instanceof Error ? error.message : String(error)
+    });
+  }
+});
+
+// POST /api/fairwork/sync - Trigger a manual sync of Fair Work data
+fairWorkRouter.post('/fairwork/sync', async (req: Request, res: Response) => {
+  try {
+    const { forceUpdate, awardCode } = req.body;
+    logger.info('Triggering manual Fair Work data sync', { forceUpdate, awardCode });
+    
+    // Start the sync in the background
+    syncScheduler.triggerSync({
+      forceUpdate: !!forceUpdate,
+      targetAwardCode: awardCode,
+    })
+      .then(() => {
+        logger.info('Manual Fair Work data sync completed successfully');
+      })
+      .catch(error => {
+        logger.error('Error in manual Fair Work data sync', { error });
+      });
+    
+    // Return immediately to avoid timeout
+    return res.json({
+      success: true,
+      message: 'Fair Work data sync started. This process may take several minutes to complete.',
+    });
+  } catch (error) {
+    logger.error('Error starting Fair Work data sync', { error });
+    return res.status(500).json({
+      success: false,
+      error: 'Failed to start Fair Work data sync',
+    });
+  }
+});
+
+// GET /api/fairwork/sync/status - Get the status of the Fair Work data sync
+fairWorkRouter.get('/fairwork/sync/status', async (req: Request, res: Response) => {
+  try {
+    logger.info('Getting Fair Work data sync status');
+    
+    const lastSyncTime = syncScheduler.getLastSyncTime();
+    const nextSyncTime = syncScheduler.getNextSyncTime();
+    
+    return res.json({
+      success: true,
+      data: {
+        lastSyncTime,
+        nextSyncTime,
+        status: lastSyncTime ? 'active' : 'pending',
+      },
+    });
+  } catch (error) {
+    logger.error('Error getting Fair Work data sync status', { error });
+    return res.status(500).json({
+      success: false,
+      error: 'Failed to get Fair Work data sync status',
+    });
+  }
+});
+
+// Start the sync scheduler when the server starts
+syncScheduler.start().catch(error => {
+  logger.error('Failed to start Fair Work sync scheduler', { error });
 });

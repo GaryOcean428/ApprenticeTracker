@@ -25,6 +25,7 @@ import { registerTGARoutes } from "./api/tga-routes";
 import { fairWorkRouter } from "./api/fair-work-routes";
 import { authRouter, isAuthenticated, hasRole } from "./api/auth-routes";
 import payrollRouter from "./api/payroll";
+import fairworkRouter from "./api/fairwork";
 import enrichmentRouter from "./api/enrichment";
 import progressReviewsRouter from "./api/progress-reviews";
 import { eq, and } from "drizzle-orm";
@@ -43,6 +44,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/api/payroll', payrollRouter); // Payroll routes
   app.use('/api/enrichment', enrichmentRouter); // Enrichment routes
   app.use('/api/progress-reviews', progressReviewsRouter); // Progress Reviews routes
+  app.use('/api/fairwork', fairworkRouter); // Enhanced Fair Work API routes
   
   // Register host employer routes
   registerHostRoutes(app);
