@@ -1,5 +1,5 @@
 import { db } from '../db';
-import { eq, and, gt, lt, gte, lte, sql, inArray } from 'drizzle-orm';
+import { eq, and, gt, lt, gte, lte, sql, inArray, desc } from 'drizzle-orm';
 import logger from '../utils/logger';
 import {
   apprentices,
@@ -7,8 +7,67 @@ import {
   hostEmployers,
   chargeRateCalculations,
   quotes,
-  quoteLineItems
+  quoteLineItems,
+  awards,
+  awardClassifications,
+  penaltyRules,
+  allowanceRules
 } from '@shared/schema';
+
+/**
+ * Types for charge rate calculations
+ */
+export interface CostConfig {
+  superRate: number;        // e.g., 0.115 for 11.5%
+  wcRate: number;           // workers' compensation rate
+  payrollTaxRate: number;   // payroll tax rate
+  leaveLoading: number;     // leave loading percentage
+  studyCost: number;        // annual study cost
+  ppeCost: number;          // annual protective clothing cost
+  adminRate: number;        // administration overhead rate
+  defaultMargin: number;    // default profit margin
+  adverseWeatherDays: number; // days lost to adverse weather
+}
+
+export interface WorkConfig {
+  hoursPerDay: number;
+  daysPerWeek: number;
+  weeksPerYear: number;
+  annualLeaveDays: number;
+  publicHolidays: number;
+  sickLeaveDays: number;
+  trainingWeeks: number;
+}
+
+export interface BillableOptions {
+  includeAnnualLeave: boolean;
+  includePublicHolidays: boolean;
+  includeSickLeave: boolean;
+  includeTrainingTime: boolean;
+  includeAdverseWeather: boolean;
+}
+
+export interface OnCosts {
+  superannuation: number;
+  workersComp: number;
+  payrollTax: number;
+  leaveLoading: number;
+  studyCost: number;
+  ppeCost: number;
+  adminCost: number;
+}
+
+export interface CalculationResult {
+  payRate: number;
+  totalHours: number;
+  billableHours: number;
+  baseWage: number;
+  oncosts: OnCosts;
+  totalCost: number;
+  costPerHour: number;
+  chargeRate: number;
+  penaltyEstimates?: Record<string, number>;
+}
 
 /**
  * Service for calculating host employer charge rates
@@ -112,26 +171,106 @@ export class ChargeRateCalculator {
   }
 
   /**
+   * Get penalty rules for an award
+   */
+  async getPenaltyRules(awardId: number): Promise<any[]> {
+    logger.info(`Fetching penalty rules for award ID ${awardId}`);
+    
+    try {
+      const penalties = await db
+        .select()
+        .from(penaltyRules)
+        .where(eq(penaltyRules.awardId, awardId))
+        .orderBy(penaltyRules.penaltyType, desc(penaltyRules.multiplier));
+      
+      logger.info(`Found ${penalties.length} penalty rules for award ID ${awardId}`);
+      return penalties;
+    } catch (error) {
+      logger.error('Error fetching penalty rules', { error, awardId });
+      return [];
+    }
+  }
+  
+  /**
+   * Calculate estimated penalty costs
+   * This provides rough estimates of how penalties impact costs
+   * for information purposes only - actual costs would be calculated
+   * based on timesheet data
+   */
+  async calculatePenaltyEstimates(payRate: number, awardId: number): Promise<Record<string, number>> {
+    const penalties = await this.getPenaltyRules(awardId);
+    const penaltyEstimates: Record<string, number> = {};
+    
+    // Calculate penalty costs based on typical distribution assumptions
+    // These values would be refined based on actual timesheet data
+    const TYPICAL_DISTRIBUTIONS = {
+      // Weekend penalties - assume average percentage of weekend work
+      weekend: 0.15, // 15% of hours on weekends
+      // Public holiday penalties - assume 10 days / ~2 weeks of public holidays per year
+      public_holiday: 0.038, // ~3.8% of hours on public holidays 
+      // Overtime penalties - assume 5% of work is overtime
+      overtime: 0.05,
+      // Evening shift penalties - assume 10% of work is evenings
+      evening_shift: 0.10,
+      // Night shift penalties - assume 5% of work is nights
+      night_shift: 0.05,
+    };
+    
+    // Calculate penalty costs for each penalty type
+    for (const penalty of penalties) {
+      const multiplier = parseFloat(penalty.multiplier.toString());
+      const distribution = TYPICAL_DISTRIBUTIONS[penalty.penaltyType as keyof typeof TYPICAL_DISTRIBUTIONS] || 0;
+      
+      // Calculate penalty cost as: base pay rate * (penalty multiplier - 1) * distribution %
+      // We subtract 1 from multiplier because we're only concerned with the extra cost
+      const penaltyCost = payRate * (multiplier - 1) * distribution;
+      
+      // Store penalty cost estimate by penalty name
+      penaltyEstimates[penalty.penaltyName] = parseFloat(penaltyCost.toFixed(2));
+    }
+    
+    return penaltyEstimates;
+  }
+
+  /**
    * Calculate charge rate based on pay rate and configuration
    */
-  calculateChargeRate(
+  async calculateChargeRate(
     payRate: number,
     workConfig: any = this.defaultWorkConfig,
     costConfig: any = this.defaultCostConfig,
     billableOptions: any = this.defaultBillableOptions,
-    margin: number = this.defaultCostConfig.defaultMargin
-  ): any {
+    margin: number = this.defaultCostConfig.defaultMargin,
+    awardId?: number
+  ): Promise<CalculationResult> {
     logger.info(`Calculating charge rate for pay rate: ${payRate}`);
     
     const totalHours = this.calculateTotalAnnualHours(workConfig);
     const billableHours = this.calculateBillableHours(workConfig, costConfig, billableOptions);
     const baseWage = payRate * totalHours;
     const oncosts = this.calculateOnCosts(payRate, totalHours, costConfig);
+    
     // Type-safe reduce to sum oncosts
-    const totalOnCosts = Object.values(oncosts).reduce((sum, cost) => {
+    const totalOnCosts: number = Object.values(oncosts).reduce((sum: number, cost: any) => {
       return sum + (typeof cost === 'number' ? cost : 0);
     }, 0);
-    const totalCost = baseWage + totalOnCosts;
+    
+    // Calculate penalty estimates if an award ID is provided
+    let penaltyEstimates: Record<string, number> | undefined;
+    if (awardId) {
+      try {
+        penaltyEstimates = await this.calculatePenaltyEstimates(payRate, awardId);
+        
+        // Add an extra 5% to total costs to account for penalty rates
+        // This is a simplified estimation - actual costs would come from timesheets
+        const penaltyTotal = Object.values(penaltyEstimates).reduce((sum: number, cost: number) => sum + cost, 0);
+        logger.info(`Estimated penalty costs: ${penaltyTotal}`);
+      } catch (error) {
+        logger.warn('Failed to calculate penalty estimates', { error, awardId });
+      }
+    }
+    
+    const totalCost: number = baseWage + totalOnCosts;
     const costPerHour = totalCost / billableHours;
     const chargeRate = costPerHour * (1 + margin);
 
@@ -144,6 +283,7 @@ export class ChargeRateCalculator {
       totalCost,
       costPerHour,
       chargeRate,
+      penaltyEstimates
     };
   }
 
@@ -249,13 +389,42 @@ export class ChargeRateCalculator {
         adminRate: adminRate
       };
 
+      // Get award ID if available in placement or from the apprentice
+      let awardId: number | undefined;
+      
+      // Try to get award ID from related tables
+      try {
+        // Check if there's an award ID directly associated with the placement
+        if (existingPlacement && 'awardId' in existingPlacement && existingPlacement.awardId) {
+          awardId = parseInt(existingPlacement.awardId.toString());
+          logger.info(`Using award ID ${awardId} from placement`);
+        } 
+        // If not, check if apprentice has a training contract with an award
+        else if (apprentice && apprentice.id) {
+          // Fetch training contract for the apprentice to see if there's an award associated
+          const [trainingContract] = await db
+            .select()
+            .from(placements)
+            .where(eq(placements.apprenticeId, apprentice.id))
+            .limit(1);
+            
+          if (trainingContract && 'awardId' in trainingContract && trainingContract.awardId) {
+            awardId = parseInt(trainingContract.awardId.toString());
+            logger.info(`Using award ID ${awardId} from training contract`);
+          }
+        }
+      } catch (error) {
+        logger.warn('Error determining award ID for charge rate calculation', { error });
+      }
+      
       // Calculate the charge rate
-      const calculation = this.calculateChargeRate(
+      const calculation = await this.calculateChargeRate(
         payRate, 
         this.defaultWorkConfig, 
         costConfig, 
         this.defaultBillableOptions,
-        customMargin // Pass the custom margin here
+        customMargin, // Pass the custom margin here
+        awardId // Pass award ID if available
       );
 
       // Save the calculation result

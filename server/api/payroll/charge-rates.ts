@@ -1,209 +1,221 @@
-import { Request, Response } from 'express';
+import { Router, Request, Response } from 'express';
 import { chargeRateCalculator } from '../../services/charge-rate-calculator';
-import logger from '../../utils/logger';
 import { db } from '../../db';
-import { chargeRateCalculations, quotes, quoteLineItems } from '@shared/schema';
+import { penaltyRules, awards } from '../../../shared/schema';
 import { eq } from 'drizzle-orm';
 
+export const chargeRateRouter = Router();
+
 /**
- * Calculate charge rate for an apprentice at a specific host employer
+ * Calculate charge rate based on provided parameters
+ * POST /api/payroll/charge-rates/calculate
  */
-export const calculateChargeRate = async (req: Request, res: Response) => {
+chargeRateRouter.post('/calculate', async (req: Request, res: Response) => {
   try {
-    const { apprenticeId, hostEmployerId } = req.body;
+    console.log('[INFO] Calculating charge rate for pay rate:', req.body.payRate);
+    const { payRate, awardId } = req.body;
     
-    if (!apprenticeId || !hostEmployerId) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Apprentice ID and Host Employer ID are required' 
+    if (!payRate) {
+      return res.status(400).json({
+        success: false,
+        error: 'Pay rate is required'
       });
     }
     
-    const result = await chargeRateCalculator.calculateAndSaveChargeRate(
-      parseInt(apprenticeId), 
-      parseInt(hostEmployerId)
+    // Get custom configuration values if provided
+    const customConfig = req.body.config || {};
+    const customMargin = req.body.margin || undefined;
+    
+    // Calculate the charge rate
+    const result = await chargeRateCalculator.calculateChargeRate(
+      parseFloat(payRate), 
+      customConfig.workConfig, 
+      customConfig.costConfig, 
+      customConfig.billableOptions,
+      customMargin,
+      awardId
     );
     
-    return res.status(200).json({
+    return res.json({
       success: true,
       data: result
     });
   } catch (error) {
-    logger.error('Error calculating charge rate', { error: error instanceof Error ? error.message : 'Unknown error' });
-    return res.status(500).json({ 
-      success: false, 
-      message: error instanceof Error ? error.message : 'An unknown error occurred' 
+    console.error('Error calculating charge rate', error);
+    return res.status(500).json({
+      success: false,
+      error: 'Failed to calculate charge rate',
+      message: error instanceof Error ? error.message : String(error)
     });
   }
-};
+});
 
 /**
- * Get an existing charge rate calculation by ID
+ * Get penalty rules for an award
+ * GET /api/payroll/charge-rates/award/:awardId/penalties
  */
-export const getChargeRateCalculation = async (req: Request, res: Response) => {
+chargeRateRouter.get('/award/:awardId/penalties', async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
+    const { awardId } = req.params;
     
-    const [calculation] = await db
+    // Get penalty rules for this award
+    const penalties = await db
       .select()
-      .from(chargeRateCalculations)
-      .where(eq(chargeRateCalculations.id, parseInt(id)));
+      .from(penaltyRules)
+      .where(eq(penaltyRules.awardId, parseInt(awardId)));
+      
+    return res.json({
+      success: true,
+      data: penalties
+    });
+  } catch (error) {
+    console.error('Error fetching penalty rules', error);
+    return res.status(500).json({
+      success: false,
+      error: 'Failed to fetch penalty rules',
+      message: error instanceof Error ? error.message : String(error)
+    });
+  }
+});
+
+/**
+ * Calculate penalty cost estimates for a pay rate and award
+ * GET /api/payroll/charge-rates/estimate-penalties
+ */
+chargeRateRouter.post('/estimate-penalties', async (req: Request, res: Response) => {
+  try {
+    const { payRate, awardId } = req.body;
     
-    if (!calculation) {
-      return res.status(404).json({
+    if (!payRate || !awardId) {
+      return res.status(400).json({
         success: false,
-        message: `Charge rate calculation with ID ${id} not found`
+        error: 'Pay rate and award ID are required'
       });
     }
     
-    return res.status(200).json({
+    console.log('[INFO] Fetching penalty rules for award ID', awardId);
+    
+    // Get award information
+    const [award] = await db
+      .select()
+      .from(awards)
+      .where(eq(awards.id, parseInt(awardId)));
+      
+    // Get estimated penalty costs
+    const penaltyEstimates = await chargeRateCalculator.calculatePenaltyEstimates(
+      parseFloat(payRate),
+      parseInt(awardId)
+    );
+    
+    return res.json({
       success: true,
-      data: calculation
+      payRate,
+      awardId,
+      awardName: award?.name || 'Unknown Award',
+      data: penaltyEstimates
     });
   } catch (error) {
-    logger.error('Error retrieving charge rate calculation', { error: error instanceof Error ? error.message : 'Unknown error' });
-    return res.status(500).json({ 
-      success: false, 
-      message: error instanceof Error ? error.message : 'An unknown error occurred' 
+    console.error('Error estimating penalty costs', error);
+    return res.status(500).json({
+      success: false,
+      error: 'Failed to estimate penalty costs',
+      message: error instanceof Error ? error.message : String(error)
     });
   }
-};
+});
 
 /**
- * Approve a charge rate calculation and apply it to the placement
+ * Calculate and save a charge rate for an apprentice and host employer
+ * POST /api/payroll/charge-rates/calculate-and-save
  */
-export const approveChargeRate = async (req: Request, res: Response) => {
+chargeRateRouter.post('/calculate-and-save', async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
+    const { apprenticeId, hostEmployerId, payRate, margin } = req.body;
     
-    const result = await chargeRateCalculator.approveChargeRate(parseInt(id));
+    if (!apprenticeId || !hostEmployerId || !payRate) {
+      return res.status(400).json({
+        success: false,
+        error: 'Apprentice ID, host employer ID, and pay rate are required'
+      });
+    }
     
-    return res.status(200).json({
+    // Calculate and save the charge rate
+    const result = await chargeRateCalculator.calculateAndSaveChargeRate(
+      parseInt(apprenticeId),
+      parseInt(hostEmployerId),
+      margin ? parseFloat(margin) : undefined
+    );
+    
+    return res.json({
       success: true,
       data: result
     });
   } catch (error) {
-    logger.error('Error approving charge rate', { error: error instanceof Error ? error.message : 'Unknown error' });
-    return res.status(500).json({ 
-      success: false, 
-      message: error instanceof Error ? error.message : 'An unknown error occurred' 
+    console.error('Error calculating and saving charge rate', error);
+    return res.status(500).json({
+      success: false,
+      error: 'Failed to calculate and save charge rate',
+      message: error instanceof Error ? error.message : String(error)
     });
   }
-};
+});
 
 /**
  * Generate a quote for a host employer with multiple apprentices
+ * POST /api/payroll/charge-rates/generate-quote
  */
-export const generateQuote = async (req: Request, res: Response) => {
+chargeRateRouter.post('/generate-quote', async (req: Request, res: Response) => {
   try {
     const { hostEmployerId, apprenticeIds } = req.body;
     
     if (!hostEmployerId || !apprenticeIds || !Array.isArray(apprenticeIds) || apprenticeIds.length === 0) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Host Employer ID and at least one Apprentice ID are required' 
+      return res.status(400).json({
+        success: false,
+        error: 'Host employer ID and at least one apprentice ID are required'
       });
     }
     
+    // Generate the quote
     const result = await chargeRateCalculator.generateQuote(
       parseInt(hostEmployerId),
-      apprenticeIds.map(id => parseInt(id))
+      apprenticeIds.map((id: any) => parseInt(id))
     );
     
-    return res.status(200).json({
+    return res.json({
       success: true,
       data: result
     });
   } catch (error) {
-    logger.error('Error generating quote', { error: error instanceof Error ? error.message : 'Unknown error' });
-    return res.status(500).json({ 
-      success: false, 
-      message: error instanceof Error ? error.message : 'An unknown error occurred' 
+    console.error('Error generating quote', error);
+    return res.status(500).json({
+      success: false,
+      error: 'Failed to generate quote',
+      message: error instanceof Error ? error.message : String(error)
     });
   }
-};
+});
 
 /**
- * Get a quote by ID with its line items
+ * Approve a charge rate calculation and apply it to the placement
+ * POST /api/payroll/charge-rates/:calculationId/approve
  */
-export const getQuote = async (req: Request, res: Response) => {
+chargeRateRouter.post('/:calculationId/approve', async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
+    const { calculationId } = req.params;
     
-    const [quote] = await db
-      .select()
-      .from(quotes)
-      .where(eq(quotes.id, parseInt(id)));
+    // Approve the charge rate calculation
+    const result = await chargeRateCalculator.approveChargeRate(parseInt(calculationId));
     
-    if (!quote) {
-      return res.status(404).json({
-        success: false,
-        message: `Quote with ID ${id} not found`
-      });
-    }
-    
-    const lineItems = await db
-      .select()
-      .from(quoteLineItems)
-      .where(eq(quoteLineItems.quoteId, parseInt(id)));
-    
-    return res.status(200).json({
+    return res.json({
       success: true,
-      data: {
-        quote,
-        lineItems
-      }
+      data: result
     });
   } catch (error) {
-    logger.error('Error retrieving quote', { error: error instanceof Error ? error.message : 'Unknown error' });
-    return res.status(500).json({ 
-      success: false, 
-      message: error instanceof Error ? error.message : 'An unknown error occurred' 
+    console.error('Error approving charge rate', error);
+    return res.status(500).json({
+      success: false,
+      error: 'Failed to approve charge rate',
+      message: error instanceof Error ? error.message : String(error)
     });
   }
-};
-
-/**
- * Update a quote's status (e.g., to 'accepted' or 'rejected')
- */
-export const updateQuoteStatus = async (req: Request, res: Response) => {
-  try {
-    const { id } = req.params;
-    const { status, rejectionReason } = req.body;
-    
-    if (!status || !['draft', 'sent', 'accepted', 'rejected', 'expired'].includes(status)) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Valid status is required (draft, sent, accepted, rejected, expired)' 
-      });
-    }
-    
-    const updateData: any = {
-      status
-    };
-    
-    // Add additional fields based on status
-    if (status === 'accepted') {
-      updateData.acceptedDate = new Date();
-      updateData.acceptedBy = req.body.acceptedBy || 'Customer';
-    } else if (status === 'rejected' && rejectionReason) {
-      updateData.rejectionReason = rejectionReason;
-    }
-    
-    await db
-      .update(quotes)
-      .set(updateData)
-      .where(eq(quotes.id, parseInt(id)));
-    
-    return res.status(200).json({
-      success: true,
-      message: `Quote status updated to ${status}`
-    });
-  } catch (error) {
-    logger.error('Error updating quote status', { error: error instanceof Error ? error.message : 'Unknown error' });
-    return res.status(500).json({ 
-      success: false, 
-      message: error instanceof Error ? error.message : 'An unknown error occurred' 
-    });
-  }
-};
+});
