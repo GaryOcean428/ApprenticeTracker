@@ -12,6 +12,14 @@ import {
   importModernAwardsData
 } from './award-rates';
 import { getTimesheets, getTimesheet, approveTimesheet, rejectTimesheet } from './timesheets';
+import {
+  calculateChargeRate,
+  getChargeRateCalculation,
+  approveChargeRate,
+  generateQuote,
+  getQuote,
+  updateQuoteStatus
+} from './charge-rates';
 import { isAuthenticated, hasRole } from '../auth-routes';
 import { hasPermission } from '../../middleware/permissions';
 
@@ -38,6 +46,14 @@ router.get('/timesheets', isAuthenticated, hasPermission('view:timesheets'), get
 router.get('/timesheets/:id', isAuthenticated, hasPermission('view:timesheets'), getTimesheet);
 router.patch('/timesheets/:id/approve', isAuthenticated, hasPermission('approve:timesheets'), approveTimesheet);
 router.patch('/timesheets/:id/reject', isAuthenticated, hasPermission('approve:timesheets'), rejectTimesheet);
+
+// Charge Rate & Quote routes
+router.post('/charge-rates/calculate', isAuthenticated, hasPermission('manage:charge_rates'), calculateChargeRate);
+router.get('/charge-rates/:id', isAuthenticated, hasPermission('view:charge_rates'), getChargeRateCalculation);
+router.patch('/charge-rates/:id/approve', isAuthenticated, hasPermission('approve:charge_rates'), approveChargeRate);
+router.post('/quotes/generate', isAuthenticated, hasPermission('manage:quotes'), generateQuote);
+router.get('/quotes/:id', isAuthenticated, hasPermission('view:quotes'), getQuote);
+router.patch('/quotes/:id/status', isAuthenticated, hasPermission('manage:quotes'), updateQuoteStatus);
 
 // Export the router
 export default router;

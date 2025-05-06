@@ -299,7 +299,7 @@ export class ChargeRateCalculator {
         const weeklyPrice = calculation.chargeRate * hoursPerWeek;
         const totalPrice = (weeklyPrice * 52).toString();
         
-        // Add line item to quote
+        // Add line item to quote - using raw column names from database
         const [lineItem] = await db
           .insert(quoteLineItems)
           .values({
