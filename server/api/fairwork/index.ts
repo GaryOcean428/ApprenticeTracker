@@ -48,6 +48,32 @@ router.get("/api_test_fairwork_dev", async (req, res) => {
   }
 });
 
+// Testing manual sync without authentication - DEV ONLY
+router.get("/api/test_sync_award/:awardCode", async (req, res) => {
+  try {
+    const { awardCode } = req.params;
+    logger.info(`Testing award sync for ${awardCode}`);
+    
+    // Start the sync for this award only
+    await syncScheduler.triggerSync({
+      forceUpdate: true, // Force update to refresh data
+      targetAwardCode: awardCode,
+    });
+    
+    // Return success
+    return res.json({
+      success: true,
+      message: `Triggered manual sync for award ${awardCode}. Check logs for results.`,
+    });
+  } catch (error) {
+    logger.error("Error testing award sync", { error });
+    return res.status(500).json({
+      success: false,
+      error: "Failed to test award sync",
+    });
+  }
+});
+
 // Test route for classifications - no authentication required
 router.get("/debug_test_only_classifications/:awardId", async (req, res) => {
   try {
