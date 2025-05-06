@@ -16,7 +16,7 @@ async function testChargeRateAPI() {
     
     // 2. Generate a quote for a host employer
     const quoteResponse = await axios.post('http://localhost:5000/api/payroll/test/quotes/generate', {
-      hostEmployerId: 929,  // Using a host employer ID from the latest seeding
+      hostEmployerId: 933,  // Using a host employer ID from the latest seeding
       apprenticeIds: [1, 2]  // Replace with existing apprentice IDs
     });
     
