@@ -11,6 +11,7 @@ import { migrateRolesSchema } from "./migrate-roles";
 import { migrateHostPreferredQualifications } from "./migrate-host-preferred-quals";
 import { migrateEnrichmentSchema } from "./migrate-enrichment";
 import { migrateProgressReviewsSchema } from "./migrate-progress-reviews";
+import { migrateHostEmployersFields } from "./migrate-host-employers-fields";
 import { initializeScheduledTasks } from "./scheduled-tasks";
 
 const app = express();
@@ -77,6 +78,10 @@ app.use((req, res, next) => {
     // Migrate Progress Reviews schema
     await migrateProgressReviewsSchema();
     log("Progress Reviews schema migration completed");
+    
+    // Migrate Host Employers Fields
+    await migrateHostEmployersFields();
+    log("Host Employers Fields migration completed");
   } catch (error) {
     log("Error migrating database schema: " + error);
   }
