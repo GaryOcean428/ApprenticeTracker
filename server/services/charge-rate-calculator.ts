@@ -127,7 +127,10 @@ export class ChargeRateCalculator {
     const billableHours = this.calculateBillableHours(workConfig, costConfig, billableOptions);
     const baseWage = payRate * totalHours;
     const oncosts = this.calculateOnCosts(payRate, totalHours, costConfig);
-    const totalOnCosts = Object.values(oncosts).reduce((sum: number, cost: number) => sum + cost, 0);
+    // Type-safe reduce to sum oncosts
+    const totalOnCosts = Object.values(oncosts).reduce((sum, cost) => {
+      return sum + (typeof cost === 'number' ? cost : 0);
+    }, 0);
     const totalCost = baseWage + totalOnCosts;
     const costPerHour = totalCost / billableHours;
     const chargeRate = costPerHour * (1 + margin);
@@ -185,16 +188,17 @@ export class ChargeRateCalculator {
           )
         );
 
-      // Default pay rate is from the apprentice record
-      let payRate = apprentice.hourlyRate ? parseFloat(apprentice.hourlyRate) : 0;
+      // Default base pay rate - would normally come from payRates table based on award
+      // and classification, but for now we'll use a default value
+      let payRate = 25.0; // Default hourly rate
       
-      // Override with placement-specific rate if it exists
+      // Override with negotiated rate from placement if it exists
       if (existingPlacement && existingPlacement.negotiatedRate) {
-        payRate = parseFloat(existingPlacement.negotiatedRate);
+        payRate = parseFloat(existingPlacement.negotiatedRate.toString());
       }
 
-      // Use host employer specific margins if available, otherwise use defaults
-      const customMargin = hostEmployer.defaultMargin ? parseFloat(hostEmployer.defaultMargin) : this.defaultCostConfig.defaultMargin;
+      // For now we're using default margins, but in the future this could come from host employer settings
+      const customMargin = this.defaultCostConfig.defaultMargin; // Default 15% margin
       
       // Customize cost config based on host employer settings
       const costConfig = {
@@ -290,23 +294,28 @@ export class ChargeRateCalculator {
           throw new Error(`Apprentice with ID ${apprenticeId} not found`);
         }
         
+        // Calculate line item pricing
+        const hoursPerWeek = this.defaultWorkConfig.hoursPerDay * this.defaultWorkConfig.daysPerWeek;
+        const weeklyPrice = calculation.chargeRate * hoursPerWeek;
+        const totalPrice = (weeklyPrice * 52).toString();
+        
         // Add line item to quote
         const [lineItem] = await db
           .insert(quoteLineItems)
           .values({
-            quoteId: quote.id,
-            apprenticeId,
+            quote_id: quote.id,
+            apprentice_id: apprenticeId,
             description: `${apprentice.firstName} ${apprentice.lastName} - Year ${apprentice.apprenticeshipYear || 1}`,
             quantity: '52', // 52 weeks
             unit: 'week',
-            weeklyHours: this.defaultWorkConfig.hoursPerDay * this.defaultWorkConfig.daysPerWeek,
-            ratePerHour: calculation.chargeRate,
-            totalPrice: (calculation.chargeRate * this.defaultWorkConfig.hoursPerDay * this.defaultWorkConfig.daysPerWeek * 52).toString(),
+            weekly_hours: hoursPerWeek,
+            rate_per_hour: calculation.chargeRate.toString(),
+            total_price: totalPrice,
             notes: `Includes training, PPE, and administration costs`
           })
           .returning();
           
-        totalAmount += parseFloat(lineItem.totalPrice);
+        totalAmount += parseFloat(lineItem.total_price);
       }
       
       // Update the quote with the total amount
