@@ -6,17 +6,17 @@ async function testChargeRateAPI() {
     console.log('Testing Charge Rate Calculation API');
     
     // 1. Calculate charge rate for an apprentice
-    const calculateResponse = await axios.post('http://localhost:5000/api/payroll/charge-rates/calculate', {
+    const calculateResponse = await axios.post('http://localhost:5000/api/payroll/test/charge-rates/calculate', {
       apprenticeId: 1,  // Replace with an existing apprentice ID
-      hostEmployerId: 905  // Replace with an existing host employer ID
+      hostEmployerId: 913  // Using a host employer ID from the latest seeding
     });
     
     console.log('\nCharge Rate Calculation Result:');
     console.log(JSON.stringify(calculateResponse.data, null, 2));
     
     // 2. Generate a quote for a host employer
-    const quoteResponse = await axios.post('http://localhost:5000/api/payroll/quotes/generate', {
-      hostEmployerId: 905,  // Replace with an existing host employer ID
+    const quoteResponse = await axios.post('http://localhost:5000/api/payroll/test/quotes/generate', {
+      hostEmployerId: 913,  // Using a host employer ID from the latest seeding
       apprenticeIds: [1, 2]  // Replace with existing apprentice IDs
     });
     
