@@ -162,6 +162,21 @@ export const MAIN_NAV_SECTIONS: NavSection[] = [
     ]
   },
   
+  // Accounts & Finance
+  {
+    title: "Accounts & Finance",
+    icon: DollarSign,
+    subItems: [
+      [
+        { title: "Charge Rates", href: "/charge-rates" },
+        { title: "Invoicing", href: "/invoicing" },
+        { title: "Financial Reports", href: "/financial-reports" },
+        { title: "Budget Planning", href: "/budget" },
+        { title: "Expense Tracking", href: "/expenses" }
+      ]
+    ]
+  },
+  
   // Documents & Resources
   {
     title: "Documents & Resources",

@@ -644,7 +644,7 @@ export default function CreateChargeRatePage() {
                       <div className="text-sm">
                         <p className="font-medium">{getApprenticeDisplayText(selectedApprentice)}</p>
                         <p className="text-muted-foreground">
-                          Trade: {selectedApprentice.trade || 'Not specified'}
+                          Year: {selectedApprentice.apprenticeshipYear || 'Not specified'}
                         </p>
                       </div>
                     ) : (
@@ -660,7 +660,7 @@ export default function CreateChargeRatePage() {
                       <div className="text-sm">
                         <p className="font-medium">{getHostEmployerDisplayText(selectedHostEmployer)}</p>
                         <p className="text-muted-foreground">
-                          Industry: {selectedHostEmployer.industry || 'Not specified'}
+                          Business Type: {selectedHostEmployer.businessType || 'Not specified'}
                         </p>
                       </div>
                     ) : (
