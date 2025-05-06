@@ -337,6 +337,33 @@ fairWorkRouter.get('/awards/:id/penalties', async (req: Request, res: Response) 
   }
 });
 
+// GET /api/penalties - Get all penalty rules (for testing only)
+fairWorkRouter.get('/penalties', async (req: Request, res: Response) => {
+  try {
+    logger.info('Fetching all penalty rules');
+    
+    // Get all penalty rules
+    const result = await db
+      .select()
+      .from(penaltyRules);
+    
+    logger.info(`Found ${result.length} penalty rules`);
+    
+    res.json({
+      success: true,
+      count: result.length,
+      data: result
+    });
+  } catch (error) {
+    logger.error('Error fetching all penalty rules', { error });
+    res.status(500).json({ 
+      success: false,
+      message: 'Error fetching all penalty rules', 
+      error: error instanceof Error ? error.message : String(error)
+    });
+  }
+});
+
 // GET /api/awards/:id/allowances - Get allowances for a specific award
 fairWorkRouter.get('/awards/:id/allowances', async (req: Request, res: Response) => {
   try {
