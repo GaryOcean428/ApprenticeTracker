@@ -106,8 +106,15 @@ router.get("/debug_test_only_classifications/:awardId", async (req, res) => {
 });
 
 // Initialize API client
+// Remove any trailing paths from the base URL as the client will handle those
+let baseUrl = process.env.FAIRWORK_API_URL || "https://api.fairwork.gov.au";
+// If the URL includes '/api/v1/awards', extract just the base domain
+if (baseUrl.includes('/api/v1/')) {
+  baseUrl = baseUrl.split('/api/v1/')[0];
+}
+
 const apiClient = new FairWorkApiClient({
-  baseUrl: process.env.FAIRWORK_API_URL || "https://api.fairwork.gov.au",
+  baseUrl: baseUrl,
   apiKey: process.env.FAIRWORK_API_KEY || "",
 });
 

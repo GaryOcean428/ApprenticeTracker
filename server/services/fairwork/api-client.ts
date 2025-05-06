@@ -155,38 +155,81 @@ export class FairWorkApiClient {
   }
 
   /**
-   * Get all modern awards (as per API documentation endpoint: GET /api/v1/awards)
+   * Get all modern awards (endpoint: GET /api/v1/awards)
    */
   async getActiveAwards(): Promise<Award[]> {
     try {
-      return await this.request<Award[]>('/api/v1/awards');
+      // Make request to FWC API awards endpoint
+      const response = await this.request<any>('/awards');
+      
+      // Extract awards from the response based on API structure
+      const awards = response.results || [];
+      
+      // Transform to our internal model
+      return awards.map(a => ({
+        id: a.award_fixed_id?.toString() || '',
+        code: a.code || '',
+        name: a.name || '',
+        fair_work_reference: a.reference_number || null,
+        fair_work_title: a.title || null,
+        published_year: a.published_year || null,
+        version_number: a.version_number || null,
+        effective_date: a.award_operative_from || null,
+        description: a.description || null
+      }));
     } catch (error) {
       logger.error('Failed to fetch active awards', { error });
-      throw error;
+      return []; // Return empty array instead of throwing to avoid breaking syncs
     }
   }
 
   /**
    * Get a specific award by code
+   * Endpoint: GET /api/v1/awards/{id_or_code}
    */
   async getAward(code: string): Promise<Award | null> {
     try {
-      return await this.request<Award>(`/awards/${code}`);
+      // Get the specific award by code or id
+      const response = await this.request<any>(`/awards/${code}`);
+      
+      // Extract awards data from the response
+      const awards = response.results || [];
+      
+      // Should only be one award, but handle it as an array just in case
+      if (awards.length === 0) return null;
+      
+      // Take the first award in the results
+      const award = awards[0];
+      
+      // Transform to our internal model
+      return {
+        id: award.award_fixed_id?.toString() || '',
+        code: award.code || '',
+        name: award.name || '',
+        fair_work_reference: award.reference_number || null,
+        fair_work_title: award.title || null,
+        published_year: award.published_year || null,
+        version_number: award.version_number || null,
+        effective_date: award.award_operative_from || null,
+        description: award.description || null
+      };
     } catch (error) {
       if ((error as ApiError).statusCode === 404) {
         return null;
       }
       logger.error('Failed to fetch award', { error, code });
-      throw error;
+      return null; // Return null instead of throwing to avoid breaking syncs
     }
   }
 
   /**
-   * Get classifications for all awards (as per API documentation endpoint: GET /api/v1/classifications)
+   * Get classifications for all awards (as per API documentation endpoint)
    */
   async getClassifications(): Promise<Classification[]> {
     try {
-      return await this.request<Classification[]>('/api/v1/classifications');
+      // The API doesn't have a single endpoint for all classifications
+      // So we'll need to use the award-specific endpoint instead
+      throw new Error('This method is not supported by the FWC API');
     } catch (error) {
       logger.error('Failed to fetch classifications', { error });
       throw error;
@@ -195,15 +238,29 @@ export class FairWorkApiClient {
 
   /**
    * Get classifications for a specific award
+   * Endpoint: GET /api/v1/awards/{id_or_code}/classifications
    */
   async getAwardClassifications(awardCode: string): Promise<Classification[]> {
     try {
-      // Filter classifications by award code
-      const allClassifications = await this.getClassifications();
-      return allClassifications.filter(c => c.award_id === awardCode);
+      // Get classifications for this specific award
+      const response = await this.request<any>(`/awards/${awardCode}/classifications`);
+      
+      // Extract classifications from the response based on API structure
+      const classifications = response.results || [];
+      
+      // Transform to our internal model if needed
+      return classifications.map(c => ({
+        id: c.classification_fixed_id?.toString() || '',
+        award_id: awardCode,
+        name: c.classification || '',
+        level: c.classification_level?.toString() || '',
+        description: c.clause_description || '',
+        fair_work_level_code: c.clause_fixed_id?.toString() || null,
+        parent_classification_name: c.parent_classification_name || null
+      }));
     } catch (error) {
       logger.error('Failed to fetch award classifications', { error, awardCode });
-      throw error;
+      return []; // Return empty array instead of throwing to avoid breaking syncs
     }
   }
 
