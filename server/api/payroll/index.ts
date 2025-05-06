@@ -20,6 +20,10 @@ import {
   getQuote,
   updateQuoteStatus
 } from './charge-rates';
+import {
+  testCalculateChargeRate,
+  testGenerateQuote
+} from './test-routes';
 import { isAuthenticated, hasRole } from '../auth-routes';
 import { hasPermission } from '../../middleware/permissions';
 
@@ -54,6 +58,13 @@ router.patch('/charge-rates/:id/approve', isAuthenticated, hasPermission('approv
 router.post('/quotes/generate', isAuthenticated, hasPermission('manage:quotes'), generateQuote);
 router.get('/quotes/:id', isAuthenticated, hasPermission('view:quotes'), getQuote);
 router.patch('/quotes/:id/status', isAuthenticated, hasPermission('manage:quotes'), updateQuoteStatus);
+
+// Test routes - DEVELOPMENT ONLY (No auth required)
+if (process.env.NODE_ENV !== 'production') {
+  router.post('/test/charge-rates/calculate', testCalculateChargeRate);
+  router.post('/test/quotes/generate', testGenerateQuote);
+  console.log('WARNING: Test routes enabled in development mode');
+}
 
 // Export the router
 export default router;

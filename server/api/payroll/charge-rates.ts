@@ -29,7 +29,7 @@ export const calculateChargeRate = async (req: Request, res: Response) => {
       data: result
     });
   } catch (error) {
-    logger.error('Error calculating charge rate', error);
+    logger.error('Error calculating charge rate', { error: error instanceof Error ? error.message : 'Unknown error' });
     return res.status(500).json({ 
       success: false, 
       message: error instanceof Error ? error.message : 'An unknown error occurred' 
@@ -61,7 +61,7 @@ export const getChargeRateCalculation = async (req: Request, res: Response) => {
       data: calculation
     });
   } catch (error) {
-    logger.error('Error retrieving charge rate calculation', error);
+    logger.error('Error retrieving charge rate calculation', { error: error instanceof Error ? error.message : 'Unknown error' });
     return res.status(500).json({ 
       success: false, 
       message: error instanceof Error ? error.message : 'An unknown error occurred' 
@@ -83,7 +83,7 @@ export const approveChargeRate = async (req: Request, res: Response) => {
       data: result
     });
   } catch (error) {
-    logger.error('Error approving charge rate', error);
+    logger.error('Error approving charge rate', { error: error instanceof Error ? error.message : 'Unknown error' });
     return res.status(500).json({ 
       success: false, 
       message: error instanceof Error ? error.message : 'An unknown error occurred' 
@@ -115,7 +115,7 @@ export const generateQuote = async (req: Request, res: Response) => {
       data: result
     });
   } catch (error) {
-    logger.error('Error generating quote', error);
+    logger.error('Error generating quote', { error: error instanceof Error ? error.message : 'Unknown error' });
     return res.status(500).json({ 
       success: false, 
       message: error instanceof Error ? error.message : 'An unknown error occurred' 
@@ -155,7 +155,7 @@ export const getQuote = async (req: Request, res: Response) => {
       }
     });
   } catch (error) {
-    logger.error('Error retrieving quote', error);
+    logger.error('Error retrieving quote', { error: error instanceof Error ? error.message : 'Unknown error' });
     return res.status(500).json({ 
       success: false, 
       message: error instanceof Error ? error.message : 'An unknown error occurred' 
@@ -200,7 +200,7 @@ export const updateQuoteStatus = async (req: Request, res: Response) => {
       message: `Quote status updated to ${status}`
     });
   } catch (error) {
-    logger.error('Error updating quote status', error);
+    logger.error('Error updating quote status', { error: error instanceof Error ? error.message : 'Unknown error' });
     return res.status(500).json({ 
       success: false, 
       message: error instanceof Error ? error.message : 'An unknown error occurred' 
