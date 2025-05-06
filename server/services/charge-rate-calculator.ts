@@ -198,12 +198,17 @@ export class ChargeRateCalculator {
             END as custom_admin_rate
         `);
         
-        if (result && result[0]) {
-          if (result[0].custom_margin_rate !== null) {
-            customMarginRate = parseFloat(result[0].custom_margin_rate);
+        logger.debug('Custom rates raw query result:', result);
+        
+        if (result && result.rows && result.rows.length > 0) {
+          logger.debug('Detected values:', result.rows[0]);
+          if (result.rows[0].custom_margin_rate !== null) {
+            customMarginRate = parseFloat(result.rows[0].custom_margin_rate);
+            logger.debug(`Setting custom margin rate: ${customMarginRate}`);
           }
-          if (result[0].custom_admin_rate !== null) {
-            customAdminRate = parseFloat(result[0].custom_admin_rate);
+          if (result.rows[0].custom_admin_rate !== null) {
+            customAdminRate = parseFloat(result.rows[0].custom_admin_rate);
+            logger.debug(`Setting custom admin rate: ${customAdminRate}`);
           }
         }
       } catch (error) {
