@@ -376,6 +376,8 @@ export const awards = pgTable("awards", {
   code: text("code").notNull().unique(),
   fairWorkReference: text("fair_work_reference"), // e.g. 'MA000010'
   fairWorkTitle: text("fair_work_title"),        // e.g. 'Clerks — Private Sector Award 2010'
+  industry: text("industry"),                    // e.g. 'Construction', 'Manufacturing', 'Health'
+  sector: text("sector"),                        // e.g. 'Private', 'Public', 'Not-for-profit'
   description: text("description"),
   effectiveDate: date("effective_date"),
   isActive: boolean("is_active").default(true),
