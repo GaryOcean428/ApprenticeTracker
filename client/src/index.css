@@ -3,87 +3,89 @@
 @tailwind utilities;
 
 :root {
+  /* Braden Group Brand Colors - Light Theme */
   --background: 0 0% 100%;
-  --foreground: 20 14.3% 4.1%;
-  --muted: 60 4.8% 95.9%;
-  --muted-foreground: 25 5.3% 44.7%;
+  --foreground: 220 10% 6%;
+  --muted: 210 20% 95%;
+  --muted-foreground: 220 10% 40%;
   --popover: 0 0% 100%;
-  --popover-foreground: 20 14.3% 4.1%;
+  --popover-foreground: 220 10% 6%;
   --card: 0 0% 100%;
-  --card-foreground: 20 14.3% 4.1%;
-  --border: 20 5.9% 90%;
-  --input: 20 5.9% 90%;
-  --primary: 205 100% 43%;
+  --card-foreground: 220 10% 6%;
+  --border: 210 20% 90%;
+  --input: 210 20% 90%;
+  --primary: 210 100% 50%; /* Bright blue primary color */
   --primary-foreground: 0 0% 100%;
-  --secondary: 237 77% 60%;
+  --secondary: 227 77% 60%; /* Secondary blue color */
   --secondary-foreground: 0 0% 100%;
-  --accent: 262 83% 58%;
+  --accent: 262 83% 58%; /* Purple for accents */
   --accent-foreground: 0 0% 100%;
   --destructive: 0 84.2% 60.2%;
   --destructive-foreground: 60 9.1% 97.8%;
-  --success: 142 69% 58%;
+  --success: 142 69% 50%;
   --success-foreground: 0 0% 100%;
   --warning: 38 92% 50%;
   --warning-foreground: 0 0% 100%;
   --info: 214 95% 60%;
   --info-foreground: 0 0% 100%;
-  --ring: 20 14.3% 4.1%;
+  --ring: 210 100% 50%;
   --radius: 0.5rem;
   
   /* Chart colors */
-  --chart-1: 205 100% 43%;
-  --chart-2: 237 77% 60%;
+  --chart-1: 210 100% 50%;
+  --chart-2: 227 77% 60%;
   --chart-3: 262 83% 58%;
   --chart-4: 38 92% 50%;
-  --chart-5: 142 69% 58%;
+  --chart-5: 142 69% 50%;
   
   /* Sidebar theming */
   --sidebar-background: 0 0% 100%;
-  --sidebar-foreground: 20 14.3% 4.1%;
-  --sidebar-primary: 205 100% 43%;
+  --sidebar-foreground: 220 10% 6%;
+  --sidebar-primary: 210 100% 50%;
   --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 60 4.8% 95.9%;
-  --sidebar-accent-foreground: 20 14.3% 4.1%;
-  --sidebar-border: 20 5.9% 90%;
-  --sidebar-ring: 20 14.3% 4.1%;
+  --sidebar-accent: 210 20% 95%;
+  --sidebar-accent-foreground: 220 10% 6%;
+  --sidebar-border: 210 20% 90%;
+  --sidebar-ring: 210 100% 50%;
 }
 
 .dark {
-  --background: 220 10% 6%;
+  /* Braden Group Brand Colors - Dark Theme */
+  --background: 222 30% 10%; /* Dark blue-black background */
   --foreground: 0 0% 98%;
-  --muted: 240 3.7% 15.9%;
-  --muted-foreground: 240 5% 64.9%;
-  --popover: 220 10% 6%;
+  --muted: 220 20% 15%;
+  --muted-foreground: 220 10% 70%;
+  --popover: 222 30% 10%;
   --popover-foreground: 0 0% 98%;
-  --card: 220 10% 6%;
+  --card: 222 30% 10%;
   --card-foreground: 0 0% 98%;
-  --border: 240 3.7% 15.9%;
-  --input: 240 3.7% 15.9%;
-  --primary: 210 100% 50%;
+  --border: 220 20% 20%;
+  --input: 220 20% 20%;
+  --primary: 210 100% 50%; /* Bright blue primary color */
   --primary-foreground: 0 0% 100%;
-  --secondary: 227 77% 60%;
+  --secondary: 214 95% 60%; /* Slightly darker blue for secondary */
   --secondary-foreground: 0 0% 100%;
-  --accent: 262 83% 58%;
+  --accent: 262 83% 58%; /* Purple for accents */
   --accent-foreground: 0 0% 100%;
   --destructive: 0 84% 60%;
   --destructive-foreground: 0 0% 98%;
-  --success: 159 84% 39%;
+  --success: 142 69% 45%;
   --success-foreground: 0 0% 100%;
-  --warning: 35 92% 50%;
+  --warning: 38 92% 50%;
   --warning-foreground: 0 0% 100%;
   --info: 214 95% 60%;
   --info-foreground: 0 0% 100%;
-  --ring: 240 4.9% 83.9%;
+  --ring: 214 95% 60%;
   
-  /* Sidebar theming - matching screenshot dark sidebar */
-  --sidebar-background: 220 10% 6%;
+  /* Sidebar theming - matching the dark sidebar from screenshots */
+  --sidebar-background: 222 30% 10%;
   --sidebar-foreground: 0 0% 98%;
-  --sidebar-primary: 214 95% 60%;
+  --sidebar-primary: 210 100% 50%;
   --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 240 3.7% 15.9%;
+  --sidebar-accent: 220 20% 15%;
   --sidebar-accent-foreground: 0 0% 98%;
-  --sidebar-border: 240 3.7% 15.9%;
-  --sidebar-ring: 240 4.9% 83.9%;
+  --sidebar-border: 220 20% 20%;
+  --sidebar-ring: 214 95% 60%;
 }
 
 /* Custom scrollbar */
@@ -103,6 +105,20 @@
 
 ::-webkit-scrollbar-thumb:hover {
   background: #a5a5a5;
+}
+
+/* Dark mode scrollbar */
+.dark ::-webkit-scrollbar-track {
+  background: #1a1e2a;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #2d3348;
+  border-radius: 4px;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #3e4663;
 }
 
 @layer base {
