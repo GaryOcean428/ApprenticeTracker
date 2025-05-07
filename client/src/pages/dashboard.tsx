@@ -12,6 +12,7 @@ import { Link } from "wouter";
 import StatCard from "@/components/dashboard/stat-card";
 import StatsCard from "@/components/dashboard/stats-card";
 import ChartPlaceholder from "@/components/dashboard/chart-placeholder";
+import FinancialSummary from "@/components/dashboard/financial-summary";
 import RecentActivity from "@/components/dashboard/recent-activity";
 import TaskList from "@/components/dashboard/tasks";
 import ApprenticeTable from "@/components/dashboard/apprentice-table";
