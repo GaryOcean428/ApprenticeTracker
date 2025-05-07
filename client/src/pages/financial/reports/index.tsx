@@ -15,6 +15,7 @@ import {
   Calendar,
   Share2
 } from 'lucide-react';
+import { ReportFormDialog } from '@/components/financial/report-form-dialog';
 
 import {
   Card,
@@ -122,6 +123,7 @@ const DUMMY_REPORTS: FinancialReport[] = [
 export default function FinancialReportsPage() {
   const { toast } = useToast();
   const [selectedTab, setSelectedTab] = useState('reports');
+  const [reportFormOpen, setReportFormOpen] = useState(false);
   
   // This would be replaced with a real API query in production
   const { data: reports, isLoading } = useQuery({
@@ -163,6 +165,8 @@ export default function FinancialReportsPage() {
 
   return (
     <div className="container mx-auto p-6">
+      <ReportFormDialog open={reportFormOpen} onOpenChange={setReportFormOpen} />
+      
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Financial Reports</h1>
@@ -175,7 +179,7 @@ export default function FinancialReportsPage() {
             <Calendar className="mr-2 h-4 w-4" />
             Schedule Report
           </Button>
-          <Button>
+          <Button onClick={() => setReportFormOpen(true)}>
             <FileText className="mr-2 h-4 w-4" />
             New Report
           </Button>

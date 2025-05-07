@@ -399,7 +399,11 @@ export default function BudgetPlanningPage() {
               )}
             </CardContent>
             <CardFooter>
-              <Button variant="outline" className="w-full">
+              <Button 
+                variant="outline" 
+                className="w-full"
+                onClick={() => setBudgetFormOpen(true)}
+              >
                 <PlusCircle className="mr-2 h-4 w-4" />
                 New Budget
               </Button>
@@ -552,43 +556,40 @@ export default function BudgetPlanningPage() {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {selectedBudget?.categories.map((category) => (
-                          <>
-                            <TableRow key={category.id}>
-                              <TableCell className="font-medium">{category.name}</TableCell>
-                              <TableCell>{formatCurrency(category.planned)}</TableCell>
-                              <TableCell>{formatCurrency(category.actual)}</TableCell>
-                              <TableCell className={category.variance < 0 ? 'text-destructive' : 'text-success'}>
-                                {formatCurrency(category.variance)}
+                        {selectedBudget?.categories.flatMap((category) => [
+                          <TableRow key={`category-${category.id}`}>
+                            <TableCell className="font-medium">{category.name}</TableCell>
+                            <TableCell>{formatCurrency(category.planned)}</TableCell>
+                            <TableCell>{formatCurrency(category.actual)}</TableCell>
+                            <TableCell className={category.variance < 0 ? 'text-destructive' : 'text-success'}>
+                              {formatCurrency(category.variance)}
+                            </TableCell>
+                            <TableCell>
+                              <CategoryStatus status={category.status} percentUsed={category.percentUsed} />
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <Button variant="ghost" size="sm">View</Button>
+                            </TableCell>
+                          </TableRow>,
+                          ...(category.subCategories?.map((subCategory) => (
+                            <TableRow key={`subcategory-${subCategory.id}`} className="bg-muted/40">
+                              <TableCell className="pl-8">
+                                <span className="text-muted-foreground">└</span> {subCategory.name}
+                              </TableCell>
+                              <TableCell>{formatCurrency(subCategory.planned)}</TableCell>
+                              <TableCell>{formatCurrency(subCategory.actual)}</TableCell>
+                              <TableCell className={subCategory.variance < 0 ? 'text-destructive' : 'text-success'}>
+                                {formatCurrency(subCategory.variance)}
                               </TableCell>
                               <TableCell>
-                                <CategoryStatus status={category.status} percentUsed={category.percentUsed} />
+                                <CategoryStatus status={subCategory.status} percentUsed={subCategory.percentUsed} />
                               </TableCell>
                               <TableCell className="text-right">
                                 <Button variant="ghost" size="sm">View</Button>
                               </TableCell>
                             </TableRow>
-                            
-                            {category.subCategories?.map((subCategory) => (
-                              <TableRow key={subCategory.id} className="bg-muted/40">
-                                <TableCell className="pl-8">
-                                  <span className="text-muted-foreground">└</span> {subCategory.name}
-                                </TableCell>
-                                <TableCell>{formatCurrency(subCategory.planned)}</TableCell>
-                                <TableCell>{formatCurrency(subCategory.actual)}</TableCell>
-                                <TableCell className={subCategory.variance < 0 ? 'text-destructive' : 'text-success'}>
-                                  {formatCurrency(subCategory.variance)}
-                                </TableCell>
-                                <TableCell>
-                                  <CategoryStatus status={subCategory.status} percentUsed={subCategory.percentUsed} />
-                                </TableCell>
-                                <TableCell className="text-right">
-                                  <Button variant="ghost" size="sm">View</Button>
-                                </TableCell>
-                              </TableRow>
-                            ))}
-                          </>
-                        ))}
+                          )) || [])
+                        ])}
                       </TableBody>
                     </Table>
                   </div>

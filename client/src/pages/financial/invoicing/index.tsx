@@ -24,6 +24,7 @@ import {
   FileCheck,
   RefreshCcw
 } from 'lucide-react';
+import { InvoiceFormDialog } from '@/components/financial/invoice-form-dialog';
 
 import {
   Card,
@@ -244,6 +245,7 @@ export default function InvoicingPage() {
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedInvoiceId, setSelectedInvoiceId] = useState<string | null>(null);
+  const [invoiceFormOpen, setInvoiceFormOpen] = useState(false);
   
   // This would be replaced with a real API query in production
   const { data: invoices, isLoading } = useQuery({
@@ -294,6 +296,8 @@ export default function InvoicingPage() {
 
   return (
     <div className="container mx-auto p-6">
+      <InvoiceFormDialog open={invoiceFormOpen} onOpenChange={setInvoiceFormOpen} />
+      
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Invoicing</h1>
@@ -306,7 +310,7 @@ export default function InvoicingPage() {
             <Download className="mr-2 h-4 w-4" />
             Batch Export
           </Button>
-          <Button>
+          <Button onClick={() => setInvoiceFormOpen(true)}>
             <PlusCircle className="mr-2 h-4 w-4" />
             New Invoice
           </Button>
