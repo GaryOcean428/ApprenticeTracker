@@ -17,6 +17,7 @@ import {
   Share2,
   DollarSign
 } from 'lucide-react';
+import { BudgetFormDialog } from '@/components/financial/budget-form-dialog';
 
 import {
   Card,
@@ -254,6 +255,7 @@ const CategoryStatus = ({ status, percentUsed }: { status: BudgetCategory['statu
 export default function BudgetPlanningPage() {
   const { toast } = useToast();
   const [selectedBudgetId, setSelectedBudgetId] = useState('budget-2025-q2');
+  const [budgetFormOpen, setBudgetFormOpen] = useState(false);
   
   // This would be replaced with a real API query in production
   const { data: budgets, isLoading } = useQuery({
@@ -298,6 +300,8 @@ export default function BudgetPlanningPage() {
 
   return (
     <div className="container mx-auto p-6">
+      <BudgetFormDialog open={budgetFormOpen} onOpenChange={setBudgetFormOpen} />
+      
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Budget Planning</h1>
@@ -310,7 +314,7 @@ export default function BudgetPlanningPage() {
             <Download className="mr-2 h-4 w-4" />
             Export
           </Button>
-          <Button>
+          <Button onClick={() => setBudgetFormOpen(true)}>
             <PlusCircle className="mr-2 h-4 w-4" />
             New Budget
           </Button>

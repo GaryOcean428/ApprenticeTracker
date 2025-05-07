@@ -47,6 +47,7 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { DatePickerWithRange } from '@/components/date-range-picker';
 import { useToast } from '@/hooks/use-toast';
+import { ExpenseFormDialog } from '@/components/financial/expense-form-dialog';
 
 // Types
 type Expense = {
@@ -159,6 +160,7 @@ const ExpenseStatusBadge = ({ status }: { status: Expense['status'] }) => {
 export default function ExpensesPage() {
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
+  const [expenseFormOpen, setExpenseFormOpen] = useState(false);
 
   // This would be replaced with a real API query in production
   const { data: expenses, isLoading } = useQuery({
@@ -179,6 +181,8 @@ export default function ExpensesPage() {
 
   return (
     <div className="container mx-auto p-6">
+      <ExpenseFormDialog open={expenseFormOpen} onOpenChange={setExpenseFormOpen} />
+      
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Expense Tracking</h1>
@@ -191,7 +195,7 @@ export default function ExpensesPage() {
             <Download className="mr-2 h-4 w-4" />
             Export
           </Button>
-          <Button>
+          <Button onClick={() => setExpenseFormOpen(true)}>
             <Plus className="mr-2 h-4 w-4" />
             New Expense
           </Button>
