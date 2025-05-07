@@ -566,6 +566,30 @@ function Router() {
             </div>
           );
         }} />
+        <ProtectedRoute path="/timesheets/approvals" component={() => {
+          return (
+            <div className="p-8">
+              <h1 className="text-2xl font-bold mb-4">Timesheet Approval Workflow</h1>
+              <p className="text-muted-foreground mb-4">This page is currently under development.</p>
+            </div>
+          );
+        }} />
+        <ProtectedRoute path="/timesheets/payroll" component={() => {
+          return (
+            <div className="p-8">
+              <h1 className="text-2xl font-bold mb-4">Payroll Export</h1>
+              <p className="text-muted-foreground mb-4">This page is currently under development.</p>
+            </div>
+          );
+        }} />
+        <ProtectedRoute path="/timesheets/leave" component={() => {
+          return (
+            <div className="p-8">
+              <h1 className="text-2xl font-bold mb-4">Leave Management</h1>
+              <p className="text-muted-foreground mb-4">This page is currently under development.</p>
+            </div>
+          );
+        }} />
         {/* TODO: Create Timesheet details page */}
         <ProtectedRoute path="/timesheets/:id" component={() => {
           const id = window.location.pathname.split('/').pop();
@@ -632,6 +656,40 @@ function Router() {
           return (
             <div className="p-8">
               <h1 className="text-2xl font-bold mb-4">Custom Reports</h1>
+              <p className="text-muted-foreground mb-4">This page is currently under development.</p>
+            </div>
+          );
+        }} />
+
+        {/* Accounts & Finance Routes */}
+        <ProtectedRoute path="/invoicing" component={() => {
+          return (
+            <div className="p-8">
+              <h1 className="text-2xl font-bold mb-4">Invoicing</h1>
+              <p className="text-muted-foreground mb-4">This page is currently under development.</p>
+            </div>
+          );
+        }} />
+        <ProtectedRoute path="/financial-reports" component={() => {
+          return (
+            <div className="p-8">
+              <h1 className="text-2xl font-bold mb-4">Financial Reports</h1>
+              <p className="text-muted-foreground mb-4">This page is currently under development.</p>
+            </div>
+          );
+        }} />
+        <ProtectedRoute path="/budget" component={() => {
+          return (
+            <div className="p-8">
+              <h1 className="text-2xl font-bold mb-4">Budget Planning</h1>
+              <p className="text-muted-foreground mb-4">This page is currently under development.</p>
+            </div>
+          );
+        }} />
+        <ProtectedRoute path="/expenses" component={() => {
+          return (
+            <div className="p-8">
+              <h1 className="text-2xl font-bold mb-4">Expense Tracking</h1>
               <p className="text-muted-foreground mb-4">This page is currently under development.</p>
             </div>
           );
