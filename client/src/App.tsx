@@ -71,6 +71,12 @@ import TemplatesListPage from "./pages/progress-reviews/templates";
 import CreateTemplatePage from "./pages/progress-reviews/templates/create";
 import ReviewsListPage from "./pages/progress-reviews/reviews";
 
+// Financial Pages
+import ExpensesPage from "./pages/financial/expenses";
+import BudgetPage from "./pages/financial/budget";
+import ReportsPage from "./pages/financial/reports";
+import InvoicingPage from "./pages/financial/invoicing";
+
 function Router() {
   const [location] = useLocation();
   const isPublicRoute = [
@@ -312,6 +318,12 @@ function Router() {
             </Suspense>
           );
         }} />
+        
+        {/* Financial Routes */}
+        <ProtectedRoute path="/financial/expenses" component={ExpensesPage} />
+        <ProtectedRoute path="/financial/budget" component={BudgetPage} />
+        <ProtectedRoute path="/financial/reports" component={ReportsPage} />
+        <ProtectedRoute path="/financial/invoicing" component={InvoicingPage} />
         
         {/* VET Training Routes */}
         <ProtectedRoute path="/vet/units" component={UnitsOfCompetencyList} />
