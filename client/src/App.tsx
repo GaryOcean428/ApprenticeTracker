@@ -662,38 +662,46 @@ function Router() {
         }} />
 
         {/* Accounts & Finance Routes */}
-        <ProtectedRoute path="/invoicing" component={() => {
-          return (
-            <div className="p-8">
-              <h1 className="text-2xl font-bold mb-4">Invoicing</h1>
-              <p className="text-muted-foreground mb-4">This page is currently under development.</p>
-            </div>
-          );
-        }} />
-        <ProtectedRoute path="/financial-reports" component={() => {
-          return (
-            <div className="p-8">
-              <h1 className="text-2xl font-bold mb-4">Financial Reports</h1>
-              <p className="text-muted-foreground mb-4">This page is currently under development.</p>
-            </div>
-          );
-        }} />
-        <ProtectedRoute path="/budget" component={() => {
-          return (
-            <div className="p-8">
-              <h1 className="text-2xl font-bold mb-4">Budget Planning</h1>
-              <p className="text-muted-foreground mb-4">This page is currently under development.</p>
-            </div>
-          );
-        }} />
-        <ProtectedRoute path="/expenses" component={() => {
-          return (
-            <div className="p-8">
-              <h1 className="text-2xl font-bold mb-4">Expense Tracking</h1>
-              <p className="text-muted-foreground mb-4">This page is currently under development.</p>
-            </div>
-          );
-        }} />
+        <ProtectedRoute path="/invoicing" component={
+          () => {
+            const InvoicingPage = lazy(() => import("./pages/financial/invoicing"));
+            return (
+              <Suspense fallback={<div className="p-8 flex items-center justify-center"><div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"/></div>}>
+                <InvoicingPage />
+              </Suspense>
+            );
+          }
+        } />
+        <ProtectedRoute path="/financial-reports" component={
+          () => {
+            const FinancialReportsPage = lazy(() => import("./pages/financial/reports"));
+            return (
+              <Suspense fallback={<div className="p-8 flex items-center justify-center"><div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"/></div>}>
+                <FinancialReportsPage />
+              </Suspense>
+            );
+          }
+        } />
+        <ProtectedRoute path="/budget" component={
+          () => {
+            const BudgetPlanningPage = lazy(() => import("./pages/financial/budget"));
+            return (
+              <Suspense fallback={<div className="p-8 flex items-center justify-center"><div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"/></div>}>
+                <BudgetPlanningPage />
+              </Suspense>
+            );
+          }
+        } />
+        <ProtectedRoute path="/expenses" component={
+          () => {
+            const ExpensesPage = lazy(() => import("./pages/financial/expenses"));
+            return (
+              <Suspense fallback={<div className="p-8 flex items-center justify-center"><div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"/></div>}>
+                <ExpensesPage />
+              </Suspense>
+            );
+          }
+        } />
 
         {/* Progress Reviews Module */}
         <ProtectedRoute path="/progress-reviews" component={ProgressReviewsPage} />
