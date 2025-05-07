@@ -334,6 +334,30 @@ function Router() {
         }} />
         <ProtectedRoute path="/vet/qualifications" component={QualificationsList} />
         <ProtectedRoute path="/vet/qualifications/create" component={CreateQualification} />
+        <ProtectedRoute path="/vet/training-packages" component={() => {
+          return (
+            <div className="p-8">
+              <h1 className="text-2xl font-bold mb-4">Training Packages</h1>
+              <p className="text-muted-foreground mb-4">This page is currently under development.</p>
+            </div>
+          );
+        }} />
+        <ProtectedRoute path="/vet/progress" component={() => {
+          return (
+            <div className="p-8">
+              <h1 className="text-2xl font-bold mb-4">VET Progress Tracking</h1>
+              <p className="text-muted-foreground mb-4">This page is currently under development.</p>
+            </div>
+          );
+        }} />
+        <ProtectedRoute path="/vet/assessments" component={() => {
+          return (
+            <div className="p-8">
+              <h1 className="text-2xl font-bold mb-4">Assessment Records</h1>
+              <p className="text-muted-foreground mb-4">This page is currently under development.</p>
+            </div>
+          );
+        }} />
         <Route path="/vet/qualifications/import" component={() => {
           const ImportQualifications = lazy(() => import("./pages/vet/qualifications/import"));
           return (
@@ -479,6 +503,46 @@ function Router() {
         {/* Compliance Routes */}
         <ProtectedRoute path="/compliance" component={ComplianceList} />
         <ProtectedRoute path="/compliance/create" component={CreateComplianceRecord} />
+        <ProtectedRoute path="/compliance/standard-1" component={() => {
+          return (
+            <div className="p-8">
+              <h1 className="text-2xl font-bold mb-4">Standard 1 Requirements</h1>
+              <p className="text-muted-foreground mb-4">This page is currently under development.</p>
+            </div>
+          );
+        }} />
+        <ProtectedRoute path="/compliance/standard-2" component={() => {
+          return (
+            <div className="p-8">
+              <h1 className="text-2xl font-bold mb-4">Standard 2 Requirements</h1>
+              <p className="text-muted-foreground mb-4">This page is currently under development.</p>
+            </div>
+          );
+        }} />
+        <ProtectedRoute path="/compliance/standard-3" component={() => {
+          return (
+            <div className="p-8">
+              <h1 className="text-2xl font-bold mb-4">Standard 3 Requirements</h1>
+              <p className="text-muted-foreground mb-4">This page is currently under development.</p>
+            </div>
+          );
+        }} />
+        <ProtectedRoute path="/compliance/standard-4" component={() => {
+          return (
+            <div className="p-8">
+              <h1 className="text-2xl font-bold mb-4">Standard 4 Requirements</h1>
+              <p className="text-muted-foreground mb-4">This page is currently under development.</p>
+            </div>
+          );
+        }} />
+        <ProtectedRoute path="/compliance/audit" component={() => {
+          return (
+            <div className="p-8">
+              <h1 className="text-2xl font-bold mb-4">Audit Preparation</h1>
+              <p className="text-muted-foreground mb-4">This page is currently under development.</p>
+            </div>
+          );
+        }} />
         {/* TODO: Create Compliance details page */}
         <ProtectedRoute path="/compliance/:id" component={() => {
           const id = window.location.pathname.split('/').pop();
@@ -524,10 +588,50 @@ function Router() {
             </div>
           );
         }} />
+        <ProtectedRoute path="/reports/compliance" component={() => {
+          return (
+            <div className="p-8">
+              <h1 className="text-2xl font-bold mb-4">Compliance Reports</h1>
+              <p className="text-muted-foreground mb-4">This page is currently under development.</p>
+            </div>
+          );
+        }} />
         <ProtectedRoute path="/reports/export" component={() => {
           return (
             <div className="p-8">
               <h1 className="text-2xl font-bold mb-4">Export Options</h1>
+              <p className="text-muted-foreground mb-4">This page is currently under development.</p>
+            </div>
+          );
+        }} />
+        <ProtectedRoute path="/reports/financial" component={() => {
+          return (
+            <div className="p-8">
+              <h1 className="text-2xl font-bold mb-4">Financial Reports</h1>
+              <p className="text-muted-foreground mb-4">This page is currently under development.</p>
+            </div>
+          );
+        }} />
+        <ProtectedRoute path="/reports/apprentice" component={() => {
+          return (
+            <div className="p-8">
+              <h1 className="text-2xl font-bold mb-4">Apprentice Progress Reports</h1>
+              <p className="text-muted-foreground mb-4">This page is currently under development.</p>
+            </div>
+          );
+        }} />
+        <ProtectedRoute path="/reports/host" component={() => {
+          return (
+            <div className="p-8">
+              <h1 className="text-2xl font-bold mb-4">Host Employer Reports</h1>
+              <p className="text-muted-foreground mb-4">This page is currently under development.</p>
+            </div>
+          );
+        }} />
+        <ProtectedRoute path="/reports/custom" component={() => {
+          return (
+            <div className="p-8">
+              <h1 className="text-2xl font-bold mb-4">Custom Reports</h1>
               <p className="text-muted-foreground mb-4">This page is currently under development.</p>
             </div>
           );
