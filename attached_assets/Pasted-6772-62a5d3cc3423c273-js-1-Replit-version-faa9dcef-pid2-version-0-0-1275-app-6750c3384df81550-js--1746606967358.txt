@@ -1,0 +1,82 @@
+6772-62a5d3cc3423c273.js:1 Replit version faa9dcef, pid2 version 0.0.1275
+_app-6750c3384df81550.js:13 
+      /////////////////////
+   ///////////////////////////
+  ////////@@@@@@@//////////////
+  ////////@@@@@@@//////////////
+  ////////@@@@@@@//////////////        Curious and driven?
+  ///////////////@@@@@@@///////        Work with us!
+  ///////////////@@@@@@@///////
+  ///////////////@@@@@@@///////        https://join.replit.com/hack.with.us
+  ////////@@@@@@@//////////////
+  ////////@@@@@@@//////////////
+  ////////@@@@@@#//////////////
+   ///////////////////////////
+      /////////////////////
+      
+_app-6750c3384df81550.js:13 [LaunchDarkly] LaunchDarkly client initialized
+GTRM:1 Banner not shown: beforeinstallpromptevent.preventDefault() called. The page must call beforeinstallpromptevent.prompt() to show the banner.
+_app-6750c3384df81550.js:13 Adding extension: GPT-Replit - ChatGPT in your Repl. Object
+_app-6750c3384df81550.js:13 Adding extension: Perplexity Object
+_app-6750c3384df81550.js:13 Adding extension: Javascript Commands Object
+ [Report Only] Refused to compile or instantiate WebAssembly module because 'unsafe-eval' is not an allowed source of script in the following Content Security Policy directive: "script-src 'self'".
+
+ [Report Only] Refused to compile or instantiate WebAssembly module because 'unsafe-eval' is not an allowed source of script in the following Content Security Policy directive: "script-src 'self'".
+
+GTRM:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+GTRM:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+GTRM:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+GTRM:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+GTRM:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+GTRM:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+api.sorryapp.com/v1/pages/27c7b5fc:1 
+            
+            
+           Failed to load resource: net::ERR_NETWORK_IO_SUSPENDED
+_app-6750c3384df81550.js:15 WebSocket connection to 'wss://replit.com/graphql_subscriptions' failed: 
+(anonymous) @ _app-6750c3384df81550.js:15
+framework-56bc272c67965d03.js:1 Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+_ @ framework-56bc272c67965d03.js:1
+framework-56bc272c67965d03.js:1 Unrecognized feature: 'ambient-light-sensor'.
+_ @ framework-56bc272c67965d03.js:1
+framework-56bc272c67965d03.js:1 Unrecognized feature: 'battery'.
+_ @ framework-56bc272c67965d03.js:1
+framework-56bc272c67965d03.js:1 Unrecognized feature: 'execution-while-not-rendered'.
+_ @ framework-56bc272c67965d03.js:1
+framework-56bc272c67965d03.js:1 Unrecognized feature: 'execution-while-out-of-viewport'.
+_ @ framework-56bc272c67965d03.js:1
+framework-56bc272c67965d03.js:1 Unrecognized feature: 'layout-animations'.
+_ @ framework-56bc272c67965d03.js:1
+framework-56bc272c67965d03.js:1 Unrecognized feature: 'legacy-image-formats'.
+_ @ framework-56bc272c67965d03.js:1
+framework-56bc272c67965d03.js:1 Unrecognized feature: 'navigation-override'.
+_ @ framework-56bc272c67965d03.js:1
+framework-56bc272c67965d03.js:1 Unrecognized feature: 'oversized-images'.
+_ @ framework-56bc272c67965d03.js:1
+framework-56bc272c67965d03.js:1 Unrecognized feature: 'publickey-credentials'.
+_ @ framework-56bc272c67965d03.js:1
+framework-56bc272c67965d03.js:1 Unrecognized feature: 'speaker-selection'.
+_ @ framework-56bc272c67965d03.js:1
+framework-56bc272c67965d03.js:1 Unrecognized feature: 'unoptimized-images'.
+_ @ framework-56bc272c67965d03.js:1
+framework-56bc272c67965d03.js:1 Unrecognized feature: 'unsized-media'.
+_ @ framework-56bc272c67965d03.js:1
+framework-56bc272c67965d03.js:1 Unrecognized feature: 'pointer-lock'.
+_ @ framework-56bc272c67965d03.js:1
+framework-56bc272c67965d03.js:1 Allow attribute will take precedence over 'allowfullscreen'.
+_ @ framework-56bc272c67965d03.js:1
+framework-56bc272c67965d03.js:1 Allow attribute will take precedence over 'allowpaymentrequest'.
+_ @ framework-56bc272c67965d03.js:1
+framework-56bc272c67965d03.js:1 Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+_ @ framework-56bc272c67965d03.js:1
+hook.js:608 Command: hello has unrecognized contributions: editor-context-menu. Valid contributions are commandbar,filetree-context-menu,sidebar-search,editor-context-menu Object
+overrideMethod @ hook.js:608
+hook.js:608 Command: javascript-root-command has unrecognized contributions: commandbar. Valid contributions are commandbar,filetree-context-menu,sidebar-search,editor-context-menu Object
+overrideMethod @ hook.js:608
+stallwart.build.js:1 stallwart: failed ping 1
+
+                
+          
+          
+          
+         Chrome is moving towards a new experience that allows users to choose to browse without third-party cookies.
