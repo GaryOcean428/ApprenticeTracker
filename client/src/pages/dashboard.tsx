@@ -116,12 +116,7 @@ const Dashboard = () => {
       {/* Charts & Progress */}
       <div className="grid gap-6 mb-8 md:grid-cols-2">
         <ApprenticeProgress />
-        
-        <ChartPlaceholder 
-          title="Financial Summary" 
-          icon={PieChart}
-          description="Financial summary chart would appear here"
-        />
+        <FinancialSummary />
       </div>
       
       {/* Recent Activities & Tasks */}
