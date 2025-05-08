@@ -1,40 +1,56 @@
 import express from 'express';
+import { storage } from '../../storage';
 import { db } from '../../db';
-import { whs_inspections } from '@shared/schema';
 import { z } from 'zod';
-import { eq } from 'drizzle-orm';
+import { 
+  whs_inspections,
+  whs_documents,
+  insertInspectionSchema,
+  insertDocumentSchema
+} from '@shared/schema';
+import { eq, desc, asc, sql } from 'drizzle-orm';
+import { isAuthenticated, hasPermission } from '../../middleware/auth';
 
 export function setupInspectionRoutes(router: express.Router) {
-  // Get all inspections with pagination
+  // GET all inspections with pagination
   router.get('/inspections', async (req, res) => {
     try {
-      const page = parseInt(req.query.page as string) || 1;
-      const limit = parseInt(req.query.limit as string) || 10;
+      const page = Number(req.query.page) || 1;
+      const limit = Number(req.query.limit) || 10;
       const offset = (page - 1) * limit;
       
-      const query = db.select().from(whs_inspections).limit(limit).offset(offset);
+      // Filter by status if provided
+      const statusFilter = req.query.status ? 
+        sql`${whs_inspections.status} = ${req.query.status}` : 
+        undefined;
       
-      // Apply filters if provided
-      if (req.query.status) {
-        query.where(eq(whs_inspections.status, req.query.status as string));
+      // Get inspections with pagination
+      const query = db.select()
+        .from(whs_inspections)
+        .orderBy(desc(whs_inspections.inspection_date));
+      
+      if (statusFilter) {
+        query.where(statusFilter);
       }
       
-      // Sort by inspection date descending (newest first)
-      query.orderBy(whs_inspections.inspection_date);
-      
-      const inspections = await query;
+      const inspections = await query
+        .limit(limit)
+        .offset(offset);
       
       // Get total count for pagination
-      const countResult = await db.select({ count: db.fn.count() }).from(whs_inspections);
-      const total = Number(countResult[0]?.count || 0);
+      const totalInspections = await db.select()
+        .from(whs_inspections);
+      
+      const totalCount = totalInspections.length;
+      const totalPages = Math.ceil(totalCount / limit);
       
       res.json({
         inspections,
         pagination: {
-          total,
           page,
           limit,
-          totalPages: Math.ceil(total / limit)
+          totalCount,
+          totalPages
         }
       });
     } catch (error) {
@@ -43,29 +59,126 @@ export function setupInspectionRoutes(router: express.Router) {
     }
   });
   
-  // Basic endpoints for other operations - in a real implementation, these would be fully fleshed out
-  
-  // Get a specific inspection
-  router.get('/inspections/:id', (req, res) => {
-    // Placeholder - would retrieve a specific inspection by ID
-    res.json({ message: 'Inspection details endpoint' });
+  // GET inspection by ID with related data
+  router.get('/inspections/:id', async (req, res) => {
+    try {
+      const id = Number(req.params.id);
+      
+      // Get inspection
+      const [inspection] = await db.select()
+        .from(whs_inspections)
+        .where(sql`${whs_inspections.id} = ${id}`);
+      
+      if (!inspection) {
+        return res.status(404).json({ message: 'Inspection not found' });
+      }
+      
+      // Get documents
+      const documents = await db.select()
+        .from(whs_documents)
+        .where(sql`${whs_documents.inspection_id} = ${id}`);
+      
+      res.json({
+        inspection,
+        documents
+      });
+    } catch (error) {
+      console.error('Error fetching inspection:', error);
+      res.status(500).json({ message: 'Failed to fetch inspection details' });
+    }
   });
   
-  // Create a new inspection
-  router.post('/inspections', (req, res) => {
-    // Placeholder - would create a new inspection
-    res.status(201).json({ message: 'Create inspection endpoint' });
+  // CREATE new inspection
+  router.post('/inspections', hasPermission('whs.create_inspection'), async (req, res) => {
+    try {
+      const validatedData = insertInspectionSchema.parse(req.body);
+      
+      // Create inspection
+      const [newInspection] = await db.insert(whs_inspections)
+        .values(validatedData)
+        .returning();
+      
+      res.status(201).json(newInspection);
+    } catch (error) {
+      console.error('Error creating inspection:', error);
+      res.status(400).json({ 
+        message: 'Failed to create inspection',
+        error: error instanceof Error ? error.message : String(error)
+      });
+    }
   });
   
-  // Update an inspection
-  router.patch('/inspections/:id', (req, res) => {
-    // Placeholder - would update a specific inspection
-    res.json({ message: 'Update inspection endpoint' });
+  // UPDATE inspection
+  router.patch('/inspections/:id', hasPermission('whs.update_inspection'), async (req, res) => {
+    try {
+      const id = Number(req.params.id);
+      
+      // Ensure inspection exists
+      const [existingInspection] = await db.select()
+        .from(whs_inspections)
+        .where(sql`${whs_inspections.id} = ${id}`);
+      
+      if (!existingInspection) {
+        return res.status(404).json({ message: 'Inspection not found' });
+      }
+      
+      // Update inspection
+      const [updatedInspection] = await db.update(whs_inspections)
+        .set(req.body)
+        .where(sql`${whs_inspections.id} = ${id}`)
+        .returning();
+      
+      res.json(updatedInspection);
+    } catch (error) {
+      console.error('Error updating inspection:', error);
+      res.status(400).json({ message: 'Failed to update inspection' });
+    }
   });
   
-  // Delete an inspection
-  router.delete('/inspections/:id', (req, res) => {
-    // Placeholder - would delete a specific inspection
-    res.status(204).send();
+  // DELETE inspection
+  router.delete('/inspections/:id', hasPermission('whs.delete_inspection'), async (req, res) => {
+    try {
+      const id = Number(req.params.id);
+      
+      // Delete inspection
+      await db.delete(whs_inspections)
+        .where(eq(whs_inspections.id, id));
+      
+      res.status(204).end();
+    } catch (error) {
+      console.error('Error deleting inspection:', error);
+      res.status(500).json({ message: 'Failed to delete inspection' });
+    }
+  });
+  
+  // Add document to inspection
+  router.post('/inspections/:inspectionId/documents', hasPermission('whs.update_inspection'), async (req, res) => {
+    try {
+      const inspectionId = Number(req.params.inspectionId);
+      
+      // Ensure inspection exists
+      const [existingInspection] = await db.select()
+        .from(whs_inspections)
+        .where(eq(whs_inspections.id, inspectionId));
+      
+      if (!existingInspection) {
+        return res.status(404).json({ message: 'Inspection not found' });
+      }
+      
+      const documentData = insertDocumentSchema.parse({
+        ...req.body,
+        inspection_id: inspectionId
+      });
+      
+      // Create document
+      const [newDocument] = await db.insert(whs_documents)
+        .values(documentData)
+        .returning();
+      
+      res.status(201).json(newDocument);
+    } catch (error) {
+      console.error('Error adding document:', error);
+      res.status(400).json({ message: 'Failed to add document' });
+    }
   });
 }
