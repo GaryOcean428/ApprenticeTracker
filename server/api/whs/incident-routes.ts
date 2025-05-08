@@ -4,7 +4,7 @@ import { sql } from 'drizzle-orm';
 import { hasPermission } from '../../middleware/auth';
 import { 
   whs_incidents, 
-  whs_incident_witnesses, 
+  whs_witnesses, 
   whs_documents, 
   insertIncidentSchema,
   insertWitnessSchema,
@@ -25,7 +25,7 @@ export function setupIncidentRoutes(router: express.Router) {
         .from(whs_incidents)
         .limit(limit)
         .offset(offset)
-        .orderBy(sql`${whs_incidents.date} DESC`);
+        .orderBy(sql`${whs_incidents.date_occurred} DESC`);
       
       // Get total count for pagination
       const [{ count }] = await db.select({ 
@@ -64,8 +64,8 @@ export function setupIncidentRoutes(router: express.Router) {
       
       // Get witnesses
       const witnesses = await db.select()
-        .from(whs_incident_witnesses)
-        .where(sql`${whs_incident_witnesses.incident_id} = ${id}`);
+        .from(whs_witnesses)
+        .where(sql`${whs_witnesses.incident_id} = ${id}`);
       
       // Get documents
       const documents = await db.select()
@@ -166,7 +166,7 @@ export function setupIncidentRoutes(router: express.Router) {
       });
       
       // Create witness
-      const [newWitness] = await db.insert(whs_incident_witnesses)
+      const [newWitness] = await db.insert(whs_witnesses)
         .values(witnessData)
         .returning();
       
@@ -214,8 +214,8 @@ export function setupIncidentRoutes(router: express.Router) {
       const id = req.params.id;
       
       // Delete witness
-      await db.delete(whs_incident_witnesses)
-        .where(sql`${whs_incident_witnesses.id} = ${id}`);
+      await db.delete(whs_witnesses)
+        .where(sql`${whs_witnesses.id} = ${id}`);
       
       res.status(204).end();
     } catch (error) {

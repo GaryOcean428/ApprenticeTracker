@@ -3,9 +3,9 @@ import { db } from '../../db';
 import { sql } from 'drizzle-orm';
 import { hasPermission } from '../../middleware/auth';
 import { 
-  whs_safety_policies,
+  whs_policies,
   whs_documents,
-  insertSafetyPolicySchema,
+  insertPolicySchema,
   insertDocumentSchema
 } from '@shared/schema/whs';
 
@@ -20,16 +20,16 @@ export function setupPolicyRoutes(router: express.Router) {
       
       // Get policies with pagination
       const policies = await db.select()
-        .from(whs_safety_policies)
+        .from(whs_policies)
         .limit(limit)
         .offset(offset)
-        .orderBy(sql`${whs_safety_policies.created_at} DESC`);
+        .orderBy(sql`${whs_policies.created_at} DESC`);
       
       // Get total count for pagination
       const [{ count }] = await db.select({ 
         count: sql`count(*)::int` 
       })
-      .from(whs_safety_policies);
+      .from(whs_policies);
       
       res.json({
         policies,
@@ -53,8 +53,8 @@ export function setupPolicyRoutes(router: express.Router) {
       
       // Get policy
       const [policy] = await db.select()
-        .from(whs_safety_policies)
-        .where(sql`${whs_safety_policies.id} = ${id}`);
+        .from(whs_policies)
+        .where(sql`${whs_policies.id} = ${id}`);
       
       if (!policy) {
         return res.status(404).json({ message: 'Safety policy not found' });
@@ -81,7 +81,7 @@ export function setupPolicyRoutes(router: express.Router) {
       const validatedData = insertSafetyPolicySchema.parse(req.body);
       
       // Create policy
-      const [newPolicy] = await db.insert(whs_safety_policies)
+      const [newPolicy] = await db.insert(whs_policies)
         .values(validatedData)
         .returning();
       
@@ -102,17 +102,17 @@ export function setupPolicyRoutes(router: express.Router) {
       
       // Ensure policy exists
       const [existingPolicy] = await db.select()
-        .from(whs_safety_policies)
-        .where(sql`${whs_safety_policies.id} = ${id}`);
+        .from(whs_policies)
+        .where(sql`${whs_policies.id} = ${id}`);
       
       if (!existingPolicy) {
         return res.status(404).json({ message: 'Safety policy not found' });
       }
       
       // Update policy
-      const [updatedPolicy] = await db.update(whs_safety_policies)
+      const [updatedPolicy] = await db.update(whs_policies)
         .set(req.body)
-        .where(sql`${whs_safety_policies.id} = ${id}`)
+        .where(sql`${whs_policies.id} = ${id}`)
         .returning();
       
       res.json(updatedPolicy);

@@ -30,7 +30,7 @@ import enrichmentRouter from "./api/enrichment";
 import progressReviewsRouter from "./api/progress-reviews";
 import financialRouter from "./api/financial";
 import complianceRouter from "./api/compliance";
-import whsRouter from "./api/whs";
+import { setupWhsRoutes } from "./api/whs/index";
 import { eq, and } from "drizzle-orm";
 import { db } from "./db"; // Assuming db connection is defined here
 import { users, gtoOrganizations } from "@shared/schema";
@@ -146,7 +146,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/api/fairwork', fairworkRouter); // Enhanced Fair Work API routes
   app.use('/api/financial', financialRouter); // Financial management routes
   app.use('/api/compliance', complianceRouter); // Compliance management routes
-  app.use('/api/whs', whsRouter); // Work Health & Safety routes
+  setupWhsRoutes(app); // Work Health & Safety routes
   
   // Register host employer routes
   registerHostRoutes(app);
