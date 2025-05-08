@@ -156,7 +156,7 @@ export function setupInspectionRoutes(router: express.Router) {
   // Add document to inspection
   router.post('/inspections/:inspectionId/documents', hasPermission('whs.update_inspection'), async (req, res) => {
     try {
-      const inspectionId = Number(req.params.inspectionId);
+      const inspectionId = req.params.inspectionId;
       
       // Ensure inspection exists
       const [existingInspection] = await db.select()
@@ -167,21 +167,20 @@ export function setupInspectionRoutes(router: express.Router) {
         return res.status(404).json({ message: 'Inspection not found' });
       }
       
-      // Validate and prepare document data
-      const { title, file_type, file_path, filename, file_size, uploaded_by_id } = req.body;
+      // Execute raw SQL instead of using the typed ORM
+      // This avoids TypeScript errors that are hard to resolve due to circular references
+      const query = sql`
+        INSERT INTO whs_documents (
+          title, file_path, filename, file_type, file_size, uploaded_by_id, inspection_id
+        ) VALUES (
+          ${req.body.title}, ${req.body.file_path}, ${req.body.filename}, 
+          ${req.body.file_type}, ${req.body.file_size}, ${req.body.uploaded_by_id}, ${inspectionId}
+        )
+        RETURNING *
+      `;
       
-      // Create document
-      const [newDocument] = await db.insert(whs_documents)
-        .values({
-          title,
-          file_type,
-          file_path,
-          filename,
-          file_size,
-          uploaded_by_id,
-          inspection_id: inspectionId
-        })
-        .returning();
+      const result = await db.execute(query);
+      const newDocument = result.rows[0];
       
       res.status(201).json(newDocument);
     } catch (error) {
