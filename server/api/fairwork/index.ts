@@ -39,7 +39,7 @@ router.get('/awards', isAuthenticated, async (req: express.Request, res: express
  * @desc Get an award by code
  * @access Private
  */
-router.get('/awards/:code', isAuthenticated, async (req, res) => {
+router.get('/awards/:code', isAuthenticated, async (req: express.Request, res: express.Response) => {
   try {
     const { code } = req.params;
     const award = await fairWorkApiClient.getAward(code);
@@ -60,7 +60,7 @@ router.get('/awards/:code', isAuthenticated, async (req, res) => {
  * @desc Get classifications for an award
  * @access Private
  */
-router.get('/awards/:code/classifications', isAuthenticated, async (req, res) => {
+router.get('/awards/:code/classifications', isAuthenticated, async (req: express.Request, res: express.Response) => {
   try {
     const { code } = req.params;
     const classifications = await fairWorkApiClient.getAwardClassifications(code);
@@ -76,7 +76,7 @@ router.get('/awards/:code/classifications', isAuthenticated, async (req, res) =>
  * @desc Get pay rates for an award
  * @access Private
  */
-router.get('/awards/:code/pay-rates', isAuthenticated, async (req, res) => {
+router.get('/awards/:code/pay-rates', isAuthenticated, async (req: express.Request, res: express.Response) => {
   try {
     const { code } = req.params;
     const {
