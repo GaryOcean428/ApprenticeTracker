@@ -526,24 +526,21 @@ function Router() {
         <ProtectedRoute path="/compliance/standard-2" component={() => {
           return (
             <div className="p-8">
-              <h1 className="text-2xl font-bold mb-4">Standard 2 Requirements</h1>
-              <p className="text-muted-foreground mb-4">This page is currently under development.</p>
+              <StandardDetail prefix="2" />
             </div>
           );
         }} />
         <ProtectedRoute path="/compliance/standard-3" component={() => {
           return (
             <div className="p-8">
-              <h1 className="text-2xl font-bold mb-4">Standard 3 Requirements</h1>
-              <p className="text-muted-foreground mb-4">This page is currently under development.</p>
+              <StandardDetail prefix="3" />
             </div>
           );
         }} />
         <ProtectedRoute path="/compliance/standard-4" component={() => {
           return (
             <div className="p-8">
-              <h1 className="text-2xl font-bold mb-4">Standard 4 Requirements</h1>
-              <p className="text-muted-foreground mb-4">This page is currently under development.</p>
+              <StandardDetail prefix="4" />
             </div>
           );
         }} />
