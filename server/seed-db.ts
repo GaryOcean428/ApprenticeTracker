@@ -3,6 +3,7 @@ import { InsertUser, InsertApprentice, InsertHostEmployer, InsertTrainingContrac
 import { db } from "./db";
 import { eq } from "drizzle-orm";
 import { seedFairWorkData } from "./seed-fair-work";
+import { importHostEmployers } from "../scripts/import-host-employers";
 
 // Helper function to convert JavaScript Date to ISO string (date part only)
 function formatDate(date: Date): string {
@@ -566,6 +567,15 @@ export async function seedDatabase() {
     
     // Seed Fair Work data (awards, classifications, etc.)
     await seedFairWorkData();
+    
+    // Import host employers from CSV file
+    try {
+      await importHostEmployers();
+      console.log("Host employers imported from CSV successfully!");
+    } catch (error) {
+      console.error("Error importing host employers from CSV:", error);
+      // Continue execution even if importing host employers fails
+    }
     
     console.log("Database seeding completed successfully!");
     return true;

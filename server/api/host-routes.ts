@@ -56,7 +56,7 @@ export function registerHostRoutes(app: Express) {
   // Host Employer Agreements
   
   // Get all agreements for a host employer
-  app.get("/api/host-agreements/:hostId", async (req, res) => {
+  app.get("/api/host-agreements/:hostId", isAuthenticated, hasPermission('view:hosts'), async (req, res) => {
     try {
       const hostId = parseInt(req.params.hostId);
       
@@ -81,7 +81,7 @@ export function registerHostRoutes(app: Express) {
   });
   
   // Get specific agreement
-  app.get("/api/host-agreements/:hostId/:agreementId", async (req, res) => {
+  app.get("/api/host-agreements/:hostId/:agreementId", isAuthenticated, hasPermission('view:hosts'), async (req, res) => {
     try {
       const hostId = parseInt(req.params.hostId);
       const agreementId = parseInt(req.params.agreementId);
@@ -203,7 +203,7 @@ export function registerHostRoutes(app: Express) {
   });
 
   // Placements API Endpoints
-  app.get("/api/hosts/:hostId/placements", async (req, res) => {
+  app.get("/api/hosts/:hostId/placements", isAuthenticated, hasPermission('view:hosts'), async (req, res) => {
     try {
       const hostId = parseInt(req.params.hostId);
       
@@ -242,7 +242,7 @@ export function registerHostRoutes(app: Express) {
   });
 
   // Apprentices API Endpoint - Get all apprentices for a host employer
-  app.get("/api/hosts/:hostId/apprentices", async (req, res) => {
+  app.get("/api/hosts/:hostId/apprentices", isAuthenticated, hasPermission('view:hosts'), async (req, res) => {
     try {
       const hostId = parseInt(req.params.hostId);
       
