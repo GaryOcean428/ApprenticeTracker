@@ -8,6 +8,21 @@ export async function migrateWhsDocuments() {
   console.log('[INFO] Updating WHS documents schema...');
   
   try {
+    // First check if the whs_documents table exists
+    const tableCheckQuery = sql`
+      SELECT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_name = 'whs_documents'
+      );
+    `;
+    
+    const tableExists = await db.execute(tableCheckQuery);
+    
+    if (!tableExists.rows[0]?.exists) {
+      console.log('[INFO] WHS documents table does not exist yet, skipping schema update');
+      return false;
+    }
+    
     // Check if columns already exist to avoid errors on re-running
     const checkColumnsQuery = sql`
       SELECT 
@@ -53,19 +68,10 @@ export async function migrateWhsDocuments() {
     return true;
   } catch (error) {
     console.error('[ERROR] Failed to update WHS documents schema:', error);
-    throw error;
+    // Don't throw error, just return false to allow other migrations to continue
+    return false;
   }
 }
 
-// Run the migration if this file is executed directly
-if (require.main === module) {
-  migrateWhsDocuments()
-    .then(() => {
-      console.log('WHS documents migration completed successfully');
-      process.exit(0);
-    })
-    .catch(error => {
-      console.error('WHS documents migration failed:', error);
-      process.exit(1);
-    });
-}
+// This file is only meant to be imported, not executed directly
+// The migration is executed from server/index.ts

@@ -28,10 +28,12 @@ export function setupIncidentRoutes(router: express.Router) {
         .orderBy(sql`${whs_incidents.date_occurred} DESC`);
       
       // Get total count for pagination
-      const [{ count }] = await db.select({ 
+      const countResult = await db.select({ 
         count: sql`count(*)::int` 
       })
       .from(whs_incidents);
+      
+      const count = countResult[0]?.count || 0;
       
       res.json({
         incidents,
@@ -39,7 +41,7 @@ export function setupIncidentRoutes(router: express.Router) {
           total: count,
           page,
           limit,
-          totalPages: Math.ceil(count / limit)
+          totalPages: Math.ceil(Number(count) / limit)
         }
       });
     } catch (error) {

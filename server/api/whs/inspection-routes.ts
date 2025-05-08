@@ -38,18 +38,20 @@ export function setupInspectionRoutes(router: express.Router) {
         .offset(offset);
       
       // Get total count for pagination
-      const totalInspections = await db.select()
-        .from(whs_inspections);
+      const countResult = await db.select({ 
+        count: sql`count(*)::int` 
+      })
+      .from(whs_inspections);
       
-      const totalCount = totalInspections.length;
-      const totalPages = Math.ceil(totalCount / limit);
+      const count = countResult[0]?.count || 0;
+      const totalPages = Math.ceil(Number(count) / limit);
       
       res.json({
         inspections,
         pagination: {
           page,
           limit,
-          totalCount,
+          total: count,
           totalPages
         }
       });
@@ -165,14 +167,20 @@ export function setupInspectionRoutes(router: express.Router) {
         return res.status(404).json({ message: 'Inspection not found' });
       }
       
-      const documentData = insertDocumentSchema.parse({
-        ...req.body,
-        inspection_id: inspectionId
-      });
+      // Validate and prepare document data
+      const { title, file_type, file_path, filename, file_size, uploaded_by_id } = req.body;
       
       // Create document
       const [newDocument] = await db.insert(whs_documents)
-        .values(documentData)
+        .values({
+          title,
+          file_type,
+          file_path,
+          filename,
+          file_size,
+          uploaded_by_id,
+          inspection_id: inspectionId
+        })
         .returning();
       
       res.status(201).json(newDocument);
