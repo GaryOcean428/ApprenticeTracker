@@ -1,154 +1,141 @@
 # Australian Apprentice Management Platform - Todo List
 
-## High Priority
+## Phase 1: Critical Compliance & Core Operations
 
-### Core Features Completion
-- [x] Complete authentication flow implementation with login/register functionality
-- [x] Implement session management and persistence
-- [ ] Develop multi-factor authentication (MFA) for admin users
-- [ ] Integrate real-time notification system for alerts and messages
-- [x] Implement file upload and document management system
-- [x] Implement payroll system with award rate integration
-- [x] Add enrichment program management functionality
-- [ ] Create progress reviews system with standardized assessment forms
-- [ ] Integrate schedule and calendar system for field officers
-
-### Architecture & Organization
-- [x] Implement clear folder structure (components, services, utils, assets)
-- [x] Apply Single Responsibility Principle across all modules
-- [x] Create scalable architecture pattern (MVC/MVVM)
-- [ ] Implement proper dependency injection patterns
-- [x] Establish clear boundaries between application layers
-- [x] Create service abstractions for business logic
-- [x] Implement proper state management architecture
-
-### Component Development
-- [x] Build reusable atomic components following component-driven development
-- [x] Create proper component hierarchy and composition
-- [x] Develop shared component library with documentation
-- [x] Ensure components are properly typed and validated
-- [x] Implement standardized prop interfaces for all components
-- [x] Create consistent component APIs
-- [x] Develop a component style guide
-
-### Code Quality & Standards
-- [x] Fix TypeScript errors in tga-service.ts focusing on type safety
-- [x] Implement consistent error handling in TGA Service
-- [x] Remove mock data in TGA service
-- [x] Improve SOAP client implementation with better configuration
-- [ ] Add proper validation for user inputs
-- [ ] Replace direct SQL queries with parameterized queries
-- [ ] Implement comprehensive error handling for all API routes
-- [ ] Add input sanitization to prevent injection attacks
-- [ ] Establish and enforce coding standards
-- [ ] Configure linting and formatting tools (ESLint, Prettier)
-- [ ] Add detailed code comments and documentation
-- [ ] Implement static code analysis
-
-### Public-facing Website
-- [ ] Develop and style home page with modern design
-- [ ] Create about page with company information
-- [ ] Implement services page with GTO service offerings
-- [ ] Build find-apprenticeship page with search functionality
-- [ ] Develop host-apprentice page for employer information
-- [ ] Create contact page with form submission
-- [ ] Implement portal login page with authentication
-
-### TGA Integration
-- [x] Fix SOAP client implementation to prevent failures
-- [x] Implement robust error handling for TGA API
-- [x] Add proper caching mechanism for qualification data
-- [ ] Implement connection pooling for database operations
-- [ ] Add scheduled task for automatic qualification data updates
-- [ ] Implement real-time verification of qualification status
-- [ ] Expand unit of competency search functionality
-
-### Authentication & Security
-- [ ] Implement proper authentication checks on all routes
-- [ ] Add role-based access control for admin-only endpoints
-- [ ] Ensure authentication middleware is consistently applied
-- [ ] Implement JWT token refresh mechanisms
-- [ ] Add secure password reset functionality
-- [ ] Implement account lockout after failed login attempts
-- [ ] Add IP-based rate limiting for sensitive endpoints
-
-## Medium Priority
-
-### Database Optimization
-- [ ] Add indexes on frequently queried fields (qualificationCode, etc.)
-- [ ] Optimize queries using JOINs instead of multiple separate queries
-- [ ] Implement query caching for frequently accessed data
-- [ ] Add database transaction support for critical operations
-- [ ] Implement soft delete functionality for data integrity
-
-### Code Organization
-- [ ] Reorganize routes into dedicated API directory
-- [ ] Create utility modules for common functions
-- [ ] Centralize error handling
-- [ ] Refactor components for better reusability
-- [ ] Implement service layer pattern for business logic
-
-### Apprentice Management
-- [ ] Field officer case notes management
-- [ ] Apprentice progress tracking dashboard
-- [ ] Training milestone tracking and alerts
-- [ ] Apprentice feedback and assessment system
-- [ ] Apprentice recruitment and onboarding workflow
-- [ ] Qualification progress visualization
-- [ ] Performance review and reporting tools
-- [ ] Training plans development and tracking
-- [ ] Apprentice skills development system
-- [ ] Certifications management for apprentices
-- [ ] Apprentice assessment records and reporting
-
-### Host Employer Management
-- [ ] Host employer monitoring dashboard
-- [ ] Vacancy management and matching system
-- [ ] Host employer satisfaction tracking
-- [ ] Field officer visit scheduling and tracking
-- [ ] Automation of placement arrangements
-- [ ] Host employer preferred qualifications tracking
-
-### Compliance System
-- [ ] Fair Work compliance reporting tools
-- [ ] GTO standards compliance tracking
-- [ ] Automated compliance alerts and reminders
-- [ ] Document verification and validation system
-- [ ] Audit trail for compliance activities
-- [ ] Compliance dashboard with status indicators
-
-### Work Health and Safety (WHS) System
+### 1. Work Health and Safety (WHS) Module Completion
 - [x] Create database tables for WHS management
-- [ ] Implement incident/hazard reporting system
-- [ ] Create risk assessment tools and register
-- [ ] Develop WHS induction and training tracking
-- [ ] Build host employer WHS compliance checklist
-- [ ] Create site audit records management
-- [ ] Implement WHS information dissemination tools
-- [ ] Design WHS dashboard with key metrics
+- [x] Implement WHS API endpoints
+- [x] Standardize naming conventions across WHS module
+- [x] Create basic WHS dashboard UI
+- [x] Implement incident/hazard reporting system
+- [ ] Complete form validation for all WHS forms
+- [ ] Implement comprehensive incident management workflow
+- [ ] Create risk assessment tools and register with export features
+- [ ] Add site inspection scheduling functionality
+- [ ] Enhance WHS dashboard with improved metrics visualization
+- [ ] Develop host employer WHS compliance checklist
+- [ ] Implement WHS reporting with PDF/Excel export
+- [ ] Build WHS training tracking integration
 
-## Low Priority
+### 2. State and Federal Government Claims Management
+- [ ] Design database schema for claims management
+- [ ] Implement apprentice/trainee eligibility tracking
+- [ ] Create claim submission workflow with document attachments
+- [ ] Build approval process for claim submissions
+- [ ] Develop claim status tracking system
+- [ ] Implement payment reconciliation tools
+- [ ] Create dashboards for claims monitoring
+- [ ] Build reports for financial forecasting based on claims
 
-### Document Management
-- [ ] Document generation system for contracts and forms
-- [ ] Template management for standardized documents
-- [ ] Version control for documents
-- [ ] Electronic signature integration
-- [ ] Document expiry tracking and notifications
+### 3. Host Employer Billing & Rate Calculation
+- [x] Begin rate calculation engine development
+- [ ] Complete Fair Work API integration for award rates
+- [ ] Implement configurable on-cost calculations
+- [ ] Build apprentice level/progress-based rate adjustments
+- [ ] Create invoice generation system with templates
+- [ ] Implement invoice approval workflow
+- [ ] Develop debtor management and aging reports
+- [ ] Build payment tracking and reconciliation tools
 
-### Reporting & Analytics
-- [ ] Custom report builder interface
-- [ ] Scheduled report generation and delivery
-- [ ] Data visualization dashboard with charts and graphs
-- [ ] Export functionality for reports (PDF, Excel, CSV)
-- [ ] Historical data analysis and trending
+### 4. Enhanced Onboarding Module
+- [ ] Design onboarding workflow engine
+- [ ] Create checklist-based system for tracking completion
+- [ ] Implement document collection and verification process
+- [ ] Build pre-employment checks integration
+- [ ] Develop information provision tracking with audit trail
+- [ ] Create electronic acknowledgment system
+- [ ] Build onboarding progress dashboard
+- [ ] Implement onboarding reporting tools
 
-### Field Officer Tools
-- [ ] Mobile-optimized interface for field activities
-- [ ] Offline capability for remote location visits
-- [ ] Site visit checklist and reporting tools
-- [ ] GPS tracking for site visits
-- [ ] Photo and evidence capture functionality
+### 5. Core Compliance Module Enhancements
+- [ ] Implement multi-jurisdictional configuration
+- [ ] Build comprehensive audit trail functionality
+- [ ] Create compliance reporting dashboard
+- [ ] Develop automated compliance reminders
+- [ ] Implement document verification system
+- [ ] Build compliance task management tools
+
+### 6. Cross-Cutting Technical Improvements
+- [x] Fix wouter routing issues in WHS module
+- [ ] Add proper validation for all user inputs
+- [ ] Implement comprehensive error handling across all API routes
+- [ ] Add input sanitization to prevent injection attacks
+- [ ] Establish stronger TypeScript typing across the application
+- [ ] Configure consistent linting and formatting tools
+- [ ] Implement proper authentication checks on all routes
+
+## Phase 2: Lifecycle Management & Field Operations
+
+### 1. Apprentice/Trainee Lifecycle Management
+- [ ] Build mentoring module for scheduling and session logging
+- [ ] Enhance training progress tracking with competency-based monitoring
+- [ ] Create performance management module for reviews and feedback
+- [ ] Implement rotation planning and management system
+- [ ] Develop apprentice support request tracking system
+- [ ] Build qualification progress visualization tools
+- [ ] Create comprehensive profile view with timeline of activities
+
+### 2. Field Officer Mobile Toolkit
+- [ ] Develop mobile-optimized interface for field activities
+- [ ] Implement structured digital forms for site visits
+- [ ] Create offline data capture capabilities
+- [ ] Build real-time synchronization when connection available
+- [ ] Implement secure access to required information
+- [ ] Add photo and evidence capture functionality
+- [ ] Create visit scheduling and calendar integration
+
+### 3. Host Employer Portal
+- [ ] Create secure web portal for host employers
+- [ ] Implement host employer agreement management system
+- [ ] Develop communication tools for host engagement
+- [ ] Build apprentice information access with appropriate permissions
+- [ ] Create vacancy posting and management functionality
+- [ ] Implement invoice viewing and payment tracking
+- [ ] Add host employer satisfaction tracking
+
+## Phase 3: Advanced Features & Refinements
+
+### 1. Advanced Applicant Tracking
+- [ ] Implement automated resume parsing
+- [ ] Create sophisticated candidate search filters
+- [ ] Build job board posting integration
+- [ ] Develop applicant communication workflows
+- [ ] Create candidate ranking and matching system
+- [ ] Build interview scheduling and feedback tools
+
+### 2. Enhanced Reporting & Analytics
+- [ ] Develop customizable reporting engine
+- [ ] Create role-based dashboards for different user types
+- [ ] Implement data visualization tools for key metrics
+- [ ] Build scheduled report generation and distribution
+- [ ] Create export functionality for various formats
+- [ ] Implement historical data analysis and trending
+
+### 3. Advanced Document Management
+- [ ] Add document version control
+- [ ] Implement granular access permissions
+- [ ] Create comprehensive audit trails for documents
+- [ ] Build document generation system for standardized forms
+- [ ] Implement electronic signature integration
+- [ ] Add document expiry tracking and notifications
+
+### 4. UX/UI Refinements
+- [ ] Conduct usability testing and implement feedback
+- [ ] Fix inconsistent styling between modules
+- [ ] Enhance responsive design for all device types
+- [ ] Implement dark mode toggle
+- [ ] Create consistent error state visualizations
+- [ ] Build guided tours for new users
+- [ ] Improve loading states and transitions
+
+### 5. Integration Capabilities
+- [ ] Expand Training.gov.au integration functionality
+- [ ] Build RTO management systems integration
+- [ ] Develop accounting software connections
+- [ ] Create additional government portal integrations
+- [ ] Implement data exchange protocols for partners
+
+## Ongoing Tasks
 
 ### Documentation
 - [x] Create docs folder with essential documentation
@@ -160,53 +147,38 @@
 - [x] Create competitive analysis of GTO software
 - [x] Summarize National Standards for GTOs
 - [x] Validate roadmap against regulations and industry standards
+- [x] Create implementation tracking documents
 - [ ] Add JSDoc comments to all functions and classes
 - [ ] Create OpenAPI/Swagger documentation for all endpoints
 - [ ] Create comprehensive user guide
 - [ ] Document database schema and relationships
 
-### Performance Optimization
-- [ ] Implement lazy loading for routes and components
-- [ ] Optimize assets and bundle size
-- [ ] Apply proper caching strategies
-- [ ] Implement performance monitoring
-- [ ] Add code splitting to improve initial load time
-- [ ] Optimize rendering performance
-- [ ] Implement data prefetching strategies
-- [ ] Establish metrics for performance assessment
+### Technical Debt & Infrastructure
+- [ ] Implement proper dependency injection patterns
+- [ ] Replace direct SQL queries with parameterized queries
+- [ ] Optimize database queries for performance
+- [ ] Reorganize routes into dedicated API directory
+- [ ] Add database transaction support for critical operations
+- [ ] Implement soft delete functionality for data integrity
+- [ ] Create utility modules for common functions
+- [ ] Set up unit and integration tests for critical components
+- [ ] Configure continuous integration/deployment pipeline
 
-### Testing
-- [ ] Set up unit tests for components and utilities
-- [ ] Implement integration tests for critical flows
-- [ ] Add end-to-end testing for key user journeys
-- [ ] Maintain good test coverage
-- [ ] Set up continuous integration testing pipeline
-- [ ] Create test fixtures and mocks
-- [ ] Implement snapshot testing for components
-- [ ] Design test plans for major features
+### Security Enhancements
+- [ ] Conduct security audit of the application
+- [ ] Implement role-based access control for all pages and features
+- [ ] Add multi-factor authentication for admin users
+- [ ] Implement JWT token refresh mechanisms
+- [ ] Add secure password reset functionality
+- [ ] Implement account lockout after failed login attempts
+- [ ] Add IP-based rate limiting for sensitive endpoints
+- [ ] Conduct penetration testing and address findings
 
-### Development Environment
-- [ ] Configure development tools and build processes
-- [ ] Set up continuous integration/deployment pipeline
-- [ ] Implement version control best practices
-- [ ] Create comprehensive README and documentation
-- [ ] Establish development workflows and standards
-- [ ] Set up proper environment configuration management
-- [ ] Create developer onboarding procedures
-
-### UI/UX Improvements
-- [ ] Fix inconsistent styling between modules
-- [ ] Add loading states in all data-dependent components
-- [ ] Improve responsive design implementation for mobile devices
-- [ ] Add proper validation feedback to all forms
-- [ ] Implement dark mode toggle
-- [ ] Create consistent error state visualizations
-- [ ] Implement guided tours for new users
-
-### Accessibility
+### Accessibility Improvements
 - [ ] Add ARIA attributes to all interactive elements
 - [ ] Fix color contrast issues throughout the application
 - [ ] Implement keyboard navigation for all interactions
 - [ ] Ensure screen reader compatibility for all content
 - [ ] Add focus indicators for keyboard users
 - [ ] Implement skip navigation links
+- [ ] Conduct accessibility audit and implement recommendations
