@@ -169,10 +169,10 @@ export const MAIN_NAV_SECTIONS: NavSection[] = [
     subItems: [
       [
         { title: "Charge Rates", href: "/charge-rates" },
-        { title: "Invoicing", href: "/invoicing" },
-        { title: "Financial Reports", href: "/financial-reports" },
-        { title: "Budget Planning", href: "/budget" },
-        { title: "Expense Tracking", href: "/expenses" }
+        { title: "Invoicing", href: "/financial/invoicing" },
+        { title: "Financial Reports", href: "/financial/reports" },
+        { title: "Budget Planning", href: "/financial/budget" },
+        { title: "Expense Tracking", href: "/financial/expenses" }
       ]
     ]
   },
