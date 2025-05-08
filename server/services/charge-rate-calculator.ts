@@ -13,6 +13,7 @@ import {
   penaltyRules,
   allowanceRules
 } from '@shared/schema';
+import { awardRateCalculator } from './award-rate-calculator';
 
 /**
  * Types for charge rate calculations
@@ -367,13 +368,121 @@ export class ChargeRateCalculator {
           )
         );
 
-      // Default base pay rate - would normally come from payRates table based on award
-      // and classification, but for now we'll use a default value
+      // Initialize pay rate to a default value
       let payRate = 25.0; // Default hourly rate
+      let awardCode: string | null = null;
+      let awardId: number | undefined;
+      let apprenticeYear = 1;
+      let isAdult = true;
+      let hasCompletedYear12 = true;
+      
+      // Try to get award ID and code from related tables
+      try {
+        // Check if there's an award ID directly associated with the placement
+        if (existingPlacement) {
+          if ('awardId' in existingPlacement && existingPlacement.awardId) {
+            awardId = parseInt(existingPlacement.awardId.toString());
+            logger.info(`Using award ID ${awardId} from placement`);
+            
+            // Fetch award code from the awards table
+            const [award] = await db
+              .select()
+              .from(awards)
+              .where(eq(awards.id, awardId));
+              
+            if (award) {
+              awardCode = award.code;
+              logger.info(`Found award code ${awardCode} for ID ${awardId}`);
+            }
+          }
+          
+          // Get apprentice year and education information if available in placement
+          if ('apprenticeYear' in existingPlacement && existingPlacement.apprenticeYear) {
+            apprenticeYear = parseInt(existingPlacement.apprenticeYear.toString());
+          }
+          
+          if ('isAdult' in existingPlacement && existingPlacement.isAdult !== undefined) {
+            isAdult = existingPlacement.isAdult === true || existingPlacement.isAdult === 'true';
+          }
+          
+          if ('hasCompletedYear12' in existingPlacement && existingPlacement.hasCompletedYear12 !== undefined) {
+            hasCompletedYear12 = existingPlacement.hasCompletedYear12 === true || existingPlacement.hasCompletedYear12 === 'true';
+          }
+          
+          logger.info(`Apprentice details: Year ${apprenticeYear}, Adult: ${isAdult}, Year 12: ${hasCompletedYear12}`);
+        }
+        
+        // If no award ID yet, check if apprentice has a training contract with an award
+        if (!awardId && apprentice && apprentice.id) {
+          // Get apprentice training details
+          if ('apprenticeYear' in apprentice && apprentice.apprenticeYear) {
+            apprenticeYear = parseInt(apprentice.apprenticeYear.toString());
+          }
+          
+          if ('isAdult' in apprentice && apprentice.isAdult !== undefined) {
+            isAdult = apprentice.isAdult === true || apprentice.isAdult === 'true';
+          }
+          
+          if ('hasCompletedYear12' in apprentice && apprentice.hasCompletedYear12 !== undefined) {
+            hasCompletedYear12 = apprentice.hasCompletedYear12 === true || apprentice.hasCompletedYear12 === 'true';
+          }
+          
+          // Fetch training contract for the apprentice to see if there's an award associated
+          const [trainingContract] = await db
+            .select()
+            .from(placements)
+            .where(eq(placements.apprenticeId, apprentice.id))
+            .limit(1);
+            
+          if (trainingContract && 'awardId' in trainingContract && trainingContract.awardId) {
+            awardId = parseInt(trainingContract.awardId.toString());
+            logger.info(`Using award ID ${awardId} from training contract`);
+            
+            // Fetch award code from the awards table
+            const [award] = await db
+              .select()
+              .from(awards)
+              .where(eq(awards.id, awardId));
+              
+            if (award) {
+              awardCode = award.code;
+              logger.info(`Found award code ${awardCode} for ID ${awardId}`);
+            }
+          }
+        }
+      } catch (error) {
+        logger.warn('Error determining award information for charge rate calculation', { error });
+      }
+      
+      // If we have an award code, get the pay rate from Fair Work API
+      if (awardCode) {
+        try {
+          logger.info(`Getting award pay rate for award ${awardCode} and apprentice year ${apprenticeYear}`);
+          const fairworkRate = await awardRateCalculator.getApprenticePayRate(
+            awardCode,
+            apprenticeYear,
+            isAdult,
+            hasCompletedYear12
+          );
+          
+          if (fairworkRate) {
+            logger.info(`Using Fair Work award rate: $${fairworkRate}/hr`);
+            payRate = fairworkRate;
+          } else {
+            logger.warn(`No Fair Work rate found for award ${awardCode}, using default rate of $${payRate}/hr`);
+          }
+        } catch (error) {
+          logger.error('Error getting Fair Work award rate', { error, awardCode });
+        }
+      } else {
+        logger.info(`No award code found, using default rate of $${payRate}/hr`);
+      }
       
       // Override with negotiated rate from placement if it exists
       if (existingPlacement && existingPlacement.negotiatedRate) {
-        payRate = parseFloat(existingPlacement.negotiatedRate.toString());
+        const negotiatedRate = parseFloat(existingPlacement.negotiatedRate.toString());
+        logger.info(`Using negotiated rate: $${negotiatedRate}/hr from placement`);
+        payRate = negotiatedRate;
       }
 
       // Use custom rates from host employer if available, otherwise use default values
@@ -388,34 +497,6 @@ export class ChargeRateCalculator {
         defaultMargin: customMargin,
         adminRate: adminRate
       };
-
-      // Get award ID if available in placement or from the apprentice
-      let awardId: number | undefined;
-      
-      // Try to get award ID from related tables
-      try {
-        // Check if there's an award ID directly associated with the placement
-        if (existingPlacement && 'awardId' in existingPlacement && existingPlacement.awardId) {
-          awardId = parseInt(existingPlacement.awardId.toString());
-          logger.info(`Using award ID ${awardId} from placement`);
-        } 
-        // If not, check if apprentice has a training contract with an award
-        else if (apprentice && apprentice.id) {
-          // Fetch training contract for the apprentice to see if there's an award associated
-          const [trainingContract] = await db
-            .select()
-            .from(placements)
-            .where(eq(placements.apprenticeId, apprentice.id))
-            .limit(1);
-            
-          if (trainingContract && 'awardId' in trainingContract && trainingContract.awardId) {
-            awardId = parseInt(trainingContract.awardId.toString());
-            logger.info(`Using award ID ${awardId} from training contract`);
-          }
-        }
-      } catch (error) {
-        logger.warn('Error determining award ID for charge rate calculation', { error });
-      }
       
       // Calculate the charge rate
       const calculation = await this.calculateChargeRate(
