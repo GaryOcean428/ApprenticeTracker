@@ -14,6 +14,7 @@ import { migrateProgressReviewsSchema } from "./migrate-progress-reviews";
 import { migrateHostEmployersFields } from "./migrate-host-employers-fields";
 import { migrateWHS } from "./migrate-whs";
 import { migrateWhsDocuments } from "./migrate-whs-documents";
+import { migrateWhsRiskAssessments } from "./migrate-whs-risk-assessments";
 import { initializeScheduledTasks } from "./scheduled-tasks";
 
 const app = express();
@@ -92,6 +93,10 @@ app.use((req, res, next) => {
     // Update WHS documents schema with missing relationship fields
     await migrateWhsDocuments();
     log("WHS documents schema updated successfully");
+    
+    // Update WHS Risk Assessments schema with new fields
+    await migrateWhsRiskAssessments();
+    log("WHS Risk Assessments schema updated successfully");
   } catch (error) {
     log("Error migrating database schema: " + error);
   }

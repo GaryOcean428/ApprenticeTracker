@@ -78,7 +78,15 @@ export function setupRiskAssessmentRoutes(router: express.Router) {
   // CREATE new risk assessment
   router.post('/risk-assessments', hasPermission('whs.create_risk_assessment'), async (req, res) => {
     try {
-      const validatedData = insertRiskAssessmentSchema.parse(req.body);
+      // Handle hazards data correctly (ensure it's stored as JSON)
+      const data = { ...req.body };
+      
+      // Make sure hazards is properly formatted as JSON
+      if (data.hazards && typeof data.hazards !== 'string') {
+        data.hazards = JSON.stringify(data.hazards);
+      }
+      
+      const validatedData = insertRiskAssessmentSchema.parse(data);
       
       // Create risk assessment
       const [newAssessment] = await db.insert(whs_risk_assessments)
