@@ -7,6 +7,7 @@ import {
   CardTitle,
   CardDescription 
 } from '@/components/ui/card';
+import NewRiskAssessmentForm from './new-risk-assessment-form';
 import {
   Table,
   TableBody,
@@ -21,6 +22,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogDescription,
 } from '@/components/ui/dialog';
 import {
   Select,
@@ -32,6 +34,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import { 
   FileSpreadsheet,
@@ -50,8 +53,31 @@ export default function RiskAssessmentsList() {
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState<string | null>(null);
   const [hostEmployerId, setHostEmployerId] = useState<string | null>(null);
+  const [newAssessmentDialogOpen, setNewAssessmentDialogOpen] = useState(false);
 
-  const { data, isLoading, refetch } = useQuery({
+  interface RiskAssessment {
+    id: string;
+    title: string;
+    location: string;
+    assessment_date: string;
+    review_date?: string;
+    status: string;
+    description: string;
+    created_at: string;
+    updated_at: string;
+  }
+
+  interface RiskAssessmentResponse {
+    assessments: RiskAssessment[];
+    pagination: {
+      total: number;
+      page: number;
+      limit: number;
+      totalPages: number;
+    };
+  }
+
+  const { data, isLoading, refetch } = useQuery<RiskAssessmentResponse>({
     queryKey: ['/api/whs/risk-assessments', { page, limit, search, status, hostEmployerId }],
     retry: false,
   });
@@ -94,10 +120,29 @@ export default function RiskAssessmentsList() {
               <CardTitle>Risk Assessments</CardTitle>
               <CardDescription>Workplace risk assessments and evaluations</CardDescription>
             </div>
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              New Assessment
-            </Button>
+            <Dialog open={newAssessmentDialogOpen} onOpenChange={setNewAssessmentDialogOpen}>
+              <DialogTrigger asChild>
+                <Button>
+                  <Plus className="h-4 w-4 mr-2" />
+                  New Assessment
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-4xl">
+                <DialogHeader>
+                  <DialogTitle>Create New Risk Assessment</DialogTitle>
+                  <DialogDescription>
+                    Document a workplace hazard assessment to identify and control risks
+                  </DialogDescription>
+                </DialogHeader>
+                <NewRiskAssessmentForm 
+                  onSuccess={() => {
+                    setNewAssessmentDialogOpen(false);
+                    refetch();
+                  }} 
+                  onCancel={() => setNewAssessmentDialogOpen(false)}
+                />
+              </DialogContent>
+            </Dialog>
           </div>
         </CardHeader>
         <CardContent>
