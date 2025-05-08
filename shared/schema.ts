@@ -153,6 +153,8 @@ export const hostEmployers = pgTable("host_employers", {
   safetyRating: integer("safety_rating"),
   complianceStatus: text("compliance_status").notNull().default("pending"),
   notes: text("notes"),
+  // Organization relationship
+  organizationId: integer("organization_id").references(() => gtoOrganizations.id),
   // AVETMISS and Fair Work fields
   employerIdentifier: text("employer_identifier").unique(),     // AVETMISS employer identifier
   employerLegalName: text("employer_legal_name"),               // Legal business name
@@ -178,6 +180,16 @@ export const hostEmployers = pgTable("host_employers", {
 export const insertHostEmployerSchema = createInsertSchema(hostEmployers).omit({
   id: true,
 });
+
+// Define host employer relationships
+export const hostEmployerRelations = relations(hostEmployers, ({ one, many }) => ({
+  organization: one(gtoOrganizations, {
+    fields: [hostEmployers.organizationId],
+    references: [gtoOrganizations.id],
+  }),
+  placements: many(placements),
+  quotes: many(quotes)
+}));
 
 // Training Contracts
 export const trainingContracts = pgTable("training_contracts", {
@@ -328,6 +340,22 @@ export const insertTimesheetDetailSchema = createInsertSchema(timesheetDetails).
   id: true,
 });
 
+// Define timesheet detail relationships
+export const timesheetDetailsRelations = relations(timesheetDetails, ({ one }) => ({
+  timesheet: one(timesheets, {
+    fields: [timesheetDetails.timesheetId],
+    references: [timesheets.id],
+  }),
+  awardRate: one(payRates, {
+    fields: [timesheetDetails.awardRateId],
+    references: [payRates.id],
+  }),
+  penaltyRule: one(penaltyRules, {
+    fields: [timesheetDetails.penaltyRuleId],
+    references: [penaltyRules.id],
+  })
+}));
+
 // Timesheet Calculations
 export const timesheetCalculations = pgTable("timesheet_calculations", {
   id: serial("id").primaryKey(),
@@ -350,6 +378,14 @@ export const insertTimesheetCalculationSchema = createInsertSchema(timesheetCalc
   calculatedAt: true,
   payrollProcessedDate: true,
 });
+
+// Define timesheet calculation relationships
+export const timesheetCalculationsRelations = relations(timesheetCalculations, ({ one }) => ({
+  timesheet: one(timesheets, {
+    fields: [timesheetCalculations.timesheetId],
+    references: [timesheets.id],
+  })
+}));
 
 // Activity Logs
 export const activityLogs = pgTable("activity_logs", {
@@ -539,6 +575,22 @@ export const insertChargeRateCalculationSchema = createInsertSchema(chargeRateCa
   approvedDate: true,
 });
 
+// Define charge rate calculation relationships
+export const chargeRateCalculationsRelations = relations(chargeRateCalculations, ({ one }) => ({
+  apprentice: one(apprentices, {
+    fields: [chargeRateCalculations.apprenticeId],
+    references: [apprentices.id],
+  }),
+  hostEmployer: one(hostEmployers, {
+    fields: [chargeRateCalculations.hostEmployerId],
+    references: [hostEmployers.id],
+  }),
+  approver: one(users, {
+    fields: [chargeRateCalculations.approvedBy],
+    references: [users.id],
+  })
+}));
+
 // Quote Management
 export const quotes = pgTable("quotes", {
   id: serial("id").primaryKey(),
@@ -565,6 +617,20 @@ export const insertQuoteSchema = createInsertSchema(quotes).omit({
   updatedAt: true,
 });
 
+// Define quote relationships
+export const quotesRelations = relations(quotes, ({ one, many }) => ({
+  hostEmployer: one(hostEmployers, {
+    fields: [quotes.hostEmployerId],
+    references: [hostEmployers.id],
+  }),
+  creator: one(users, {
+    fields: [quotes.createdBy],
+    references: [users.id],
+  }),
+  placements: many(placements),
+  lineItems: many(quoteLineItems)
+}));
+
 // Quote Line Items
 export const quoteLineItems = pgTable("quote_line_items", {
   id: serial("id").primaryKey(),
@@ -584,6 +650,18 @@ export const quoteLineItems = pgTable("quote_line_items", {
 export const insertQuoteLineItemSchema = createInsertSchema(quoteLineItems).omit({
   id: true,
 });
+
+// Define quote line item relationships
+export const quoteLineItemsRelations = relations(quoteLineItems, ({ one }) => ({
+  quote: one(quotes, {
+    fields: [quoteLineItems.quoteId],
+    references: [quotes.id],
+  }),
+  apprentice: one(apprentices, {
+    fields: [quoteLineItems.apprenticeId],
+    references: [apprentices.id],
+  })
+}));
 
 // Fair Work Compliance Logs
 export const fairworkComplianceLogs = pgTable("fairwork_compliance_logs", {
@@ -609,6 +687,22 @@ export const insertFairworkComplianceLogSchema = createInsertSchema(fairworkComp
   id: true,
   createdAt: true,
 });
+
+// Define Fair Work compliance log relationships
+export const fairworkComplianceLogsRelations = relations(fairworkComplianceLogs, ({ one }) => ({
+  employee: one(apprentices, {
+    fields: [fairworkComplianceLogs.employeeId],
+    references: [apprentices.id],
+  }),
+  timesheet: one(timesheets, {
+    fields: [fairworkComplianceLogs.timesheetId],
+    references: [timesheets.id],
+  }),
+  payRate: one(payRates, {
+    fields: [fairworkComplianceLogs.payRateId],
+    references: [payRates.id],
+  })
+}));
 
 // Enterprise Agreements
 export const enterpriseAgreements = pgTable("enterprise_agreements", {
