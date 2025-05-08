@@ -117,6 +117,16 @@
 - [ ] Audit trail for compliance activities
 - [ ] Compliance dashboard with status indicators
 
+### Work Health and Safety (WHS) System
+- [x] Create database tables for WHS management
+- [ ] Implement incident/hazard reporting system
+- [ ] Create risk assessment tools and register
+- [ ] Develop WHS induction and training tracking
+- [ ] Build host employer WHS compliance checklist
+- [ ] Create site audit records management
+- [ ] Implement WHS information dissemination tools
+- [ ] Design WHS dashboard with key metrics
+
 ## Low Priority
 
 ### Document Management
@@ -149,6 +159,7 @@
 - [x] Document gap analysis and improvement areas
 - [x] Create competitive analysis of GTO software
 - [x] Summarize National Standards for GTOs
+- [x] Validate roadmap against regulations and industry standards
 - [ ] Add JSDoc comments to all functions and classes
 - [ ] Create OpenAPI/Swagger documentation for all endpoints
 - [ ] Create comprehensive user guide

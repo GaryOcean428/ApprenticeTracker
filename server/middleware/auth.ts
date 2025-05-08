@@ -101,3 +101,54 @@ export function hasAnyRole(roles: string[]) {
     next();
   };
 }
+
+/**
+ * Middleware to check if the user has the required permission
+ * 
+ * @param permission The specific permission required to access the route
+ */
+export function hasPermission(permission: string) {
+  return (req: Request, res: Response, next: NextFunction) => {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Unauthorized - Not authenticated' });
+    }
+    
+    // For development purposes, assume admin and developer roles have all permissions
+    if (process.env.NODE_ENV === 'development' && ['admin', 'developer'].includes(req.user.role)) {
+      return next();
+    }
+    
+    // Check if user has the required permission
+    // In a real implementation, this would check against a permissions array in the user object
+    if (!req.user.permissions || !req.user.permissions.includes(permission)) {
+      return res.status(403).json({ error: 'Forbidden - Insufficient permissions' });
+    }
+    
+    next();
+  };
+}
+
+/**
+ * Middleware to check if the user has any of the required permissions
+ * 
+ * @param permissions An array of permissions where having any one is sufficient
+ */
+export function hasAnyPermission(permissions: string[]) {
+  return (req: Request, res: Response, next: NextFunction) => {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Unauthorized - Not authenticated' });
+    }
+    
+    // For development purposes, assume admin and developer roles have all permissions
+    if (process.env.NODE_ENV === 'development' && ['admin', 'developer'].includes(req.user.role)) {
+      return next();
+    }
+    
+    // Check if user has any of the required permissions
+    if (!req.user.permissions || !permissions.some(p => req.user.permissions.includes(p))) {
+      return res.status(403).json({ error: 'Forbidden - Insufficient permissions' });
+    }
+    
+    next();
+  };
+}
