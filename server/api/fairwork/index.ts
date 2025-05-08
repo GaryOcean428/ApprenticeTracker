@@ -1,378 +1,250 @@
 /**
- * Fair Work API Routes
- *
- * These routes provide access to Fair Work data and synchronization functionality.
+ * Fair Work API routes
+ * 
+ * These routes provide access to Fair Work Commission data including awards,
+ * classifications, and pay rates.
  */
 
-import { Router } from "express";
-import { FairWorkApiClient } from "../../services/fairwork/api-client";
-import { createFairWorkSyncScheduler } from "../../services/fairwork/scheduler";
-import logger from "../../utils/logger";
-import { authenticateUser, requirePermission, hasPermission } from "../../middleware/permissions";
-import { db } from "../../db";
-import { eq } from "drizzle-orm";
-import { awards, awardClassifications, penaltyRules, allowanceRules } from "@shared/schema";
+import express from 'express';
+import { body, param, query, validationResult } from 'express-validator';
+import { awardRateCalculator } from '../../services/award-rate-calculator';
+import { fairWorkDataSync } from '../../services/fairwork/data-sync';
+import { FairWorkApiClient } from '../../services/fairwork/api-client';
+import logger from '../../utils/logger';
+import { isAuthenticated } from '../../middleware/auth';
 
-// Create router
-const router = Router();
-
-// Dedicated debug logger setup
-function debugLog(message: string, data?: any) {
-  console.log(`[FAIRWORK_DEBUG] ${message}`, data || '');
-}
-
-// Test routes for development purposes - no authentication required
-router.get("/api_test_fairwork_dev", async (req, res) => {
-  try {
-    logger.info("Testing Fair Work API connection");
-    
-    // Get 10 most recent awards
-    const recentAwards = await db
-      .select()
-      .from(awards)
-      .limit(10);
-    
-    return res.json({
-      success: true,
-      message: "Fair Work API test route",
-      data: {
-        awards: recentAwards,
-      },
-    });
-  } catch (error) {
-    logger.error("Error testing Fair Work API", { error });
-    return res.status(500).json({
-      success: false,
-      error: "Failed to test Fair Work API",
-    });
-  }
+const router = express.Router();
+const fairWorkApiClient = new FairWorkApiClient({
+  baseUrl: process.env.FAIRWORK_API_URL || 'https://api.fairwork.gov.au',
+  apiKey: process.env.FAIRWORK_API_KEY || ''
 });
-
-// Testing manual sync without authentication - DEV ONLY
-router.get("/api/test_sync_award/:awardCode", async (req, res) => {
-  try {
-    const { awardCode } = req.params;
-    logger.info(`Testing award sync for ${awardCode}`);
-    
-    // Start the sync for this award only
-    await syncScheduler.triggerSync({
-      forceUpdate: true, // Force update to refresh data
-      targetAwardCode: awardCode,
-    });
-    
-    // Return success
-    return res.json({
-      success: true,
-      message: `Triggered manual sync for award ${awardCode}. Check logs for results.`,
-    });
-  } catch (error) {
-    logger.error("Error testing award sync", { error });
-    return res.status(500).json({
-      success: false,
-      error: "Failed to test award sync",
-    });
-  }
-});
-
-// Test route for classifications - no authentication required
-router.get("/debug_test_only_classifications/:awardId", async (req, res) => {
-  try {
-    const { awardId } = req.params;
-    logger.info(`Testing Fair Work API - getting classifications for award ID ${awardId}`);
-    debugLog(`Testing Fair Work API - getting classifications for award ID ${awardId}`);
-    
-    // Get classifications for this award
-    const classifications = await db
-      .select()
-      .from(awardClassifications)
-      .where(eq(awardClassifications.awardId, parseInt(awardId)));
-      
-    logger.info(`Found ${classifications.length} classifications for award ID ${awardId}`);
-    
-    return res.json({
-      success: true,
-      message: "Fair Work API classifications test route",
-      data: {
-        classifications,
-      },
-    });
-  } catch (error) {
-    logger.error("Error testing Fair Work API classifications", { error });
-    return res.status(500).json({
-      success: false,
-      error: "Failed to test Fair Work API classifications",
-    });
-  }
-});
-
-// Initialize API client
-// Remove any trailing paths from the base URL as the client will handle those
-let baseUrl = process.env.FAIRWORK_API_URL || "https://api.fairwork.gov.au";
-// If the URL includes '/api/v1/awards', extract just the base domain
-if (baseUrl.includes('/api/v1/')) {
-  baseUrl = baseUrl.split('/api/v1/')[0];
-}
-
-const apiClient = new FairWorkApiClient({
-  baseUrl: baseUrl,
-  apiKey: process.env.FAIRWORK_API_KEY || "",
-});
-
-// Initialize scheduler
-const syncScheduler = createFairWorkSyncScheduler(apiClient);
 
 /**
  * @route GET /api/fairwork/awards
- * @description Get all awards from our local database
- * @access Admin, Developer
+ * @desc Get all awards
+ * @access Private
  */
-router.get("/awards", authenticateUser, requirePermission("read", "award"), async (req, res) => {
+router.get('/awards', isAuthenticated, async (req, res) => {
   try {
-    logger.info("Getting all awards from database");
-    
-    // Query the database for all awards
-    const allAwards = await db.select().from(awards);
-    
-    return res.json({
-      success: true,
-      data: allAwards,
-    });
+    const awards = await fairWorkApiClient.getActiveAwards();
+    res.json(awards);
   } catch (error) {
-    logger.error("Error fetching awards", { error });
-    return res.status(500).json({
-      success: false,
-      error: "Failed to fetch awards",
-    });
+    logger.error('Error fetching awards', { error });
+    res.status(500).json({ error: 'Failed to fetch awards' });
   }
 });
 
 /**
  * @route GET /api/fairwork/awards/:code
- * @description Get a specific award and its classifications
- * @access Admin, Developer
+ * @desc Get an award by code
+ * @access Private
  */
-router.get("/awards/:code", authenticateUser, requirePermission("read", "award"), async (req, res) => {
+router.get('/awards/:code', isAuthenticated, async (req, res) => {
   try {
     const { code } = req.params;
-    logger.info(`Getting award ${code} from database`);
-    
-    // Get the award
-    const [award] = await db.select().from(awards).where(eq(awards.code, code));
+    const award = await fairWorkApiClient.getAward(code);
     
     if (!award) {
-      return res.status(404).json({
-        success: false,
-        error: `Award with code ${code} not found`,
-      });
+      return res.status(404).json({ error: 'Award not found' });
     }
     
-    // Get the classifications for this award
-    const classifications = await db
-      .select()
-      .from(awardClassifications)
-      .where(eq(awardClassifications.awardId, award.id));
-    
-    return res.json({
-      success: true,
-      data: {
-        award,
-        classifications,
-      },
-    });
+    res.json(award);
   } catch (error) {
-    logger.error("Error fetching award", { error, awardCode: req.params.code });
-    return res.status(500).json({
-      success: false,
-      error: "Failed to fetch award",
-    });
+    logger.error('Error fetching award', { error });
+    res.status(500).json({ error: 'Failed to fetch award' });
   }
 });
 
 /**
  * @route GET /api/fairwork/awards/:code/classifications
- * @description Get classifications for a specific award
- * @access Admin, Developer
+ * @desc Get classifications for an award
+ * @access Private
  */
-router.get("/awards/:code/classifications", authenticateUser, requirePermission("read", "award"), async (req, res) => {
+router.get('/awards/:code/classifications', isAuthenticated, async (req, res) => {
   try {
     const { code } = req.params;
-    logger.info(`Getting classifications for award ${code}`);
-    
-    // Get the award
-    const [award] = await db.select().from(awards).where(eq(awards.code, code));
-    
-    if (!award) {
-      return res.status(404).json({
-        success: false,
-        error: `Award with code ${code} not found`,
-      });
-    }
-    
-    // Get the classifications for this award
-    const classifications = await db
-      .select()
-      .from(awardClassifications)
-      .where(eq(awardClassifications.awardId, award.id));
-    
-    return res.json({
-      success: true,
-      data: classifications,
-    });
+    const classifications = await fairWorkApiClient.getAwardClassifications(code);
+    res.json(classifications);
   } catch (error) {
-    logger.error("Error fetching award classifications", { error, awardCode: req.params.code });
-    return res.status(500).json({
-      success: false,
-      error: "Failed to fetch award classifications",
-    });
+    logger.error('Error fetching classifications', { error });
+    res.status(500).json({ error: 'Failed to fetch classifications' });
   }
 });
 
 /**
- * @route GET /api/fairwork/awards/:code/penalties
- * @description Get penalties for a specific award
- * @access Admin, Developer
+ * @route GET /api/fairwork/awards/:code/pay-rates
+ * @desc Get pay rates for an award
+ * @access Private
  */
-router.get("/awards/:code/penalties", authenticateUser, requirePermission("read", "award"), async (req, res) => {
+router.get('/awards/:code/pay-rates', isAuthenticated, async (req, res) => {
   try {
     const { code } = req.params;
-    logger.info(`Getting penalties for award ${code}`);
+    const {
+      classificationLevel,
+      classificationFixedId,
+      employeeRateTypeCode,
+      operativeFrom,
+      operativeTo
+    } = req.query;
     
-    // Get the award
-    const [award] = await db.select().from(awards).where(eq(awards.code, code));
+    const options: any = {};
     
-    if (!award) {
-      return res.status(404).json({
-        success: false,
-        error: `Award with code ${code} not found`,
-      });
-    }
+    if (classificationLevel) options.classificationLevel = parseInt(classificationLevel as string);
+    if (classificationFixedId) options.classificationFixedId = parseInt(classificationFixedId as string);
+    if (employeeRateTypeCode) options.employeeRateTypeCode = employeeRateTypeCode as string;
+    if (operativeFrom) options.operativeFrom = operativeFrom as string;
+    if (operativeTo) options.operativeTo = operativeTo as string;
     
-    // Get the penalties for this award
-    const penalties = await db
-      .select()
-      .from(penaltyRules)
-      .where(eq(penaltyRules.awardId, award.id));
-    
-    return res.json({
-      success: true,
-      data: penalties,
-    });
+    const payRates = await fairWorkApiClient.getPayRates(code, options);
+    res.json(payRates);
   } catch (error) {
-    logger.error("Error fetching award penalties", { error, awardCode: req.params.code });
-    return res.status(500).json({
-      success: false,
-      error: "Failed to fetch award penalties",
-    });
+    logger.error('Error fetching pay rates', { error });
+    res.status(500).json({ error: 'Failed to fetch pay rates' });
   }
 });
 
 /**
- * @route GET /api/fairwork/awards/:code/allowances
- * @description Get allowances for a specific award
- * @access Admin, Developer
+ * @route GET /api/fairwork/apprentice-rates
+ * @desc Get apprentice pay rates
+ * @access Private
  */
-router.get("/awards/:code/allowances", authenticateUser, requirePermission("read", "award"), async (req, res) => {
+router.get('/apprentice-rates', isAuthenticated, [
+  query('award').notEmpty().withMessage('Award code is required'),
+  query('year').isInt({ min: 1, max: 4 }).withMessage('Apprentice year must be between 1 and 4'),
+  query('isAdult').optional().isBoolean().withMessage('isAdult must be a boolean'),
+  query('hasCompletedYear12').optional().isBoolean().withMessage('hasCompletedYear12 must be a boolean')
+], async (req: express.Request, res: express.Response) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+  
   try {
-    const { code } = req.params;
-    logger.info(`Getting allowances for award ${code}`);
+    const award = req.query.award as string;
+    const year = parseInt(req.query.year as string);
+    const isAdult = req.query.isAdult === 'true';
+    const hasCompletedYear12 = req.query.hasCompletedYear12 === 'true';
     
-    // Get the award
-    const [award] = await db.select().from(awards).where(eq(awards.code, code));
+    const rate = await awardRateCalculator.getApprenticePayRate(
+      award,
+      year,
+      isAdult,
+      hasCompletedYear12
+    );
     
-    if (!award) {
-      return res.status(404).json({
-        success: false,
-        error: `Award with code ${code} not found`,
-      });
+    if (rate === null) {
+      return res.status(404).json({ error: 'Pay rate not found' });
     }
     
-    // Get the allowances for this award
-    const allowances = await db
-      .select()
-      .from(allowanceRules)
-      .where(eq(allowanceRules.awardId, award.id));
-    
-    return res.json({
-      success: true,
-      data: allowances,
+    res.json({ 
+      rate,
+      award,
+      year,
+      isAdult,
+      hasCompletedYear12
     });
   } catch (error) {
-    logger.error("Error fetching award allowances", { error, awardCode: req.params.code });
-    return res.status(500).json({
-      success: false,
-      error: "Failed to fetch award allowances",
+    logger.error('Error fetching apprentice rate', { error });
+    res.status(500).json({ error: 'Failed to fetch apprentice rate' });
+  }
+});
+
+/**
+ * @route GET /api/fairwork/classification-rates
+ * @desc Get classification pay rates
+ * @access Private
+ */
+router.get('/classification-rates', isAuthenticated, [
+  query('award').notEmpty().withMessage('Award code is required'),
+  query('classification').notEmpty().withMessage('Classification code is required')
+], async (req: express.Request, res: express.Response) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+  
+  try {
+    const award = req.query.award as string;
+    const classification = req.query.classification as string;
+    
+    const rate = await awardRateCalculator.getClassificationPayRate(
+      award,
+      classification
+    );
+    
+    if (rate === null) {
+      return res.status(404).json({ error: 'Pay rate not found' });
+    }
+    
+    res.json({ 
+      rate,
+      award,
+      classification
     });
+  } catch (error) {
+    logger.error('Error fetching classification rate', { error });
+    res.status(500).json({ error: 'Failed to fetch classification rate' });
   }
 });
 
 /**
  * @route POST /api/fairwork/sync
- * @description Trigger a manual sync of Fair Work data
- * @access Admin, Developer
+ * @desc Manually trigger a sync of Fair Work data
+ * @access Private (admin only)
  */
-router.post("/sync", authenticateUser, requirePermission("update", "award"), async (req, res) => {
+router.post('/sync', isAuthenticated, async (req: express.Request, res: express.Response) => {
   try {
-    const { forceUpdate, awardCode } = req.body;
-    logger.info("Triggering manual Fair Work data sync", { forceUpdate, awardCode });
+    // Check if the user has admin permissions
+    if (!req.user || req.user.role !== 'admin') {
+      return res.status(403).json({ error: 'Insufficient permissions' });
+    }
+    
+    const forceRefresh = req.body.forceRefresh === true;
     
     // Start the sync in the background
-    syncScheduler.triggerSync({
-      forceUpdate: !!forceUpdate,
-      targetAwardCode: awardCode,
-    })
-      .then(() => {
-        logger.info("Manual Fair Work data sync completed successfully");
-      })
-      .catch(error => {
-        logger.error("Error in manual Fair Work data sync", { error });
-      });
+    fairWorkDataSync.syncAllData(forceRefresh).catch(error => {
+      logger.error('Background sync failed', { error });
+    });
     
-    // Return immediately to avoid timeout
-    return res.json({
-      success: true,
-      message: "Fair Work data sync started. This process may take several minutes to complete.",
+    res.json({ 
+      message: 'Sync started',
+      forceRefresh
     });
   } catch (error) {
-    logger.error("Error starting Fair Work data sync", { error });
-    return res.status(500).json({
-      success: false,
-      error: "Failed to start Fair Work data sync",
-    });
+    logger.error('Error starting sync', { error });
+    res.status(500).json({ error: 'Failed to start sync' });
   }
 });
 
 /**
- * @route GET /api/fairwork/sync/status
- * @description Get the status of the Fair Work data sync
- * @access Admin, Developer
+ * @route GET /api/fairwork/status
+ * @desc Get status of Fair Work API integration
+ * @access Private (admin only)
  */
-router.get("/sync/status", authenticateUser, requirePermission("read", "award"), async (req, res) => {
+router.get('/status', isAuthenticated, async (req, res) => {
   try {
-    logger.info("Getting Fair Work data sync status");
+    // Check if the user has admin permissions
+    if (!req.user || req.user.role !== 'admin') {
+      return res.status(403).json({ error: 'Insufficient permissions' });
+    }
     
-    const lastSyncTime = syncScheduler.getLastSyncTime();
-    const nextSyncTime = syncScheduler.getNextSyncTime();
+    // Test a basic API call to check if it's working
+    const awards = await fairWorkApiClient.getActiveAwards();
     
-    return res.json({
-      success: true,
-      data: {
-        lastSyncTime,
-        nextSyncTime,
-        status: lastSyncTime ? "active" : "pending",
-      },
+    res.json({
+      status: 'operational',
+      apiUrl: process.env.FAIRWORK_API_URL,
+      lastSync: new Date().toISOString(), // In a real app, we'd store this timestamp
+      awardCount: awards.length
     });
   } catch (error) {
-    logger.error("Error getting Fair Work data sync status", { error });
-    return res.status(500).json({
-      success: false,
-      error: "Failed to get Fair Work data sync status",
+    logger.error('Error checking API status', { error });
+    res.status(500).json({ 
+      status: 'error',
+      error: 'API connection failed',
+      message: error.message || 'Unknown error'
     });
   }
-});
-
-// Start the sync scheduler when the server starts
-syncScheduler.start().catch(error => {
-  logger.error("Failed to start Fair Work sync scheduler", { error });
 });
 
 export default router;

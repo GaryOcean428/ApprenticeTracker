@@ -76,10 +76,10 @@ export class AwardRateCalculator {
       // since we don't have a direct table model
       const query = sql`
         SELECT * FROM pay_rates 
-        WHERE award_id = ${award.id} 
-          AND apprentice_year = ${apprenticeYear}
-          AND is_adult = ${isAdult}
-          AND has_completed_year12 = ${hasCompletedYear12}
+        WHERE classification_id IN (
+          SELECT id FROM award_classifications WHERE award_id = ${award.id}
+        )
+          AND apprenticeship_year = ${apprenticeYear}
           AND is_apprentice_rate = true
         ORDER BY effective_from DESC
         LIMIT 1
@@ -99,20 +99,44 @@ export class AwardRateCalculator {
       try {
         logger.info(`No local apprentice pay rate found, trying Fair Work API for award ${awardCode}`);
         
-        // This would fetch current rates from Fair Work API
-        // Note: This is a simplified example. The real implementation would need to:
-        // 1. Find the correct classification for apprentices in the award
-        // 2. Get the rates for that classification
-        // 3. Apply any apprentice-specific rules based on year, age, education
-        
+        // Find the appropriate apprentice classification in the award
         const apprenticeClassification = await this.getApprenticeClassification(award.id);
         if (!apprenticeClassification) {
           logger.warn(`No apprentice classification found for award ${awardCode}`);
           return null;
         }
         
-        // A real implementation would get pay rates from Fair Work API
-        // For now, we'll use a calculated rate based on award year and classification level
+        // Fetch the pay rates from Fair Work API
+        const fairWorkRates = await this.fairworkApiClient.getPayRates(awardCode, {
+          classificationFixedId: parseInt(apprenticeClassification.fair_work_level_code || '0'),
+          employeeRateTypeCode: 'AP' // 'AP' is for Apprentice
+        });
+        
+        // Find the specific rate that matches our criteria
+        let matchingRate = fairWorkRates.find(rate => 
+          rate.is_apprentice_rate && 
+          rate.apprenticeship_year === apprenticeYear
+        );
+        
+        // If we found a rate from Fair Work, use it
+        if (matchingRate) {
+          const apiRate = matchingRate.hourly_rate;
+          logger.info(`Found Fair Work apprentice pay rate: $${apiRate}/hr`);
+          
+          // Cache this rate in the database for future use
+          await this.cacheApprenticePayRate(
+            award.id, 
+            apprenticeClassification.id, 
+            apprenticeYear, 
+            apiRate, 
+            isAdult, 
+            hasCompletedYear12
+          );
+          
+          return apiRate;
+        }
+        
+        // If we couldn't find a specific rate, calculate a default one
         const calculatedRate = this.calculateDefaultApprenticeRate(apprenticeYear, isAdult, hasCompletedYear12);
         logger.info(`Calculated apprentice pay rate: $${calculatedRate}/hr`);
         
@@ -181,7 +205,6 @@ export class AwardRateCalculator {
       const payRateQuery = sql`
         SELECT * FROM pay_rates
         WHERE classification_id = ${classification.id}
-          AND award_id = ${award.id}
           AND is_apprentice_rate = false
         ORDER BY effective_from DESC
         LIMIT 1
@@ -201,9 +224,40 @@ export class AwardRateCalculator {
       try {
         logger.info(`No local classification pay rate found, trying Fair Work API for award ${awardCode}`);
         
-        // This would fetch current rates from Fair Work API
-        // A real implementation would get pay rates from Fair Work API
-        // For now, we'll use a calculated rate based on classification level
+        // Fetch pay rates from Fair Work API
+        const fairWorkRates = await this.fairworkApiClient.getPayRates(awardCode, {
+          classificationFixedId: parseInt(classificationCode),
+          employeeRateTypeCode: 'STD' // Standard adult rate
+        });
+        
+        // Find the most recent valid rate
+        const currentDate = new Date().toISOString().split('T')[0];
+        const validRates = fairWorkRates.filter(rate => 
+          !rate.is_apprentice_rate &&
+          (!rate.effective_to || rate.effective_to >= currentDate)
+        );
+        
+        // Sort by effective date descending to get the most recent
+        validRates.sort((a, b) => 
+          new Date(b.effective_from).getTime() - new Date(a.effective_from).getTime()
+        );
+        
+        // If we found rates from Fair Work API
+        if (validRates.length > 0) {
+          const apiRate = validRates[0].hourly_rate;
+          logger.info(`Found Fair Work classification pay rate: $${apiRate}/hr`);
+          
+          // Cache this rate in the database for future use
+          await this.cacheClassificationPayRate(
+            award.id,
+            classification.id,
+            apiRate
+          );
+          
+          return apiRate;
+        }
+        
+        // If no rates found from API, calculate a default
         const calculatedRate = this.calculateDefaultClassificationRate(classification.level);
         logger.info(`Calculated classification pay rate: $${calculatedRate}/hr`);
         
@@ -374,7 +428,7 @@ export class AwardRateCalculator {
       const query = sql`
         INSERT INTO pay_rates (
           classification_id, hourly_rate, effective_from, source, 
-          is_apprentice_rate, apprentice_year, is_adult, has_completed_year12
+          is_apprentice_rate, apprenticeship_year, pay_rate_type
         ) VALUES (
           ${classificationId}, 
           ${hourlyRate.toString()}, 
@@ -382,8 +436,7 @@ export class AwardRateCalculator {
           'calculated',
           TRUE,
           ${apprenticeYear},
-          ${isAdult},
-          ${hasCompletedYear12}
+          ${isAdult ? "'Adult'" : hasCompletedYear12 ? "'Year 12'" : "'Junior'"}
         )
       `;
       
