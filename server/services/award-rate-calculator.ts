@@ -72,26 +72,27 @@ export class AwardRateCalculator {
         return null;
       }
 
-      // Then, find apprentice pay rates for this award
-      const apprenticeRates = await db
-        .select()
-        .from(apprenticePayRates)
-        .where(
-          and(
-            eq(apprenticePayRates.awardId, award.id),
-            eq(apprenticePayRates.apprenticeYear, apprenticeYear),
-            eq(apprenticePayRates.isAdult, isAdult),
-            eq(apprenticePayRates.hasCompletedYear12, hasCompletedYear12)
-          )
-        )
-        .orderBy(desc(apprenticePayRates.effectiveFrom))
-        .limit(1);
+      // Then, find apprentice pay rates for this award using a custom SQL query
+      // since we don't have a direct table model
+      const query = sql`
+        SELECT * FROM pay_rates 
+        WHERE award_id = ${award.id} 
+          AND apprentice_year = ${apprenticeYear}
+          AND is_adult = ${isAdult}
+          AND has_completed_year12 = ${hasCompletedYear12}
+          AND is_apprentice_rate = true
+        ORDER BY effective_from DESC
+        LIMIT 1
+      `;
+      
+      const result = await db.execute(query);
+      const apprenticeRates = result.rows;
       
       // If we found a rate, return it
-      if (apprenticeRates.length > 0) {
-        const rate = apprenticeRates[0];
-        logger.info(`Found apprentice pay rate: $${rate.hourlyRate}/hr (from ${rate.effectiveFrom})`);
-        return parseFloat(rate.hourlyRate.toString());
+      if (apprenticeRates && apprenticeRates.length > 0) {
+        const rate = apprenticeRates[0] as Record<string, any>;
+        logger.info(`Found apprentice pay rate: $${rate.hourly_rate}/hr (from ${rate.effective_from})`);
+        return parseFloat(String(rate.hourly_rate));
       }
       
       // If no specific apprentice rate is found, try to get from Fair Work API in real-time
@@ -159,40 +160,41 @@ export class AwardRateCalculator {
         return null;
       }
 
-      // Then, find the classification
-      const [classification] = await db
-        .select()
-        .from(awardClassifications)
-        .where(
-          and(
-            eq(awardClassifications.awardId, award.id),
-            eq(awardClassifications.code, classificationCode)
-          )
-        );
+      // Then, find the classification using a raw query since we need to access the code field
+      const classificationQuery = sql`
+        SELECT * FROM award_classifications 
+        WHERE award_id = ${award.id} 
+          AND fair_work_level_code = ${classificationCode}
+      `;
       
-      if (!classification) {
+      const classResult = await db.execute(classificationQuery);
+      const classifications = classResult.rows as any[];
+      
+      if (!classifications || classifications.length === 0) {
         logger.warn(`Classification ${classificationCode} not found for award ${awardCode}`);
         return null;
       }
+      
+      const classification = classifications[0];
 
-      // Get the latest pay rate for this classification
-      const classificationRates = await db
-        .select()
-        .from(payRates)
-        .where(
-          and(
-            eq(payRates.classificationId, classification.id),
-            eq(payRates.awardId, award.id)
-          )
-        )
-        .orderBy(desc(payRates.effectiveFrom))
-        .limit(1);
+      // Get the latest pay rate for this classification using a raw query
+      const payRateQuery = sql`
+        SELECT * FROM pay_rates
+        WHERE classification_id = ${classification.id}
+          AND award_id = ${award.id}
+          AND is_apprentice_rate = false
+        ORDER BY effective_from DESC
+        LIMIT 1
+      `;
+      
+      const rateResult = await db.execute(payRateQuery);
+      const classificationRates = rateResult.rows as any[];
       
       // If we found a rate, return it
-      if (classificationRates.length > 0) {
-        const rate = classificationRates[0];
-        logger.info(`Found classification pay rate: $${rate.hourlyRate}/hr (from ${rate.effectiveFrom})`);
-        return parseFloat(rate.hourlyRate.toString());
+      if (classificationRates && classificationRates.length > 0) {
+        const rate = classificationRates[0] as Record<string, any>;
+        logger.info(`Found classification pay rate: $${rate.hourly_rate}/hr (from ${rate.effective_from})`);
+        return parseFloat(String(rate.hourly_rate));
       }
       
       // If no rate is found, try to get from Fair Work API
@@ -253,24 +255,23 @@ export class AwardRateCalculator {
    */
   private async getApprenticeClassification(awardId: number): Promise<any> {
     try {
-      // Get classifications for this award that match apprentice related terms
-      const apprenticeClassifications = await db
-        .select()
-        .from(awardClassifications)
-        .where(
-          and(
-            eq(awardClassifications.awardId, awardId)
-          )
-        );
+      // Get classifications for this award that match apprentice related terms using a raw query
+      const query = sql`
+        SELECT * FROM award_classifications 
+        WHERE award_id = ${awardId}
+      `;
+      
+      const result = await db.execute(query);
+      const apprenticeClassifications = result.rows as any[];
       
       // Find the first one that looks like an apprentice classification
-      // Based on name or code (contains 'apprentice', 'trainee', etc.)
+      // Based on name or fair_work_level_code (contains 'apprentice', 'trainee', etc.)
       for (const classification of apprenticeClassifications) {
         const name = (classification.name || '').toLowerCase();
-        const code = (classification.code || '').toLowerCase();
+        const fairWorkCode = (classification.fair_work_level_code || '').toLowerCase();
         
         if (name.includes('apprentice') || name.includes('trainee') || 
-            code.includes('ap') || code.includes('tr')) {
+            fairWorkCode.includes('ap') || fairWorkCode.includes('tr')) {
           return classification;
         }
       }
@@ -343,12 +344,15 @@ export class AwardRateCalculator {
    * Calculate a default classification rate
    * This is a fallback method when API data is not available
    */
-  private calculateDefaultClassificationRate(level: number): number {
+  private calculateDefaultClassificationRate(level: number | string): number {
     // Base rate for Level 1
     const baseRate = 23.00;
     
+    // Convert string level to number if needed
+    const numericLevel = typeof level === 'string' ? parseInt(level) || 1 : level;
+    
     // Add $2.25 per level
-    const calculatedRate = baseRate + ((level - 1) * 2.25);
+    const calculatedRate = baseRate + ((numericLevel - 1) * 2.25);
     
     // Return the rate rounded to 2 decimal places
     return Math.round(calculatedRate * 100) / 100;
@@ -366,20 +370,24 @@ export class AwardRateCalculator {
     hasCompletedYear12: boolean = true
   ): Promise<void> {
     try {
-      // Insert the pay rate into the apprentice pay rates table
-      await db
-        .insert(apprenticePayRates)
-        .values({
-          awardId,
-          classificationId,
-          apprenticeYear,
-          hourlyRate: hourlyRate.toString(),
-          isAdult,
-          hasCompletedYear12,
-          effectiveFrom: new Date().toISOString().split('T')[0], // Current date in YYYY-MM-DD format
-          source: 'calculated'
-        });
+      // Insert the pay rate into the pay_rates table with a raw query
+      const query = sql`
+        INSERT INTO pay_rates (
+          classification_id, hourly_rate, effective_from, source, 
+          is_apprentice_rate, apprentice_year, is_adult, has_completed_year12
+        ) VALUES (
+          ${classificationId}, 
+          ${hourlyRate.toString()}, 
+          ${new Date().toISOString().split('T')[0]}, 
+          'calculated',
+          TRUE,
+          ${apprenticeYear},
+          ${isAdult},
+          ${hasCompletedYear12}
+        )
+      `;
       
+      await db.execute(query);
       logger.info(`Cached apprentice pay rate: $${hourlyRate}/hr for award ${awardId}, year ${apprenticeYear}`);
     } catch (error) {
       logger.error('Error caching apprentice pay rate', { error });
@@ -395,17 +403,20 @@ export class AwardRateCalculator {
     hourlyRate: number
   ): Promise<void> {
     try {
-      // Insert the pay rate into the pay rates table
-      await db
-        .insert(payRates)
-        .values({
-          awardId,
-          classificationId,
-          hourlyRate: hourlyRate.toString(),
-          effectiveFrom: new Date().toISOString().split('T')[0], // Current date in YYYY-MM-DD format
-          source: 'calculated'
-        });
+      // Insert the pay rate into the pay_rates table with a raw query
+      const query = sql`
+        INSERT INTO pay_rates (
+          classification_id, hourly_rate, effective_from, source, is_apprentice_rate
+        ) VALUES (
+          ${classificationId}, 
+          ${hourlyRate.toString()}, 
+          ${new Date().toISOString().split('T')[0]}, 
+          'calculated',
+          FALSE
+        )
+      `;
       
+      await db.execute(query);
       logger.info(`Cached classification pay rate: $${hourlyRate}/hr for award ${awardId}, classification ${classificationId}`);
     } catch (error) {
       logger.error('Error caching classification pay rate', { error });
