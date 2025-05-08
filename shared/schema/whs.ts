@@ -55,6 +55,9 @@ export const whs_witnesses = pgTable('whs_witnesses', {
 export const whs_documents = pgTable('whs_documents', {
   id: uuid('id').defaultRandom().primaryKey(),
   incident_id: uuid('incident_id').references(() => whs_incidents.id, { onDelete: 'cascade' }),
+  risk_assessment_id: uuid('risk_assessment_id').references(() => whs_risk_assessments.id, { onDelete: 'cascade' }),
+  inspection_id: uuid('inspection_id').references(() => whs_inspections.id, { onDelete: 'cascade' }),
+  policy_id: uuid('policy_id').references(() => whs_policies.id, { onDelete: 'cascade' }),
   title: varchar('title', { length: 200 }).notNull(),
   filename: varchar('filename', { length: 200 }).notNull(),
   file_path: varchar('file_path', { length: 500 }).notNull(),
