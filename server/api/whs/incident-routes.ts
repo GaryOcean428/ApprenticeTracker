@@ -1,58 +1,45 @@
 import express from 'express';
-import { storage } from '../../storage';
 import { db } from '../../db';
-import { z } from 'zod';
+import { sql } from 'drizzle-orm';
+import { hasPermission } from '../../middleware/auth';
 import { 
-  whs_incidents,
-  whs_witnesses,
-  whs_documents,
+  whs_incidents, 
+  whs_incident_witnesses, 
+  whs_documents, 
   insertIncidentSchema,
   insertWitnessSchema,
   insertDocumentSchema
 } from '@shared/schema/whs';
-import { eq, desc, asc, sql } from 'drizzle-orm';
-import { isAuthenticated, hasPermission } from '../../middleware/auth';
 
 export function setupIncidentRoutes(router: express.Router) {
-  // GET all incidents with pagination
+  // GET all incidents
   router.get('/incidents', async (req, res) => {
     try {
-      const page = Number(req.query.page) || 1;
-      const limit = Number(req.query.limit) || 10;
+      // Parse query parameters for pagination
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 10;
       const offset = (page - 1) * limit;
       
-      // Filter by status if provided
-      const statusFilter = req.query.status ? 
-        eq(whs_incidents.status, req.query.status as any) : 
-        undefined;
-      
       // Get incidents with pagination
-      const query = db.select()
+      const incidents = await db.select()
         .from(whs_incidents)
-        .orderBy(desc(whs_incidents.date_occurred));
-      
-      if (statusFilter) {
-        query.where(statusFilter);
-      }
-      
-      const incidents = await query
         .limit(limit)
-        .offset(offset);
+        .offset(offset)
+        .orderBy(sql`${whs_incidents.date} DESC`);
       
       // Get total count for pagination
-      const totalIncidents = await db.select()
-        .from(whs_incidents);
-      
-      const totalCount = totalIncidents.length;
-      const totalPages = Math.ceil(totalCount / limit);
+      const [{ count }] = await db.select({ 
+        count: sql`count(*)::int` 
+      })
+      .from(whs_incidents);
       
       res.json({
         incidents,
         pagination: {
+          total: count,
           page,
           limit,
-          totalCount,
-          totalPages
+          totalPages: Math.ceil(count / limit)
         }
       });
     } catch (error) {
@@ -61,7 +48,7 @@ export function setupIncidentRoutes(router: express.Router) {
     }
   });
   
-  // GET incident by ID with related data
+  // GET incident by ID
   router.get('/incidents/:id', async (req, res) => {
     try {
       const id = req.params.id;
@@ -69,7 +56,7 @@ export function setupIncidentRoutes(router: express.Router) {
       // Get incident
       const [incident] = await db.select()
         .from(whs_incidents)
-        .where(eq(whs_incidents.id, id));
+        .where(sql`${whs_incidents.id} = ${id}`);
       
       if (!incident) {
         return res.status(404).json({ message: 'Incident not found' });
@@ -77,13 +64,13 @@ export function setupIncidentRoutes(router: express.Router) {
       
       // Get witnesses
       const witnesses = await db.select()
-        .from(whs_witnesses)
-        .where(eq(whs_witnesses.incident_id, id));
+        .from(whs_incident_witnesses)
+        .where(sql`${whs_incident_witnesses.incident_id} = ${id}`);
       
       // Get documents
       const documents = await db.select()
         .from(whs_documents)
-        .where(eq(whs_documents.incident_id, id));
+        .where(sql`${whs_documents.incident_id} = ${id}`);
       
       res.json({
         incident,
@@ -124,7 +111,7 @@ export function setupIncidentRoutes(router: express.Router) {
       // Ensure incident exists
       const [existingIncident] = await db.select()
         .from(whs_incidents)
-        .where(eq(whs_incidents.id, id));
+        .where(sql`${whs_incidents.id} = ${id}`);
       
       if (!existingIncident) {
         return res.status(404).json({ message: 'Incident not found' });
@@ -133,7 +120,7 @@ export function setupIncidentRoutes(router: express.Router) {
       // Update incident
       const [updatedIncident] = await db.update(whs_incidents)
         .set(req.body)
-        .where(eq(whs_incidents.id, id))
+        .where(sql`${whs_incidents.id} = ${id}`)
         .returning();
       
       res.json(updatedIncident);
@@ -150,7 +137,7 @@ export function setupIncidentRoutes(router: express.Router) {
       
       // Delete incident
       await db.delete(whs_incidents)
-        .where(eq(whs_incidents.id, id));
+        .where(sql`${whs_incidents.id} = ${id}`);
       
       res.status(204).end();
     } catch (error) {
@@ -167,7 +154,7 @@ export function setupIncidentRoutes(router: express.Router) {
       // Ensure incident exists
       const [existingIncident] = await db.select()
         .from(whs_incidents)
-        .where(eq(whs_incidents.id, incidentId));
+        .where(sql`${whs_incidents.id} = ${incidentId}`);
       
       if (!existingIncident) {
         return res.status(404).json({ message: 'Incident not found' });
@@ -179,7 +166,7 @@ export function setupIncidentRoutes(router: express.Router) {
       });
       
       // Create witness
-      const [newWitness] = await db.insert(whs_witnesses)
+      const [newWitness] = await db.insert(whs_incident_witnesses)
         .values(witnessData)
         .returning();
       
@@ -198,7 +185,7 @@ export function setupIncidentRoutes(router: express.Router) {
       // Ensure incident exists
       const [existingIncident] = await db.select()
         .from(whs_incidents)
-        .where(eq(whs_incidents.id, incidentId));
+        .where(sql`${whs_incidents.id} = ${incidentId}`);
       
       if (!existingIncident) {
         return res.status(404).json({ message: 'Incident not found' });
@@ -218,6 +205,22 @@ export function setupIncidentRoutes(router: express.Router) {
     } catch (error) {
       console.error('Error adding document:', error);
       res.status(400).json({ message: 'Failed to add document' });
+    }
+  });
+  
+  // Delete witness
+  router.delete('/incidents/witnesses/:id', hasPermission('whs.update_incident'), async (req, res) => {
+    try {
+      const id = req.params.id;
+      
+      // Delete witness
+      await db.delete(whs_incident_witnesses)
+        .where(sql`${whs_incident_witnesses.id} = ${id}`);
+      
+      res.status(204).end();
+    } catch (error) {
+      console.error('Error deleting witness:', error);
+      res.status(500).json({ message: 'Failed to delete witness' });
     }
   });
 }

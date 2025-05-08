@@ -1,56 +1,43 @@
 import express from 'express';
-import { storage } from '../../storage';
 import { db } from '../../db';
-import { z } from 'zod';
+import { sql } from 'drizzle-orm';
+import { hasPermission } from '../../middleware/auth';
 import { 
   whs_risk_assessments,
   whs_documents,
   insertRiskAssessmentSchema,
   insertDocumentSchema
 } from '@shared/schema/whs';
-import { eq, desc, asc, sql } from 'drizzle-orm';
-import { isAuthenticated, hasPermission } from '../../middleware/auth';
 
 export function setupRiskAssessmentRoutes(router: express.Router) {
-  // GET all risk assessments with pagination
+  // GET all risk assessments
   router.get('/risk-assessments', async (req, res) => {
     try {
-      const page = Number(req.query.page) || 1;
-      const limit = Number(req.query.limit) || 10;
+      // Parse query parameters for pagination
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 10;
       const offset = (page - 1) * limit;
       
-      // Filter by status if provided
-      const statusFilter = req.query.status ? 
-        eq(whs_risk_assessments.status, req.query.status as any) : 
-        undefined;
-      
       // Get risk assessments with pagination
-      const query = db.select()
+      const assessments = await db.select()
         .from(whs_risk_assessments)
-        .orderBy(desc(whs_risk_assessments.assessment_date));
-      
-      if (statusFilter) {
-        query.where(statusFilter);
-      }
-      
-      const assessments = await query
         .limit(limit)
-        .offset(offset);
+        .offset(offset)
+        .orderBy(sql`${whs_risk_assessments.assessment_date} DESC`);
       
       // Get total count for pagination
-      const totalAssessments = await db.select()
-        .from(whs_risk_assessments);
-      
-      const totalCount = totalAssessments.length;
-      const totalPages = Math.ceil(totalCount / limit);
+      const [{ count }] = await db.select({ 
+        count: sql`count(*)::int` 
+      })
+      .from(whs_risk_assessments);
       
       res.json({
         assessments,
         pagination: {
+          total: count,
           page,
           limit,
-          totalCount,
-          totalPages
+          totalPages: Math.ceil(count / limit)
         }
       });
     } catch (error) {
@@ -59,7 +46,7 @@ export function setupRiskAssessmentRoutes(router: express.Router) {
     }
   });
   
-  // GET risk assessment by ID with related data
+  // GET risk assessment by ID
   router.get('/risk-assessments/:id', async (req, res) => {
     try {
       const id = req.params.id;
@@ -67,7 +54,7 @@ export function setupRiskAssessmentRoutes(router: express.Router) {
       // Get risk assessment
       const [assessment] = await db.select()
         .from(whs_risk_assessments)
-        .where(eq(whs_risk_assessments.id, id));
+        .where(sql`${whs_risk_assessments.id} = ${id}`);
       
       if (!assessment) {
         return res.status(404).json({ message: 'Risk assessment not found' });
@@ -116,7 +103,7 @@ export function setupRiskAssessmentRoutes(router: express.Router) {
       // Ensure risk assessment exists
       const [existingAssessment] = await db.select()
         .from(whs_risk_assessments)
-        .where(eq(whs_risk_assessments.id, id));
+        .where(sql`${whs_risk_assessments.id} = ${id}`);
       
       if (!existingAssessment) {
         return res.status(404).json({ message: 'Risk assessment not found' });
@@ -125,7 +112,7 @@ export function setupRiskAssessmentRoutes(router: express.Router) {
       // Update risk assessment
       const [updatedAssessment] = await db.update(whs_risk_assessments)
         .set(req.body)
-        .where(eq(whs_risk_assessments.id, id))
+        .where(sql`${whs_risk_assessments.id} = ${id}`)
         .returning();
       
       res.json(updatedAssessment);
@@ -142,7 +129,7 @@ export function setupRiskAssessmentRoutes(router: express.Router) {
       
       // Delete risk assessment
       await db.delete(whs_risk_assessments)
-        .where(eq(whs_risk_assessments.id, id));
+        .where(sql`${whs_risk_assessments.id} = ${id}`);
       
       res.status(204).end();
     } catch (error) {
@@ -159,7 +146,7 @@ export function setupRiskAssessmentRoutes(router: express.Router) {
       // Ensure risk assessment exists
       const [existingAssessment] = await db.select()
         .from(whs_risk_assessments)
-        .where(eq(whs_risk_assessments.id, assessmentId));
+        .where(sql`${whs_risk_assessments.id} = ${assessmentId}`);
       
       if (!existingAssessment) {
         return res.status(404).json({ message: 'Risk assessment not found' });

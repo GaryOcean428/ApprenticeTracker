@@ -142,7 +142,7 @@ export function setupInspectionRoutes(router: express.Router) {
       
       // Delete inspection
       await db.delete(whs_inspections)
-        .where(eq(whs_inspections.id, id));
+        .where(sql`${whs_inspections.id} = ${id}`);
       
       res.status(204).end();
     } catch (error) {
@@ -159,7 +159,7 @@ export function setupInspectionRoutes(router: express.Router) {
       // Ensure inspection exists
       const [existingInspection] = await db.select()
         .from(whs_inspections)
-        .where(eq(whs_inspections.id, inspectionId));
+        .where(sql`${whs_inspections.id} = ${inspectionId}`);
       
       if (!existingInspection) {
         return res.status(404).json({ message: 'Inspection not found' });
