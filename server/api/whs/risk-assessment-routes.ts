@@ -13,31 +13,77 @@ export function setupRiskAssessmentRoutes(router: express.Router) {
   // GET all risk assessments
   router.get('/risk-assessments', async (req, res) => {
     try {
-      // Parse query parameters for pagination
+      // Parse query parameters
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 10;
       const offset = (page - 1) * limit;
+      const search = (req.query.search as string) || '';
+      const status = (req.query.status as string) || '';
+      const hostEmployerId = (req.query.hostEmployerId as string) || '';
       
-      // Get risk assessments with pagination
-      const assessments = await db.select()
-        .from(whs_risk_assessments)
+      // Build query with filters
+      let query = db.select().from(whs_risk_assessments);
+      let countQuery = db.select({ count: sql`count(*)::int` }).from(whs_risk_assessments);
+      
+      // Apply filters
+      if (search) {
+        const searchFilter = sql`(
+          ${whs_risk_assessments.title} ILIKE ${'%' + search + '%'} OR
+          ${whs_risk_assessments.location} ILIKE ${'%' + search + '%'} OR
+          ${whs_risk_assessments.description} ILIKE ${'%' + search + '%'} OR
+          ${whs_risk_assessments.assessor_name} ILIKE ${'%' + search + '%'}
+        )`;
+        
+        query = query.where(searchFilter);
+        countQuery = countQuery.where(searchFilter);
+      }
+      
+      if (status) {
+        query = query.where(sql`${whs_risk_assessments.status} = ${status}`);
+        countQuery = countQuery.where(sql`${whs_risk_assessments.status} = ${status}`);
+      }
+      
+      if (hostEmployerId) {
+        query = query.where(sql`${whs_risk_assessments.host_employer_id} = ${hostEmployerId}`);
+        countQuery = countQuery.where(sql`${whs_risk_assessments.host_employer_id} = ${hostEmployerId}`);
+      }
+      
+      // Apply pagination and ordering
+      query = query
         .limit(limit)
         .offset(offset)
         .orderBy(sql`${whs_risk_assessments.assessment_date} DESC`);
       
-      // Get total count for pagination
-      const [{ count }] = await db.select({ 
-        count: sql`count(*)::int` 
-      })
-      .from(whs_risk_assessments);
+      // Execute queries
+      const assessments = await query;
+      const [countResult] = await countQuery;
+      
+      // Process hazards JSON for each assessment
+      for (const assessment of assessments) {
+        if (assessment.hazards) {
+          try {
+            // Parse hazards JSON if it's a string
+            if (typeof assessment.hazards === 'string') {
+              assessment.hazards = JSON.parse(assessment.hazards);
+            }
+          } catch (error) {
+            console.error('Error parsing hazards JSON:', error);
+            assessment.hazards = [];
+          }
+        } else {
+          assessment.hazards = [];
+        }
+      }
+      
+      const totalCount = Number(countResult?.count || 0);
       
       res.json({
         assessments,
         pagination: {
-          total: count,
+          total: totalCount,
           page,
           limit,
-          totalPages: Math.ceil(count / limit)
+          totalPages: Math.ceil(totalCount / limit)
         }
       });
     } catch (error) {
@@ -58,6 +104,22 @@ export function setupRiskAssessmentRoutes(router: express.Router) {
       
       if (!assessment) {
         return res.status(404).json({ message: 'Risk assessment not found' });
+      }
+      
+      // Parse the hazards JSON if it exists
+      if (assessment.hazards) {
+        try {
+          // If it's a string, parse it; otherwise, leave it as is
+          if (typeof assessment.hazards === 'string') {
+            assessment.hazards = JSON.parse(assessment.hazards);
+          }
+        } catch (parseError) {
+          console.error('Error parsing hazards JSON:', parseError);
+          // Set to empty array if parsing fails
+          assessment.hazards = [];
+        }
+      } else {
+        assessment.hazards = [];
       }
       
       // Get documents
@@ -117,16 +179,27 @@ export function setupRiskAssessmentRoutes(router: express.Router) {
         return res.status(404).json({ message: 'Risk assessment not found' });
       }
       
+      // Handle hazards data correctly (ensure it's stored as JSON)
+      const data = { ...req.body };
+      
+      // Make sure hazards is properly formatted as JSON
+      if (data.hazards && typeof data.hazards !== 'string') {
+        data.hazards = JSON.stringify(data.hazards);
+      }
+      
       // Update risk assessment
       const [updatedAssessment] = await db.update(whs_risk_assessments)
-        .set(req.body)
+        .set(data)
         .where(sql`${whs_risk_assessments.id} = ${id}`)
         .returning();
       
       res.json(updatedAssessment);
     } catch (error) {
       console.error('Error updating risk assessment:', error);
-      res.status(400).json({ message: 'Failed to update risk assessment' });
+      res.status(400).json({ 
+        message: 'Failed to update risk assessment',
+        error: error instanceof Error ? error.message : String(error)
+      });
     }
   });
   
@@ -174,6 +247,46 @@ export function setupRiskAssessmentRoutes(router: express.Router) {
     } catch (error) {
       console.error('Error adding document:', error);
       res.status(400).json({ message: 'Failed to add document' });
+    }
+  });
+  
+  // Approve risk assessment
+  router.post('/risk-assessments/:id/approve', hasPermission('whs.approve_risk_assessment'), async (req, res) => {
+    try {
+      const id = req.params.id;
+      const { approverName, approvalNotes } = req.body;
+      
+      if (!approverName) {
+        return res.status(400).json({ message: 'Approver name is required' });
+      }
+      
+      // Ensure risk assessment exists
+      const [existingAssessment] = await db.select()
+        .from(whs_risk_assessments)
+        .where(sql`${whs_risk_assessments.id} = ${id}`);
+      
+      if (!existingAssessment) {
+        return res.status(404).json({ message: 'Risk assessment not found' });
+      }
+      
+      // Update risk assessment with approval info
+      const [updatedAssessment] = await db.update(whs_risk_assessments)
+        .set({
+          status: 'completed',
+          approver_name: approverName,
+          approval_date: new Date(),
+          approval_notes: approvalNotes || null
+        })
+        .where(sql`${whs_risk_assessments.id} = ${id}`)
+        .returning();
+      
+      res.json(updatedAssessment);
+    } catch (error) {
+      console.error('Error approving risk assessment:', error);
+      res.status(500).json({ 
+        message: 'Failed to approve risk assessment',
+        error: error instanceof Error ? error.message : String(error)
+      });
     }
   });
 }
