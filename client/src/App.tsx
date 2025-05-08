@@ -40,6 +40,9 @@ import StandardAssessment from "./pages/gto-compliance/standard-assessment";
 import ComplaintsManagement from "./pages/gto-compliance/complaints";
 import PermissionsDemo from "./pages/settings/permissions-demo";
 
+// WHS Module
+import WHSPage from "./pages/whs/index";
+
 // Settings Pages
 import UserManagement from "./pages/settings/user-management";
 import PermissionsManagement from "./pages/settings/permissions";
@@ -296,6 +299,41 @@ function Router() {
           return (
             <Suspense fallback={<div>Loading...</div>}>
               <RiskManagement />
+            </Suspense>
+          );
+        }} />
+
+        {/* WHS Routes */}
+        <ProtectedRoute path="/whs" component={WHSPage} />
+        <ProtectedRoute path="/whs/incidents" component={() => {
+          const WHSIncidents = lazy(() => import("./pages/whs/incidents"));
+          return (
+            <Suspense fallback={<div className="p-8 flex items-center justify-center"><div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"/></div>}>
+              <WHSIncidents />
+            </Suspense>
+          );
+        }} />
+        <ProtectedRoute path="/whs/risk-assessments" component={() => {
+          const WHSRiskAssessments = lazy(() => import("./pages/whs/risk-assessments"));
+          return (
+            <Suspense fallback={<div className="p-8 flex items-center justify-center"><div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"/></div>}>
+              <WHSRiskAssessments />
+            </Suspense>
+          );
+        }} />
+        <ProtectedRoute path="/whs/inspections" component={() => {
+          const WHSInspections = lazy(() => import("./pages/whs/inspections"));
+          return (
+            <Suspense fallback={<div className="p-8 flex items-center justify-center"><div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"/></div>}>
+              <WHSInspections />
+            </Suspense>
+          );
+        }} />
+        <ProtectedRoute path="/whs/policies" component={() => {
+          const WHSPolicies = lazy(() => import("./pages/whs/policies"));
+          return (
+            <Suspense fallback={<div className="p-8 flex items-center justify-center"><div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"/></div>}>
+              <WHSPolicies />
             </Suspense>
           );
         }} />
