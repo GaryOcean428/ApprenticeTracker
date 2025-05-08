@@ -216,18 +216,38 @@ export const placements = pgTable("placements", {
   // Labour hire & GTO fields
   labourHireIndicator: boolean("labour_hire_indicator").default(false), // Distinguish direct hire vs. labour hire
   gtoPlacement: boolean("gto_placement").default(false),             // If placed by a GTO
-  ebaId: integer("eba_id"),                                         // Link to enterprise agreement
+  ebaId: integer("eba_id").references(() => enterpriseAgreements.id), // Link to enterprise agreement
   
   // Charge rate fields
   chargeRate: numeric("charge_rate", { precision: 10, scale: 2 }),       // Current charge rate for host employer
   negotiatedRate: numeric("negotiated_rate", { precision: 10, scale: 2 }), // Negotiated hourly rate for apprentice
   lastChargeRateUpdate: timestamp("last_charge_rate_update"),           // When the charge rate was last updated
-  quoteId: integer("quote_id"),                                         // Link to the original quote if applicable
+  quoteId: integer("quote_id").references(() => quotes.id),            // Link to the original quote if applicable
 });
 
 export const insertPlacementSchema = createInsertSchema(placements).omit({
   id: true,
 });
+
+// Define placement relationships
+export const placementsRelations = relations(placements, ({ one }) => ({
+  apprentice: one(apprentices, {
+    fields: [placements.apprenticeId],
+    references: [apprentices.id],
+  }),
+  hostEmployer: one(hostEmployers, {
+    fields: [placements.hostEmployerId],
+    references: [hostEmployers.id],
+  }),
+  quote: one(quotes, {
+    fields: [placements.quoteId],
+    references: [quotes.id],
+  }),
+  enterpriseAgreement: one(enterpriseAgreements, {
+    fields: [placements.ebaId],
+    references: [enterpriseAgreements.id],
+  })
+}));
 
 // Documents
 export const documents = pgTable("documents", {
