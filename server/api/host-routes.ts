@@ -21,7 +21,7 @@ import {
   qualifications,
 } from "@shared/schema";
 import { z } from "zod";
-import { isAuthenticated } from "../api/auth-routes";
+import { isAuthenticated } from "../middleware/auth";
 import { hasPermission, hasAnyPermission } from "../middleware/permissions";
 
 export function registerHostRoutes(app: Express) {

@@ -1,0 +1,595 @@
+ Replit version 9b61b37d, pid2 version 0.0.1279
+ 
+      /////////////////////
+   ///////////////////////////
+  ////////@@@@@@@//////////////
+  ////////@@@@@@@//////////////
+  ////////@@@@@@@//////////////        Curious and driven?
+  ///////////////@@@@@@@///////        Work with us!
+  ///////////////@@@@@@@///////
+  ///////////////@@@@@@@///////        https://join.replit.com/hack.with.us
+  ////////@@@@@@@//////////////
+  ////////@@@@@@@//////////////
+  ////////@@@@@@#//////////////
+   ///////////////////////////
+      /////////////////////
+      
+ [LaunchDarkly] LaunchDarkly client initialized
+GTRM:1 Banner not shown: beforeinstallpromptevent.preventDefault() called. The page must call beforeinstallpromptevent.prompt() to show the banner.
+ Adding extension: GPT-Replit - ChatGPT in your Repl. Object
+ Adding extension: Perplexity Object
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+ Unrecognized feature: 'ambient-light-sensor'.
+_ @ framework-b74ab96b715a151c.js:1
+ Unrecognized feature: 'battery'.
+_ @ framework-b74ab96b715a151c.js:1
+ Unrecognized feature: 'execution-while-not-rendered'.
+_ @ framework-b74ab96b715a151c.js:1
+ Unrecognized feature: 'execution-while-out-of-viewport'.
+_ @ framework-b74ab96b715a151c.js:1
+ Unrecognized feature: 'layout-animations'.
+_ @ framework-b74ab96b715a151c.js:1
+ Unrecognized feature: 'legacy-image-formats'.
+_ @ framework-b74ab96b715a151c.js:1
+ Unrecognized feature: 'navigation-override'.
+_ @ framework-b74ab96b715a151c.js:1
+ Unrecognized feature: 'oversized-images'.
+_ @ framework-b74ab96b715a151c.js:1
+ Unrecognized feature: 'publickey-credentials'.
+_ @ framework-b74ab96b715a151c.js:1
+ Unrecognized feature: 'speaker-selection'.
+_ @ framework-b74ab96b715a151c.js:1
+ Unrecognized feature: 'unoptimized-images'.
+_ @ framework-b74ab96b715a151c.js:1
+ Unrecognized feature: 'unsized-media'.
+_ @ framework-b74ab96b715a151c.js:1
+ Unrecognized feature: 'pointer-lock'.
+_ @ framework-b74ab96b715a151c.js:1
+ Allow attribute will take precedence over 'allowfullscreen'.
+_ @ framework-b74ab96b715a151c.js:1
+ Allow attribute will take precedence over 'allowpaymentrequest'.
+_ @ framework-b74ab96b715a151c.js:1
+ Adding extension: Javascript Commands Object
+ Command: hello has unrecognized contributions: editor-context-menu. Valid contributions are commandbar,filetree-context-menu,sidebar-search,editor-context-menu Object
+overrideMethod @ installHook.js:1
+ Command: javascript-root-command has unrecognized contributions: commandbar. Valid contributions are commandbar,filetree-context-menu,sidebar-search,editor-context-menu Object
+overrideMethod @ installHook.js:1
+ [Report Only] Refused to compile or instantiate WebAssembly module because 'unsafe-eval' is not an allowed source of script in the following Content Security Policy directive: "script-src 'self'".
+
+ [Report Only] Refused to compile or instantiate WebAssembly module because 'unsafe-eval' is not an allowed source of script in the following Content Security Policy directive: "script-src 'self'".
+
+sp.replit.com/v1/t:1  Failed to load resource: net::ERR_NETWORK_CHANGED
+sp.replit.com/v1/t:1  Failed to load resource: net::ERR_NETWORK_CHANGED
+ WebSocket connection to 'wss://production-ai-chat.replit.com/river?auth_token=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjM2NDY4Nzg1LCJ1c2VyVGltZUNyZWF0ZWQiOiIyMDI0LTA5LTEzVDAyOjEyOjQ2LjMwM1oiLCJyZXBsSWQiOiI2ODQ1NDVkNi05MWM0LTQ4M2EtYmFhMi00ZGIzNDIzY2IzN2EiLCJtZW1iZXJzaGlwIjoiY29yZSIsImlzc3VlciI6Imh0dHBzOi8vcmVwbGl0LXdlYi1wcm9kLnAucmVwbGl0LmNvbSIsInJvbGVzIjpbImV4cGxvcmVyIiwib25ib2FyZGluZ19leHBlcmllbmNlX2xvdyIsImludGVudF9wZXJzb25hbCIsIm9uYm9hcmRpbmdfcm9sZV9leGVjIiwib25ib2FyZGluZ19qb2JfZW50cmVwcmVuZXVyIl0sImNhbldyaXRlIjp0cnVlLCJoYXNSZXBsaXRBaVBybyI6dHJ1ZSwiaWF0IjoxNzQ2Njc4NDIxLCJleHAiOjE3NDY2ODIwMjF9.C-vPbddeKWM57M08ltu-BlcyjxrLXC1VWu8zjP5tU54AibxzSRLZq05UC5S2lvKRopYfkD4fbF9Q1Xs_MG-pP7Phqaz_e8pItZ6VAqPYZV3m77je6SdpFucPadgMR7OfatRFT_PlB5K9FtFpsJAk-eIdhwXprqALkDUoz4i_F4RHx4Q8KoFIRoX00mwkYvzM3gIjSaiDmJW5Hnk-Rcke8avyElQemq8u3pieVgXm-LUXo6GCM5CCxwZRJqEL5AFZhyvuHdVyVVU7hwzDsRTVYWgP0ATGLzwppPUxERH0VUqMXoexmKZ37gpSH8uXQE1eVndKA2qU8VA-yVaofuS2lg' failed: 
+(anonymous) @ _app-68e9c1c76392621a.js:40
+ WebSocket connection to 'wss://eval.picard.platform.replit.com/wsv2/v2.public.Q2dZSWh1WHd3QVlTQmdpbGdmSEFCaUlHY0dsallYSmtNQUE2b3dJS0pEWTRORFUwTldRMkxUa3hZelF0TkRnellTMWlZV0V5TFRSa1lqTTBNak5qWWpNM1lSSURibWw0R2hoeVpYQnNhWFF0Y21Wd2JDMW1hV3hsY3kxd2FXTmhjbVFpQkVkVVVrMHFER0p5WVdSbGJteGhibWMzTjBKVUNobHlaWEJzYVhRdGNtVndiQzFpYkc5amEzTXRjR2xqWVhKa0VoZHlaWEJzYVhRdGNtVndiQzF0WlhSaExYQnBZMkZ5WkJvZWNtVndiR2wwTFcxaGNtZGhjbWx1WlMxaWJHOWphM010Y0dsallYSmtTZ2NJc2ZDeEVSQUJVQUJhQ0dWNGNHeHZjbVZ5V2hsdmJtSnZZWEprYVc1blgyVjRjR1Z5YVdWdVkyVmZiRzkzV2c5cGJuUmxiblJmY0dWeWMyOXVZV3hhRkc5dVltOWhjbVJwYm1kZmNtOXNaVjlsZUdWaldodHZibUp2WVhKa2FXNW5YMnB2WWw5bGJuUnlaWEJ5Wlc1bGRYSlNKUWdCRUlDQWdJQUlHUUFBQUFBQUFQQS9JUUFBQUFBQUFQQS9LSUNBZ0lESUFUQUJPQUJnQUdvVENMSHdzUkVTREdKeVlXUmxibXhoYm1jM04zSVpkWE5sTFd4aGRXNWphR1JoY210c2VTMWthWEpsWTNSc2VZSUJBaW9BaWdFakNBRVFnSUNBZ0NBWkFBQUFBQUFBRUVBaEFBQUFBQUFBRUVBb2dJQ0FnTWdCTUFDYUFRb0tDREF1TUM0eE1qYzVvQUVCayZa5ZvggpVMxlfD4_rf04r08SeH54n4cTGKWjniOWivK8Hi5bH_I2FrPF1cW22mqa2nQETduNaCkcnFePUxCQ.Q2dad2NtOWtPak1pQ25KbGNHeHBkQzVqYjIwPQ' failed: 
+connect @ 4899-1463657e213999d4.js:1
+ WebSocket connection to 'wss://production-ai-chat.replit.com/river?auth_token=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjM2NDY4Nzg1LCJ1c2VyVGltZUNyZWF0ZWQiOiIyMDI0LTA5LTEzVDAyOjEyOjQ2LjMwM1oiLCJyZXBsSWQiOiI2ODQ1NDVkNi05MWM0LTQ4M2EtYmFhMi00ZGIzNDIzY2IzN2EiLCJtZW1iZXJzaGlwIjoiY29yZSIsImlzc3VlciI6Imh0dHBzOi8vcmVwbGl0LXdlYi1wcm9kLnAucmVwbGl0LmNvbSIsInJvbGVzIjpbImV4cGxvcmVyIiwib25ib2FyZGluZ19leHBlcmllbmNlX2xvdyIsImludGVudF9wZXJzb25hbCIsIm9uYm9hcmRpbmdfcm9sZV9leGVjIiwib25ib2FyZGluZ19qb2JfZW50cmVwcmVuZXVyIl0sImNhbldyaXRlIjp0cnVlLCJoYXNSZXBsaXRBaVBybyI6dHJ1ZSwiaWF0IjoxNzQ2Njc4NDIxLCJleHAiOjE3NDY2ODIwMjF9.C-vPbddeKWM57M08ltu-BlcyjxrLXC1VWu8zjP5tU54AibxzSRLZq05UC5S2lvKRopYfkD4fbF9Q1Xs_MG-pP7Phqaz_e8pItZ6VAqPYZV3m77je6SdpFucPadgMR7OfatRFT_PlB5K9FtFpsJAk-eIdhwXprqALkDUoz4i_F4RHx4Q8KoFIRoX00mwkYvzM3gIjSaiDmJW5Hnk-Rcke8avyElQemq8u3pieVgXm-LUXo6GCM5CCxwZRJqEL5AFZhyvuHdVyVVU7hwzDsRTVYWgP0ATGLzwppPUxERH0VUqMXoexmKZ37gpSH8uXQE1eVndKA2qU8VA-yVaofuS2lg' failed: 
+(anonymous) @ _app-68e9c1c76392621a.js:40
+logs.browser-intake-us5-datadoghq.com/api/v2/logs?ddsource=browser&ddtags=sdk_version%3A4.46.0%2Capi%3Afetch%2Cenv%3Aproduction%2Cservice%3Awebsite%2Cversion%3A9b61b37d&dd-api-key=pub31a5047a3a4692afb84a423db984dc57&dd-evp-origin-version=4.46.0&dd-evp-origin=browser&dd-request-id=107aae80-5542-40e5-9c2b-8ee755061599:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVED
+/graphql:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVED
+/data/repls/684545d6-91c4-483a-baa2-4db3423cb37a/get_connection_metadata:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVED
+logs.browser-intake-us5-datadoghq.com/api/v2/logs?ddsource=browser&ddtags=sdk_version%3A4.46.0%2Capi%3Axhr%2Cenv%3Aproduction%2Cservice%3Awebsite%2Cversion%3A9b61b37d&dd-api-key=pub31a5047a3a4692afb84a423db984dc57&dd-evp-origin-version=4.46.0&dd-evp-origin=browser&dd-request-id=092e5f02-383a-48b0-995d-421f00bf5f0d:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVED
+logs.browser-intake-us5-datadoghq.com/api/v2/logs?ddsource=browser&ddtags=sdk_version%3A4.46.0%2Capi%3Afetch%2Cenv%3Aproduction%2Cservice%3Awebsite%2Cversion%3A9b61b37d&dd-api-key=pub31a5047a3a4692afb84a423db984dc57&dd-evp-origin-version=4.46.0&dd-evp-origin=browser&dd-request-id=33aad87f-3e4a-4435-a1cb-9cc0edb01303:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVED
+logs.browser-intake-us5-datadoghq.com/api/v2/logs?ddsource=browser&ddtags=sdk_version%3A4.46.0%2Capi%3Axhr%2Cenv%3Aproduction%2Cservice%3Awebsite%2Cversion%3A9b61b37d&dd-api-key=pub31a5047a3a4692afb84a423db984dc57&dd-evp-origin-version=4.46.0&dd-evp-origin=browser&dd-request-id=42ec11eb-53a9-4280-87b9-d4e584b28542:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVED
+/data/repls/684545d6-91c4-483a-baa2-4db3423cb37a/get_connection_metadata:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVED
+/graphql:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVED
+ WebSocket connection to 'wss://production-ai-chat.replit.com/river?auth_token=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjM2NDY4Nzg1LCJ1c2VyVGltZUNyZWF0ZWQiOiIyMDI0LTA5LTEzVDAyOjEyOjQ2LjMwM1oiLCJyZXBsSWQiOiI2ODQ1NDVkNi05MWM0LTQ4M2EtYmFhMi00ZGIzNDIzY2IzN2EiLCJtZW1iZXJzaGlwIjoiY29yZSIsImlzc3VlciI6Imh0dHBzOi8vcmVwbGl0LXdlYi1wcm9kLnAucmVwbGl0LmNvbSIsInJvbGVzIjpbImV4cGxvcmVyIiwib25ib2FyZGluZ19leHBlcmllbmNlX2xvdyIsImludGVudF9wZXJzb25hbCIsIm9uYm9hcmRpbmdfcm9sZV9leGVjIiwib25ib2FyZGluZ19qb2JfZW50cmVwcmVuZXVyIl0sImNhbldyaXRlIjp0cnVlLCJoYXNSZXBsaXRBaVBybyI6dHJ1ZSwiaWF0IjoxNzQ2Njc4NDIxLCJleHAiOjE3NDY2ODIwMjF9.C-vPbddeKWM57M08ltu-BlcyjxrLXC1VWu8zjP5tU54AibxzSRLZq05UC5S2lvKRopYfkD4fbF9Q1Xs_MG-pP7Phqaz_e8pItZ6VAqPYZV3m77je6SdpFucPadgMR7OfatRFT_PlB5K9FtFpsJAk-eIdhwXprqALkDUoz4i_F4RHx4Q8KoFIRoX00mwkYvzM3gIjSaiDmJW5Hnk-Rcke8avyElQemq8u3pieVgXm-LUXo6GCM5CCxwZRJqEL5AFZhyvuHdVyVVU7hwzDsRTVYWgP0ATGLzwppPUxERH0VUqMXoexmKZ37gpSH8uXQE1eVndKA2qU8VA-yVaofuS2lg' failed: 
+(anonymous) @ _app-68e9c1c76392621a.js:40
+logs.browser-intake-us5-datadoghq.com/api/v2/logs?ddsource=browser&ddtags=sdk_version%3A4.46.0%2Capi%3Afetch%2Cenv%3Aproduction%2Cservice%3Awebsite%2Cversion%3A9b61b37d&dd-api-key=pub31a5047a3a4692afb84a423db984dc57&dd-evp-origin-version=4.46.0&dd-evp-origin=browser&dd-request-id=1e824dd6-9cf4-426b-b21f-d3aabd8758d7:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVED
+logs.browser-intake-us5-datadoghq.com/api/v2/logs?ddsource=browser&ddtags=sdk_version%3A4.46.0%2Capi%3Axhr%2Cenv%3Aproduction%2Cservice%3Awebsite%2Cversion%3A9b61b37d&dd-api-key=pub31a5047a3a4692afb84a423db984dc57&dd-evp-origin-version=4.46.0&dd-evp-origin=browser&dd-request-id=edfee086-0efa-431f-bb91-4f995fc55c04:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVED
+ WebSocket connection to 'wss://replit.com/graphql_subscriptions' failed: 
+(anonymous) @ _app-68e9c1c76392621a.js:15
+sp.replit.com/v1/t:1  Failed to load resource: net::ERR_NETWORK_CHANGED
+GTRM:1 Uncaught (in promise) 
+GTRM:1 Uncaught (in promise) 
+GTRM:1 Uncaught (in promise) 
+GTRM:1 Uncaught (in promise) 
+GTRM:1 Uncaught (in promise) 
+GTRM:1 Uncaught (in promise) 
+GTRM:1 Uncaught (in promise) 
+GTRM:1 Uncaught (in promise) 
+GTRM:1 Uncaught (in promise) 
+GTRM:1 Uncaught (in promise) 
+_app-68e9c1c76392621a.js:13 Uncaught 
+684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar1nn%3A:32 Unrecognized feature: 'ambient-light-sensor'.
+684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar1nn%3A:32 Unrecognized feature: 'battery'.
+684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar1nn%3A:32 Unrecognized feature: 'execution-while-not-rendered'.
+684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar1nn%3A:32 Unrecognized feature: 'execution-while-out-of-viewport'.
+684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar1nn%3A:32 Unrecognized feature: 'layout-animations'.
+684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar1nn%3A:32 Unrecognized feature: 'legacy-image-formats'.
+684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar1nn%3A:32 Unrecognized feature: 'navigation-override'.
+684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar1nn%3A:32 Unrecognized feature: 'oversized-images'.
+684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar1nn%3A:32 Unrecognized feature: 'publickey-credentials'.
+684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar1nn%3A:32 Unrecognized feature: 'speaker-selection'.
+684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar1nn%3A:32 Unrecognized feature: 'unoptimized-images'.
+684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar1nn%3A:32 Unrecognized feature: 'unsized-media'.
+684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar1nn%3A:32 Allow attribute will take precedence over 'allowfullscreen'.
+684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar1nn%3A:32 Allow attribute will take precedence over 'allowpaymentrequest'.
+684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ task queue exceeded allotted deadline by 67ms
+overrideMethod @ installHook.js:1
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+GTRM:1 Uncaught (in promise) 
+GTRM:1 Uncaught (in promise) 
+GTRM:1 Uncaught (in promise) 
+GTRM:1 Uncaught (in promise) 
+GTRM:1 Uncaught (in promise) 
+GTRM:1 Uncaught (in promise) 
+GTRM:1 Uncaught (in promise) 
+GTRM:1 Uncaught (in promise) 
+GTRM:1 Uncaught (in promise) 
+GTRM:1 Uncaught (in promise) 
+GTRM:1 Uncaught (in promise) 
+GTRM:1 Uncaught (in promise) 
+GTRM:1 Uncaught (in promise) 
+GTRM:1 Uncaught (in promise) 
+GTRM:1 Uncaught (in promise) 
+GTRM:1 Uncaught (in promise) 
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ stallwart: failed ping 1
+ stallwart: failed ping 1
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/api/financial/summary?timeframe=month:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/api/activities/recent?limit=4:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/api/tasks:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/api/dashboard/metrics:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/api/apprentices:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+Network.js:227 WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ Network.js:227
+Network.js:227 WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ Network.js:227
+Network.js:227 WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ Network.js:227
+Network.js:227 WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ Network.js:227
+Network.js:227 WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ Network.js:227
+dialog.tsx:21 
+            
+            
+           Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+progress.tsx:20 
+            
+            
+           Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+scroll-area.tsx:15 
+            
+            
+           Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+utils.ts:1 
+            
+            
+           Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+progress-review-utils.ts:8 
+            
+            
+           Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+avatar.tsx:12 
+            
+            
+           Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+date-range-picker.tsx:39 
+            
+            
+           Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+expense-form-dialog.tsx:138 
+            
+            
+           Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+report-form-dialog.tsx:168 
+            
+            
+           Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+budget-form-dialog.tsx:146 
+            
+            
+           Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+invoice-form-dialog.tsx:152 
+            
+            
+           Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+header.tsx:37 
+            
+            
+           Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+UnifiedNavigation.tsx:27 
+            
+            
+           Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+stat-card.tsx:33 
+            
+            
+           Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+Network.js:227 WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ Network.js:227
+recent-activity.tsx:21 
+            
+            
+           Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+financial-summary.tsx:78 
+            
+            
+           Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+tasks.tsx:120 
+            
+            
+           Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+apprentice-table.tsx:47 
+            
+            
+           Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+quick-access.tsx:8 
+            
+            
+           Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+apprentice-progress.tsx:90 
+            
+            
+           Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+compliance-alerts.tsx:49 
+            
+            
+           Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+calendar.tsx:57 
+            
+            
+           Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+slider.tsx:19 
+            
+            
+           Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+ApprenticeStatusChange.tsx:117 
+            
+            
+           Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+alert-dialog.tsx:17 
+            
+            
+           Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+page-layout.tsx:55 
+            
+            
+           Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+filter-bar.tsx:52 
+            
+            
+           Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+Network.js:227 WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ Network.js:227
+data-grid.tsx:81 
+            
+            
+           Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+date-utils.ts:1 
+            
+            
+           Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+radio-group.tsx:12 
+            
+            
+           Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+use-permissions.ts:1 
+            
+            
+           Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+permissions.ts:8 
+            
+            
+           Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+permission-guard.tsx:41 
+            
+            
+           Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+action-button.tsx:27 
+            
+            
+           Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+whs.ts:1 
+            
+            
+           Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+500x160 Black Logo (1).png:1 
+            
+            
+           Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+Network.js:227 WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ Network.js:227
+Network.js:227 WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ Network.js:227
+Network.js:227 WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ Network.js:227
+Network.js:227 WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ Network.js:227
+Network.js:227 WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ Network.js:227
+Network.js:227 WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ Network.js:227
+Network.js:227 WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ Network.js:227
+Network.js:227 WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ Network.js:227
+Network.js:227 WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ Network.js:227
+Network.js:227 WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ Network.js:227
+Network.js:227 WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ Network.js:227
+Network.js:227 WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ Network.js:227
+Network.js:227 WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ Network.js:227
+Network.js:227 WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ Network.js:227
+Network.js:227 WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ Network.js:227
+Network.js:227 WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ Network.js:227
+Network.js:227 WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ Network.js:227
+Network.js:227 WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ Network.js:227
+Network.js:227 WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ Network.js:227
+Network.js:227 WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ Network.js:227
+Network.js:227 WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ Network.js:227
+Network.js:227 WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ Network.js:227
+Network.js:227 WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ Network.js:227
+Network.js:227 WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ Network.js:227
+Network.js:227 WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ Network.js:227
+Network.js:227 WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ Network.js:227
+Network.js:227 WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ Network.js:227
+Network.js:227 WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ Network.js:227
+Network.js:227 WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ Network.js:227
+Network.js:227 WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ Network.js:227
+Network.js:227 WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ Network.js:227
+Network.js:227 WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ Network.js:227
+Network.js:227 WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ Network.js:227
+Network.js:227 WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ Network.js:227
+684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/api/hosts:1 
+            
+            
+           Failed to load resource: the server responded with a status of 401 (Unauthorized)
+
+                
+          
+          
+          
+         Chrome is moving towards a new experience that allows users to choose to browse without third-party cookies.
