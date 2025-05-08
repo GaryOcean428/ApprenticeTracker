@@ -24,11 +24,11 @@ const fairWorkApiClient = new FairWorkApiClient({
  * @desc Get all awards
  * @access Private
  */
-router.get('/awards', isAuthenticated, async (req, res) => {
+router.get('/awards', isAuthenticated, async (req: express.Request, res: express.Response) => {
   try {
     const awards = await fairWorkApiClient.getActiveAwards();
     res.json(awards);
-  } catch (error) {
+  } catch (error: any) {
     logger.error('Error fetching awards', { error });
     res.status(500).json({ error: 'Failed to fetch awards' });
   }
@@ -49,7 +49,7 @@ router.get('/awards/:code', isAuthenticated, async (req, res) => {
     }
     
     res.json(award);
-  } catch (error) {
+  } catch (error: any) {
     logger.error('Error fetching award', { error });
     res.status(500).json({ error: 'Failed to fetch award' });
   }
@@ -65,7 +65,7 @@ router.get('/awards/:code/classifications', isAuthenticated, async (req, res) =>
     const { code } = req.params;
     const classifications = await fairWorkApiClient.getAwardClassifications(code);
     res.json(classifications);
-  } catch (error) {
+  } catch (error: any) {
     logger.error('Error fetching classifications', { error });
     res.status(500).json({ error: 'Failed to fetch classifications' });
   }
@@ -97,7 +97,7 @@ router.get('/awards/:code/pay-rates', isAuthenticated, async (req, res) => {
     
     const payRates = await fairWorkApiClient.getPayRates(code, options);
     res.json(payRates);
-  } catch (error) {
+  } catch (error: any) {
     logger.error('Error fetching pay rates', { error });
     res.status(500).json({ error: 'Failed to fetch pay rates' });
   }
@@ -143,7 +143,7 @@ router.get('/apprentice-rates', isAuthenticated, [
       isAdult,
       hasCompletedYear12
     });
-  } catch (error) {
+  } catch (error: any) {
     logger.error('Error fetching apprentice rate', { error });
     res.status(500).json({ error: 'Failed to fetch apprentice rate' });
   }
@@ -181,7 +181,7 @@ router.get('/classification-rates', isAuthenticated, [
       award,
       classification
     });
-  } catch (error) {
+  } catch (error: any) {
     logger.error('Error fetching classification rate', { error });
     res.status(500).json({ error: 'Failed to fetch classification rate' });
   }
@@ -210,7 +210,7 @@ router.post('/sync', isAuthenticated, async (req: express.Request, res: express.
       message: 'Sync started',
       forceRefresh
     });
-  } catch (error) {
+  } catch (error: any) {
     logger.error('Error starting sync', { error });
     res.status(500).json({ error: 'Failed to start sync' });
   }
@@ -221,7 +221,7 @@ router.post('/sync', isAuthenticated, async (req: express.Request, res: express.
  * @desc Get status of Fair Work API integration
  * @access Private (admin only)
  */
-router.get('/status', isAuthenticated, async (req, res) => {
+router.get('/status', isAuthenticated, async (req: express.Request, res: express.Response) => {
   try {
     // Check if the user has admin permissions
     if (!req.user || req.user.role !== 'admin') {
@@ -237,7 +237,7 @@ router.get('/status', isAuthenticated, async (req, res) => {
       lastSync: new Date().toISOString(), // In a real app, we'd store this timestamp
       awardCount: awards.length
     });
-  } catch (error) {
+  } catch (error: any) {
     logger.error('Error checking API status', { error });
     res.status(500).json({ 
       status: 'error',
