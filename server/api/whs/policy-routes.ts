@@ -63,7 +63,7 @@ export function setupPolicyRoutes(router: express.Router) {
       // Get documents
       const documents = await db.select()
         .from(whs_documents)
-        .where(sql`${whs_documents.safety_policy_id} = ${id}`);
+        .where(sql`${whs_documents.policy_id} = ${id}`);
       
       res.json({
         policy,
@@ -78,7 +78,7 @@ export function setupPolicyRoutes(router: express.Router) {
   // CREATE new safety policy
   router.post('/policies', hasPermission('whs.create_policy'), async (req, res) => {
     try {
-      const validatedData = insertSafetyPolicySchema.parse(req.body);
+      const validatedData = insertPolicySchema.parse(req.body);
       
       // Create policy
       const [newPolicy] = await db.insert(whs_policies)
@@ -128,8 +128,8 @@ export function setupPolicyRoutes(router: express.Router) {
       const id = req.params.id;
       
       // Delete policy
-      await db.delete(whs_safety_policies)
-        .where(sql`${whs_safety_policies.id} = ${id}`);
+      await db.delete(whs_policies)
+        .where(sql`${whs_policies.id} = ${id}`);
       
       res.status(204).end();
     } catch (error) {
@@ -145,8 +145,8 @@ export function setupPolicyRoutes(router: express.Router) {
       
       // Ensure policy exists
       const [existingPolicy] = await db.select()
-        .from(whs_safety_policies)
-        .where(sql`${whs_safety_policies.id} = ${policyId}`);
+        .from(whs_policies)
+        .where(sql`${whs_policies.id} = ${policyId}`);
       
       if (!existingPolicy) {
         return res.status(404).json({ message: 'Safety policy not found' });
@@ -154,7 +154,7 @@ export function setupPolicyRoutes(router: express.Router) {
       
       const documentData = insertDocumentSchema.parse({
         ...req.body,
-        safety_policy_id: policyId
+        policy_id: policyId
       });
       
       // Create document

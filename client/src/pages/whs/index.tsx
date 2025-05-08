@@ -31,11 +31,11 @@ import IncidentsList from '@/components/whs/incidents-list';
 import RiskAssessmentsList from '@/components/whs/risk-assessments-list';
 import SafetyPoliciesList from '@/components/whs/safety-policies-list';
 import InspectionsList from '@/components/whs/inspections-list';
-import { useNavigate } from 'wouter';
+import { useLocation } from 'wouter';
 
 export default function WHSPage() {
   const [activeTab, setActiveTab] = React.useState('overview');
-  const navigate = useNavigate();
+  const [_, navigate] = useLocation();
   
   const { data: statistics, isLoading: statsLoading } = useQuery({
     queryKey: ['/api/whs/statistics'],
