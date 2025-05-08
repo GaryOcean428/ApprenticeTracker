@@ -55,6 +55,17 @@ The platform is currently under active development with the following major comp
 - `/shared`: Shared types and utilities
 - `/docs`: System documentation
 
+## Documentation
+
+Comprehensive documentation is available in the `/docs` directory:
+
+- **Architecture**: `architecture.md`, `system-architecture.md`
+- **Code Standards**: `code-standards.md`, `component-library.md`
+- **API Documentation**: `fair-work-api.md`, `tga-api.md`
+- **System Requirements**: `national-standards-summary.md`, `gto-compliance.md`
+- **Development Strategy**: `upgrade-roadmap.md`, `gap-analysis.md`, `competitor-comparison.md`
+- **Performance**: `performance-optimization.md`, `testing-strategy.md`
+
 ## Getting Started
 
 ### Prerequisites
@@ -70,11 +81,33 @@ The platform is currently under active development with the following major comp
 3. Set up environment variables
 4. Start the development server: `npm run dev`
 
-## Current Development Focus
+## Development Roadmap
 
+CRM7 follows a strategic development roadmap based on comprehensive analysis of regulatory requirements and industry best practices. See our detailed roadmap in `/docs/upgrade-roadmap.md`.
+
+### Phase 1: Critical Compliance & Financial Operations (Current Focus)
+
+⏳ Work Health and Safety (WHS) Management
+⏳ Government Claims Management
+⏳ Host Employer Billing and Invoicing
+⏳ Enhanced Onboarding Module
+⏳ Core Compliance Module Enhancement
 ✅ Payroll system with award rate integration
+
+### Phase 2: Lifecycle Management & Field Operations
+
+⏳ Advanced Apprentice Lifecycle Management
+⏳ Field Officer Mobile Toolkit
+⏳ Host Employer Portal
 ✅ Enrichment program management
 ⏳ Progress reviews system
+
+### Phase 3: Advanced Features & Integrations
+
+⏳ Advanced Applicant Tracking
+⏳ Enhanced Reporting and Analytics
+⏳ Advanced Document Management
+⏳ External System Integrations
 ⏳ Calendar integration for field officers
 ⏳ Training plans development and tracking
 
