@@ -44,6 +44,19 @@ export default {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
+        // Braden Group Brand Colors
+        braden: {
+          red: "#ab233a",
+          "dark-red": "#811a2c",
+          gold: "#cbb26a",
+          "light-gold": "#d8c690",
+          bronze: "#be9e44",
+          navy: "#2c3e50",
+          slate: "#95a5a6",
+          sky: "#3498db",
+          forest: "#27ae60",
+          lavender: "#9b59b6",
+        },
         chart: {
           "1": "hsl(var(--chart-1))",
           "2": "hsl(var(--chart-2))",

@@ -1,6 +1,7 @@
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { ReactNode } from "react";
+import logoPath from "@assets/500x160 Black Logo (1).png";
 
 interface PublicLayoutProps {
   children: ReactNode;
@@ -13,36 +14,36 @@ export default function PublicLayout({ children }: PublicLayoutProps) {
         <div className="container mx-auto flex h-16 items-center justify-between px-4 py-4">
           <div className="flex gap-6 md:gap-10">
             <Link href="/" className="flex items-center space-x-2">
-              <span className="font-bold text-xl sm:inline-block text-blue-600">Braden Group</span>
+              <img src={logoPath} alt="Braden Group Logo" className="h-10" />
             </Link>
             <nav className="hidden gap-6 md:flex">
               <Link href="/">
-                <span className="flex items-center text-lg font-medium transition-colors hover:text-blue-500">
+                <span className="flex items-center text-lg font-medium transition-colors hover:text-braden-sky">
                   Home
                 </span>
               </Link>
               <Link href="/about">
-                <span className="flex items-center text-lg font-medium transition-colors hover:text-blue-500">
+                <span className="flex items-center text-lg font-medium transition-colors hover:text-braden-sky">
                   About
                 </span>
               </Link>
               <Link href="/services">
-                <span className="flex items-center text-lg font-medium transition-colors hover:text-blue-500">
+                <span className="flex items-center text-lg font-medium transition-colors hover:text-braden-sky">
                   Services
                 </span>
               </Link>
               <Link href="/find-apprenticeship">
-                <span className="flex items-center text-lg font-medium transition-colors hover:text-blue-500">
+                <span className="flex items-center text-lg font-medium transition-colors hover:text-braden-sky">
                   Find Apprenticeship
                 </span>
               </Link>
               <Link href="/host-apprentice">
-                <span className="flex items-center text-lg font-medium transition-colors hover:text-blue-500">
+                <span className="flex items-center text-lg font-medium transition-colors hover:text-braden-sky">
                   Host an Apprentice
                 </span>
               </Link>
               <Link href="/contact">
-                <span className="flex items-center text-lg font-medium transition-colors hover:text-blue-500">
+                <span className="flex items-center text-lg font-medium transition-colors hover:text-braden-sky">
                   Contact
                 </span>
               </Link>
@@ -50,25 +51,27 @@ export default function PublicLayout({ children }: PublicLayoutProps) {
           </div>
           <div className="flex items-center gap-4">
             <Link href="/auth/login">
-              <Button variant="outline" className="bg-white">Log In</Button>
+              <Button variant="outline" className="border-braden-sky text-braden-navy border-2 bg-white hover:bg-gray-50">Log In</Button>
             </Link>
             <Link href="/auth/login">
-              <Button className="bg-blue-600 hover:bg-blue-700">Portal Access</Button>
+              <Button className="bg-braden-sky hover:bg-blue-600 text-white">Portal Access</Button>
             </Link>
           </div>
         </div>
       </header>
       <main className="flex-1">{children}</main>
-      <footer className="border-t bg-gray-100">
+      <footer className="border-t bg-braden-navy text-white">
         <div className="container mx-auto px-4 md:px-6 py-8 md:py-12">
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
             <div className="space-y-4">
-              <h3 className="text-lg font-medium">Braden Group</h3>
-              <p className="max-w-xs text-sm text-gray-500">
+              <h3 className="text-lg font-medium text-braden-gold">Braden Group</h3>
+              <p className="max-w-xs text-sm text-gray-300">
+                <span className="font-medium italic">People. Employment. Progress.</span>
+                <br /><br />
                 Connecting apprentices and employers for successful careers and business growth in Western Australia.
               </p>
               <div className="flex space-x-4">
-                <a href="#" className="text-gray-500 hover:text-blue-600">
+                <a href="#" className="text-gray-300 hover:text-braden-sky">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="24"
@@ -84,7 +87,7 @@ export default function PublicLayout({ children }: PublicLayoutProps) {
                     <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
                   </svg>
                 </a>
-                <a href="#" className="text-gray-500 hover:text-blue-600">
+                <a href="#" className="text-gray-300 hover:text-braden-sky">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="24"
@@ -100,7 +103,7 @@ export default function PublicLayout({ children }: PublicLayoutProps) {
                     <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z" />
                   </svg>
                 </a>
-                <a href="#" className="text-gray-500 hover:text-blue-600">
+                <a href="#" className="text-gray-300 hover:text-braden-sky">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="24"
@@ -118,7 +121,7 @@ export default function PublicLayout({ children }: PublicLayoutProps) {
                     <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
                   </svg>
                 </a>
-                <a href="#" className="text-gray-500 hover:text-blue-600">
+                <a href="#" className="text-gray-300 hover:text-braden-sky">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="24"
@@ -140,99 +143,99 @@ export default function PublicLayout({ children }: PublicLayoutProps) {
             </div>
             <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 md:grid-cols-4 lg:col-span-2">
               <div className="space-y-4">
-                <h3 className="text-sm font-medium">Services</h3>
+                <h3 className="text-sm font-medium text-braden-gold">Services</h3>
                 <ul className="space-y-2 text-sm">
                   <li>
-                    <a href="#" className="text-gray-500 hover:text-blue-600 transition-colors">
+                    <a href="#" className="text-gray-300 hover:text-braden-sky transition-colors">
                       Apprenticeship Management
                     </a>
                   </li>
                   <li>
-                    <a href="#" className="text-gray-500 hover:text-blue-600 transition-colors">
+                    <a href="#" className="text-gray-300 hover:text-braden-sky transition-colors">
                       Host Employer Services
                     </a>
                   </li>
                   <li>
-                    <a href="#" className="text-gray-500 hover:text-blue-600 transition-colors">
+                    <a href="#" className="text-gray-300 hover:text-braden-sky transition-colors">
                       Recruitment Solutions
                     </a>
                   </li>
                   <li>
-                    <a href="#" className="text-gray-500 hover:text-blue-600 transition-colors">
+                    <a href="#" className="text-gray-300 hover:text-braden-sky transition-colors">
                       Compliance Support
                     </a>
                   </li>
                 </ul>
               </div>
               <div className="space-y-4">
-                <h3 className="text-sm font-medium">Apprenticeships</h3>
+                <h3 className="text-sm font-medium text-braden-gold">Apprenticeships</h3>
                 <ul className="space-y-2 text-sm">
                   <li>
-                    <a href="#" className="text-gray-500 hover:text-blue-600 transition-colors">
+                    <a href="#" className="text-gray-300 hover:text-braden-sky transition-colors">
                       Current Opportunities
                     </a>
                   </li>
                   <li>
-                    <a href="#" className="text-gray-500 hover:text-blue-600 transition-colors">
+                    <a href="#" className="text-gray-300 hover:text-braden-sky transition-colors">
                       Types of Apprenticeships
                     </a>
                   </li>
                   <li>
-                    <a href="#" className="text-gray-500 hover:text-blue-600 transition-colors">
+                    <a href="#" className="text-gray-300 hover:text-braden-sky transition-colors">
                       How to Apply
                     </a>
                   </li>
                   <li>
-                    <a href="#" className="text-gray-500 hover:text-blue-600 transition-colors">
+                    <a href="#" className="text-gray-300 hover:text-braden-sky transition-colors">
                       Eligibility Requirements
                     </a>
                   </li>
                 </ul>
               </div>
               <div className="space-y-4">
-                <h3 className="text-sm font-medium">Resources</h3>
+                <h3 className="text-sm font-medium text-braden-gold">Resources</h3>
                 <ul className="space-y-2 text-sm">
                   <li>
-                    <a href="#" className="text-gray-500 hover:text-blue-600 transition-colors">
+                    <a href="#" className="text-gray-300 hover:text-braden-sky transition-colors">
                       Blog
                     </a>
                   </li>
                   <li>
-                    <a href="#" className="text-gray-500 hover:text-blue-600 transition-colors">
+                    <a href="#" className="text-gray-300 hover:text-braden-sky transition-colors">
                       FAQ
                     </a>
                   </li>
                   <li>
-                    <a href="#" className="text-gray-500 hover:text-blue-600 transition-colors">
+                    <a href="#" className="text-gray-300 hover:text-braden-sky transition-colors">
                       Testimonials
                     </a>
                   </li>
                   <li>
-                    <a href="#" className="text-gray-500 hover:text-blue-600 transition-colors">
+                    <a href="#" className="text-gray-300 hover:text-braden-sky transition-colors">
                       News
                     </a>
                   </li>
                 </ul>
               </div>
               <div className="space-y-4">
-                <h3 className="text-sm font-medium">Contact</h3>
+                <h3 className="text-sm font-medium text-braden-gold">Contact</h3>
                 <ul className="space-y-2 text-sm">
-                  <li className="text-gray-500">
+                  <li className="text-gray-300">
                     123 Business Street
                     <br />
                     Perth, WA 6000
                   </li>
-                  <li className="text-gray-500">
+                  <li className="text-gray-300">
                     info@bradengroup.com.au
                   </li>
-                  <li className="text-gray-500">
+                  <li className="text-gray-300">
                     (08) 9123 4567
                   </li>
                 </ul>
               </div>
             </div>
           </div>
-          <div className="mt-8 border-t pt-8 text-center text-sm text-gray-500">
+          <div className="mt-8 border-t border-gray-700 pt-8 text-center text-sm text-gray-400">
             <p>© {new Date().getFullYear()} Braden Group. All rights reserved.</p>
           </div>
         </div>

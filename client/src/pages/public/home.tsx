@@ -11,20 +11,20 @@ export default function HomePage() {
           <div className="flex flex-col items-center justify-center space-y-8 text-center">
             <div className="space-y-4 max-w-4xl">
               <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl">
-                <span className="text-blue-600">Connecting apprentices with career opportunities, and employers with skilled talent.</span>
+                <span className="text-braden-sky">Connecting apprentices with career opportunities, and employers with skilled talent.</span>
               </h1>
-              <p className="mx-auto max-w-[700px] text-gray-600 md:text-xl">
+              <p className="mx-auto max-w-[700px] text-braden-navy md:text-xl">
                 Group Training Organisation specialising in apprenticeship and traineeship management in Western Australia.
               </p>
             </div>
             <div className="flex flex-wrap justify-center gap-4 mt-8">
               <Link href="/find-apprenticeship">
-                <Button className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2" size="lg">
+                <Button className="bg-braden-sky hover:bg-blue-600 text-white font-semibold px-6 py-3" size="lg">
                   Find an Apprenticeship
                 </Button>
               </Link>
               <Link href="/host-apprentice">
-                <Button variant="outline" size="lg" className="border-2 border-blue-600 text-blue-600 hover:bg-blue-50 font-semibold">
+                <Button variant="outline" size="lg" className="border-2 border-braden-navy bg-gray-900 text-white hover:bg-gray-800 font-semibold px-6 py-3">
                   Become a Host Employer
                 </Button>
               </Link>
@@ -37,21 +37,21 @@ export default function HomePage() {
       <section className="w-full py-12 md:py-24 lg:py-32 bg-white">
         <div className="container mx-auto px-4 md:px-6">
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="flex flex-col items-center justify-center space-y-2 border rounded-lg p-4">
-              <div className="text-3xl font-bold">100+</div>
-              <div className="text-center text-sm text-gray-500">Apprentices Placed</div>
+            <div className="flex flex-col items-center justify-center space-y-2 border-2 border-braden-sky rounded-lg p-6 shadow-md">
+              <div className="text-4xl font-bold text-braden-navy">100+</div>
+              <div className="text-center text-sm text-braden-navy font-medium">Apprentices Placed</div>
             </div>
-            <div className="flex flex-col items-center justify-center space-y-2 border rounded-lg p-4">
-              <div className="text-3xl font-bold">50+</div>
-              <div className="text-center text-sm text-gray-500">Host Employers</div>
+            <div className="flex flex-col items-center justify-center space-y-2 border-2 border-braden-sky rounded-lg p-6 shadow-md">
+              <div className="text-4xl font-bold text-braden-navy">50+</div>
+              <div className="text-center text-sm text-braden-navy font-medium">Host Employers</div>
             </div>
-            <div className="flex flex-col items-center justify-center space-y-2 border rounded-lg p-4">
-              <div className="text-3xl font-bold">95%</div>
-              <div className="text-center text-sm text-gray-500">Completion Rate</div>
+            <div className="flex flex-col items-center justify-center space-y-2 border-2 border-braden-sky rounded-lg p-6 shadow-md">
+              <div className="text-4xl font-bold text-braden-navy">95%</div>
+              <div className="text-center text-sm text-braden-navy font-medium">Completion Rate</div>
             </div>
-            <div className="flex flex-col items-center justify-center space-y-2 border rounded-lg p-4">
-              <div className="text-3xl font-bold">15+</div>
-              <div className="text-center text-sm text-gray-500">Industries Served</div>
+            <div className="flex flex-col items-center justify-center space-y-2 border-2 border-braden-sky rounded-lg p-6 shadow-md">
+              <div className="text-4xl font-bold text-braden-navy">15+</div>
+              <div className="text-center text-sm text-braden-navy font-medium">Industries Served</div>
             </div>
           </div>
         </div>
@@ -62,46 +62,46 @@ export default function HomePage() {
         <div className="container mx-auto px-4 md:px-6">
           <div className="flex flex-col items-center justify-center space-y-6 text-center">
             <div className="space-y-3 max-w-3xl">
-              <h2 className="text-3xl font-bold tracking-tighter md:text-4xl">
+              <h2 className="text-3xl font-bold tracking-tighter md:text-4xl text-braden-navy">
                 What Our Clients Say
               </h2>
-              <p className="mx-auto max-w-[700px] text-gray-500 md:text-xl">
+              <p className="mx-auto max-w-[700px] text-braden-navy md:text-xl">
                 Hear from our apprentices and host employers about their experience working with Braden Group.
               </p>
             </div>
             <div className="w-full grid gap-6 py-8 md:grid-cols-2 lg:gap-10 max-w-5xl">
               <div className="flex flex-col justify-center space-y-4">
-                <div className="relative overflow-hidden rounded-lg border bg-background p-6">
+                <div className="relative overflow-hidden rounded-lg border-2 border-braden-sky bg-white p-6 shadow-md">
                   <div className="flex flex-row items-start gap-4">
-                    <div className="rounded-full border border-blue-500 p-1">
-                      <div className="bg-blue-500 w-8 h-8 rounded-full flex items-center justify-center text-white">
+                    <div className="rounded-full border border-braden-sky p-1">
+                      <div className="bg-braden-sky w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold text-lg">
                         A
                       </div>
                     </div>
                     <div className="grid gap-1">
-                      <h3 className="text-xl font-bold">Alex Thompson</h3>
-                      <p className="text-sm text-gray-500">Electrical Apprentice</p>
+                      <h3 className="text-xl font-bold text-braden-navy">Alex Thompson</h3>
+                      <p className="text-sm text-braden-slate">Electrical Apprentice</p>
                     </div>
                   </div>
-                  <blockquote className="mt-4 border-l-4 border-gray-200 pl-4 italic">
+                  <blockquote className="mt-4 border-l-4 border-braden-gold pl-4 italic text-braden-navy">
                     "Braden Group made it easy to find an apprenticeship that matched my skills and interests. The support I've received has been amazing."
                   </blockquote>
                 </div>
               </div>
               <div className="flex flex-col justify-center space-y-4">
-                <div className="relative overflow-hidden rounded-lg border bg-background p-6">
+                <div className="relative overflow-hidden rounded-lg border-2 border-braden-sky bg-white p-6 shadow-md">
                   <div className="flex flex-row items-start gap-4">
-                    <div className="rounded-full border border-blue-500 p-1">
-                      <div className="bg-blue-500 w-8 h-8 rounded-full flex items-center justify-center text-white">
+                    <div className="rounded-full border border-braden-sky p-1">
+                      <div className="bg-braden-sky w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold text-lg">
                         S
                       </div>
                     </div>
                     <div className="grid gap-1">
-                      <h3 className="text-xl font-bold">Sarah Johnson</h3>
-                      <p className="text-sm text-gray-500">Host Employer - Johnson Construction</p>
+                      <h3 className="text-xl font-bold text-braden-navy">Sarah Johnson</h3>
+                      <p className="text-sm text-braden-slate">Host Employer - Johnson Construction</p>
                     </div>
                   </div>
-                  <blockquote className="mt-4 border-l-4 border-gray-200 pl-4 italic">
+                  <blockquote className="mt-4 border-l-4 border-braden-gold pl-4 italic text-braden-navy">
                     "Working with Braden Group has removed the administrative burden of managing apprentices while giving us access to top talent."
                   </blockquote>
                 </div>
@@ -112,11 +112,11 @@ export default function HomePage() {
       </section>
 
       {/* CTA Section */}
-      <section className="w-full py-12 md:py-24 lg:py-32 bg-blue-600 text-white">
+      <section className="w-full py-12 md:py-24 lg:py-32 bg-braden-navy text-white">
         <div className="container mx-auto px-4 md:px-6">
           <div className="flex flex-col items-center justify-center space-y-6 text-center">
             <div className="space-y-3 max-w-2xl">
-              <h2 className="text-3xl font-bold tracking-tighter md:text-4xl">
+              <h2 className="text-3xl font-bold tracking-tighter md:text-4xl text-braden-gold">
                 Ready to get started?
               </h2>
               <p className="mx-auto max-w-[600px] text-gray-200 md:text-xl">
@@ -125,7 +125,7 @@ export default function HomePage() {
             </div>
             <div className="mt-6">
               <Link href="/contact">
-                <Button variant="secondary" size="lg">
+                <Button className="bg-braden-sky hover:bg-blue-600 text-white font-semibold px-6 py-3" size="lg">
                   Contact Us Today
                 </Button>
               </Link>

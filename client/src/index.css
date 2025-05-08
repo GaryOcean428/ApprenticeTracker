@@ -3,6 +3,104 @@
 @tailwind utilities;
 
 :root {
+  /* Braden Group Color Palette */
+  --braden-red: #ab233a;
+  --braden-dark-red: #811a2c;
+  --braden-gold: #cbb26a;
+  --braden-light-gold: #d8c690;
+  --braden-bronze: #be9e44;
+  --braden-navy: #2c3e50;
+  --braden-slate: #95a5a6;
+  --braden-sky: #3498db;
+  --braden-forest: #27ae60;
+  --braden-lavender: #9b59b6;
+}
+
+/* Apply brand colors to existing theme */
+.bg-primary {
+  background-color: var(--braden-sky);
+}
+
+.text-primary {
+  color: var(--braden-sky);
+}
+
+.bg-secondary {
+  background-color: var(--braden-navy);
+}
+
+.text-secondary {
+  color: var(--braden-navy);
+}
+
+.bg-accent {
+  background-color: var(--braden-gold);
+}
+
+.text-accent {
+  color: var(--braden-gold);
+}
+
+/* Brand-specific utility classes */
+.bg-braden-red {
+  background-color: var(--braden-red);
+}
+
+.text-braden-red {
+  color: var(--braden-red);
+}
+
+.bg-braden-dark-red {
+  background-color: var(--braden-dark-red);
+}
+
+.text-braden-dark-red {
+  color: var(--braden-dark-red);
+}
+
+.bg-braden-gold {
+  background-color: var(--braden-gold);
+}
+
+.text-braden-gold {
+  color: var(--braden-gold);
+}
+
+.bg-braden-light-gold {
+  background-color: var(--braden-light-gold);
+}
+
+.text-braden-light-gold {
+  color: var(--braden-light-gold);
+}
+
+.bg-braden-navy {
+  background-color: var(--braden-navy);
+}
+
+.text-braden-navy {
+  color: var(--braden-navy);
+}
+
+.bg-braden-sky {
+  background-color: var(--braden-sky);
+}
+
+.text-braden-sky {
+  color: var(--braden-sky);
+}
+
+.border-braden-sky {
+  border-color: var(--braden-sky);
+}
+
+.border-braden-gold {
+  border-color: var(--braden-gold);
+}
+
+/* Add additional utility classes as needed */
+
+:root {
   /* Braden Group Brand Colors - Light Theme */
   --background: 0 0% 100%;
   --foreground: 220 10% 6%;
