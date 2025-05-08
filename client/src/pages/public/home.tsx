@@ -7,24 +7,24 @@ export default function HomePage() {
     <PublicLayout>
       {/* Hero Section */}
       <section className="w-full py-12 md:py-24 lg:py-32 bg-blue-50">
-        <div className="container px-4 md:px-6">
-          <div className="flex flex-col items-center space-y-4 text-center">
-            <div className="space-y-2">
-              <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl text-white">
-                <span className="bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">Connecting apprentices with career opportunities, and employers with skilled talent.</span>
+        <div className="container mx-auto px-4 md:px-6">
+          <div className="flex flex-col items-center justify-center space-y-8 text-center">
+            <div className="space-y-4 max-w-4xl">
+              <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl">
+                <span className="text-blue-600">Connecting apprentices with career opportunities, and employers with skilled talent.</span>
               </h1>
-              <p className="mx-auto max-w-[700px] text-gray-600 md:text-xl lg:text-2xl">
+              <p className="mx-auto max-w-[700px] text-gray-600 md:text-xl">
                 Group Training Organisation specialising in apprenticeship and traineeship management in Western Australia.
               </p>
             </div>
-            <div className="space-x-4">
+            <div className="flex flex-wrap justify-center gap-4 mt-8">
               <Link href="/find-apprenticeship">
-                <Button className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-6 rounded-md" size="lg">
+                <Button className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2" size="lg">
                   Find an Apprenticeship
                 </Button>
               </Link>
               <Link href="/host-apprentice">
-                <Button variant="outline" size="lg" className="border-2 border-blue-600 text-blue-600 hover:bg-blue-50 font-semibold px-8 py-6 rounded-md">
+                <Button variant="outline" size="lg" className="border-2 border-blue-600 text-blue-600 hover:bg-blue-50 font-semibold">
                   Become a Host Employer
                 </Button>
               </Link>
@@ -35,7 +35,7 @@ export default function HomePage() {
 
       {/* Stats Section */}
       <section className="w-full py-12 md:py-24 lg:py-32 bg-white">
-        <div className="container px-4 md:px-6">
+        <div className="container mx-auto px-4 md:px-6">
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
             <div className="flex flex-col items-center justify-center space-y-2 border rounded-lg p-4">
               <div className="text-3xl font-bold">100+</div>
@@ -59,17 +59,17 @@ export default function HomePage() {
 
       {/* Testimonials Section */}
       <section className="w-full py-12 md:py-24 lg:py-32 bg-gray-50">
-        <div className="container px-4 md:px-6">
-          <div className="flex flex-col items-center justify-center space-y-4 text-center">
-            <div className="space-y-2">
-              <h2 className="text-3xl font-bold tracking-tighter md:text-4xl/tight">
+        <div className="container mx-auto px-4 md:px-6">
+          <div className="flex flex-col items-center justify-center space-y-6 text-center">
+            <div className="space-y-3 max-w-3xl">
+              <h2 className="text-3xl font-bold tracking-tighter md:text-4xl">
                 What Our Clients Say
               </h2>
-              <p className="mx-auto max-w-[700px] text-gray-500 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+              <p className="mx-auto max-w-[700px] text-gray-500 md:text-xl">
                 Hear from our apprentices and host employers about their experience working with Braden Group.
               </p>
             </div>
-            <div className="mx-auto grid max-w-5xl items-center gap-6 py-12 lg:grid-cols-2 lg:gap-12">
+            <div className="w-full grid gap-6 py-8 md:grid-cols-2 lg:gap-10 max-w-5xl">
               <div className="flex flex-col justify-center space-y-4">
                 <div className="relative overflow-hidden rounded-lg border bg-background p-6">
                   <div className="flex flex-row items-start gap-4">
@@ -80,7 +80,7 @@ export default function HomePage() {
                     </div>
                     <div className="grid gap-1">
                       <h3 className="text-xl font-bold">Alex Thompson</h3>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">Electrical Apprentice</p>
+                      <p className="text-sm text-gray-500">Electrical Apprentice</p>
                     </div>
                   </div>
                   <blockquote className="mt-4 border-l-4 border-gray-200 pl-4 italic">
@@ -98,7 +98,7 @@ export default function HomePage() {
                     </div>
                     <div className="grid gap-1">
                       <h3 className="text-xl font-bold">Sarah Johnson</h3>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">Host Employer - Johnson Construction</p>
+                      <p className="text-sm text-gray-500">Host Employer - Johnson Construction</p>
                     </div>
                   </div>
                   <blockquote className="mt-4 border-l-4 border-gray-200 pl-4 italic">
@@ -113,17 +113,17 @@ export default function HomePage() {
 
       {/* CTA Section */}
       <section className="w-full py-12 md:py-24 lg:py-32 bg-blue-600 text-white">
-        <div className="container px-4 md:px-6">
-          <div className="flex flex-col items-center justify-center space-y-4 text-center">
-            <div className="space-y-2">
-              <h2 className="text-3xl font-bold tracking-tighter md:text-4xl/tight">
+        <div className="container mx-auto px-4 md:px-6">
+          <div className="flex flex-col items-center justify-center space-y-6 text-center">
+            <div className="space-y-3 max-w-2xl">
+              <h2 className="text-3xl font-bold tracking-tighter md:text-4xl">
                 Ready to get started?
               </h2>
-              <p className="mx-auto max-w-[600px] text-gray-200 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+              <p className="mx-auto max-w-[600px] text-gray-200 md:text-xl">
                 Whether you're looking for an apprenticeship or want to host an apprentice, we're here to help.
               </p>
             </div>
-            <div className="space-x-4">
+            <div className="mt-6">
               <Link href="/contact">
                 <Button variant="secondary" size="lg">
                   Contact Us Today

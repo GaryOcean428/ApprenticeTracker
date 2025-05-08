@@ -10,10 +10,10 @@ export default function PublicLayout({ children }: PublicLayoutProps) {
   return (
     <div className="flex min-h-screen flex-col">
       <header className="sticky top-0 z-40 w-full border-b bg-white">
-        <div className="container flex h-16 items-center justify-between py-4">
+        <div className="container mx-auto flex h-16 items-center justify-between px-4 py-4">
           <div className="flex gap-6 md:gap-10">
             <Link href="/" className="flex items-center space-x-2">
-              <span className="hidden font-bold text-xl sm:inline-block bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">Braden Group</span>
+              <span className="font-bold text-xl sm:inline-block text-blue-600">Braden Group</span>
             </Link>
             <nav className="hidden gap-6 md:flex">
               <Link href="/">
@@ -50,17 +50,17 @@ export default function PublicLayout({ children }: PublicLayoutProps) {
           </div>
           <div className="flex items-center gap-4">
             <Link href="/auth/login">
-              <Button variant="outline">Log In</Button>
+              <Button variant="outline" className="bg-white">Log In</Button>
             </Link>
             <Link href="/auth/login">
-              <Button>Portal Access</Button>
+              <Button className="bg-blue-600 hover:bg-blue-700">Portal Access</Button>
             </Link>
           </div>
         </div>
       </header>
       <main className="flex-1">{children}</main>
       <footer className="border-t bg-gray-100">
-        <div className="container px-4 md:px-6 py-8 md:py-12">
+        <div className="container mx-auto px-4 md:px-6 py-8 md:py-12">
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
             <div className="space-y-4">
               <h3 className="text-lg font-medium">Braden Group</h3>
