@@ -24,6 +24,7 @@ import PlacementsList from "./pages/placements/index";
 import DocumentsList from "./pages/documents/index";
 import ComplianceList from "./pages/compliance/index";
 import CreateComplianceRecord from "./pages/compliance/create";
+import StandardDetail from "./components/compliance/StandardDetail";
 import TimesheetsList from "./pages/timesheets/index";
 import ReportsList from "./pages/reports/index";
 import AwardsList from "./pages/awards/index";
@@ -518,8 +519,7 @@ function Router() {
         <ProtectedRoute path="/compliance/standard-1" component={() => {
           return (
             <div className="p-8">
-              <h1 className="text-2xl font-bold mb-4">Standard 1 Requirements</h1>
-              <p className="text-muted-foreground mb-4">This page is currently under development.</p>
+              <StandardDetail prefix="1" />
             </div>
           );
         }} />
