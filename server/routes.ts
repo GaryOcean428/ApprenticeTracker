@@ -31,6 +31,7 @@ import progressReviewsRouter from "./api/progress-reviews";
 import financialRouter from "./api/financial";
 import complianceRouter from "./api/compliance";
 import { setupWhsRoutes } from "./api/whs/index";
+import labourHireRouter from "./api/labour-hire-routes";
 import { eq, and } from "drizzle-orm";
 import { db } from "./db"; // Assuming db connection is defined here
 import { users, gtoOrganizations } from "@shared/schema";
@@ -147,6 +148,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/api/financial', financialRouter); // Financial management routes
   app.use('/api/compliance', complianceRouter); // Compliance management routes
   setupWhsRoutes(app); // Work Health & Safety routes
+  app.use('/api/labour-hire', labourHireRouter); // Labour Hire Workers routes
   
   // Register host employer routes
   registerHostRoutes(app);

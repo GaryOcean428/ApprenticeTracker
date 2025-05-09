@@ -21,6 +21,17 @@ import {
   type Qualification, type InsertQualification,
   type HostEmployerPreferredQualification, type InsertHostEmployerPreferredQualification
 } from "@shared/schema";
+
+// Import labour hire types
+import {
+  labourHireWorkers, labourHirePlacements, labourHireTimesheets, 
+  labourHireTimesheetDetails, labourHireWorkerDocuments,
+  type LabourHireWorker, type InsertLabourHireWorker,
+  type LabourHirePlacement, type InsertLabourHirePlacement,
+  type LabourHireTimesheet, type InsertLabourHireTimesheet,
+  type LabourHireTimesheetDetail, type InsertLabourHireTimesheetDetail,
+  type LabourHireWorkerDocument, type InsertLabourHireWorkerDocument
+} from "@shared/schema";
 import { db } from "./db";
 import { eq, and, or, desc, asc, sql, type SQL } from "drizzle-orm";
 import session from "express-session";
@@ -170,6 +181,42 @@ export interface IStorage {
   getQualification(id: number): Promise<Qualification | undefined>;
   getAllQualifications(): Promise<Qualification[]>;
   searchQualifications(query: string): Promise<Qualification[]>;
+  
+  // Labour Hire Worker methods
+  getLabourHireWorker(id: number): Promise<LabourHireWorker | undefined>;
+  getLabourHireWorkerByEmail(email: string): Promise<LabourHireWorker | undefined>;
+  getAllLabourHireWorkers(): Promise<LabourHireWorker[]>;
+  createLabourHireWorker(worker: InsertLabourHireWorker): Promise<LabourHireWorker>;
+  updateLabourHireWorker(id: number, worker: Partial<InsertLabourHireWorker>): Promise<LabourHireWorker | undefined>;
+  deleteLabourHireWorker(id: number): Promise<boolean>;
+  
+  // Labour Hire Placement methods
+  getLabourHirePlacement(id: number): Promise<LabourHirePlacement | undefined>;
+  getAllLabourHirePlacements(): Promise<LabourHirePlacement[]>;
+  getLabourHirePlacementsByWorker(workerId: number): Promise<LabourHirePlacement[]>;
+  getLabourHirePlacementsByHost(hostEmployerId: number): Promise<LabourHirePlacement[]>;
+  createLabourHirePlacement(placement: InsertLabourHirePlacement): Promise<LabourHirePlacement>;
+  updateLabourHirePlacement(id: number, placement: Partial<InsertLabourHirePlacement>): Promise<LabourHirePlacement | undefined>;
+  deleteLabourHirePlacement(id: number): Promise<boolean>;
+  
+  // Labour Hire Timesheet methods
+  getLabourHireTimesheet(id: number): Promise<LabourHireTimesheet | undefined>;
+  getAllLabourHireTimesheets(): Promise<LabourHireTimesheet[]>;
+  getLabourHireTimesheetsByWorker(workerId: number): Promise<LabourHireTimesheet[]>;
+  getLabourHireTimesheetsByPlacement(placementId: number): Promise<LabourHireTimesheet[]>;
+  createLabourHireTimesheet(timesheet: InsertLabourHireTimesheet): Promise<LabourHireTimesheet>;
+  updateLabourHireTimesheet(id: number, timesheet: Partial<InsertLabourHireTimesheet>): Promise<LabourHireTimesheet | undefined>;
+  submitLabourHireTimesheet(id: number): Promise<LabourHireTimesheet | undefined>;
+  approveLabourHireTimesheet(id: number, approvedBy: number): Promise<LabourHireTimesheet | undefined>;
+  rejectLabourHireTimesheet(id: number, reason: string): Promise<LabourHireTimesheet | undefined>;
+  
+  // Labour Hire Worker Document methods
+  getLabourHireWorkerDocument(id: number): Promise<LabourHireWorkerDocument | undefined>;
+  getLabourHireWorkerDocuments(workerId: number): Promise<LabourHireWorkerDocument[]>;
+  createLabourHireWorkerDocument(document: InsertLabourHireWorkerDocument): Promise<LabourHireWorkerDocument>;
+  updateLabourHireWorkerDocument(id: number, document: Partial<InsertLabourHireWorkerDocument>): Promise<LabourHireWorkerDocument | undefined>;
+  verifyLabourHireWorkerDocument(id: number, verifiedBy: number): Promise<LabourHireWorkerDocument | undefined>;
+  rejectLabourHireWorkerDocument(id: number, reason: string): Promise<LabourHireWorkerDocument | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -179,6 +226,288 @@ export class DatabaseStorage implements IStorage {
     this.sessionStore = new MemoryStore({
       checkPeriod: 86400000, // 24 hours
     });
+  }
+  
+  // Labour Hire Worker methods
+  async getLabourHireWorker(id: number): Promise<LabourHireWorker | undefined> {
+    const [worker] = await db
+      .select()
+      .from(labourHireWorkers)
+      .where(eq(labourHireWorkers.id, id));
+    return worker;
+  }
+  
+  async getLabourHireWorkerByEmail(email: string): Promise<LabourHireWorker | undefined> {
+    const [worker] = await db
+      .select()
+      .from(labourHireWorkers)
+      .where(eq(labourHireWorkers.email, email));
+    return worker;
+  }
+  
+  async getAllLabourHireWorkers(): Promise<LabourHireWorker[]> {
+    return await db
+      .select()
+      .from(labourHireWorkers)
+      .orderBy(labourHireWorkers.lastName, labourHireWorkers.firstName);
+  }
+  
+  async createLabourHireWorker(worker: InsertLabourHireWorker): Promise<LabourHireWorker> {
+    const [createdWorker] = await db
+      .insert(labourHireWorkers)
+      .values({
+        ...worker,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      })
+      .returning();
+    return createdWorker;
+  }
+  
+  async updateLabourHireWorker(id: number, worker: Partial<InsertLabourHireWorker>): Promise<LabourHireWorker | undefined> {
+    const [updatedWorker] = await db
+      .update(labourHireWorkers)
+      .set({
+        ...worker,
+        updatedAt: new Date()
+      })
+      .where(eq(labourHireWorkers.id, id))
+      .returning();
+    return updatedWorker;
+  }
+  
+  async deleteLabourHireWorker(id: number): Promise<boolean> {
+    const result = await db
+      .delete(labourHireWorkers)
+      .where(eq(labourHireWorkers.id, id));
+    return result.rowCount ? result.rowCount > 0 : false;
+  }
+  
+  // Labour Hire Placement methods
+  async getLabourHirePlacement(id: number): Promise<LabourHirePlacement | undefined> {
+    const [placement] = await db
+      .select()
+      .from(labourHirePlacements)
+      .where(eq(labourHirePlacements.id, id));
+    return placement;
+  }
+  
+  async getAllLabourHirePlacements(): Promise<LabourHirePlacement[]> {
+    return await db
+      .select()
+      .from(labourHirePlacements)
+      .orderBy(desc(labourHirePlacements.startDate));
+  }
+  
+  async getLabourHirePlacementsByWorker(workerId: number): Promise<LabourHirePlacement[]> {
+    return await db
+      .select()
+      .from(labourHirePlacements)
+      .where(eq(labourHirePlacements.workerId, workerId))
+      .orderBy(desc(labourHirePlacements.startDate));
+  }
+  
+  async getLabourHirePlacementsByHost(hostEmployerId: number): Promise<LabourHirePlacement[]> {
+    return await db
+      .select()
+      .from(labourHirePlacements)
+      .where(eq(labourHirePlacements.hostEmployerId, hostEmployerId))
+      .orderBy(desc(labourHirePlacements.startDate));
+  }
+  
+  async createLabourHirePlacement(placement: InsertLabourHirePlacement): Promise<LabourHirePlacement> {
+    const [createdPlacement] = await db
+      .insert(labourHirePlacements)
+      .values({
+        ...placement,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      })
+      .returning();
+    return createdPlacement;
+  }
+  
+  async updateLabourHirePlacement(id: number, placement: Partial<InsertLabourHirePlacement>): Promise<LabourHirePlacement | undefined> {
+    const [updatedPlacement] = await db
+      .update(labourHirePlacements)
+      .set({
+        ...placement,
+        updatedAt: new Date()
+      })
+      .where(eq(labourHirePlacements.id, id))
+      .returning();
+    return updatedPlacement;
+  }
+  
+  async deleteLabourHirePlacement(id: number): Promise<boolean> {
+    const result = await db
+      .delete(labourHirePlacements)
+      .where(eq(labourHirePlacements.id, id));
+    return result.rowCount ? result.rowCount > 0 : false;
+  }
+  
+  // Labour Hire Timesheet methods
+  async getLabourHireTimesheet(id: number): Promise<LabourHireTimesheet | undefined> {
+    const [timesheet] = await db
+      .select()
+      .from(labourHireTimesheets)
+      .where(eq(labourHireTimesheets.id, id));
+    return timesheet;
+  }
+  
+  async getAllLabourHireTimesheets(): Promise<LabourHireTimesheet[]> {
+    return await db
+      .select()
+      .from(labourHireTimesheets)
+      .orderBy(desc(labourHireTimesheets.weekStarting));
+  }
+  
+  async getLabourHireTimesheetsByWorker(workerId: number): Promise<LabourHireTimesheet[]> {
+    return await db
+      .select()
+      .from(labourHireTimesheets)
+      .where(eq(labourHireTimesheets.workerId, workerId))
+      .orderBy(desc(labourHireTimesheets.weekStarting));
+  }
+  
+  async getLabourHireTimesheetsByPlacement(placementId: number): Promise<LabourHireTimesheet[]> {
+    return await db
+      .select()
+      .from(labourHireTimesheets)
+      .where(eq(labourHireTimesheets.placementId, placementId))
+      .orderBy(desc(labourHireTimesheets.weekStarting));
+  }
+  
+  async createLabourHireTimesheet(timesheet: InsertLabourHireTimesheet): Promise<LabourHireTimesheet> {
+    const [createdTimesheet] = await db
+      .insert(labourHireTimesheets)
+      .values({
+        ...timesheet,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      })
+      .returning();
+    return createdTimesheet;
+  }
+  
+  async updateLabourHireTimesheet(id: number, timesheet: Partial<InsertLabourHireTimesheet>): Promise<LabourHireTimesheet | undefined> {
+    const [updatedTimesheet] = await db
+      .update(labourHireTimesheets)
+      .set({
+        ...timesheet,
+        updatedAt: new Date()
+      })
+      .where(eq(labourHireTimesheets.id, id))
+      .returning();
+    return updatedTimesheet;
+  }
+  
+  async submitLabourHireTimesheet(id: number): Promise<LabourHireTimesheet | undefined> {
+    const [updatedTimesheet] = await db
+      .update(labourHireTimesheets)
+      .set({
+        status: 'submitted',
+        submittedDate: new Date(),
+        updatedAt: new Date()
+      })
+      .where(eq(labourHireTimesheets.id, id))
+      .returning();
+    return updatedTimesheet;
+  }
+  
+  async approveLabourHireTimesheet(id: number, approvedBy: number): Promise<LabourHireTimesheet | undefined> {
+    const [updatedTimesheet] = await db
+      .update(labourHireTimesheets)
+      .set({
+        status: 'approved',
+        approvedBy,
+        approvalDate: new Date(),
+        updatedAt: new Date()
+      })
+      .where(eq(labourHireTimesheets.id, id))
+      .returning();
+    return updatedTimesheet;
+  }
+  
+  async rejectLabourHireTimesheet(id: number, reason: string): Promise<LabourHireTimesheet | undefined> {
+    const [updatedTimesheet] = await db
+      .update(labourHireTimesheets)
+      .set({
+        status: 'rejected',
+        notes: reason,
+        updatedAt: new Date()
+      })
+      .where(eq(labourHireTimesheets.id, id))
+      .returning();
+    return updatedTimesheet;
+  }
+  
+  // Labour Hire Worker Document methods
+  async getLabourHireWorkerDocument(id: number): Promise<LabourHireWorkerDocument | undefined> {
+    const [document] = await db
+      .select()
+      .from(labourHireWorkerDocuments)
+      .where(eq(labourHireWorkerDocuments.id, id));
+    return document;
+  }
+  
+  async getLabourHireWorkerDocuments(workerId: number): Promise<LabourHireWorkerDocument[]> {
+    return await db
+      .select()
+      .from(labourHireWorkerDocuments)
+      .where(eq(labourHireWorkerDocuments.workerId, workerId))
+      .orderBy(labourHireWorkerDocuments.documentType);
+  }
+  
+  async createLabourHireWorkerDocument(document: InsertLabourHireWorkerDocument): Promise<LabourHireWorkerDocument> {
+    const [createdDocument] = await db
+      .insert(labourHireWorkerDocuments)
+      .values({
+        ...document,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      })
+      .returning();
+    return createdDocument;
+  }
+  
+  async updateLabourHireWorkerDocument(id: number, document: Partial<InsertLabourHireWorkerDocument>): Promise<LabourHireWorkerDocument | undefined> {
+    const [updatedDocument] = await db
+      .update(labourHireWorkerDocuments)
+      .set({
+        ...document,
+        updatedAt: new Date()
+      })
+      .where(eq(labourHireWorkerDocuments.id, id))
+      .returning();
+    return updatedDocument;
+  }
+  
+  async verifyLabourHireWorkerDocument(id: number, verifiedBy: number): Promise<LabourHireWorkerDocument | undefined> {
+    const [updatedDocument] = await db
+      .update(labourHireWorkerDocuments)
+      .set({
+        verificationStatus: 'verified',
+        verifiedBy,
+        verificationDate: new Date(),
+        updatedAt: new Date()
+      })
+      .where(eq(labourHireWorkerDocuments.id, id))
+      .returning();
+    return updatedDocument;
+  }
+  
+  async rejectLabourHireWorkerDocument(id: number, reason: string): Promise<LabourHireWorkerDocument | undefined> {
+    const [updatedDocument] = await db
+      .update(labourHireWorkerDocuments)
+      .set({
+        verificationStatus: 'rejected',
+        notes: reason,
+        updatedAt: new Date()
+      })
+      .where(eq(labourHireWorkerDocuments.id, id))
+      .returning();
+    return updatedDocument;
   }
   
   // Host Employer Preferred Qualifications methods
