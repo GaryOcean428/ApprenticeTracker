@@ -3,6 +3,9 @@ import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 import { relations } from "drizzle-orm";
 
+// Import labour hire workers schema
+export * from "./schema/labour-hire";
+
 // Users
 // Roles
 export const roles = pgTable("roles", {
