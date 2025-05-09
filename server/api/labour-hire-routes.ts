@@ -1,7 +1,6 @@
 import express from "express";
 import { storage } from "../storage";
-import { isAuthenticated } from "../middleware/auth";
-import { hasPermission } from "../middleware/permissions";
+import { isAuthenticated, hasPermission } from "../middleware/auth";
 import { 
   insertLabourHireWorkerSchema, 
   insertLabourHirePlacementSchema, 
@@ -17,7 +16,7 @@ const router = express.Router();
 router.get(
   "/workers",
   isAuthenticated,
-  hasPermission("read", "labour_hire_worker"),
+  hasPermission("read:labour_hire_worker"),
   async (req, res) => {
     try {
       const workers = await storage.getAllLabourHireWorkers();
@@ -32,7 +31,7 @@ router.get(
 router.get(
   "/workers/:id",
   isAuthenticated,
-  hasPermission("read", "labour_hire_worker"),
+  hasPermission("read:labour_hire_worker"),
   async (req, res) => {
     try {
       const id = parseInt(req.params.id);
@@ -56,7 +55,7 @@ router.get(
 router.post(
   "/workers",
   isAuthenticated,
-  hasPermission("create", "labour_hire_worker"),
+  hasPermission("create:labour_hire_worker"),
   async (req, res) => {
     try {
       const validatedData = insertLabourHireWorkerSchema.parse(req.body);
@@ -83,7 +82,7 @@ router.post(
 router.put(
   "/workers/:id",
   isAuthenticated,
-  hasPermission("update", "labour_hire_worker"),
+  hasPermission("update:labour_hire_worker"),
   async (req, res) => {
     try {
       const id = parseInt(req.params.id);
@@ -124,7 +123,7 @@ router.put(
 router.delete(
   "/workers/:id",
   isAuthenticated,
-  hasPermission("delete", "labour_hire_worker"),
+  hasPermission("delete:labour_hire_worker"),
   async (req, res) => {
     try {
       const id = parseInt(req.params.id);
@@ -155,7 +154,7 @@ router.delete(
 router.get(
   "/placements",
   isAuthenticated,
-  hasPermission("read", "labour_hire_placement"),
+  hasPermission("read:labour_hire_placement"),
   async (req, res) => {
     try {
       const { workerId, hostEmployerId } = req.query;
@@ -180,7 +179,7 @@ router.get(
 router.get(
   "/placements/:id",
   isAuthenticated,
-  hasPermission("read", "labour_hire_placement"),
+  hasPermission("read:labour_hire_placement"),
   async (req, res) => {
     try {
       const id = parseInt(req.params.id);
@@ -204,7 +203,7 @@ router.get(
 router.post(
   "/placements",
   isAuthenticated,
-  hasPermission("create", "labour_hire_placement"),
+  hasPermission("create:labour_hire_placement"),
   async (req, res) => {
     try {
       const validatedData = insertLabourHirePlacementSchema.parse(req.body);
@@ -237,7 +236,7 @@ router.post(
 router.put(
   "/placements/:id",
   isAuthenticated,
-  hasPermission("update", "labour_hire_placement"),
+  hasPermission("update:labour_hire_placement"),
   async (req, res) => {
     try {
       const id = parseInt(req.params.id);
@@ -286,7 +285,7 @@ router.put(
 router.delete(
   "/placements/:id",
   isAuthenticated,
-  hasPermission("delete", "labour_hire_placement"),
+  hasPermission("delete:labour_hire_placement"),
   async (req, res) => {
     try {
       const id = parseInt(req.params.id);
@@ -317,7 +316,7 @@ router.delete(
 router.get(
   "/timesheets",
   isAuthenticated,
-  hasPermission("read", "labour_hire_timesheet"),
+  hasPermission("read:labour_hire_timesheet"),
   async (req, res) => {
     try {
       const { workerId, placementId } = req.query;
