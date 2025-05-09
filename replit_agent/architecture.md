@@ -188,15 +188,29 @@ Based on dependencies, the application likely uses:
 - React context or hooks for local state
 - Form state management through React Hook Form
 
+### 7.4 Permission System
+
+The application implements a robust permission system with:
+
+- Role-based access control with predefined roles (admin, developer, organization_admin, field_officer, host_employer, apprentice, rto_admin, labour_hire_worker)
+- Permission format: `action:resource` (e.g., `read:labour_hire_worker`, `verify:labour_hire_worker_document`)
+- Permission checking middleware: `hasPermission`, `requirePermission`, and `hasAnyPermission`
+- Developer role has all permissions (wildcard access)
+- Fine-grained permissions for different user roles
+- Labour hire worker functionality with dedicated permissions
+
 ## 8. Security Considerations
 
 The application implements several security measures:
 
 - **JWT token-based authentication**
-- **Role-based access control**
+- **Role-based access control** with granular permissions system
+- **Unified permission format** using `action:resource` pattern
+- **Permission middleware** to protect all API routes
 - **Row Level Security** in the database
 - **Input validation and sanitization**
 - **Environment variable management** for secrets
+- **Document verification workflow** with proper status tracking
 
 ## 9. Future Development
 

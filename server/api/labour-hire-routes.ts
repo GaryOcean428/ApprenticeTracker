@@ -567,7 +567,7 @@ router.get(
 router.post(
   "/workers/:workerId/documents",
   isAuthenticated,
-  hasPermission("create", "labour_hire_worker_document"),
+  hasPermission("create:labour_hire_worker_document"),
   async (req, res) => {
     try {
       const workerId = parseInt(req.params.workerId);
@@ -608,7 +608,7 @@ router.post(
 router.post(
   "/workers/documents/:id/verify",
   isAuthenticated,
-  hasPermission("verify", "labour_hire_worker_document"),
+  hasPermission("verify:labour_hire_worker_document"),
   async (req, res) => {
     try {
       const id = parseInt(req.params.id);
@@ -640,7 +640,7 @@ router.post(
 router.post(
   "/workers/documents/:id/reject",
   isAuthenticated,
-  hasPermission("verify", "labour_hire_worker_document"),
+  hasPermission("verify:labour_hire_worker_document"),
   async (req, res) => {
     try {
       const id = parseInt(req.params.id);
