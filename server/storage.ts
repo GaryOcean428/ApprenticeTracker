@@ -32,6 +32,24 @@ import {
   type LabourHireTimesheetDetail, type InsertLabourHireTimesheetDetail,
   type LabourHireWorkerDocument, type InsertLabourHireWorkerDocument
 } from "@shared/schema";
+
+// Import unified contacts and clients types
+import {
+  contacts, contactTags, contactTagAssignments, contactGroups, 
+  contactGroupMembers, contactInteractions, clients, clientTypes, 
+  clientContacts, clientServices, clientInteractions,
+  type Contact, type InsertContact,
+  type ContactTag, type InsertContactTag,
+  type ContactTagAssignment, type InsertContactTagAssignment,
+  type ContactGroup, type InsertContactGroup,
+  type ContactGroupMember, type InsertContactGroupMember,
+  type ContactInteraction, type InsertContactInteraction,
+  type Client, type InsertClient,
+  type ClientType, type InsertClientType,
+  type ClientContact, type InsertClientContact,
+  type ClientService, type InsertClientService,
+  type ClientInteraction, type InsertClientInteraction
+} from "@shared/schema";
 import { db } from "./db";
 import { eq, and, or, desc, asc, sql, type SQL } from "drizzle-orm";
 import session from "express-session";
@@ -217,6 +235,85 @@ export interface IStorage {
   updateLabourHireWorkerDocument(id: number, document: Partial<InsertLabourHireWorkerDocument>): Promise<LabourHireWorkerDocument | undefined>;
   verifyLabourHireWorkerDocument(id: number, verifiedBy: number): Promise<LabourHireWorkerDocument | undefined>;
   rejectLabourHireWorkerDocument(id: number, reason: string): Promise<LabourHireWorkerDocument | undefined>;
+  
+  // Unified Contacts methods
+  getContact(id: number): Promise<Contact | undefined>;
+  getContactByEmail(email: string): Promise<Contact | undefined>;
+  getAllContacts(options?: { primaryRole?: string, isActive?: boolean, organizationId?: number }): Promise<Contact[]>;
+  createContact(contact: InsertContact): Promise<Contact>;
+  updateContact(id: number, contact: Partial<InsertContact>): Promise<Contact | undefined>;
+  deactivateContact(id: number): Promise<boolean>;
+  deleteContact(id: number): Promise<boolean>;
+  
+  // Contact Tags methods
+  getContactTag(id: number): Promise<ContactTag | undefined>;
+  getAllContactTags(): Promise<ContactTag[]>;
+  createContactTag(tag: InsertContactTag): Promise<ContactTag>;
+  updateContactTag(id: number, tag: Partial<InsertContactTag>): Promise<ContactTag | undefined>;
+  deleteContactTag(id: number): Promise<boolean>;
+  
+  // Contact Tag Assignment methods
+  assignTagToContact(assignment: InsertContactTagAssignment): Promise<ContactTagAssignment>;
+  removeTagFromContact(contactId: number, tagId: number): Promise<boolean>;
+  getContactTags(contactId: number): Promise<ContactTag[]>;
+  getTaggedContacts(tagId: number): Promise<Contact[]>;
+  
+  // Contact Groups methods
+  getContactGroup(id: number): Promise<ContactGroup | undefined>;
+  getAllContactGroups(organizationId?: number): Promise<ContactGroup[]>;
+  createContactGroup(group: InsertContactGroup): Promise<ContactGroup>;
+  updateContactGroup(id: number, group: Partial<InsertContactGroup>): Promise<ContactGroup | undefined>;
+  deleteContactGroup(id: number): Promise<boolean>;
+  
+  // Contact Group Members methods
+  addContactToGroup(member: InsertContactGroupMember): Promise<ContactGroupMember>;
+  removeContactFromGroup(groupId: number, contactId: number): Promise<boolean>;
+  getGroupMembers(groupId: number): Promise<Contact[]>;
+  getContactGroups(contactId: number): Promise<ContactGroup[]>;
+  
+  // Contact Interactions methods
+  getContactInteraction(id: number): Promise<ContactInteraction | undefined>;
+  getContactInteractions(contactId: number): Promise<ContactInteraction[]>;
+  createContactInteraction(interaction: InsertContactInteraction): Promise<ContactInteraction>;
+  updateContactInteraction(id: number, interaction: Partial<InsertContactInteraction>): Promise<ContactInteraction | undefined>;
+  deleteContactInteraction(id: number): Promise<boolean>;
+  
+  // Client methods
+  getClient(id: number): Promise<Client | undefined>;
+  getAllClients(options?: { clientType?: string, status?: string, organizationId?: number }): Promise<Client[]>;
+  createClient(client: InsertClient): Promise<Client>;
+  updateClient(id: number, client: Partial<InsertClient>): Promise<Client | undefined>;
+  deactivateClient(id: number): Promise<boolean>;
+  deleteClient(id: number): Promise<boolean>;
+  
+  // Client Types methods
+  getClientType(id: number): Promise<ClientType | undefined>;
+  getAllClientTypes(): Promise<ClientType[]>;
+  createClientType(type: InsertClientType): Promise<ClientType>;
+  updateClientType(id: number, type: Partial<InsertClientType>): Promise<ClientType | undefined>;
+  deleteClientType(id: number): Promise<boolean>;
+  
+  // Client Contacts methods
+  getClientContact(id: number): Promise<ClientContact | undefined>;
+  getClientContacts(clientId: number): Promise<Contact[]>;
+  addContactToClient(clientContact: InsertClientContact): Promise<ClientContact>;
+  updateClientContact(id: number, clientContact: Partial<InsertClientContact>): Promise<ClientContact | undefined>;
+  removeContactFromClient(clientId: number, contactId: number): Promise<boolean>;
+  setPrimaryContact(clientId: number, contactId: number): Promise<boolean>;
+  
+  // Client Services methods
+  getClientService(id: number): Promise<ClientService | undefined>;
+  getClientServices(clientId: number): Promise<ClientService[]>;
+  addServiceToClient(service: InsertClientService): Promise<ClientService>;
+  updateClientService(id: number, service: Partial<InsertClientService>): Promise<ClientService | undefined>;
+  removeServiceFromClient(id: number): Promise<boolean>;
+  
+  // Client Interactions methods
+  getClientInteraction(id: number): Promise<ClientInteraction | undefined>;
+  getClientInteractions(clientId: number): Promise<ClientInteraction[]>;
+  createClientInteraction(interaction: InsertClientInteraction): Promise<ClientInteraction>;
+  updateClientInteraction(id: number, interaction: Partial<InsertClientInteraction>): Promise<ClientInteraction | undefined>;
+  deleteClientInteraction(id: number): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {

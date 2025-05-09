@@ -16,6 +16,7 @@ import { migrateWHS } from "./migrate-whs";
 import { migrateWhsDocuments } from "./migrate-whs-documents";
 import { migrateWhsRiskAssessments } from "./migrate-whs-risk-assessments";
 import { migrateLabourHireSchema } from "./migrate-labour-hire";
+import { migrateUnifiedContactsSystem, seedContactTags } from "./migrate-unified-contacts";
 import { initializeScheduledTasks } from "./scheduled-tasks";
 
 const app = express();
@@ -102,6 +103,10 @@ app.use((req, res, next) => {
     // Migrate Labour Hire Workers schema
     await migrateLabourHireSchema();
     log("Labour Hire Workers schema migration completed");
+    
+    // Migrate Unified Contacts and Clients schema
+    await migrateUnifiedContactsSystem();
+    log("Unified Contacts and Clients schema migration completed");
   } catch (error) {
     log("Error migrating database schema: " + error);
   }
@@ -119,6 +124,10 @@ app.use((req, res, next) => {
     // Seed Enrichment Program data
     await seedEnrichmentData();
     log("Enrichment Program data seeded successfully");
+    
+    // Seed Contact Tags for unified contact system
+    await seedContactTags();
+    log("Contact Tags seeded successfully");
   } catch (error) {
     log("Error seeding database: " + error);
   }
