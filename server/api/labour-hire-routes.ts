@@ -341,7 +341,7 @@ router.get(
 router.get(
   "/timesheets/:id",
   isAuthenticated,
-  hasPermission("read", "labour_hire_timesheet"),
+  hasPermission("read:labour_hire_timesheet"),
   async (req, res) => {
     try {
       const id = parseInt(req.params.id);
@@ -365,7 +365,7 @@ router.get(
 router.post(
   "/timesheets",
   isAuthenticated,
-  hasPermission("create", "labour_hire_timesheet"),
+  hasPermission("create:labour_hire_timesheet"),
   async (req, res) => {
     try {
       const validatedData = insertLabourHireTimesheetSchema.parse(req.body);
@@ -403,7 +403,7 @@ router.post(
 router.put(
   "/timesheets/:id",
   isAuthenticated,
-  hasPermission("update", "labour_hire_timesheet"),
+  hasPermission("update:labour_hire_timesheet"),
   async (req, res) => {
     try {
       const id = parseInt(req.params.id);
@@ -441,7 +441,7 @@ router.put(
 router.post(
   "/timesheets/:id/submit",
   isAuthenticated,
-  hasPermission("update", "labour_hire_timesheet"),
+  hasPermission("update:labour_hire_timesheet"),
   async (req, res) => {
     try {
       const id = parseInt(req.params.id);
@@ -472,7 +472,7 @@ router.post(
 router.post(
   "/timesheets/:id/approve",
   isAuthenticated,
-  hasPermission("approve", "labour_hire_timesheet"),
+  hasPermission("approve:labour_hire_timesheet"),
   async (req, res) => {
     try {
       const id = parseInt(req.params.id);
@@ -504,7 +504,7 @@ router.post(
 router.post(
   "/timesheets/:id/reject",
   isAuthenticated,
-  hasPermission("approve", "labour_hire_timesheet"),
+  hasPermission("approve:labour_hire_timesheet"),
   async (req, res) => {
     try {
       const id = parseInt(req.params.id);
@@ -541,7 +541,7 @@ router.post(
 router.get(
   "/workers/:workerId/documents",
   isAuthenticated,
-  hasPermission("read", "labour_hire_worker_document"),
+  hasPermission("read:labour_hire_worker_document"),
   async (req, res) => {
     try {
       const workerId = parseInt(req.params.workerId);
