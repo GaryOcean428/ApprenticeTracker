@@ -15,6 +15,7 @@ import { migrateHostEmployersFields } from "./migrate-host-employers-fields";
 import { migrateWHS } from "./migrate-whs";
 import { migrateWhsDocuments } from "./migrate-whs-documents";
 import { migrateWhsRiskAssessments } from "./migrate-whs-risk-assessments";
+import { migrateLabourHireSchema } from "./migrate-labour-hire";
 import { initializeScheduledTasks } from "./scheduled-tasks";
 
 const app = express();
@@ -97,6 +98,10 @@ app.use((req, res, next) => {
     // Update WHS Risk Assessments schema with new fields
     await migrateWhsRiskAssessments();
     log("WHS Risk Assessments schema updated successfully");
+    
+    // Migrate Labour Hire Workers schema
+    await migrateLabourHireSchema();
+    log("Labour Hire Workers schema migration completed");
   } catch (error) {
     log("Error migrating database schema: " + error);
   }
