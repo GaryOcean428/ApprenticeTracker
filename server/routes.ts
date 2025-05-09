@@ -28,6 +28,8 @@ import payrollRouter from "./api/payroll";
 import fairworkRouter from "./api/fairwork";
 import enrichmentRouter from "./api/enrichment";
 import progressReviewsRouter from "./api/progress-reviews";
+import contactsRouter from "./api/contacts-routes";
+import clientsRouter from "./api/clients-routes";
 import financialRouter from "./api/financial";
 import complianceRouter from "./api/compliance";
 import { setupWhsRoutes } from "./api/whs/index";
@@ -149,6 +151,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/api/compliance', complianceRouter); // Compliance management routes
   setupWhsRoutes(app); // Work Health & Safety routes
   app.use('/api/labour-hire', labourHireRouter); // Labour Hire Workers routes
+  app.use('/api/contacts', contactsRouter); // Unified Contacts System routes
+  app.use('/api/clients', clientsRouter); // Client Management System routes
   
   // Register host employer routes
   registerHostRoutes(app);

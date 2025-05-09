@@ -1466,6 +1466,626 @@ export class DatabaseStorage implements IStorage {
     const result = await db.delete(dataViews).where(eq(dataViews.id, id));
     return result.rowCount > 0;
   }
+  
+  // =============== UNIFIED CONTACTS SYSTEM ===============
+  
+  // Unified Contacts methods
+  async getContact(id: number): Promise<Contact | undefined> {
+    const [contact] = await db
+      .select()
+      .from(contacts)
+      .where(eq(contacts.id, id));
+    return contact;
+  }
+  
+  async getContactByEmail(email: string): Promise<Contact | undefined> {
+    const [contact] = await db
+      .select()
+      .from(contacts)
+      .where(eq(contacts.email, email));
+    return contact;
+  }
+  
+  async getAllContacts(options?: { primaryRole?: string, isActive?: boolean, organizationId?: number }): Promise<Contact[]> {
+    let query = db.select().from(contacts);
+    
+    if (options) {
+      if (options.primaryRole) {
+        query = query.where(eq(contacts.primaryRole, options.primaryRole));
+      }
+      
+      if (options.isActive !== undefined) {
+        query = query.where(eq(contacts.isActive, options.isActive));
+      }
+      
+      if (options.organizationId) {
+        query = query.where(eq(contacts.organizationId, options.organizationId));
+      }
+    }
+    
+    return await query.orderBy(contacts.lastName, contacts.firstName);
+  }
+  
+  async createContact(contact: InsertContact): Promise<Contact> {
+    const [createdContact] = await db
+      .insert(contacts)
+      .values({
+        ...contact,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      })
+      .returning();
+    return createdContact;
+  }
+  
+  async updateContact(id: number, contact: Partial<InsertContact>): Promise<Contact | undefined> {
+    const [updatedContact] = await db
+      .update(contacts)
+      .set({
+        ...contact,
+        updatedAt: new Date()
+      })
+      .where(eq(contacts.id, id))
+      .returning();
+    return updatedContact;
+  }
+  
+  async deactivateContact(id: number): Promise<boolean> {
+    const [updatedContact] = await db
+      .update(contacts)
+      .set({
+        isActive: false,
+        updatedAt: new Date()
+      })
+      .where(eq(contacts.id, id))
+      .returning();
+    return !!updatedContact;
+  }
+  
+  async deleteContact(id: number): Promise<boolean> {
+    const result = await db
+      .delete(contacts)
+      .where(eq(contacts.id, id));
+    return result.rowCount ? result.rowCount > 0 : false;
+  }
+  
+  // Contact Tags methods
+  async getContactTag(id: number): Promise<ContactTag | undefined> {
+    const [tag] = await db
+      .select()
+      .from(contactTags)
+      .where(eq(contactTags.id, id));
+    return tag;
+  }
+  
+  async getAllContactTags(): Promise<ContactTag[]> {
+    return await db
+      .select()
+      .from(contactTags)
+      .orderBy(contactTags.name);
+  }
+  
+  async createContactTag(tag: InsertContactTag): Promise<ContactTag> {
+    const [createdTag] = await db
+      .insert(contactTags)
+      .values(tag)
+      .returning();
+    return createdTag;
+  }
+  
+  async updateContactTag(id: number, tag: Partial<InsertContactTag>): Promise<ContactTag | undefined> {
+    const [updatedTag] = await db
+      .update(contactTags)
+      .set(tag)
+      .where(eq(contactTags.id, id))
+      .returning();
+    return updatedTag;
+  }
+  
+  async deleteContactTag(id: number): Promise<boolean> {
+    const result = await db
+      .delete(contactTags)
+      .where(eq(contactTags.id, id));
+    return result.rowCount ? result.rowCount > 0 : false;
+  }
+  
+  // Contact Tag Assignment methods
+  async assignTagToContact(assignment: InsertContactTagAssignment): Promise<ContactTagAssignment> {
+    const [createdAssignment] = await db
+      .insert(contactTagAssignments)
+      .values(assignment)
+      .returning();
+    return createdAssignment;
+  }
+  
+  async removeTagFromContact(contactId: number, tagId: number): Promise<boolean> {
+    const result = await db
+      .delete(contactTagAssignments)
+      .where(
+        and(
+          eq(contactTagAssignments.contactId, contactId),
+          eq(contactTagAssignments.tagId, tagId)
+        )
+      );
+    return result.rowCount ? result.rowCount > 0 : false;
+  }
+  
+  async getContactTags(contactId: number): Promise<ContactTag[]> {
+    return await db
+      .select({
+        id: contactTags.id,
+        name: contactTags.name,
+        color: contactTags.color,
+        description: contactTags.description,
+        category: contactTags.category,
+        isSystem: contactTags.isSystem
+      })
+      .from(contactTagAssignments)
+      .innerJoin(contactTags, eq(contactTagAssignments.tagId, contactTags.id))
+      .where(eq(contactTagAssignments.contactId, contactId))
+      .orderBy(contactTags.name);
+  }
+  
+  async getTaggedContacts(tagId: number): Promise<Contact[]> {
+    return await db
+      .select({
+        id: contacts.id,
+        firstName: contacts.firstName,
+        lastName: contacts.lastName,
+        email: contacts.email,
+        phone: contacts.phone,
+        mobile: contacts.mobile,
+        position: contacts.position,
+        primaryRole: contacts.primaryRole,
+        notes: contacts.notes,
+        isActive: contacts.isActive,
+        organizationId: contacts.organizationId,
+        createdAt: contacts.createdAt,
+        updatedAt: contacts.updatedAt
+      })
+      .from(contactTagAssignments)
+      .innerJoin(contacts, eq(contactTagAssignments.contactId, contacts.id))
+      .where(eq(contactTagAssignments.tagId, tagId))
+      .orderBy(contacts.lastName, contacts.firstName);
+  }
+  
+  // Contact Groups methods
+  async getContactGroup(id: number): Promise<ContactGroup | undefined> {
+    const [group] = await db
+      .select()
+      .from(contactGroups)
+      .where(eq(contactGroups.id, id));
+    return group;
+  }
+  
+  async getAllContactGroups(organizationId?: number): Promise<ContactGroup[]> {
+    let query = db.select().from(contactGroups);
+    
+    if (organizationId) {
+      query = query.where(eq(contactGroups.organizationId, organizationId));
+    }
+    
+    return await query.orderBy(contactGroups.name);
+  }
+  
+  async createContactGroup(group: InsertContactGroup): Promise<ContactGroup> {
+    const [createdGroup] = await db
+      .insert(contactGroups)
+      .values({
+        ...group,
+        createdAt: new Date()
+      })
+      .returning();
+    return createdGroup;
+  }
+  
+  async updateContactGroup(id: number, group: Partial<InsertContactGroup>): Promise<ContactGroup | undefined> {
+    const [updatedGroup] = await db
+      .update(contactGroups)
+      .set(group)
+      .where(eq(contactGroups.id, id))
+      .returning();
+    return updatedGroup;
+  }
+  
+  async deleteContactGroup(id: number): Promise<boolean> {
+    const result = await db
+      .delete(contactGroups)
+      .where(eq(contactGroups.id, id));
+    return result.rowCount ? result.rowCount > 0 : false;
+  }
+  
+  // Contact Group Members methods
+  async addContactToGroup(member: InsertContactGroupMember): Promise<ContactGroupMember> {
+    const [createdMember] = await db
+      .insert(contactGroupMembers)
+      .values(member)
+      .returning();
+    return createdMember;
+  }
+  
+  async removeContactFromGroup(groupId: number, contactId: number): Promise<boolean> {
+    const result = await db
+      .delete(contactGroupMembers)
+      .where(
+        and(
+          eq(contactGroupMembers.groupId, groupId),
+          eq(contactGroupMembers.contactId, contactId)
+        )
+      );
+    return result.rowCount ? result.rowCount > 0 : false;
+  }
+  
+  async getGroupMembers(groupId: number): Promise<Contact[]> {
+    return await db
+      .select({
+        id: contacts.id,
+        firstName: contacts.firstName,
+        lastName: contacts.lastName,
+        email: contacts.email,
+        phone: contacts.phone,
+        mobile: contacts.mobile,
+        position: contacts.position,
+        primaryRole: contacts.primaryRole,
+        notes: contacts.notes,
+        isActive: contacts.isActive,
+        organizationId: contacts.organizationId,
+        createdAt: contacts.createdAt,
+        updatedAt: contacts.updatedAt
+      })
+      .from(contactGroupMembers)
+      .innerJoin(contacts, eq(contactGroupMembers.contactId, contacts.id))
+      .where(eq(contactGroupMembers.groupId, groupId))
+      .orderBy(contacts.lastName, contacts.firstName);
+  }
+  
+  async getContactGroups(contactId: number): Promise<ContactGroup[]> {
+    return await db
+      .select({
+        id: contactGroups.id,
+        name: contactGroups.name,
+        description: contactGroups.description,
+        organizationId: contactGroups.organizationId,
+        createdAt: contactGroups.createdAt
+      })
+      .from(contactGroupMembers)
+      .innerJoin(contactGroups, eq(contactGroupMembers.groupId, contactGroups.id))
+      .where(eq(contactGroupMembers.contactId, contactId))
+      .orderBy(contactGroups.name);
+  }
+  
+  // Contact Interactions methods
+  async getContactInteraction(id: number): Promise<ContactInteraction | undefined> {
+    const [interaction] = await db
+      .select()
+      .from(contactInteractions)
+      .where(eq(contactInteractions.id, id));
+    return interaction;
+  }
+  
+  async getContactInteractions(contactId: number): Promise<ContactInteraction[]> {
+    return await db
+      .select()
+      .from(contactInteractions)
+      .where(eq(contactInteractions.contactId, contactId))
+      .orderBy(desc(contactInteractions.date));
+  }
+  
+  async createContactInteraction(interaction: InsertContactInteraction): Promise<ContactInteraction> {
+    const [createdInteraction] = await db
+      .insert(contactInteractions)
+      .values({
+        ...interaction,
+        createdAt: new Date()
+      })
+      .returning();
+    return createdInteraction;
+  }
+  
+  async updateContactInteraction(id: number, interaction: Partial<InsertContactInteraction>): Promise<ContactInteraction | undefined> {
+    const [updatedInteraction] = await db
+      .update(contactInteractions)
+      .set(interaction)
+      .where(eq(contactInteractions.id, id))
+      .returning();
+    return updatedInteraction;
+  }
+  
+  async deleteContactInteraction(id: number): Promise<boolean> {
+    const result = await db
+      .delete(contactInteractions)
+      .where(eq(contactInteractions.id, id));
+    return result.rowCount ? result.rowCount > 0 : false;
+  }
+  
+  // =============== CLIENT MANAGEMENT SYSTEM ===============
+  
+  // Client methods
+  async getClient(id: number): Promise<Client | undefined> {
+    const [client] = await db
+      .select()
+      .from(clients)
+      .where(eq(clients.id, id));
+    return client;
+  }
+  
+  async getAllClients(options?: { clientType?: string, status?: string, organizationId?: number }): Promise<Client[]> {
+    let query = db.select().from(clients);
+    
+    if (options) {
+      if (options.clientType) {
+        query = query.where(eq(clients.clientType, options.clientType));
+      }
+      
+      if (options.status) {
+        query = query.where(eq(clients.status, options.status));
+      }
+      
+      if (options.organizationId) {
+        query = query.where(eq(clients.organizationId, options.organizationId));
+      }
+    }
+    
+    return await query.orderBy(clients.name);
+  }
+  
+  async createClient(client: InsertClient): Promise<Client> {
+    const [createdClient] = await db
+      .insert(clients)
+      .values({
+        ...client,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      })
+      .returning();
+    return createdClient;
+  }
+  
+  async updateClient(id: number, client: Partial<InsertClient>): Promise<Client | undefined> {
+    const [updatedClient] = await db
+      .update(clients)
+      .set({
+        ...client,
+        updatedAt: new Date()
+      })
+      .where(eq(clients.id, id))
+      .returning();
+    return updatedClient;
+  }
+  
+  async deactivateClient(id: number): Promise<boolean> {
+    const [updatedClient] = await db
+      .update(clients)
+      .set({
+        status: 'inactive',
+        updatedAt: new Date()
+      })
+      .where(eq(clients.id, id))
+      .returning();
+    return !!updatedClient;
+  }
+  
+  async deleteClient(id: number): Promise<boolean> {
+    const result = await db
+      .delete(clients)
+      .where(eq(clients.id, id));
+    return result.rowCount ? result.rowCount > 0 : false;
+  }
+  
+  // Client Types methods
+  async getClientType(id: number): Promise<ClientType | undefined> {
+    const [type] = await db
+      .select()
+      .from(clientTypes)
+      .where(eq(clientTypes.id, id));
+    return type;
+  }
+  
+  async getAllClientTypes(): Promise<ClientType[]> {
+    return await db
+      .select()
+      .from(clientTypes)
+      .orderBy(clientTypes.name);
+  }
+  
+  async createClientType(type: InsertClientType): Promise<ClientType> {
+    const [createdType] = await db
+      .insert(clientTypes)
+      .values(type)
+      .returning();
+    return createdType;
+  }
+  
+  async updateClientType(id: number, type: Partial<InsertClientType>): Promise<ClientType | undefined> {
+    const [updatedType] = await db
+      .update(clientTypes)
+      .set(type)
+      .where(eq(clientTypes.id, id))
+      .returning();
+    return updatedType;
+  }
+  
+  async deleteClientType(id: number): Promise<boolean> {
+    const result = await db
+      .delete(clientTypes)
+      .where(eq(clientTypes.id, id));
+    return result.rowCount ? result.rowCount > 0 : false;
+  }
+  
+  // Client Contacts methods
+  async getClientContact(id: number): Promise<ClientContact | undefined> {
+    const [clientContact] = await db
+      .select()
+      .from(clientContacts)
+      .where(eq(clientContacts.id, id));
+    return clientContact;
+  }
+  
+  async getClientContacts(clientId: number): Promise<Contact[]> {
+    return await db
+      .select({
+        id: contacts.id,
+        firstName: contacts.firstName,
+        lastName: contacts.lastName,
+        email: contacts.email,
+        phone: contacts.phone,
+        mobile: contacts.mobile,
+        position: contacts.position,
+        primaryRole: contacts.primaryRole,
+        notes: contacts.notes,
+        isActive: contacts.isActive,
+        organizationId: contacts.organizationId,
+        createdAt: contacts.createdAt,
+        updatedAt: contacts.updatedAt
+      })
+      .from(clientContacts)
+      .innerJoin(contacts, eq(clientContacts.contactId, contacts.id))
+      .where(eq(clientContacts.clientId, clientId))
+      .orderBy(contacts.lastName, contacts.firstName);
+  }
+  
+  async addContactToClient(clientContact: InsertClientContact): Promise<ClientContact> {
+    const [createdClientContact] = await db
+      .insert(clientContacts)
+      .values(clientContact)
+      .returning();
+    return createdClientContact;
+  }
+  
+  async updateClientContact(id: number, clientContact: Partial<InsertClientContact>): Promise<ClientContact | undefined> {
+    const [updatedClientContact] = await db
+      .update(clientContacts)
+      .set(clientContact)
+      .where(eq(clientContacts.id, id))
+      .returning();
+    return updatedClientContact;
+  }
+  
+  async removeContactFromClient(clientId: number, contactId: number): Promise<boolean> {
+    const result = await db
+      .delete(clientContacts)
+      .where(
+        and(
+          eq(clientContacts.clientId, clientId),
+          eq(clientContacts.contactId, contactId)
+        )
+      );
+    return result.rowCount ? result.rowCount > 0 : false;
+  }
+  
+  async setPrimaryContact(clientId: number, contactId: number): Promise<boolean> {
+    // First, reset all contacts for this client to non-primary
+    await db
+      .update(clientContacts)
+      .set({ isPrimary: false })
+      .where(eq(clientContacts.clientId, clientId));
+    
+    // Then set the specified contact as primary
+    const [updatedContact] = await db
+      .update(clientContacts)
+      .set({ isPrimary: true })
+      .where(
+        and(
+          eq(clientContacts.clientId, clientId),
+          eq(clientContacts.contactId, contactId)
+        )
+      )
+      .returning();
+    
+    return !!updatedContact;
+  }
+  
+  // Client Services methods
+  async getClientService(id: number): Promise<ClientService | undefined> {
+    const [service] = await db
+      .select()
+      .from(clientServices)
+      .where(eq(clientServices.id, id));
+    return service;
+  }
+  
+  async getClientServices(clientId: number): Promise<ClientService[]> {
+    return await db
+      .select()
+      .from(clientServices)
+      .where(eq(clientServices.clientId, clientId))
+      .orderBy(clientServices.serviceType);
+  }
+  
+  async addServiceToClient(service: InsertClientService): Promise<ClientService> {
+    const [createdService] = await db
+      .insert(clientServices)
+      .values({
+        ...service,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      })
+      .returning();
+    return createdService;
+  }
+  
+  async updateClientService(id: number, service: Partial<InsertClientService>): Promise<ClientService | undefined> {
+    const [updatedService] = await db
+      .update(clientServices)
+      .set({
+        ...service,
+        updatedAt: new Date()
+      })
+      .where(eq(clientServices.id, id))
+      .returning();
+    return updatedService;
+  }
+  
+  async removeServiceFromClient(id: number): Promise<boolean> {
+    const result = await db
+      .delete(clientServices)
+      .where(eq(clientServices.id, id));
+    return result.rowCount ? result.rowCount > 0 : false;
+  }
+  
+  // Client Interactions methods
+  async getClientInteraction(id: number): Promise<ClientInteraction | undefined> {
+    const [interaction] = await db
+      .select()
+      .from(clientInteractions)
+      .where(eq(clientInteractions.id, id));
+    return interaction;
+  }
+  
+  async getClientInteractions(clientId: number): Promise<ClientInteraction[]> {
+    return await db
+      .select()
+      .from(clientInteractions)
+      .where(eq(clientInteractions.clientId, clientId))
+      .orderBy(desc(clientInteractions.date));
+  }
+  
+  async createClientInteraction(interaction: InsertClientInteraction): Promise<ClientInteraction> {
+    const [createdInteraction] = await db
+      .insert(clientInteractions)
+      .values({
+        ...interaction,
+        createdAt: new Date()
+      })
+      .returning();
+    return createdInteraction;
+  }
+  
+  async updateClientInteraction(id: number, interaction: Partial<InsertClientInteraction>): Promise<ClientInteraction | undefined> {
+    const [updatedInteraction] = await db
+      .update(clientInteractions)
+      .set(interaction)
+      .where(eq(clientInteractions.id, id))
+      .returning();
+    return updatedInteraction;
+  }
+  
+  async deleteClientInteraction(id: number): Promise<boolean> {
+    const result = await db
+      .delete(clientInteractions)
+      .where(eq(clientInteractions.id, id));
+    return result.rowCount ? result.rowCount > 0 : false;
+  }
 }
 
 export const storage = new DatabaseStorage();
