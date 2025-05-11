@@ -1617,8 +1617,10 @@ export class DatabaseStorage implements IStorage {
         name: contactTags.name,
         color: contactTags.color,
         description: contactTags.description,
-        category: contactTags.category,
-        isSystem: contactTags.isSystem
+        organizationId: contactTags.organizationId,
+        isSystem: contactTags.isSystem,
+        createdAt: contactTags.createdAt,
+        updatedAt: contactTags.updatedAt
       })
       .from(contactTagAssignments)
       .innerJoin(contactTags, eq(contactTagAssignments.tagId, contactTags.id))

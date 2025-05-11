@@ -124,7 +124,17 @@ router.delete('/:id', contactsAuthorized, async (req: Request, res: Response) =>
 
 // ===================== CONTACT TAGS ROUTES =====================
 
-// Get all contact tags
+// Get all contact tags - two routes for the same functionality for flexibility
+router.get('/tags', contactsViewAuthorized, async (req: Request, res: Response) => {
+  try {
+    const tags = await storage.getAllContactTags();
+    res.json(tags);
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Get all contact tags (alternative route)
 router.get('/tags/all', contactsViewAuthorized, async (req: Request, res: Response) => {
   try {
     const tags = await storage.getAllContactTags();
@@ -140,6 +150,27 @@ router.post('/tags', contactsAuthorized, async (req: Request, res: Response) => 
     const parsedData = insertContactTagSchema.parse(req.body);
     const newTag = await storage.createContactTag(parsedData);
     res.status(201).json(newTag);
+  } catch (error: any) {
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ message: 'Validation error', errors: error.errors });
+    }
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Update a contact tag
+router.put('/tags/:id', contactsAuthorized, async (req: Request, res: Response) => {
+  try {
+    const id = parseInt(req.params.id);
+    const parsedData = insertContactTagSchema.partial().parse(req.body);
+    
+    const updatedTag = await storage.updateContactTag(id, parsedData);
+    
+    if (!updatedTag) {
+      return res.status(404).json({ message: 'Tag not found' });
+    }
+    
+    res.json(updatedTag);
   } catch (error: any) {
     if (error instanceof z.ZodError) {
       return res.status(400).json({ message: 'Validation error', errors: error.errors });
