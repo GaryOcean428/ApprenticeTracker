@@ -1559,10 +1559,18 @@ export class DatabaseStorage implements IStorage {
   }
   
   async getAllContactTags(): Promise<ContactTag[]> {
-    return await db
-      .select()
-      .from(contactTags)
-      .orderBy(contactTags.name);
+    try {
+      console.log("Getting all contact tags...");
+      const tags = await db
+        .select()
+        .from(contactTags)
+        .orderBy(contactTags.name);
+      console.log("Tags retrieved:", tags.length);
+      return tags;
+    } catch (error) {
+      console.error("Error getting all contact tags:", error);
+      throw error;
+    }
   }
   
   async createContactTag(tag: InsertContactTag): Promise<ContactTag> {
