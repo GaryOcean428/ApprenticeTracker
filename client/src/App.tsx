@@ -124,6 +124,14 @@ function Router() {
         
         {/* Contacts & Clients Routes */}
         <ProtectedRoute path="/contacts" component={ContactsList} />
+        <ProtectedRoute path="/contacts/tags" component={() => {
+          const ContactTags = lazy(() => import("./pages/contacts/tags/index"));
+          return (
+            <Suspense fallback={<div className="p-8 flex items-center justify-center"><div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"/></div>}>
+              <ContactTags />
+            </Suspense>
+          );
+        }} />
         <ProtectedRoute path="/clients" component={ClientsList} />
         
         {/* Apprentice Routes */}

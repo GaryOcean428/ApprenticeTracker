@@ -17,7 +17,11 @@ import {
   DollarSign,
   Search,
   Globe,
-  Mail
+  Mail,
+  Contact,
+  Building,
+  UserCircle,
+  UserPlus
 } from "lucide-react";
 
 export interface SubNavItem {
@@ -40,6 +44,40 @@ export const MAIN_NAV_SECTIONS: NavSection[] = [
     href: "/admin",
   },
   
+  // Unified Contacts System
+  {
+    title: "Contacts",
+    icon: Contact,
+    href: "/contacts",
+    subItems: [
+      [
+        { title: "All Contacts", href: "/contacts" },
+        { title: "Apprentices", href: "/contacts?tab=apprentices" },
+        { title: "Trainees", href: "/contacts?tab=trainees" },
+        { title: "Labour Hire Workers", href: "/contacts?tab=labour-hire" },
+        { title: "Host Contacts", href: "/contacts?tab=host-employers" },
+        { title: "Contact Tags", href: "/contacts/tags" },
+        { title: "Contact Groups", href: "/contacts/groups" }
+      ]
+    ]
+  },
+  
+  // Client Management
+  {
+    title: "Clients",
+    icon: Building,
+    href: "/clients",
+    subItems: [
+      [
+        { title: "All Clients", href: "/clients" },
+        { title: "Host Employers", href: "/clients?tab=hosts" },
+        { title: "Prospects", href: "/clients?tab=prospects" },
+        { title: "Client Types", href: "/clients/types" },
+        { title: "Client Services", href: "/clients/services" }
+      ]
+    ]
+  },
+
   // Apprentices & Trainees
   {
     title: "Apprentices & Trainees",

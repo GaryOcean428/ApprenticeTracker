@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link, useLocation } from 'wouter';
 import { formatDistanceToNow } from 'date-fns';
@@ -176,18 +176,19 @@ export default function ClientsPage() {
     data: clientTypes = [], 
     isLoading: isTypesLoading 
   } = useQuery<ClientType[]>({
-    queryKey: ['/api/clients/types/all'],
-    onSuccess: (data) => {
-      // Set default client type if not set
-      if (newClient.clientTypeId === 0 && data.length > 0) {
-        const defaultType = data.find(type => type.isDefault) || data[0];
-        setNewClient(prev => ({
-          ...prev,
-          clientTypeId: defaultType.id
-        }));
-      }
-    }
+    queryKey: ['/api/clients/types/all']
   });
+  
+  // Set default client type when data is loaded
+  useEffect(() => {
+    if (newClient.clientTypeId === 0 && clientTypes.length > 0) {
+      const defaultType = clientTypes.find(type => type.isDefault) || clientTypes[0];
+      setNewClient(prev => ({
+        ...prev,
+        clientTypeId: defaultType.id
+      }));
+    }
+  }, [clientTypes]);
   
   // Fetch clients
   const { 
