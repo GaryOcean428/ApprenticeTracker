@@ -127,9 +127,12 @@ router.delete('/:id', contactsAuthorized, async (req: Request, res: Response) =>
 // Get all contact tags - two routes for the same functionality for flexibility
 router.get('/tags', contactsViewAuthorized, async (req: Request, res: Response) => {
   try {
+    console.log("GET /api/contacts/tags endpoint called");
     const tags = await storage.getAllContactTags();
+    console.log(`Returning ${tags.length} tags from /tags endpoint`);
     res.json(tags);
   } catch (error: any) {
+    console.error("Error in GET /api/contacts/tags:", error);
     res.status(500).json({ message: error.message });
   }
 });
@@ -137,9 +140,12 @@ router.get('/tags', contactsViewAuthorized, async (req: Request, res: Response) 
 // Get all contact tags (alternative route)
 router.get('/tags/all', contactsViewAuthorized, async (req: Request, res: Response) => {
   try {
+    console.log("GET /api/contacts/tags/all endpoint called");
     const tags = await storage.getAllContactTags();
+    console.log(`Returning ${tags.length} tags from /tags/all endpoint`);
     res.json(tags);
   } catch (error: any) {
+    console.error("Error in GET /api/contacts/tags/all:", error);
     res.status(500).json({ message: error.message });
   }
 });
