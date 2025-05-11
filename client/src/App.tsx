@@ -19,6 +19,8 @@ import ApprenticeDetails from "./pages/apprentices/[id]";
 import HostsList from "./pages/hosts/index";
 import CreateHost from "./pages/hosts/create";
 import HostDetails from "./pages/hosts/[id]";
+import ContactsList from "./pages/contacts/index";
+import ClientsList from "./pages/clients/index";
 import ContractsList from "./pages/contracts/index";
 import PlacementsList from "./pages/placements/index";
 import DocumentsList from "./pages/documents/index";
@@ -119,6 +121,10 @@ function Router() {
         {/* Protected Dashboard Routes */}
         <ProtectedRoute path="/portal" component={PortalPage} />
         <ProtectedRoute path="/admin" component={Dashboard} />
+        
+        {/* Contacts & Clients Routes */}
+        <ProtectedRoute path="/contacts" component={ContactsList} />
+        <ProtectedRoute path="/clients" component={ClientsList} />
         
         {/* Apprentice Routes */}
         <ProtectedRoute path="/apprentices" component={ApprenticesList} />
