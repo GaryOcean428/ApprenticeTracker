@@ -125,9 +125,10 @@ router.delete('/:id', contactsAuthorized, async (req: Request, res: Response) =>
 // ===================== CONTACT TAGS ROUTES =====================
 
 // Get all contact tags - two routes for the same functionality for flexibility
-router.get('/tags', contactsViewAuthorized, async (req: Request, res: Response) => {
+router.get('/tags', isAuthenticated, async (req: Request, res: Response) => {
   try {
     console.log("GET /api/contacts/tags endpoint called");
+    console.log("User:", (req as any).user?.id);
     const tags = await storage.getAllContactTags();
     console.log(`Returning ${tags.length} tags from /tags endpoint`);
     res.json(tags);
