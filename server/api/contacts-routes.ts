@@ -129,14 +129,14 @@ router.delete('/:id', contactsAuthorized, async (req: Request, res: Response) =>
 
 // Get all contact tags - primary endpoint
 // Using an explicit path to avoid confusion with the /:id route
-// Temporarily removing authorization middleware for debugging
-router.get('/contact-tags', async (req: Request, res: Response) => {
+// Creating a completely new route path that won't conflict with any others
+router.get('/system-tags-list', async (req: Request, res: Response) => {
   try {
-    console.log("GET /api/contacts/contact-tags endpoint called");
+    console.log("GET /api/contacts/system-tags-list endpoint called");
     
     // Directly return some static data to test if the API route works at all
     // This is just a temporary test to isolate where the issue is
-    console.log("Returning static test data from /contact-tags endpoint");
+    console.log("Returning static test data from /system-tags-list endpoint");
     return res.json([
       { 
         id: 1, 
