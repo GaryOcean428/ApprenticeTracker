@@ -818,6 +818,15 @@ function Router() {
           );
         }} />
         
+        <ProtectedRoute path="/labour-hire/workers/:id" component={() => {
+          const WorkerDetailPage = lazy(() => import("./pages/labour-hire/workers/[id]"));
+          return (
+            <Suspense fallback={<div className="p-8 flex items-center justify-center"><div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" /></div>}>
+              <WorkerDetailPage />
+            </Suspense>
+          );
+        }} />
+        
         <ProtectedRoute path="/labour-hire/placements" component={() => {
           return (
             <div className="p-8">
