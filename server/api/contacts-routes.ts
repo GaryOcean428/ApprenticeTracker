@@ -11,6 +11,8 @@ import {
 import { isAuthenticated } from '../middleware/auth';
 import { hasPermission } from '../middleware/permissions';
 import { z } from 'zod';
+import { db } from '../db';
+import { sql } from 'drizzle-orm';
 
 const router = express.Router();
 
@@ -124,16 +126,22 @@ router.delete('/:id', contactsAuthorized, async (req: Request, res: Response) =>
 
 // ===================== CONTACT TAGS ROUTES =====================
 
-// Get all contact tags - two routes for the same functionality for flexibility
+// Direct SQL query for tags to bypass any issues with drizzle
 router.get('/tags', isAuthenticated, async (req: Request, res: Response) => {
   try {
     console.log("GET /api/contacts/tags endpoint called");
     console.log("User:", (req as any).user?.id);
-    const tags = await storage.getAllContactTags();
-    console.log(`Returning ${tags.length} tags from /tags endpoint`);
-    res.json(tags);
+    
+    // Use raw SQL instead of Drizzle ORM
+    const result = await db.execute(sql`
+      SELECT * FROM contact_tags ORDER BY name ASC
+    `);
+    
+    console.log(`Raw SQL returned ${result.rows.length} tags`);
+    res.json(result.rows);
   } catch (error: any) {
     console.error("Error in GET /api/contacts/tags:", error);
+    console.error("Error details:", error.stack);
     res.status(500).json({ message: error.message });
   }
 });
