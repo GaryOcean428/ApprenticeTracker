@@ -136,6 +136,36 @@ const fairworkTestEndpoints = (app: Express) => {
 export async function registerRoutes(app: Express): Promise<Server> {
   // Register special test endpoints for Fair Work API
   fairworkTestEndpoints(app);
+  
+  // Special direct test endpoint for contact tags
+  app.get('/api/___direct_test_contact_tags', (req, res) => {
+    try {
+      console.log('Testing direct contact tags endpoint');
+      
+      return res.json({
+        success: true,
+        message: 'Direct contact tags test API',
+        data: [
+          { 
+            id: 1, 
+            name: "Test Tag", 
+            description: "This is a test tag", 
+            color: "#3B82F6",
+            isSystem: true,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+          }
+        ]
+      });
+    } catch (error) {
+      console.error('Error in direct contact tags test API', error);
+      return res.status(500).json({
+        success: false,
+        error: 'Failed to test direct contact tags API',
+        message: error instanceof Error ? error.message : String(error)
+      });
+    }
+  });
   // API Routes - prefix all routes with /api
 
   // Register specialized route handlers
