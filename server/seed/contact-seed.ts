@@ -4,6 +4,7 @@ import { parse } from 'csv-parse';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import chalk from 'chalk';
+import { eq } from 'drizzle-orm';
 
 /**
  * Seed contact tags in the system
@@ -13,7 +14,7 @@ export async function seedContactTags() {
     console.log("[INFO] Seeding system contact tags...");
     
     // Check if contact tags already exist
-    const existingTags = await db.select().from(contactTags).where({ isSystem: true });
+    const existingTags = await db.select().from(contactTags).where(eq(contactTags.isSystem, true));
     
     if (existingTags.length > 0) {
       console.log("[INFO] System contact tags already exist. Skipping...");
@@ -26,7 +27,7 @@ export async function seedContactTags() {
         name: "Apprentice",
         description: "Registered apprentice in training",
         color: "#3B82F6", // blue
-        isSystem: true
+        isSystem: true  // system tags cannot be deleted
       },
       {
         name: "Trainee",

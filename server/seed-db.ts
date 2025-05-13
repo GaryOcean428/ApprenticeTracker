@@ -4,6 +4,7 @@ import { db } from "./db";
 import { eq } from "drizzle-orm";
 import { seedFairWorkData } from "./seed-fair-work";
 import { importHostEmployers } from "../scripts/import-host-employers";
+import { seedContacts, seedContactTags } from "./seed/contact-seed";
 
 // Helper function to convert JavaScript Date to ISO string (date part only)
 function formatDate(date: Date): string {
@@ -575,6 +576,20 @@ export async function seedDatabase() {
     } catch (error) {
       console.error("Error importing host employers from CSV:", error);
       // Continue execution even if importing host employers fails
+    }
+    
+    // Seed contacts data
+    try {
+      // For now, just seed the contact tags as a first step
+      await seedContactTags();
+      console.log("Contact Tags seeded successfully");
+      
+      // Uncomment when ready to seed full contacts data
+      // await seedContacts();
+      // console.log("Contacts data seeded successfully");
+    } catch (error) {
+      console.error("Error seeding contacts data:", error);
+      // Continue execution even if contact seeding fails
     }
     
     console.log("Database seeding completed successfully!");
