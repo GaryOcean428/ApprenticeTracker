@@ -102,7 +102,7 @@ export default function ContactTagsPage() {
     isLoading: isTagsLoading,
     error: tagsError,
   } = useQuery<ContactTag[]>({
-    queryKey: ['/api/contacts/tags'],
+    queryKey: ['/api/tags'],
   });
   
   // Create tag mutation
@@ -112,7 +112,7 @@ export default function ContactTagsPage() {
       return await res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/contacts/tags'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/tags'] });
       setIsCreateDialogOpen(false);
       resetForm();
       toast({
@@ -136,7 +136,7 @@ export default function ContactTagsPage() {
       return await res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/contacts/tags'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/tags'] });
       setIsEditDialogOpen(false);
       setSelectedTag(null);
       toast({
@@ -160,7 +160,7 @@ export default function ContactTagsPage() {
       return await res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/contacts/tags'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/tags'] });
       setIsDeleteDialogOpen(false);
       setSelectedTag(null);
       toast({
