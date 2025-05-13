@@ -140,8 +140,26 @@ function Router() {
         <Route path="/apprentices/recruitment" component={() => {
           const ApprenticeRecruitment = lazy(() => import("./pages/apprentices/recruitment/index"));
           return (
-            <Suspense fallback={<div>Loading...</div>}>
+            <Suspense fallback={<div className="p-8 flex items-center justify-center"><div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" /></div>}>
               <ApprenticeRecruitment />
+            </Suspense>
+          );
+        }} />
+        
+        <Route path="/apprentices/recruitment/selections" component={() => {
+          const ApprenticeSelections = lazy(() => import("./pages/apprentices/recruitment/selections"));
+          return (
+            <Suspense fallback={<div className="p-8 flex items-center justify-center"><div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" /></div>}>
+              <ApprenticeSelections />
+            </Suspense>
+          );
+        }} />
+        
+        <Route path="/apprentices/recruitment/onboarding" component={() => {
+          const ApprenticeOnboarding = lazy(() => import("./pages/apprentices/recruitment/onboarding"));
+          return (
+            <Suspense fallback={<div className="p-8 flex items-center justify-center"><div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" /></div>}>
+              <ApprenticeOnboarding />
             </Suspense>
           );
         }} />
@@ -790,7 +808,7 @@ function Router() {
         
         {/* External Employees - Apprentices & Trainees Section */}
         <ProtectedRoute path="/external-employees/apprentices" component={() => {
-          const ApprenticesSection = lazy(() => import("./pages/apprentices/index"));
+          const ApprenticesSection = lazy(() => import("./pages/external-employees/apprentices/index"));
           return (
             <Suspense fallback={<div className="p-8 flex items-center justify-center"><div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" /></div>}>
               <ApprenticesSection />
