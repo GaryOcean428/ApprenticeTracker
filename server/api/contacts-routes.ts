@@ -126,33 +126,15 @@ router.delete('/:id', contactsAuthorized, async (req: Request, res: Response) =>
 
 // ===================== CONTACT TAGS ROUTES =====================
 
-// Simplest possible implementation
-router.get('/tags', async (req: Request, res: Response) => {
+// Get all contact tags - primary endpoint
+router.get('/tags', contactsViewAuthorized, async (req: Request, res: Response) => {
   try {
-    console.log("GET /api/contacts/tags endpoint called with simplified handler");
-    
-    // Hard-code a sample response for testing
-    const sampleTags = [
-      {
-        id: 1,
-        name: "Apprentice",
-        description: "Registered apprentice in training",
-        color: "#3B82F6",
-        isSystem: true
-      },
-      {
-        id: 2,
-        name: "Trainee",
-        description: "Registered trainee in a training program",
-        color: "#10B981",
-        isSystem: true
-      }
-    ];
-    
-    console.log("Returning sample tags");
-    res.json(sampleTags);
+    console.log("GET /api/contacts/tags endpoint called");
+    const tags = await storage.getAllContactTags();
+    console.log(`Returning ${tags.length} tags from /tags endpoint`);
+    res.json(tags);
   } catch (error: any) {
-    console.error("Error in simplified GET /api/contacts/tags:", error);
+    console.error("Error in GET /api/contacts/tags:", error);
     console.error("Error details:", error.stack);
     res.status(500).json({ message: error.message });
   }
@@ -272,7 +254,21 @@ router.delete('/:contactId/tags/:tagId', contactsAuthorized, async (req: Request
 
 // ===================== CONTACT GROUPS ROUTES =====================
 
-// Get all contact groups
+// Get all contact groups - primary endpoint
+router.get('/groups', contactsViewAuthorized, async (req: Request, res: Response) => {
+  try {
+    console.log("GET /api/contacts/groups endpoint called");
+    const organizationId = req.query.organizationId ? parseInt(req.query.organizationId as string) : undefined;
+    const groups = await storage.getAllContactGroups(organizationId);
+    console.log(`Returning ${groups.length} groups from /groups endpoint`);
+    res.json(groups);
+  } catch (error: any) {
+    console.error("Error in GET /api/contacts/groups:", error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Get all contact groups (alternative route)
 router.get('/groups/all', contactsViewAuthorized, async (req: Request, res: Response) => {
   try {
     const organizationId = req.query.organizationId ? parseInt(req.query.organizationId as string) : undefined;

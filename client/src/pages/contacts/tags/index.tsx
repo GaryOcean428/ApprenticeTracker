@@ -1,18 +1,8 @@
-import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useLocation } from 'wouter';
-import { 
-  ArrowLeft, 
-  PlusCircle, 
-  Tag, 
-  Edit, 
-  Trash2, 
-  Check, 
-  AlertTriangle 
-} from 'lucide-react';
-
-// UI Components
-import { Button } from '@/components/ui/button';
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { useState } from "react";
+import { PageHeader } from "@/components/page-header";
+import { DashboardShell } from "@/components/dashboard-shell";
+import { SkeletonTable } from "@/components/skeleton-table";
 import {
   Table,
   TableBody,
@@ -20,546 +10,362 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Switch } from '@/components/ui/switch';
-import { useToast } from '@/hooks/use-toast';
-import { apiRequest } from '@/lib/queryClient';
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { 
+  Card, 
+  CardContent, 
+  CardDescription, 
+  CardFooter, 
+  CardHeader, 
+  CardTitle 
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { 
+  TagIcon, 
+  PlusIcon, 
+  PencilIcon, 
+  TrashIcon 
+} from "lucide-react";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 
-// Define types
-interface ContactTag {
+// Define type for contact tag
+type ContactTag = {
   id: number;
   name: string;
-  color: string;
   description: string | null;
+  color: string;
+  organizationId: number | null;
   isSystem: boolean;
   createdAt: string;
   updatedAt: string;
-}
+};
 
-interface NewTag {
-  name: string;
-  color: string;
-  description: string | null;
-  isSystem?: boolean;
-}
+// Form schema for creating/editing a tag
+const tagFormSchema = z.object({
+  name: z.string().min(1, "Tag name is required"),
+  description: z.string().optional(),
+  color: z.string().default("#6366F1"),
+});
 
-// Main component
+type TagFormValues = z.infer<typeof tagFormSchema>;
+
 export default function ContactTagsPage() {
-  const [location, setLocation] = useLocation();
-  const queryClient = useQueryClient();
   const { toast } = useToast();
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [selectedTag, setSelectedTag] = useState<ContactTag | null>(null);
-  
-  // Form state
-  const [tagForm, setTagForm] = useState<NewTag>({
-    name: '',
-    color: '#3b82f6', // Default blue color
-    description: '',
-    isSystem: false
-  });
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   
   // Fetch contact tags
-  const { 
-    data: tags = [], 
-    isLoading: isTagsLoading,
-    error: tagsError,
-  } = useQuery<ContactTag[]>({
-    queryKey: ['/api/tags'],
+  const { data: tags, isLoading } = useQuery<ContactTag[]>({
+    queryKey: ['/api/contacts/tags'],
   });
-  
-  // Create tag mutation
-  const createTagMutation = useMutation({
-    mutationFn: async (tag: NewTag) => {
-      const res = await apiRequest('POST', '/api/tags', tag);
+
+  // Form for adding new tag
+  const form = useForm<TagFormValues>({
+    resolver: zodResolver(tagFormSchema),
+    defaultValues: {
+      name: "",
+      description: "",
+      color: "#6366F1",
+    },
+  });
+
+  // Mutation for adding new tag
+  const addTagMutation = useMutation({
+    mutationFn: async (values: TagFormValues) => {
+      const res = await apiRequest("POST", "/api/contacts/tags", values);
       return await res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/tags'] });
-      setIsCreateDialogOpen(false);
-      resetForm();
+      queryClient.invalidateQueries({ queryKey: ['/api/contacts/tags'] });
+      setIsAddDialogOpen(false);
+      form.reset();
       toast({
-        title: 'Tag created',
-        description: 'Contact tag was created successfully.',
+        title: "Success",
+        description: "Contact tag created successfully",
       });
     },
     onError: (error: any) => {
       toast({
-        title: 'Error creating tag',
-        description: error.message || 'An error occurred while creating the tag.',
-        variant: 'destructive',
-      });
-    }
-  });
-  
-  // Update tag mutation
-  const updateTagMutation = useMutation({
-    mutationFn: async ({ id, tag }: { id: number; tag: Partial<NewTag> }) => {
-      const res = await apiRequest('PUT', `/api/tags/${id}`, tag);
-      return await res.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/tags'] });
-      setIsEditDialogOpen(false);
-      setSelectedTag(null);
-      toast({
-        title: 'Tag updated',
-        description: 'Contact tag was updated successfully.',
+        title: "Error",
+        description: `Failed to create contact tag: ${error.message}`,
+        variant: "destructive",
       });
     },
-    onError: (error: any) => {
-      toast({
-        title: 'Error updating tag',
-        description: error.message || 'An error occurred while updating the tag.',
-        variant: 'destructive',
-      });
-    }
   });
-  
-  // Delete tag mutation
+
+  // Mutation for deleting a tag
   const deleteTagMutation = useMutation({
     mutationFn: async (id: number) => {
-      const res = await apiRequest('DELETE', `/api/tags/${id}`);
-      return await res.json();
+      await apiRequest("DELETE", `/api/contacts/tags/${id}`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/tags'] });
-      setIsDeleteDialogOpen(false);
-      setSelectedTag(null);
+      queryClient.invalidateQueries({ queryKey: ['/api/contacts/tags'] });
       toast({
-        title: 'Tag deleted',
-        description: 'Contact tag was deleted successfully.',
+        title: "Success",
+        description: "Contact tag deleted successfully",
       });
     },
     onError: (error: any) => {
       toast({
-        title: 'Error deleting tag',
-        description: error.message || 'An error occurred while deleting the tag.',
-        variant: 'destructive',
+        title: "Error",
+        description: `Failed to delete contact tag: ${error.message}`,
+        variant: "destructive",
       });
-    }
+    },
   });
-  
-  // Reset form
-  const resetForm = () => {
-    setTagForm({
-      name: '',
-      color: '#3b82f6',
-      description: '',
-      isSystem: false
-    });
+
+  const onSubmit = (values: TagFormValues) => {
+    addTagMutation.mutate(values);
   };
-  
-  // Handle form input change
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setTagForm(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-  
-  // Handle system flag toggle
-  const handleSystemToggle = (checked: boolean) => {
-    setTagForm(prev => ({
-      ...prev,
-      isSystem: checked
-    }));
-  };
-  
-  // Handle form submission
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    createTagMutation.mutate(tagForm);
-  };
-  
-  // Handle edit form submission
-  const handleEditSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (selectedTag) {
-      updateTagMutation.mutate({ id: selectedTag.id, tag: tagForm });
+
+  const handleDelete = (tag: ContactTag) => {
+    if (tag.isSystem) {
+      toast({
+        title: "Cannot Delete",
+        description: "System tags cannot be deleted",
+        variant: "destructive",
+      });
+      return;
     }
-  };
-  
-  // Open edit dialog
-  const openEditDialog = (tag: ContactTag) => {
-    setSelectedTag(tag);
-    setTagForm({
-      name: tag.name,
-      color: tag.color,
-      description: tag.description || '',
-      isSystem: tag.isSystem
-    });
-    setIsEditDialogOpen(true);
-  };
-  
-  // Open delete dialog
-  const openDeleteDialog = (tag: ContactTag) => {
-    setSelectedTag(tag);
-    setIsDeleteDialogOpen(true);
-  };
-  
-  // Handle delete confirmation
-  const handleDeleteConfirm = () => {
-    if (selectedTag) {
-      deleteTagMutation.mutate(selectedTag.id);
+    
+    if (confirm("Are you sure you want to delete this contact tag?")) {
+      deleteTagMutation.mutate(tag.id);
     }
   };
   
   return (
-    <div className="container mx-auto py-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <div className="flex items-center">
-          <Button 
-            variant="ghost" 
-            onClick={() => setLocation('/contacts')}
-            className="mr-2"
-          >
-            <ArrowLeft className="h-4 w-4 mr-1" />
-            Back to Contacts
-          </Button>
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Contact Tags</h1>
-            <p className="text-muted-foreground">
-              Manage tags for categorizing contacts in the system.
-            </p>
-          </div>
-        </div>
-        
-        <Button onClick={() => setIsCreateDialogOpen(true)}>
-          <PlusCircle className="h-4 w-4 mr-2" />
-          Create New Tag
-        </Button>
+    <DashboardShell>
+      <PageHeader
+        heading="Contact Tags"
+        description="Manage tags to categorize and organize your contacts"
+      >
+        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+          <DialogTrigger asChild>
+            <Button>
+              <PlusIcon className="mr-2 h-4 w-4" />
+              New Tag
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Create Contact Tag</DialogTitle>
+              <DialogDescription>
+                Add a new tag to categorize your contacts
+              </DialogDescription>
+            </DialogHeader>
+            
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Tag Name</FormLabel>
+                      <FormControl>
+                        <Input placeholder="e.g., VIP" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Description</FormLabel>
+                      <FormControl>
+                        <Textarea 
+                          placeholder="What does this tag represent?" 
+                          {...field} 
+                          value={field.value || ""}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="color"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Color</FormLabel>
+                      <div className="flex items-center space-x-2">
+                        <FormControl>
+                          <Input
+                            type="color"
+                            {...field}
+                            className="w-16 h-10 p-1"
+                          />
+                        </FormControl>
+                        <Input 
+                          {...field} 
+                          placeholder="#6366F1" 
+                          className="w-24"
+                        />
+                      </div>
+                      <FormDescription>
+                        Choose a color for the tag
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <DialogFooter>
+                  <DialogClose asChild>
+                    <Button type="button" variant="outline">Cancel</Button>
+                  </DialogClose>
+                  <Button type="submit" disabled={addTagMutation.isPending}>
+                    {addTagMutation.isPending ? "Creating..." : "Create Tag"}
+                  </Button>
+                </DialogFooter>
+              </form>
+            </Form>
+          </DialogContent>
+        </Dialog>
+      </PageHeader>
+
+      <div className="mt-6">
+        {isLoading ? (
+          <SkeletonTable columns={4} rows={5} />
+        ) : (
+          <Card>
+            <CardHeader>
+              <CardTitle>All Tags</CardTitle>
+              <CardDescription>
+                Manage your contact tags
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {tags && tags.length > 0 ? (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Tag</TableHead>
+                      <TableHead>Description</TableHead>
+                      <TableHead>Type</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {tags.map((tag) => (
+                      <TableRow key={tag.id}>
+                        <TableCell>
+                          <div className="flex items-center space-x-2">
+                            <div 
+                              className="w-4 h-4 rounded-full" 
+                              style={{ backgroundColor: tag.color }}
+                            />
+                            <span className="font-medium">{tag.name}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          {tag.description || "No description"}
+                        </TableCell>
+                        <TableCell>
+                          {tag.isSystem ? (
+                            <Badge variant="secondary">System</Badge>
+                          ) : (
+                            <Badge variant="outline">Custom</Badge>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end space-x-2">
+                            <Button variant="ghost" size="icon">
+                              <PencilIcon className="h-4 w-4" />
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              onClick={() => handleDelete(tag)}
+                              disabled={deleteTagMutation.isPending || tag.isSystem}
+                            >
+                              <TrashIcon className="h-4 w-4 text-destructive" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              ) : (
+                <div className="flex flex-col items-center justify-center p-6">
+                  <TagIcon className="h-16 w-16 text-muted-foreground/30 mb-4" />
+                  <p className="text-center text-muted-foreground mb-4">
+                    No tags found. Create your first tag to get started.
+                  </p>
+                  <Button
+                    onClick={() => setIsAddDialogOpen(true)}
+                  >
+                    <PlusIcon className="mr-2 h-4 w-4" />
+                    Create Your First Tag
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
       </div>
       
-      <Card>
-        <CardHeader>
-          <CardTitle>Tag Management</CardTitle>
-          <CardDescription>
-            Tags help categorize and filter contacts based on their roles or characteristics.
-            System tags are used by the application and cannot be deleted.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {isTagsLoading ? (
-            <div className="flex justify-center py-8">
-              <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
-            </div>
-          ) : tagsError ? (
-            <div className="text-center py-8 text-destructive">
-              <AlertTriangle className="h-8 w-8 mx-auto mb-2" />
-              <p>Error loading tags. Please try again later.</p>
-            </div>
-          ) : tags.length === 0 ? (
-            <div className="text-center py-8">
-              <Tag className="h-12 w-12 mx-auto mb-2 text-muted-foreground" />
-              <h3 className="text-lg font-medium mb-1">No tags found</h3>
-              <p className="text-muted-foreground">
-                Create your first tag to start organizing contacts.
-              </p>
-              <Button 
-                className="mt-4" 
-                onClick={() => setIsCreateDialogOpen(true)}
-              >
-                Create Tag
-              </Button>
-            </div>
-          ) : (
-            <div className="border rounded-md">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Tag</TableHead>
-                    <TableHead>Description</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {tags.map(tag => (
-                    <TableRow key={tag.id}>
-                      <TableCell>
-                        <div className="flex items-center">
-                          <div
-                            className="w-4 h-4 mr-2 rounded-full"
-                            style={{ backgroundColor: tag.color || '#888888' }}
-                          />
-                          <span className="font-medium">{tag.name}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        {tag.description || <span className="text-muted-foreground">No description</span>}
-                      </TableCell>
-                      <TableCell>
-                        {tag.isSystem ? (
-                          <span className="inline-flex items-center px-2 py-1 text-xs font-medium bg-amber-100 text-amber-800 rounded-md">
-                            System
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-md">
-                            Custom
-                          </span>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex items-center justify-end space-x-2">
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => openEditDialog(tag)}
-                          >
-                            <Edit className="h-4 w-4" />
-                            <span className="sr-only">Edit</span>
-                          </Button>
-                          
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <div>
-                                  <Button
-                                    size="sm"
-                                    variant="ghost"
-                                    className="text-destructive"
-                                    onClick={() => openDeleteDialog(tag)}
-                                    disabled={tag.isSystem}
-                                  >
-                                    <Trash2 className="h-4 w-4" />
-                                    <span className="sr-only">Delete</span>
-                                  </Button>
-                                </div>
-                              </TooltipTrigger>
-                              {tag.isSystem && (
-                                <TooltipContent>
-                                  System tags cannot be deleted
-                                </TooltipContent>
-                              )}
-                            </Tooltip>
-                          </TooltipProvider>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-      
-      {/* Create Tag Dialog */}
-      <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Create New Tag</DialogTitle>
-            <DialogDescription>
-              Add a new tag for categorizing contacts.
-            </DialogDescription>
-          </DialogHeader>
-          
-          <form onSubmit={handleSubmit}>
-            <div className="grid gap-4 py-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Tag Name</Label>
-                <Input
-                  id="name"
-                  name="name"
-                  value={tagForm.name}
-                  onChange={handleInputChange}
-                  required
-                />
+      <div className="mt-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Usage Guidelines</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div>
+                <h3 className="font-medium">How to use tags effectively:</h3>
+                <ul className="list-disc list-inside mt-2 text-sm text-muted-foreground ml-4 space-y-1">
+                  <li>Create tags that represent meaningful categories</li>
+                  <li>Use consistent naming conventions for related tags</li>
+                  <li>Assign colors that make logical sense (e.g., red for urgent)</li>
+                  <li>Don't create too many overlapping tags</li>
+                  <li>Review and clean up unused tags periodically</li>
+                </ul>
               </div>
               
-              <div className="space-y-2">
-                <Label htmlFor="color">Tag Color</Label>
-                <div className="flex items-center space-x-2">
-                  <input 
-                    type="color" 
-                    id="color"
-                    name="color"
-                    value={tagForm.color}
-                    onChange={handleInputChange}
-                    className="w-10 h-10 border-0 p-0 cursor-pointer"
-                  />
-                  <Input
-                    value={tagForm.color}
-                    onChange={handleInputChange}
-                    name="color"
-                    maxLength={7}
-                  />
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="description">Description (Optional)</Label>
-                <Textarea
-                  id="description"
-                  name="description"
-                  value={tagForm.description || ''}
-                  onChange={handleInputChange}
-                  rows={3}
-                />
-              </div>
-              
-              <div className="flex items-center space-x-2">
-                <Switch
-                  id="isSystem"
-                  checked={tagForm.isSystem}
-                  onCheckedChange={handleSystemToggle}
-                />
-                <Label htmlFor="isSystem">System Tag</Label>
+              <div>
+                <h3 className="font-medium">System Tags:</h3>
+                <p className="text-sm text-muted-foreground mt-2">
+                  System tags are pre-defined and cannot be deleted. They ensure consistent 
+                  categorization across the platform.
+                </p>
               </div>
             </div>
-            
-            <DialogFooter>
-              <Button variant="outline" type="button" onClick={() => setIsCreateDialogOpen(false)}>
-                Cancel
-              </Button>
-              <Button type="submit" disabled={createTagMutation.isPending}>
-                {createTagMutation.isPending ? 'Creating...' : 'Create Tag'}
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
-      
-      {/* Edit Tag Dialog */}
-      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Edit Tag</DialogTitle>
-            <DialogDescription>
-              Update the properties of this tag.
-            </DialogDescription>
-          </DialogHeader>
-          
-          <form onSubmit={handleEditSubmit}>
-            <div className="grid gap-4 py-4">
-              <div className="space-y-2">
-                <Label htmlFor="edit-name">Tag Name</Label>
-                <Input
-                  id="edit-name"
-                  name="name"
-                  value={tagForm.name}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="edit-color">Tag Color</Label>
-                <div className="flex items-center space-x-2">
-                  <input 
-                    type="color" 
-                    id="edit-color"
-                    name="color"
-                    value={tagForm.color}
-                    onChange={handleInputChange}
-                    className="w-10 h-10 border-0 p-0 cursor-pointer"
-                  />
-                  <Input
-                    value={tagForm.color}
-                    onChange={handleInputChange}
-                    name="color"
-                    maxLength={7}
-                  />
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="edit-description">Description (Optional)</Label>
-                <Textarea
-                  id="edit-description"
-                  name="description"
-                  value={tagForm.description || ''}
-                  onChange={handleInputChange}
-                  rows={3}
-                />
-              </div>
-              
-              <div className="flex items-center space-x-2">
-                <Switch
-                  id="edit-isSystem"
-                  checked={tagForm.isSystem}
-                  onCheckedChange={handleSystemToggle}
-                  disabled={selectedTag?.isSystem}
-                />
-                <Label htmlFor="edit-isSystem" className={selectedTag?.isSystem ? 'text-muted-foreground' : ''}>
-                  System Tag
-                  {selectedTag?.isSystem && <span className="ml-2 text-xs">(Cannot be changed)</span>}
-                </Label>
-              </div>
-            </div>
-            
-            <DialogFooter>
-              <Button variant="outline" type="button" onClick={() => setIsEditDialogOpen(false)}>
-                Cancel
-              </Button>
-              <Button type="submit" disabled={updateTagMutation.isPending}>
-                {updateTagMutation.isPending ? 'Updating...' : 'Update Tag'}
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
-      
-      {/* Delete Confirmation Dialog */}
-      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the tag
-              "{selectedTag?.name}" and remove it from all associated contacts.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={handleDeleteConfirm}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              {deleteTagMutation.isPending ? 'Deleting...' : 'Delete Tag'}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </div>
+          </CardContent>
+        </Card>
+      </div>
+    </DashboardShell>
   );
 }
