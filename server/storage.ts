@@ -1562,19 +1562,16 @@ export class DatabaseStorage implements IStorage {
     try {
       console.log("Getting all contact tags...");
       
-      // Debugging information
-      console.log("ContactTags schema:", JSON.stringify(contactTags, null, 2));
+      // Use SQL directly to avoid Drizzle ORM issues with schema
+      const result = await db.execute(
+        sql`SELECT id, name, description, color, is_system as "isSystem", 
+            created_at as "createdAt", updated_at as "updatedAt"
+            FROM contact_tags
+            ORDER BY name ASC`
+      );
       
-      const query = db
-        .select()
-        .from(contactTags)
-        .orderBy(contactTags.name);
-      
-      console.log("Query:", query.toSQL());
-      
-      const tags = await query;
-      console.log("Tags retrieved:", tags.length);
-      return tags;
+      console.log("Tags retrieved:", result.length);
+      return result;
     } catch (error) {
       console.error("Error getting all contact tags:", error);
       console.error("Error details:", error.stack);
