@@ -1561,14 +1561,23 @@ export class DatabaseStorage implements IStorage {
   async getAllContactTags(): Promise<ContactTag[]> {
     try {
       console.log("Getting all contact tags...");
-      const tags = await db
+      
+      // Debugging information
+      console.log("ContactTags schema:", JSON.stringify(contactTags, null, 2));
+      
+      const query = db
         .select()
         .from(contactTags)
         .orderBy(contactTags.name);
+      
+      console.log("Query:", query.toSQL());
+      
+      const tags = await query;
       console.log("Tags retrieved:", tags.length);
       return tags;
     } catch (error) {
       console.error("Error getting all contact tags:", error);
+      console.error("Error details:", error.stack);
       throw error;
     }
   }
