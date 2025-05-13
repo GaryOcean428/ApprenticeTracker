@@ -293,16 +293,23 @@ export default function LabourHireWorkersPage() {
                       <Pagination>
                         <PaginationContent>
                           <PaginationItem>
-                            <PaginationPrevious
-                              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                              disabled={currentPage === 1}
+                            <PaginationPrevious 
+                              href="#"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                setCurrentPage((prev) => Math.max(prev - 1, 1));
+                              }}
                             />
                           </PaginationItem>
                           
                           {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
                             <PaginationItem key={page}>
                               <PaginationLink
-                                onClick={() => setCurrentPage(page)}
+                                href="#"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  setCurrentPage(page);
+                                }}
                                 isActive={currentPage === page}
                               >
                                 {page}
@@ -312,8 +319,11 @@ export default function LabourHireWorkersPage() {
                           
                           <PaginationItem>
                             <PaginationNext
-                              onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-                              disabled={currentPage === totalPages}
+                              href="#"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                setCurrentPage((prev) => Math.min(prev + 1, totalPages));
+                              }}
                             />
                           </PaginationItem>
                         </PaginationContent>
