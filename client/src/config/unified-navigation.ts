@@ -78,12 +78,14 @@ export const MAIN_NAV_SECTIONS: NavSection[] = [
     ]
   },
 
-  // Apprentices & Trainees
+  // External Employees (Main Parent Section)
   {
-    title: "Apprentices & Trainees",
+    title: "External Employees",
     icon: Users,
     subItems: [
+      // Apprentices & Trainees Sub-section
       [
+        { title: "Apprentices & Trainees", href: "/external-employees/apprentices" },
         { title: "All Apprentices", href: "/apprentices" },
         { title: "Recruitment", href: "/apprentices/recruitment" },
         { title: "Employment Records", href: "/apprentices/records" },
@@ -91,6 +93,16 @@ export const MAIN_NAV_SECTIONS: NavSection[] = [
         { title: "Progress Tracking", href: "/apprentices/progress" },
         { title: "Completion", href: "/apprentices/completion" }
       ],
+      // Workers Sub-section
+      [
+        { title: "Workers", href: "/external-employees/workers" },
+        { title: "All Workers", href: "/labour-hire/workers" },
+        { title: "Placements", href: "/labour-hire/placements" },
+        { title: "Timesheets", href: "/labour-hire/timesheets" },
+        { title: "Skills & Qualifications", href: "/labour-hire/skills" },
+        { title: "Worker Pool", href: "/labour-hire/pool" }
+      ],
+      // Shared Sub-section
       [
         { title: "Placements & Rotations", href: "/placements" },
         { title: "Progress Reviews", href: "/progress-reviews" },
