@@ -166,6 +166,79 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
   });
+  
+  // ====== DIRECT API ENDPOINTS FOR CONTACT TAGS ======
+  // These endpoints bypass the router to avoid Vite's catch-all route interference
+  
+  // Get all contact tags
+  app.get('/api/contacts/tags/all', async (req, res) => {
+    try {
+      console.log("GET /api/contacts/tags/all direct endpoint called");
+      const tags = await storage.getAllContactTags();
+      console.log(`Returning ${tags.length} tags from direct /api/contacts/tags/all endpoint`);
+      res.json(tags);
+    } catch (error: any) {
+      console.error("Error in direct GET /api/contacts/tags/all:", error);
+      res.status(500).json({ message: error.message });
+    }
+  });
+  
+  // Create a new contact tag
+  app.post('/api/contacts/tags', async (req, res) => {
+    try {
+      console.log("POST /api/contacts/tags direct endpoint called");
+      const parsedData = insertContactTagSchema.parse(req.body);
+      const newTag = await storage.createContactTag(parsedData);
+      res.status(201).json(newTag);
+    } catch (error: any) {
+      console.error("Error in direct POST /api/contacts/tags:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: 'Validation error', errors: error.errors });
+      }
+      res.status(500).json({ message: error.message });
+    }
+  });
+  
+  // Update a contact tag
+  app.put('/api/contacts/tags/:id', async (req, res) => {
+    try {
+      console.log("PUT /api/contacts/tags/:id direct endpoint called");
+      const id = parseInt(req.params.id);
+      const parsedData = insertContactTagSchema.partial().parse(req.body);
+      
+      const updatedTag = await storage.updateContactTag(id, parsedData);
+      
+      if (!updatedTag) {
+        return res.status(404).json({ message: 'Tag not found' });
+      }
+      
+      res.json(updatedTag);
+    } catch (error: any) {
+      console.error("Error in direct PUT /api/contacts/tags/:id:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: 'Validation error', errors: error.errors });
+      }
+      res.status(500).json({ message: error.message });
+    }
+  });
+  
+  // Delete a contact tag
+  app.delete('/api/contacts/tags/:id', async (req, res) => {
+    try {
+      console.log("DELETE /api/contacts/tags/:id direct endpoint called");
+      const id = parseInt(req.params.id);
+      const success = await storage.deleteContactTag(id);
+      
+      if (!success) {
+        return res.status(404).json({ message: 'Tag not found' });
+      }
+      
+      res.json({ message: 'Tag deleted successfully' });
+    } catch (error: any) {
+      console.error("Error in direct DELETE /api/contacts/tags/:id:", error);
+      res.status(500).json({ message: error.message });
+    }
+  });
   // API Routes - prefix all routes with /api
 
   // Register specialized route handlers
