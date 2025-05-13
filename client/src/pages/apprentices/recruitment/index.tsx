@@ -30,9 +30,21 @@ export default function ApprenticeRecruitment() {
             Manage recruitment, applications, and onboarding for apprentices
           </p>
         </div>
-        <Button onClick={() => toast({ title: "Coming Soon", description: "Apprentice recruitment creation feature coming soon" })}>
-          <Plus className="mr-2 h-4 w-4" /> New Applicant
-        </Button>
+        <div className="flex space-x-2">
+          <Button onClick={() => toast({ title: "Coming Soon", description: "Apprentice recruitment creation feature coming soon" })}>
+            <Plus className="mr-2 h-4 w-4" /> New Applicant
+          </Button>
+          <Button variant="outline" asChild>
+            <Link href="/apprentices/recruitment/selections">
+              View Selections
+            </Link>
+          </Button>
+          <Button variant="outline" asChild>
+            <Link href="/apprentices/recruitment/onboarding">
+              Onboarding
+            </Link>
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -160,16 +172,48 @@ export default function ApprenticeRecruitment() {
               </div>
             </TabsContent>
             
-            {["interviews", "selections", "onboarding"].map((tab) => (
-              <TabsContent key={tab} value={tab} className="py-4">
-                <div className="text-center py-8">
-                  <h3 className="text-lg font-medium">Coming Soon</h3>
-                  <p className="text-muted-foreground mt-2">
-                    This section is currently under development.
-                  </p>
-                </div>
-              </TabsContent>
-            ))}
+            {/* Interviews tab */}
+            <TabsContent value="interviews" className="py-4">
+              <div className="text-center py-8">
+                <h3 className="text-lg font-medium">Interviews Section</h3>
+                <p className="text-muted-foreground mt-2">
+                  Interview scheduling and management is currently under development.
+                </p>
+                <Button className="mt-4" onClick={() => toast({ title: "Interviews", description: "Interview management feature coming soon" })}>
+                  Schedule Interviews
+                </Button>
+              </div>
+            </TabsContent>
+            
+            {/* Selections tab */}
+            <TabsContent value="selections" className="py-4">
+              <div className="text-center py-8">
+                <h3 className="text-lg font-medium">Selections Module</h3>
+                <p className="text-muted-foreground mt-2">
+                  Manage candidate selections and interview results.
+                </p>
+                <Button className="mt-4" asChild>
+                  <Link href="/apprentices/recruitment/selections">
+                    Go to Selections
+                  </Link>
+                </Button>
+              </div>
+            </TabsContent>
+            
+            {/* Onboarding tab */}
+            <TabsContent value="onboarding" className="py-4">
+              <div className="text-center py-8">
+                <h3 className="text-lg font-medium">Onboarding Process</h3>
+                <p className="text-muted-foreground mt-2">
+                  Manage the onboarding process for selected candidates.
+                </p>
+                <Button className="mt-4" asChild>
+                  <Link href="/apprentices/recruitment/onboarding">
+                    Go to Onboarding
+                  </Link>
+                </Button>
+              </div>
+            </TabsContent>
           </Tabs>
         </CardHeader>
       </Card>

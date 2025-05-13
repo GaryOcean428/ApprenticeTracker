@@ -40,15 +40,15 @@ export default function ExternalEmployeesPage() {
             <ul className="space-y-2 text-sm">
               <li className="flex items-center">
                 <UserPlus className="h-4 w-4 mr-2 text-muted-foreground" />
-                <span>Recruitment & onboarding</span>
+                <Link href="/apprentices/recruitment" className="hover:underline text-blue-600">Recruitment & onboarding</Link>
               </li>
               <li className="flex items-center">
                 <FileText className="h-4 w-4 mr-2 text-muted-foreground" />
-                <span>Training plans & progress</span>
+                <Link href="/apprentices/training" className="hover:underline text-blue-600">Training plans & progress</Link>
               </li>
               <li className="flex items-center">
                 <CheckCircle2 className="h-4 w-4 mr-2 text-muted-foreground" />
-                <span>Competency tracking</span>
+                <Link href="/apprentices/progress" className="hover:underline text-blue-600">Competency tracking</Link>
               </li>
             </ul>
           </CardContent>
@@ -77,15 +77,15 @@ export default function ExternalEmployeesPage() {
             <ul className="space-y-2 text-sm">
               <li className="flex items-center">
                 <Building2 className="h-4 w-4 mr-2 text-muted-foreground" />
-                <span>Placements & assignments</span>
+                <Link href="/labour-hire/placements" className="hover:underline text-blue-600">Placements & assignments</Link>
               </li>
               <li className="flex items-center">
                 <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
-                <span>Timesheets & attendance</span>
+                <Link href="/labour-hire/timesheets" className="hover:underline text-blue-600">Timesheets & attendance</Link>
               </li>
               <li className="flex items-center">
                 <ClipboardList className="h-4 w-4 mr-2 text-muted-foreground" />
-                <span>Skills & qualifications</span>
+                <Link href="/labour-hire/workers" className="hover:underline text-blue-600">Skills & qualifications</Link>
               </li>
             </ul>
           </CardContent>
