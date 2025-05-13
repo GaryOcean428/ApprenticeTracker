@@ -81,7 +81,7 @@ export default function ContactTagsPage() {
   
   // Fetch contact tags
   const { data: tags, isLoading } = useQuery<ContactTag[]>({
-    queryKey: ['/api/contacts/tags'],
+    queryKey: ['/api/contacts/contact-tags'],
   });
 
   // Form for adding new tag
@@ -101,7 +101,7 @@ export default function ContactTagsPage() {
       return await res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/contacts/tags'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/contacts/contact-tags'] });
       setIsAddDialogOpen(false);
       form.reset();
       toast({
@@ -124,7 +124,7 @@ export default function ContactTagsPage() {
       await apiRequest("DELETE", `/api/contacts/tags/${id}`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/contacts/tags'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/contacts/contact-tags'] });
       toast({
         title: "Success",
         description: "Contact tag deleted successfully",

@@ -128,16 +128,38 @@ router.delete('/:id', contactsAuthorized, async (req: Request, res: Response) =>
 // ===================== CONTACT TAGS ROUTES =====================
 
 // Get all contact tags - primary endpoint
-router.get('/tags', async (req: Request, res: Response) => {
+// Using an explicit path to avoid confusion with the /:id route
+router.get('/contact-tags', contactsViewAuthorized, async (req: Request, res: Response) => {
   try {
-    console.log("GET /api/contacts/tags endpoint called");
+    console.log("GET /api/contacts/contact-tags endpoint called");
+    
+    // Directly return some static data to test if the API route works at all
+    // This is just a temporary test to isolate where the issue is
+    return res.json([
+      { 
+        id: 1, 
+        name: "Test Tag", 
+        description: "This is a test tag", 
+        color: "#3B82F6",
+        isSystem: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      }
+    ]);
+    
+    // The original code will be skipped during this test
     const tags = await storage.getAllContactTags();
-    console.log(`Returning ${tags.length} tags from /tags endpoint`);
+    console.log(`Returning ${tags.length} tags from /contact-tags endpoint`);
     res.json(tags);
   } catch (error: any) {
-    console.error("Error in GET /api/contacts/tags:", error);
+    console.error("Error in GET /api/contacts/contact-tags:", error);
     console.error("Error details:", error.stack);
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ 
+      message: error.message,
+      stack: error.stack,
+      name: error.name,
+      fullError: JSON.stringify(error)
+    });
   }
 });
 
