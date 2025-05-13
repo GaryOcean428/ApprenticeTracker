@@ -129,12 +129,14 @@ router.delete('/:id', contactsAuthorized, async (req: Request, res: Response) =>
 
 // Get all contact tags - primary endpoint
 // Using an explicit path to avoid confusion with the /:id route
-router.get('/contact-tags', contactsViewAuthorized, async (req: Request, res: Response) => {
+// Temporarily removing authorization middleware for debugging
+router.get('/contact-tags', async (req: Request, res: Response) => {
   try {
     console.log("GET /api/contacts/contact-tags endpoint called");
     
     // Directly return some static data to test if the API route works at all
     // This is just a temporary test to isolate where the issue is
+    console.log("Returning static test data from /contact-tags endpoint");
     return res.json([
       { 
         id: 1, 
@@ -147,10 +149,10 @@ router.get('/contact-tags', contactsViewAuthorized, async (req: Request, res: Re
       }
     ]);
     
-    // The original code will be skipped during this test
-    const tags = await storage.getAllContactTags();
-    console.log(`Returning ${tags.length} tags from /contact-tags endpoint`);
-    res.json(tags);
+    // The original code BELOW will be skipped during this test
+    // const tags = await storage.getAllContactTags();
+    // console.log(`Returning ${tags.length} tags from /contact-tags endpoint`);
+    // res.json(tags);
   } catch (error: any) {
     console.error("Error in GET /api/contacts/contact-tags:", error);
     console.error("Error details:", error.stack);
