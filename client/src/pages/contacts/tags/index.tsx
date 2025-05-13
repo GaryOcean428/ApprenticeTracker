@@ -108,7 +108,7 @@ export default function ContactTagsPage() {
   // Create tag mutation
   const createTagMutation = useMutation({
     mutationFn: async (tag: NewTag) => {
-      const res = await apiRequest('POST', '/api/contacts/tags', tag);
+      const res = await apiRequest('POST', '/api/tags', tag);
       return await res.json();
     },
     onSuccess: () => {
@@ -132,7 +132,7 @@ export default function ContactTagsPage() {
   // Update tag mutation
   const updateTagMutation = useMutation({
     mutationFn: async ({ id, tag }: { id: number; tag: Partial<NewTag> }) => {
-      const res = await apiRequest('PUT', `/api/contacts/tags/${id}`, tag);
+      const res = await apiRequest('PUT', `/api/tags/${id}`, tag);
       return await res.json();
     },
     onSuccess: () => {
@@ -156,7 +156,7 @@ export default function ContactTagsPage() {
   // Delete tag mutation
   const deleteTagMutation = useMutation({
     mutationFn: async (id: number) => {
-      const res = await apiRequest('DELETE', `/api/contacts/tags/${id}`);
+      const res = await apiRequest('DELETE', `/api/tags/${id}`);
       return await res.json();
     },
     onSuccess: () => {
