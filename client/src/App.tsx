@@ -778,6 +778,82 @@ function Router() {
           );
         }} />
         
+        {/* External Employees Routes */}
+        <ProtectedRoute path="/external-employees" component={() => {
+          const ExternalEmployeesPage = lazy(() => import("./pages/external-employees/index"));
+          return (
+            <Suspense fallback={<div className="p-8 flex items-center justify-center"><div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" /></div>}>
+              <ExternalEmployeesPage />
+            </Suspense>
+          );
+        }} />
+        
+        {/* External Employees - Apprentices & Trainees Section */}
+        <ProtectedRoute path="/external-employees/apprentices" component={() => {
+          const ApprenticesSection = lazy(() => import("./pages/apprentices/index"));
+          return (
+            <Suspense fallback={<div className="p-8 flex items-center justify-center"><div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" /></div>}>
+              <ApprenticesSection />
+            </Suspense>
+          );
+        }} />
+        
+        {/* External Employees - Workers Section */}
+        <ProtectedRoute path="/external-employees/workers" component={() => {
+          const WorkersSection = lazy(() => import("./pages/external-employees/workers/index"));
+          return (
+            <Suspense fallback={<div className="p-8 flex items-center justify-center"><div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" /></div>}>
+              <WorkersSection />
+            </Suspense>
+          );
+        }} />
+        
+        {/* Labour Hire Workers Routes */}
+        <ProtectedRoute path="/labour-hire/workers" component={() => {
+          const LabourHireWorkersPage = lazy(() => import("./pages/labour-hire/workers/index"));
+          return (
+            <Suspense fallback={<div className="p-8 flex items-center justify-center"><div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" /></div>}>
+              <LabourHireWorkersPage />
+            </Suspense>
+          );
+        }} />
+        
+        <ProtectedRoute path="/labour-hire/placements" component={() => {
+          return (
+            <div className="p-8">
+              <h1 className="text-2xl font-bold mb-4">Worker Placements</h1>
+              <p className="text-muted-foreground mb-4">This page is currently under development.</p>
+            </div>
+          );
+        }} />
+        
+        <ProtectedRoute path="/labour-hire/timesheets" component={() => {
+          return (
+            <div className="p-8">
+              <h1 className="text-2xl font-bold mb-4">Worker Timesheets</h1>
+              <p className="text-muted-foreground mb-4">This page is currently under development.</p>
+            </div>
+          );
+        }} />
+        
+        <ProtectedRoute path="/labour-hire/skills" component={() => {
+          return (
+            <div className="p-8">
+              <h1 className="text-2xl font-bold mb-4">Worker Skills Database</h1>
+              <p className="text-muted-foreground mb-4">This page is currently under development.</p>
+            </div>
+          );
+        }} />
+        
+        <ProtectedRoute path="/labour-hire/pool" component={() => {
+          return (
+            <div className="p-8">
+              <h1 className="text-2xl font-bold mb-4">Worker Pool</h1>
+              <p className="text-muted-foreground mb-4">This page is currently under development.</p>
+            </div>
+          );
+        }} />
+        
         {/* Fallback to 404 */}
         <Route component={NotFound} />
       </Switch>
