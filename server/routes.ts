@@ -148,6 +148,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
   
+  // Error logging endpoint for client-side errors
+  app.post('/api/error-log', (req, res) => {
+    const { error, errorInfo, url, timestamp } = req.body;
+    
+    // Log error to the console for now
+    // In production, these should be sent to a proper logging service
+    console.error('[CLIENT ERROR]', {
+      timestamp,
+      url,
+      error,
+      errorInfo
+    });
+    
+    // Could add integration with error tracking services here
+    // like Sentry, LogRocket, etc.
+    
+    // Acknowledge receipt
+    res.status(200).json({ received: true });
+  });
+  
   // Register special test endpoints for Fair Work API
   fairworkTestEndpoints(app);
   

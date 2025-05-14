@@ -42,6 +42,30 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
     // Log the error to the console
     console.error('Error caught by ErrorBoundary:', error, errorInfo);
     
+    // Send error to backend for logging/telemetry
+    try {
+      // Don't block the UI while reporting
+      fetch('/api/error-log', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          error: {
+            message: error.message,
+            stack: error.stack,
+            name: error.name
+          },
+          errorInfo: {
+            componentStack: errorInfo.componentStack
+          },
+          url: window.location.href,
+          timestamp: new Date().toISOString()
+        })
+      }).catch(e => console.error('Failed to report error:', e));
+    } catch (e) {
+      // Silently fail if error reporting fails
+      console.error('Error reporting failed:', e);
+    }
+    
     // Call the onError callback if provided
     if (this.props.onError) {
       this.props.onError(error, errorInfo);
