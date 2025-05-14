@@ -416,10 +416,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       console.log("POST /api/contacts/groups direct endpoint called");
       
+      // Note: Color may need to be stored in a custom field or metadata
       const newGroup = await storage.createContactGroup({
         name: req.body.name,
         description: req.body.description,
-        color: req.body.color,
         organizationId: req.body.organizationId
       });
       
@@ -438,8 +438,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const updatedGroup = await storage.updateContactGroup(id, {
         name: req.body.name,
-        description: req.body.description,
-        color: req.body.color
+        description: req.body.description
+        // Note: Color removed as it's not in the schema
       });
       
       if (!updatedGroup) {
@@ -478,7 +478,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("GET /api/contacts/groups/:id/members direct endpoint called");
       const groupId = parseInt(req.params.id);
       
-      const members = await storage.getContactGroupMembers(groupId);
+      // Get contacts that belong to this group
+      const members = await storage.getGroupMembers(groupId);
       const formattedMembers = formatDbRows(members);
       
       console.log(`Returning ${formattedMembers.length} members for group ID ${groupId}`);
@@ -523,6 +524,230 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ message: 'Contact removed from group successfully' });
     } catch (error: any) {
       console.error(`Error in direct DELETE /api/contacts/groups/:groupId/members/:contactId:`, error);
+      res.status(500).json({ message: error.message });
+    }
+  });
+  
+  // ===== CONTACTS DIRECT ENDPOINTS =====
+  
+  // Get all contacts (with pagination)
+  app.get('/api/contacts', directEndpointAuth, async (req, res) => {
+    try {
+      console.log("GET /api/contacts direct endpoint called");
+      
+      // Parse pagination parameters with defaults
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 10;
+      const offset = (page - 1) * limit;
+      
+      // Get all contacts - add pagination in storage method if needed
+      const contacts = await storage.getAllContacts();
+      const formattedContacts = formatDbRows(contacts);
+      
+      // Apply manual pagination if needed
+      const startIndex = offset;
+      const endIndex = offset + limit;
+      const paginatedContacts = formattedContacts.slice(startIndex, endIndex);
+      const total = formattedContacts.length;
+      
+      console.log(`Returning ${paginatedContacts.length} contacts (page ${page}, limit ${limit}, total ${total})`);
+      
+      res.json({
+        contacts: paginatedContacts,
+        pagination: {
+          page,
+          limit,
+          totalItems: total,
+          totalPages: Math.ceil(total / limit)
+        }
+      });
+    } catch (error: any) {
+      console.error(`Error in direct GET /api/contacts:`, error);
+      res.status(500).json({ message: error.message });
+    }
+  });
+  
+  // Get single contact by ID
+  app.get('/api/contacts/:id', directEndpointAuth, async (req, res) => {
+    try {
+      console.log("GET /api/contacts/:id direct endpoint called");
+      const id = parseInt(req.params.id);
+      
+      const contact = await storage.getContact(id);
+      
+      if (!contact) {
+        return res.status(404).json({ message: 'Contact not found' });
+      }
+      
+      res.json(contact);
+    } catch (error: any) {
+      console.error(`Error in direct GET /api/contacts/:id:`, error);
+      res.status(500).json({ message: error.message });
+    }
+  });
+  
+  // Create a new contact
+  app.post('/api/contacts', directEndpointAuth, directEndpointPermission('contacts.manage'), async (req, res) => {
+    try {
+      console.log("POST /api/contacts direct endpoint called");
+      
+      // Create contact with fields that match the schema
+      const newContact = await storage.createContact({
+        firstName: req.body.firstName,
+        lastName: req.body.lastName,
+        email: req.body.email,
+        contactType: req.body.contactType || 'general',
+        primaryRole: req.body.primaryRole || 'primary',
+        phone: req.body.phone,
+        mobile: req.body.mobile,
+        address: req.body.address,
+        city: req.body.city,
+        state: req.body.state,
+        postalCode: req.body.postalCode,
+        country: req.body.country || 'Australia',
+        notes: req.body.notes,
+        organizationId: req.body.organizationId,
+        isActive: req.body.isActive !== undefined ? req.body.isActive : true
+      });
+      
+      res.status(201).json(newContact);
+    } catch (error: any) {
+      console.error(`Error in direct POST /api/contacts:`, error);
+      res.status(500).json({ message: error.message });
+    }
+  });
+  
+  // Update a contact
+  app.put('/api/contacts/:id', directEndpointAuth, directEndpointPermission('contacts.manage'), async (req, res) => {
+    try {
+      console.log("PUT /api/contacts/:id direct endpoint called");
+      const id = parseInt(req.params.id);
+      
+      // Update contact with fields that match the schema
+      const updatedContact = await storage.updateContact(id, {
+        firstName: req.body.firstName,
+        lastName: req.body.lastName,
+        email: req.body.email,
+        phone: req.body.phone,
+        mobile: req.body.mobile,
+        address: req.body.address,
+        city: req.body.city,
+        state: req.body.state,
+        postalCode: req.body.postalCode,
+        country: req.body.country,
+        contactType: req.body.contactType,
+        primaryRole: req.body.primaryRole,
+        notes: req.body.notes,
+        organizationId: req.body.organizationId,
+        isActive: req.body.isActive
+      });
+      
+      if (!updatedContact) {
+        return res.status(404).json({ message: 'Contact not found' });
+      }
+      
+      res.json(updatedContact);
+    } catch (error: any) {
+      console.error(`Error in direct PUT /api/contacts/:id:`, error);
+      res.status(500).json({ message: error.message });
+    }
+  });
+  
+  // Deactivate a contact (soft delete)
+  app.put('/api/contacts/:id/deactivate', directEndpointAuth, directEndpointPermission('contacts.manage'), async (req, res) => {
+    try {
+      console.log("PUT /api/contacts/:id/deactivate direct endpoint called");
+      const id = parseInt(req.params.id);
+      
+      const deactivated = await storage.deactivateContact(id);
+      
+      if (!deactivated) {
+        return res.status(404).json({ message: 'Contact not found' });
+      }
+      
+      res.json({ message: 'Contact deactivated successfully' });
+    } catch (error: any) {
+      console.error(`Error in direct PUT /api/contacts/:id/deactivate:`, error);
+      res.status(500).json({ message: error.message });
+    }
+  });
+  
+  // Hard delete a contact (use with caution)
+  app.delete('/api/contacts/:id', directEndpointAuth, directEndpointPermission('contacts.manage'), async (req, res) => {
+    try {
+      console.log("DELETE /api/contacts/:id direct endpoint called");
+      const id = parseInt(req.params.id);
+      
+      const success = await storage.deleteContact(id);
+      
+      if (!success) {
+        return res.status(404).json({ message: 'Contact not found' });
+      }
+      
+      res.json({ message: 'Contact permanently deleted' });
+    } catch (error: any) {
+      console.error(`Error in direct DELETE /api/contacts/:id:`, error);
+      res.status(500).json({ message: error.message });
+    }
+  });
+  
+  // Get all groups that a contact belongs to
+  app.get('/api/contacts/:id/groups', directEndpointAuth, async (req, res) => {
+    try {
+      console.log("GET /api/contacts/:id/groups direct endpoint called");
+      const id = parseInt(req.params.id);
+      
+      const groups = await storage.getContactGroups(id);
+      const formattedGroups = formatDbRows(groups);
+      
+      console.log(`Returning ${formattedGroups.length} groups for contact ID ${id}`);
+      res.json(formattedGroups);
+    } catch (error: any) {
+      console.error(`Error in direct GET /api/contacts/:id/groups:`, error);
+      res.status(500).json({ message: error.message });
+    }
+  });
+  
+  // Get interactions for a contact
+  app.get('/api/contacts/:id/interactions', directEndpointAuth, async (req, res) => {
+    try {
+      console.log("GET /api/contacts/:id/interactions direct endpoint called");
+      const id = parseInt(req.params.id);
+      
+      const interactions = await storage.getContactInteractions(id);
+      const formattedInteractions = formatDbRows(interactions);
+      
+      console.log(`Returning ${formattedInteractions.length} interactions for contact ID ${id}`);
+      res.json(formattedInteractions);
+    } catch (error: any) {
+      console.error(`Error in direct GET /api/contacts/:id/interactions:`, error);
+      res.status(500).json({ message: error.message });
+    }
+  });
+  
+  // Create a new interaction for a contact
+  app.post('/api/contacts/:id/interactions', directEndpointAuth, directEndpointPermission('contacts.manage'), async (req, res) => {
+    try {
+      console.log("POST /api/contacts/:id/interactions direct endpoint called");
+      const contactId = parseInt(req.params.id);
+      
+      const interaction = await storage.createContactInteraction({
+        contactId,
+        type: req.body.type,
+        medium: req.body.medium,
+        subject: req.body.subject,
+        content: req.body.content,
+        outcome: req.body.outcome,
+        interactionDate: req.body.interactionDate ? new Date(req.body.interactionDate) : new Date(),
+        userId: req.user?.id || 1,
+        isFollowUpRequired: req.body.isFollowUpRequired || false,
+        followUpDate: req.body.followUpDate ? new Date(req.body.followUpDate) : null,
+        followUpNotes: req.body.followUpNotes
+      });
+      
+      res.status(201).json(interaction);
+    } catch (error: any) {
+      console.error(`Error in direct POST /api/contacts/:id/interactions:`, error);
       res.status(500).json({ message: error.message });
     }
   });
