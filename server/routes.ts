@@ -42,6 +42,7 @@ import tagsRouter from "./api/tags-routes";
 import { eq, and } from "drizzle-orm";
 import { db } from "./db"; // Assuming db connection is defined here
 import { users, gtoOrganizations } from "@shared/schema";
+import jwt from 'jsonwebtoken';
 
 // Special test endpoints for Fair Work API that won't be intercepted by Vite
 const fairworkTestEndpoints = (app: Express) => {
@@ -171,8 +172,68 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // ====== DIRECT API ENDPOINTS FOR CONTACT TAGS ======
-  // These endpoints bypass the router to avoid Vite's catch-all route interference
+  // ====== DIRECT API ENDPOINTS TO BYPASS VITE MIDDLEWARE ======
+  // IMPORTANT: These direct endpoints bypass the router objects to avoid Vite's catch-all route interference
+  // Vite's middleware uses app.use("*",...) which intercepts all requests, including API calls
+  // By defining these endpoints directly in routes.ts (before Vite middleware), we ensure they work properly
+  
+  // Authentication middleware specifically for direct endpoints
+  const directEndpointAuth = async (req: any, res: any, next: any) => {
+    try {
+      // For development purposes
+      if (process.env.NODE_ENV === 'development') {
+        // Set a default development user
+        req.user = {
+          id: 1,
+          username: 'dev-user',
+          role: 'admin'
+        };
+        return next();
+      }
+      
+      // Get the token from the Authorization header
+      const authHeader = req.headers.authorization;
+      
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ error: 'Unauthorized - No token provided' });
+      }
+      
+      const token = authHeader.split(' ')[1];
+      
+      if (!token) {
+        return res.status(401).json({ error: 'Unauthorized - Invalid token format' });
+      }
+      
+      // Verify the token
+      const secretKey = process.env.JWT_SECRET || 'default-dev-secret';
+      const decoded = jwt.verify(token, secretKey);
+      
+      // Add the user info to the request
+      req.user = decoded;
+      
+      next();
+    } catch (error) {
+      console.error('Authentication error', error);
+      return res.status(401).json({ error: 'Unauthorized - Invalid token' });
+    }
+  };
+  
+  // Direct endpoint permission middleware
+  const directEndpointPermission = (permission: string) => {
+    return (req: any, res: any, next: any) => {
+      // For development, allow all permissions
+      if (process.env.NODE_ENV === 'development' && ['admin', 'developer'].includes(req.user.role)) {
+        return next();
+      }
+      
+      // Check permission in production
+      if (!req.user.permissions || !req.user.permissions.includes(permission)) {
+        return res.status(403).json({ error: 'Forbidden - Insufficient permissions' });
+      }
+      
+      next();
+    };
+  };
   
   // Helper function to format database rows into clean objects
   const formatDbRows = (rows: any) => {
@@ -200,7 +261,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   };
   
   // Get all contact tags with formatting
-  app.get('/api/contacts/tags/all', async (req, res) => {
+  app.get('/api/contacts/tags/all', directEndpointAuth, async (req, res) => {
     try {
       console.log("GET /api/contacts/tags/all direct endpoint called");
       const tags = await storage.getAllContactTags();
@@ -214,7 +275,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Create a new contact tag - using direct data
-  app.post('/api/contacts/tags', async (req, res) => {
+  app.post('/api/contacts/tags', directEndpointAuth, directEndpointPermission('contacts.manage'), async (req, res) => {
     try {
       console.log("POST /api/contacts/tags direct endpoint called");
       
@@ -235,7 +296,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Update a contact tag - using direct data
-  app.put('/api/contacts/tags/:id', async (req, res) => {
+  app.put('/api/contacts/tags/:id', directEndpointAuth, directEndpointPermission('contacts.manage'), async (req, res) => {
     try {
       console.log("PUT /api/contacts/tags/:id direct endpoint called");
       const id = parseInt(req.params.id);
@@ -261,7 +322,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Delete a contact tag
-  app.delete('/api/contacts/tags/:id', async (req, res) => {
+  app.delete('/api/contacts/tags/:id', directEndpointAuth, directEndpointPermission('contacts.manage'), async (req, res) => {
     try {
       console.log("DELETE /api/contacts/tags/:id direct endpoint called");
       const id = parseInt(req.params.id);
@@ -274,6 +335,194 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ message: 'Tag deleted successfully' });
     } catch (error: any) {
       console.error("Error in direct DELETE /api/contacts/tags/:id:", error);
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  // ===== CONTACT TAG ASSIGNMENTS DIRECT ENDPOINTS =====
+  
+  // Get tags for a specific contact
+  app.get('/api/contacts/:id/tags', directEndpointAuth, async (req, res) => {
+    try {
+      console.log("GET /api/contacts/:id/tags direct endpoint called");
+      const contactId = parseInt(req.params.id);
+      const tags = await storage.getContactTags(contactId);
+      const formattedTags = formatDbRows(tags);
+      console.log(`Returning ${formattedTags.length} tags for contact ID ${contactId}`);
+      res.json(formattedTags);
+    } catch (error: any) {
+      console.error(`Error in direct GET /api/contacts/:id/tags:`, error);
+      res.status(500).json({ message: error.message });
+    }
+  });
+  
+  // Assign tag to contact
+  app.post('/api/contacts/:id/tags', directEndpointAuth, directEndpointPermission('contacts.manage'), async (req, res) => {
+    try {
+      console.log("POST /api/contacts/:id/tags direct endpoint called");
+      const contactId = parseInt(req.params.id);
+      
+      // Skip schema validation, use direct data
+      const assignment = await storage.assignTagToContact({
+        contactId,
+        tagId: req.body.tagId
+      });
+      
+      res.status(201).json(assignment);
+    } catch (error: any) {
+      console.error(`Error in direct POST /api/contacts/:id/tags:`, error);
+      res.status(500).json({ message: error.message });
+    }
+  });
+  
+  // Remove tag from contact
+  app.delete('/api/contacts/:contactId/tags/:tagId', directEndpointAuth, directEndpointPermission('contacts.manage'), async (req, res) => {
+    try {
+      console.log("DELETE /api/contacts/:contactId/tags/:tagId direct endpoint called");
+      const contactId = parseInt(req.params.contactId);
+      const tagId = parseInt(req.params.tagId);
+      
+      const success = await storage.removeTagFromContact(contactId, tagId);
+      
+      if (!success) {
+        return res.status(404).json({ message: 'Tag assignment not found' });
+      }
+      
+      res.json({ message: 'Tag removed from contact successfully' });
+    } catch (error: any) {
+      console.error(`Error in direct DELETE /api/contacts/:contactId/tags/:tagId:`, error);
+      res.status(500).json({ message: error.message });
+    }
+  });
+  
+  // ===== CONTACT GROUPS DIRECT ENDPOINTS =====
+  
+  // Get all contact groups
+  app.get('/api/contacts/groups', directEndpointAuth, async (req, res) => {
+    try {
+      console.log("GET /api/contacts/groups direct endpoint called");
+      const groups = await storage.getAllContactGroups();
+      const formattedGroups = formatDbRows(groups);
+      console.log(`Returning ${formattedGroups.length} contact groups`);
+      res.json(formattedGroups);
+    } catch (error: any) {
+      console.error(`Error in direct GET /api/contacts/groups:`, error);
+      res.status(500).json({ message: error.message });
+    }
+  });
+  
+  // Create a new contact group
+  app.post('/api/contacts/groups', directEndpointAuth, directEndpointPermission('contacts.manage'), async (req, res) => {
+    try {
+      console.log("POST /api/contacts/groups direct endpoint called");
+      
+      const newGroup = await storage.createContactGroup({
+        name: req.body.name,
+        description: req.body.description,
+        color: req.body.color,
+        organizationId: req.body.organizationId
+      });
+      
+      res.status(201).json(newGroup);
+    } catch (error: any) {
+      console.error(`Error in direct POST /api/contacts/groups:`, error);
+      res.status(500).json({ message: error.message });
+    }
+  });
+  
+  // Update a contact group
+  app.put('/api/contacts/groups/:id', directEndpointAuth, directEndpointPermission('contacts.manage'), async (req, res) => {
+    try {
+      console.log("PUT /api/contacts/groups/:id direct endpoint called");
+      const id = parseInt(req.params.id);
+      
+      const updatedGroup = await storage.updateContactGroup(id, {
+        name: req.body.name,
+        description: req.body.description,
+        color: req.body.color
+      });
+      
+      if (!updatedGroup) {
+        return res.status(404).json({ message: 'Group not found' });
+      }
+      
+      res.json(updatedGroup);
+    } catch (error: any) {
+      console.error(`Error in direct PUT /api/contacts/groups/:id:`, error);
+      res.status(500).json({ message: error.message });
+    }
+  });
+  
+  // Delete a contact group
+  app.delete('/api/contacts/groups/:id', directEndpointAuth, directEndpointPermission('contacts.manage'), async (req, res) => {
+    try {
+      console.log("DELETE /api/contacts/groups/:id direct endpoint called");
+      const id = parseInt(req.params.id);
+      
+      const success = await storage.deleteContactGroup(id);
+      
+      if (!success) {
+        return res.status(404).json({ message: 'Group not found' });
+      }
+      
+      res.json({ message: 'Group deleted successfully' });
+    } catch (error: any) {
+      console.error(`Error in direct DELETE /api/contacts/groups/:id:`, error);
+      res.status(500).json({ message: error.message });
+    }
+  });
+  
+  // Get group members
+  app.get('/api/contacts/groups/:id/members', directEndpointAuth, async (req, res) => {
+    try {
+      console.log("GET /api/contacts/groups/:id/members direct endpoint called");
+      const groupId = parseInt(req.params.id);
+      
+      const members = await storage.getContactGroupMembers(groupId);
+      const formattedMembers = formatDbRows(members);
+      
+      console.log(`Returning ${formattedMembers.length} members for group ID ${groupId}`);
+      res.json(formattedMembers);
+    } catch (error: any) {
+      console.error(`Error in direct GET /api/contacts/groups/:id/members:`, error);
+      res.status(500).json({ message: error.message });
+    }
+  });
+  
+  // Add contact to group
+  app.post('/api/contacts/groups/:id/members', directEndpointAuth, directEndpointPermission('contacts.manage'), async (req, res) => {
+    try {
+      console.log("POST /api/contacts/groups/:id/members direct endpoint called");
+      const groupId = parseInt(req.params.id);
+      
+      const membership = await storage.addContactToGroup({
+        groupId,
+        contactId: req.body.contactId
+      });
+      
+      res.status(201).json(membership);
+    } catch (error: any) {
+      console.error(`Error in direct POST /api/contacts/groups/:id/members:`, error);
+      res.status(500).json({ message: error.message });
+    }
+  });
+  
+  // Remove contact from group
+  app.delete('/api/contacts/groups/:groupId/members/:contactId', directEndpointAuth, directEndpointPermission('contacts.manage'), async (req, res) => {
+    try {
+      console.log("DELETE /api/contacts/groups/:groupId/members/:contactId direct endpoint called");
+      const groupId = parseInt(req.params.groupId);
+      const contactId = parseInt(req.params.contactId);
+      
+      const success = await storage.removeContactFromGroup(groupId, contactId);
+      
+      if (!success) {
+        return res.status(404).json({ message: 'Group membership not found' });
+      }
+      
+      res.json({ message: 'Contact removed from group successfully' });
+    } catch (error: any) {
+      console.error(`Error in direct DELETE /api/contacts/groups/:groupId/members/:contactId:`, error);
       res.status(500).json({ message: error.message });
     }
   });
