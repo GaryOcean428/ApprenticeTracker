@@ -134,38 +134,16 @@ export const whs_policies = pgTable('whs_policies', {
 export const insertIncidentSchema = createInsertSchema(whs_incidents, {
   description: z.string().min(10, 'Description must be at least 10 characters'),
   title: z.string().min(5, 'Title must be at least 5 characters'),
-}).omit({
-  id: true,
-  created_at: true,
-  last_updated: true
-} as const);
+});
 
 export const insertWitnessSchema = createInsertSchema(whs_witnesses, {
   name: z.string().min(2, 'Witness name must be at least 2 characters'),
-}).omit({
-  id: true,
-  created_at: true
-} as const);
+});
 
-export const insertDocumentSchema = createInsertSchema(whs_documents).omit({
-  id: true,
-  created_at: true
-} as const);
-
-export const insertRiskAssessmentSchema = createInsertSchema(whs_risk_assessments).omit({
-  id: true,
-  created_at: true
-} as const);
-
-export const insertInspectionSchema = createInsertSchema(whs_inspections).omit({
-  id: true,
-  created_at: true
-} as const);
-
-export const insertPolicySchema = createInsertSchema(whs_policies).omit({
-  id: true,
-  created_at: true
-} as const);
+export const insertDocumentSchema = createInsertSchema(whs_documents);
+export const insertRiskAssessmentSchema = createInsertSchema(whs_risk_assessments);
+export const insertInspectionSchema = createInsertSchema(whs_inspections);
+export const insertPolicySchema = createInsertSchema(whs_policies);
 
 // Define types
 export type Incident = typeof whs_incidents.$inferSelect;
