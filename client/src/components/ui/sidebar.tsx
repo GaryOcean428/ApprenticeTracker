@@ -174,11 +174,12 @@ const Sidebar = () => {
           <SidebarItem 
             icon={<ClipboardCheck className="h-5 w-5" />} 
             label="Timesheets & Payroll" 
-            active={location.startsWith('/timesheets')}
+            active={location.startsWith('/timesheets') || location.startsWith('/awards') || location === '/fair-work-demo'}
             children={[
               { label: "Timesheet Management", href: "/timesheets" },
               { label: "Approval Workflow", href: "/timesheets/approvals" },
               { label: "Pay Items & Awards", href: "/awards" },
+              { label: "Award Interpreter", href: "/fair-work-demo" },
               { label: "Payroll Export", href: "/timesheets/payroll" },
               { label: "Leave Management", href: "/timesheets/leave" }
             ]} 
