@@ -61,6 +61,7 @@ import CreateQualification from "./pages/vet/qualifications/create";
 // Charge Rates Module
 import ChargeRatesIndex from "./pages/charge-rates/index";
 import ChargeRatesCreate from "./pages/charge-rates/create";
+import FairWorkDemoPage from "./pages/fair-work-demo";
 
 // Public pages
 import HomePage from "./pages/public/home";
@@ -253,6 +254,7 @@ function Router() {
         {/* Fair Work Routes */}
         <ProtectedRoute path="/awards" component={AwardsList} />
         <ProtectedRoute path="/awards/create" component={CreateAward} />
+        <ProtectedRoute path="/fair-work-demo" component={FairWorkDemoPage} />
         <Route path="/awards/:id" component={() => {
           const AwardDetail = lazy(() => import("./pages/awards/[id]/index"));
           return (

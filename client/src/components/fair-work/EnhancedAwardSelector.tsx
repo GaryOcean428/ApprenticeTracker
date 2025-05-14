@@ -181,35 +181,35 @@ export default function EnhancedAwardSelector({
   const [selectedYear, setSelectedYear] = useState<number>(defaultYear || new Date().getFullYear());
   const [apprenticeYear, setApprenticeYear] = useState<number>(defaultApprenticeYear);
   const [isAdult, setIsAdult] = useState<boolean>(defaultIsAdult);
-  const [hasCompletedYear12, setHasCompletedYear12] = useState<boolean>(defaultHasCompletedYear);
+  const [hasCompletedYear12, setHasCompletedYear12] = useState<boolean>(defaultHasCompletedYear12);
   const [selectedSector, setSelectedSector] = useState<string>(defaultSector || 'standard');
   const [activeTab, setActiveTab] = useState<string>('rates');
 
   // Fetch awards
-  const { data: awardsData, isLoading: isLoadingAwards } = useQuery({
+  const { data: awardsData, isLoading: isLoadingAwards } = useQuery<{success: boolean, data: Award[]}>({
     queryKey: ['/api/fairwork-enhanced/awards'],
   });
 
   // Fetch award rates
-  const { data: rateData, isLoading: isLoadingRates } = useQuery({
+  const { data: rateData, isLoading: isLoadingRates } = useQuery<ApprenticeRateResponse>({
     queryKey: ['/api/fairwork-enhanced/apprentice-rates', selectedAwardCode, selectedYear, apprenticeYear, isAdult, hasCompletedYear12, selectedSector],
     enabled: !!selectedAwardCode,
   });
 
   // Fetch historical rates
-  const { data: historicalData, isLoading: isLoadingHistorical } = useQuery({
+  const { data: historicalData, isLoading: isLoadingHistorical } = useQuery<HistoricalRatesResponse>({
     queryKey: ['/api/fairwork-enhanced/historical-rates', selectedAwardCode, apprenticeYear, isAdult, hasCompletedYear12, selectedSector],
     enabled: !!selectedAwardCode && activeTab === 'historical',
   });
 
   // Fetch allowances
-  const { data: allowancesData, isLoading: isLoadingAllowances } = useQuery({
+  const { data: allowancesData, isLoading: isLoadingAllowances } = useQuery<AllowancesResponse>({
     queryKey: ['/api/fairwork-enhanced/allowances', selectedAwardCode],
     enabled: !!selectedAwardCode && activeTab === 'allowances',
   });
 
   // Fetch penalty rates
-  const { data: penaltyRatesData, isLoading: isLoadingPenalties } = useQuery({
+  const { data: penaltyRatesData, isLoading: isLoadingPenalties } = useQuery<PenaltyRatesResponse>({
     queryKey: ['/api/fairwork-enhanced/penalty-rates', selectedAwardCode],
     enabled: !!selectedAwardCode && activeTab === 'penalties',
   });
@@ -279,8 +279,10 @@ export default function EnhancedAwardSelector({
     );
   }
 
-  const awards = awardsData?.data || [];
-  const selectedAward = awards.find((award: Award) => award.code === selectedAwardCode);
+  const awards = awardsData?.success ? awardsData.data : [];
+  const selectedAward = Array.isArray(awards) ? 
+    awards.find((award: Award) => award.code === selectedAwardCode) : 
+    undefined;
   
   return (
     <Card className="w-full">
@@ -300,7 +302,7 @@ export default function EnhancedAwardSelector({
                 <SelectValue placeholder="Select an award" />
               </SelectTrigger>
               <SelectContent>
-                {awards.map((award: Award) => (
+                {Array.isArray(awards) && awards.map((award: Award) => (
                   <SelectItem key={award.code} value={award.code}>
                     {award.name}
                   </SelectItem>
