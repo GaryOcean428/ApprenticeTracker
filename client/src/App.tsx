@@ -254,20 +254,20 @@ function Router() {
         {/* Fair Work Routes */}
         <ProtectedRoute path="/awards" component={AwardsList} />
         <ProtectedRoute path="/awards/create" component={CreateAward} />
-        <ProtectedRoute path="/fair-work-demo" component={FairWorkDemoPage} />
-        <Route path="/awards/:id" component={() => {
+        <Route path="/fair-work-demo" component={FairWorkDemoPage} />
+        <Route path="/awards/:id" component={(params: {params: any}) => {
           const AwardDetail = lazy(() => import("./pages/awards/[id]/index"));
           return (
             <Suspense fallback={<div className="p-8 flex items-center justify-center"><div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"/></div>}>
-              <AwardDetail />
+              <AwardDetail params={params.params} />
             </Suspense>
           );
         }} />
-        <Route path="/awards/:id/edit" component={() => {
+        <Route path="/awards/:id/edit" component={(params: {params: any}) => {
           const AwardEdit = lazy(() => import("./pages/awards/[id]/edit"));
           return (
             <Suspense fallback={<div className="p-8 flex items-center justify-center"><div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"/></div>}>
-              <AwardEdit />
+              <AwardEdit params={params.params} />
             </Suspense>
           );
         }} />
