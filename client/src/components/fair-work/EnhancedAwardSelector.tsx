@@ -190,27 +190,76 @@ export default function EnhancedAwardSelector({
     queryKey: ['/api/fairwork-enhanced/awards'],
   });
 
+  // Build query parameters for apprentice rates
+  const buildApprenticeRateQueryUrl = () => {
+    if (!selectedAwardCode) return '';
+    
+    const params = new URLSearchParams();
+    params.append('awardCode', selectedAwardCode);
+    params.append('year', selectedYear.toString());
+    params.append('apprenticeYear', apprenticeYear.toString());
+    params.append('isAdult', isAdult.toString());
+    params.append('hasCompletedYear12', hasCompletedYear12.toString());
+    if (selectedSector) params.append('sector', selectedSector);
+    
+    return `/api/fairwork-enhanced/apprentice-rates?${params.toString()}`;
+  };
+
   // Fetch award rates
   const { data: rateData, isLoading: isLoadingRates } = useQuery<ApprenticeRateResponse>({
-    queryKey: ['/api/fairwork-enhanced/apprentice-rates', selectedAwardCode, selectedYear, apprenticeYear, isAdult, hasCompletedYear12, selectedSector],
+    queryKey: [buildApprenticeRateQueryUrl()],
     enabled: !!selectedAwardCode,
   });
 
+  // Build query for historical rates
+  const buildHistoricalRatesQueryUrl = () => {
+    if (!selectedAwardCode) return '';
+    
+    const params = new URLSearchParams();
+    params.append('awardCode', selectedAwardCode);
+    params.append('apprenticeYear', apprenticeYear.toString());
+    params.append('isAdult', isAdult.toString());
+    params.append('hasCompletedYear12', hasCompletedYear12.toString());
+    if (selectedSector) params.append('sector', selectedSector);
+    
+    return `/api/fairwork-enhanced/historical-rates?${params.toString()}`;
+  };
+
+  // Build query for allowances
+  const buildAllowancesQueryUrl = () => {
+    if (!selectedAwardCode) return '';
+    
+    const params = new URLSearchParams();
+    params.append('awardCode', selectedAwardCode);
+    
+    return `/api/fairwork-enhanced/allowances?${params.toString()}`;
+  };
+
+  // Build query for penalty rates
+  const buildPenaltyRatesQueryUrl = () => {
+    if (!selectedAwardCode) return '';
+    
+    const params = new URLSearchParams();
+    params.append('awardCode', selectedAwardCode);
+    
+    return `/api/fairwork-enhanced/penalty-rates?${params.toString()}`;
+  };
+
   // Fetch historical rates
   const { data: historicalData, isLoading: isLoadingHistorical } = useQuery<HistoricalRatesResponse>({
-    queryKey: ['/api/fairwork-enhanced/historical-rates', selectedAwardCode, apprenticeYear, isAdult, hasCompletedYear12, selectedSector],
+    queryKey: [buildHistoricalRatesQueryUrl()],
     enabled: !!selectedAwardCode && activeTab === 'historical',
   });
 
   // Fetch allowances
   const { data: allowancesData, isLoading: isLoadingAllowances } = useQuery<AllowancesResponse>({
-    queryKey: ['/api/fairwork-enhanced/allowances', selectedAwardCode],
+    queryKey: [buildAllowancesQueryUrl()],
     enabled: !!selectedAwardCode && activeTab === 'allowances',
   });
 
   // Fetch penalty rates
   const { data: penaltyRatesData, isLoading: isLoadingPenalties } = useQuery<PenaltyRatesResponse>({
-    queryKey: ['/api/fairwork-enhanced/penalty-rates', selectedAwardCode],
+    queryKey: [buildPenaltyRatesQueryUrl()],
     enabled: !!selectedAwardCode && activeTab === 'penalties',
   });
 

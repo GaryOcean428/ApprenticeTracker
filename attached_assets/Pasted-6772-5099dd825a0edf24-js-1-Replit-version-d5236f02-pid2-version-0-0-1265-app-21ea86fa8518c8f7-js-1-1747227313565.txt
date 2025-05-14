@@ -1,0 +1,179 @@
+6772-5099dd825a0edf24.js:1 Replit version d5236f02, pid2 version 0.0.1265
+_app-21ea86fa8518c8f7.js:13 
+      /////////////////////
+   ///////////////////////////
+  ////////@@@@@@@//////////////
+  ////////@@@@@@@//////////////
+  ////////@@@@@@@//////////////        Curious and driven?
+  ///////////////@@@@@@@///////        Work with us!
+  ///////////////@@@@@@@///////
+  ///////////////@@@@@@@///////        https://join.replit.com/hack.with.us
+  ////////@@@@@@@//////////////
+  ////////@@@@@@@//////////////
+  ////////@@@@@@#//////////////
+   ///////////////////////////
+      /////////////////////
+      
+_app-21ea86fa8518c8f7.js:13 [LaunchDarkly] LaunchDarkly client initialized
+GTRM:1 Banner not shown: beforeinstallpromptevent.preventDefault() called. The page must call beforeinstallpromptevent.prompt() to show the banner.
+_app-21ea86fa8518c8f7.js:13 Adding extension: GPT-Replit - ChatGPT in your Repl. Object
+_app-21ea86fa8518c8f7.js:13 Adding extension: Perplexity Object
+_app-21ea86fa8518c8f7.js:13 Adding extension: ReplDB Export and Import Object
+_app-21ea86fa8518c8f7.js:13 Adding extension: Prettier - Code Formatter Object
+ [Report Only] Refused to compile or instantiate WebAssembly module because 'unsafe-eval' is not an allowed source of script in the following Content Security Policy directive: "script-src 'self'".
+
+ [Report Only] Refused to compile or instantiate WebAssembly module because 'unsafe-eval' is not an allowed source of script in the following Content Security Policy directive: "script-src 'self'".
+
+_app-21ea86fa8518c8f7.js:13 Adding extension: Javascript Commands Object
+GTRM:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+GTRM:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+GTRM:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+GTRM:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+GTRM:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+GTRM:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+ Unrecognized feature: 'ambient-light-sensor'.
+_ @ framework-f386dea716637963.js:1
+ Unrecognized feature: 'battery'.
+_ @ framework-f386dea716637963.js:1
+ Unrecognized feature: 'execution-while-not-rendered'.
+_ @ framework-f386dea716637963.js:1
+ Unrecognized feature: 'execution-while-out-of-viewport'.
+_ @ framework-f386dea716637963.js:1
+ Unrecognized feature: 'layout-animations'.
+_ @ framework-f386dea716637963.js:1
+ Unrecognized feature: 'legacy-image-formats'.
+_ @ framework-f386dea716637963.js:1
+ Unrecognized feature: 'navigation-override'.
+_ @ framework-f386dea716637963.js:1
+ Unrecognized feature: 'oversized-images'.
+_ @ framework-f386dea716637963.js:1
+ Unrecognized feature: 'publickey-credentials'.
+_ @ framework-f386dea716637963.js:1
+ Unrecognized feature: 'speaker-selection'.
+_ @ framework-f386dea716637963.js:1
+ Unrecognized feature: 'unoptimized-images'.
+_ @ framework-f386dea716637963.js:1
+ Unrecognized feature: 'unsized-media'.
+_ @ framework-f386dea716637963.js:1
+ Unrecognized feature: 'web-share'.
+_ @ framework-f386dea716637963.js:1
+ Unrecognized feature: 'pointer-lock'.
+_ @ framework-f386dea716637963.js:1
+ Allow attribute will take precedence over 'allowfullscreen'.
+_ @ framework-f386dea716637963.js:1
+ Allow attribute will take precedence over 'allowpaymentrequest'.
+_ @ framework-f386dea716637963.js:1
+hook.js:608 Command: hello has unrecognized contributions: editor-context-menu. Valid contributions are commandbar,filetree-context-menu,sidebar-search,editor-context-menu Object
+overrideMethod @ hook.js:608
+hook.js:608 Command: javascript-root-command has unrecognized contributions: commandbar. Valid contributions are commandbar,filetree-context-menu,sidebar-search,editor-context-menu Object
+overrideMethod @ hook.js:608
+ stallwart: failed ping 1
+684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar11k%3A:32 Unrecognized feature: 'ambient-light-sensor'.
+workspace_iframe.html:32 Unrecognized feature: 'ambient-light-sensor'.
+684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar11k%3A:32 Unrecognized feature: 'battery'.
+workspace_iframe.html:32 Unrecognized feature: 'battery'.
+684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar11k%3A:32 Unrecognized feature: 'execution-while-not-rendered'.
+workspace_iframe.html:32 Unrecognized feature: 'execution-while-not-rendered'.
+684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar11k%3A:32 Unrecognized feature: 'execution-while-out-of-viewport'.
+workspace_iframe.html:32 Unrecognized feature: 'execution-while-out-of-viewport'.
+684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar11k%3A:32 Unrecognized feature: 'layout-animations'.
+workspace_iframe.html:32 Unrecognized feature: 'layout-animations'.
+684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar11k%3A:32 Unrecognized feature: 'legacy-image-formats'.
+workspace_iframe.html:32 Unrecognized feature: 'legacy-image-formats'.
+684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar11k%3A:32 Unrecognized feature: 'navigation-override'.
+workspace_iframe.html:32 Unrecognized feature: 'navigation-override'.
+684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar11k%3A:32 Unrecognized feature: 'oversized-images'.
+workspace_iframe.html:32 Unrecognized feature: 'oversized-images'.
+684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar11k%3A:32 Unrecognized feature: 'publickey-credentials'.
+workspace_iframe.html:32 Unrecognized feature: 'publickey-credentials'.
+684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar11k%3A:32 Unrecognized feature: 'speaker-selection'.
+workspace_iframe.html:32 Unrecognized feature: 'speaker-selection'.
+684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar11k%3A:32 Unrecognized feature: 'unoptimized-images'.
+workspace_iframe.html:32 Unrecognized feature: 'unoptimized-images'.
+684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar11k%3A:32 Unrecognized feature: 'unsized-media'.
+workspace_iframe.html:32 Unrecognized feature: 'unsized-media'.
+684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar11k%3A:32 Unrecognized feature: 'web-share'.
+workspace_iframe.html:32 Unrecognized feature: 'web-share'.
+684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar11k%3A:32 Allow attribute will take precedence over 'allowfullscreen'.
+workspace_iframe.html:32 Allow attribute will take precedence over 'allowfullscreen'.
+684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar11k%3A:32 Allow attribute will take precedence over 'allowpaymentrequest'.
+workspace_iframe.html:32 Allow attribute will take precedence over 'allowpaymentrequest'.
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+ WebSocket connection to 'wss://684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/' failed: 
+t @ eruda.js:2
+hook.js:608 task queue exceeded allotted deadline by 132ms
+overrideMethod @ hook.js:608
+684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/api/fairwork-enhanced/apprentice-rates:1 
+            
+            
+           Failed to load resource: the server responded with a status of 400 (Bad Request)
+684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/api/fairwork-enhanced/apprentice-rates:1 
+            
+            
+           Failed to load resource: the server responded with a status of 400 (Bad Request)
+684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/api/fairwork-enhanced/apprentice-rates:1 
+            
+            
+           Failed to load resource: the server responded with a status of 400 (Bad Request)
+684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/api/fairwork-enhanced/apprentice-rates:1 
+            
+            
+           Failed to load resource: the server responded with a status of 400 (Bad Request)
+684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/api/fairwork-enhanced/apprentice-rates:1 
+            
+            
+           Failed to load resource: the server responded with a status of 400 (Bad Request)
+684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/api/fairwork-enhanced/apprentice-rates:1 
+            
+            
+           Failed to load resource: the server responded with a status of 400 (Bad Request)
+684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/api/fairwork-enhanced/historical-rates:1 
+            
+            
+           Failed to load resource: the server responded with a status of 400 (Bad Request)
+684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/api/fairwork-enhanced/historical-rates:1 
+            
+            
+           Failed to load resource: the server responded with a status of 400 (Bad Request)
+684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/api/fairwork-enhanced/allowances:1 
+            
+            
+           Failed to load resource: the server responded with a status of 400 (Bad Request)
+684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/api/fairwork-enhanced/allowances:1 
+            
+            
+           Failed to load resource: the server responded with a status of 400 (Bad Request)
+684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/api/fairwork-enhanced/penalty-rates:1 
+            
+            
+           Failed to load resource: the server responded with a status of 400 (Bad Request)
+684545d6-91c4-483a-baa2-4db3423cb37a-00-3c31str3a5ge7.picard.replit.dev/api/fairwork-enhanced/penalty-rates:1 
+            
+            
+           Failed to load resource: the server responded with a status of 400 (Bad Request)
+
+                
+          
+          
+          
+         Chrome is moving towards a new experience that allows users to choose to browse without third-party cookies.
+stallwart.build.js:1 stallwart: failed ping 1
