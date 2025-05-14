@@ -1784,7 +1784,7 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(contactInteractions)
       .where(eq(contactInteractions.contactId, contactId))
-      .orderBy(desc(contactInteractions.date));
+      .orderBy(desc(contactInteractions.interactionDate));
   }
   
   async createContactInteraction(interaction: InsertContactInteraction): Promise<ContactInteraction> {

@@ -731,18 +731,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("POST /api/contacts/:id/interactions direct endpoint called");
       const contactId = parseInt(req.params.id);
       
+      // Create interaction using fields that match the schema
       const interaction = await storage.createContactInteraction({
         contactId,
-        type: req.body.type,
-        medium: req.body.medium,
-        subject: req.body.subject,
+        interactionType: req.body.interactionType || 'note',
+        subject: req.body.subject || 'New interaction',
         content: req.body.content,
-        outcome: req.body.outcome,
         interactionDate: req.body.interactionDate ? new Date(req.body.interactionDate) : new Date(),
-        userId: req.user?.id || 1,
-        isFollowUpRequired: req.body.isFollowUpRequired || false,
-        followUpDate: req.body.followUpDate ? new Date(req.body.followUpDate) : null,
-        followUpNotes: req.body.followUpNotes
+        createdBy: req.user?.id,
+        metadata: req.body.metadata || {}
       });
       
       res.status(201).json(interaction);
