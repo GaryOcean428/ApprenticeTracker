@@ -114,7 +114,7 @@ export const insertUserSchema = createInsertSchema(users).pick({
   subscriptionEndsAt: true,
   stripeCustomerId: true,
   stripeSubscriptionId: true
-});
+} as const);
 
 // Apprentices
 export const apprentices = pgTable("apprentices", {
