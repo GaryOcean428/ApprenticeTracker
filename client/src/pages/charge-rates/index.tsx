@@ -38,7 +38,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { MainLayout } from '@/components/layout/MainLayout';
+// We don't need MainLayout as it's handled by the App.tsx route wrapper
 
 export default function ChargeRatesPage() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -49,7 +49,7 @@ export default function ChargeRatesPage() {
   // Fetch charge rate calculations
   const { data: chargeRates, isLoading } = useQuery({
     queryKey: ['/api/payroll/charge-rates'],
-    select: (data) => data?.data || [],
+    select: (data: any) => data?.data || [],
   });
 
   // Handle sort change
@@ -142,7 +142,6 @@ export default function ChargeRatesPage() {
   };
 
   return (
-    <MainLayout>
       <div className="container mx-auto py-6 space-y-6">
         <div className="flex flex-col md:flex-row justify-between md:items-center space-y-4 md:space-y-0">
           <div>
@@ -340,6 +339,5 @@ export default function ChargeRatesPage() {
           </CardContent>
         </Card>
       </div>
-    </MainLayout>
   );
 }
