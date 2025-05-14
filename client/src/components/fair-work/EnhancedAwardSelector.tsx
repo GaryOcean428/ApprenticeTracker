@@ -482,19 +482,22 @@ export default function EnhancedAwardSelector({
                     
                     <div className="grid grid-cols-1 gap-2 sm:grid-cols-3 mt-4">
                       <RateCard 
-                        title="Hourly Rate" 
+                        title="Base Hourly Wage" 
                         amount={rateData.data.rates.hourly} 
                         period="per hour" 
+                        subtitle="Award base rate before on-costs"
                       />
                       <RateCard 
-                        title="Weekly Rate" 
+                        title="Base Weekly Wage" 
                         amount={rateData.data.rates.weekly} 
                         period="per week" 
+                        subtitle="38-hour standard week"
                       />
                       <RateCard 
-                        title="Annual Rate" 
+                        title="Base Annual Wage" 
                         amount={rateData.data.rates.annual} 
                         period="per year" 
+                        subtitle="52-week calculation"
                       />
                     </div>
                   </div>
@@ -900,7 +903,17 @@ export default function EnhancedAwardSelector({
 }
 
 // Helper component for rate display
-function RateCard({ title, amount, period }: { title: string; amount: number; period: string }) {
+function RateCard({ 
+  title, 
+  amount, 
+  period, 
+  subtitle 
+}: { 
+  title: string; 
+  amount: number; 
+  period: string;
+  subtitle?: string 
+}) {
   return (
     <div className="bg-background rounded-md p-3 border">
       <h4 className="text-sm text-muted-foreground">{title}</h4>
@@ -915,6 +928,9 @@ function RateCard({ title, amount, period }: { title: string; amount: number; pe
           {period}
         </span>
       </div>
+      {subtitle && (
+        <div className="text-xs text-muted-foreground mt-1">{subtitle}</div>
+      )}
     </div>
   );
 }
