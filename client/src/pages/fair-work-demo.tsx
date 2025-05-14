@@ -53,6 +53,10 @@ export default function FairWorkDemoPage() {
   // Handle rate selection from the award interpreter
   const handleRateSelected = (rate: number, award: string, year: number) => {
     console.log(`Selected rate: $${rate.toFixed(2)} for award ${award} in year ${year}`);
+    
+    // Use the pure base rate for calculations
+    // This is the rate before any adjustments like adult, year12, sector
+    // The API response includes this as a separate field we can access via the EnhancedAwardSelector
     setSelectedBaseRate(rate);
     setSelectedAward(award);
     setSelectedYear(year);

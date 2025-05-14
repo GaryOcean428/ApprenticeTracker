@@ -47,6 +47,7 @@ interface Award {
 }
 
 interface ApprenticeRate {
+  baseHourly: number;
   hourly: number;
   weekly: number;
   annual: number;
@@ -267,8 +268,9 @@ export default function EnhancedAwardSelector({
   useEffect(() => {
     if (rateData?.success && rateData.data) {
       if (onRateSelected) {
+        // Pass the pure base rate to the parent component
         onRateSelected(
-          rateData.data.rates.hourly,
+          rateData.data.rates.baseHourly,
           selectedAwardCode,
           selectedYear
         );
@@ -488,17 +490,39 @@ export default function EnhancedAwardSelector({
                         subtitle="Pure award base rate"
                       />
                       <RateCard 
-                        title="Base Weekly Wage" 
+                        title="Modified Hourly Rate" 
+                        amount={rateData.data.rates.hourly} 
+                        period="per hour" 
+                        subtitle="With all applicable adjustments"
+                      />
+                      <RateCard 
+                        title="Weekly Wage" 
                         amount={rateData.data.rates.weekly} 
                         period="per week" 
                         subtitle="38-hour standard week"
                       />
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
                       <RateCard 
-                        title="Base Annual Wage" 
+                        title="Annual Wage" 
                         amount={rateData.data.rates.annual} 
                         period="per year" 
                         subtitle="52-week calculation"
                       />
+                      <div className="bg-muted/30 rounded-md p-3 border">
+                        <h4 className="text-sm font-medium">Sector</h4>
+                        <div className="mt-1 text-sm">
+                          <Badge variant="outline" className="bg-primary/10 text-primary">
+                            {rateData.data.parameters.sector === 'standard' ? 'Standard Rates' : 
+                             `${rateData.data.parameters.sector.charAt(0).toUpperCase()}${rateData.data.parameters.sector.slice(1)} Sector`}
+                          </Badge>
+                          {rateData.data.parameters.sector === 'standard' && 
+                            <div className="mt-2 text-xs text-muted-foreground">
+                              Standard rates apply when no specific sector is selected
+                            </div>
+                          }
+                        </div>
+                      </div>
                     </div>
                   </div>
                 ) : (
