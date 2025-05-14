@@ -89,12 +89,16 @@ function calculateApprenticeRate(params: {
   const currentYear = new Date().getFullYear();
   const yearAdjustment = (year - currentYear) * 0.03; // 3% annual increase
   
-  // Calculate final rates
+  // Pure base rate before any modifiers
+  const pureBaseRate = baseHourlyRate;
+  
+  // Calculate final rates with all modifiers applied
   const hourlyRate = (baseHourlyRate + adultBonus + year12Bonus) * 
                      sectorMultiplier * (1 + yearAdjustment);
   const weeklyRate = hourlyRate * 38; // Standard 38-hour week
   
   return {
+    pureBaseRate: parseFloat(pureBaseRate.toFixed(2)),
     hourlyRate: parseFloat(hourlyRate.toFixed(2)),
     weeklyRate: parseFloat(weeklyRate.toFixed(2)),
     factors: {
@@ -188,6 +192,7 @@ router.get('/apprentice-rates', isAuthenticated, (req: Request, res: Response) =
           sector: sector || 'standard'
         },
         rates: {
+          baseHourly: rates.pureBaseRate,
           hourly: rates.hourlyRate,
           weekly: rates.weeklyRate,
           annual: parseFloat((rates.weeklyRate * 52).toFixed(2))
@@ -272,6 +277,7 @@ router.get('/historical-rates', isAuthenticated, (req: Request, res: Response) =
       historicalData.push({
         year,
         rates: {
+          baseHourly: rates.pureBaseRate,
           hourly: rates.hourlyRate,
           weekly: rates.weeklyRate,
           annual: parseFloat((rates.weeklyRate * 52).toFixed(2))

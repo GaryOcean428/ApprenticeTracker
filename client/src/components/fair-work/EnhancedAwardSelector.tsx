@@ -483,9 +483,9 @@ export default function EnhancedAwardSelector({
                     <div className="grid grid-cols-1 gap-2 sm:grid-cols-3 mt-4">
                       <RateCard 
                         title="Base Hourly Wage" 
-                        amount={rateData.data.rates.hourly} 
+                        amount={rateData.data.rates.baseHourly} 
                         period="per hour" 
-                        subtitle="Award base rate before on-costs"
+                        subtitle="Pure award base rate"
                       />
                       <RateCard 
                         title="Base Weekly Wage" 
