@@ -150,6 +150,7 @@ export const MAIN_NAV_SECTIONS: NavSection[] = [
         { title: "Timesheet Management", href: "/timesheets" },
         { title: "Approval Workflow", href: "/timesheets/approvals" },
         { title: "Pay Awards & Rates", href: "/awards" },
+        { title: "Award Interpreter", href: "/fair-work-demo" },
         { title: "Payroll Export", href: "/timesheets/payroll" },
         { title: "Leave Management", href: "/timesheets/leave" }
       ]
@@ -232,6 +233,18 @@ export const MAIN_NAV_SECTIONS: NavSection[] = [
     title: "Documents & Resources",
     icon: FileText,
     href: "/documents",
+  },
+  
+  // Tools & Utilities
+  {
+    title: "Tools",
+    icon: Award,
+    subItems: [
+      [
+        { title: "Fair Work Award Interpreter", href: "/fair-work-demo" },
+        { title: "Charge Rate Calculator", href: "/charge-rates" }
+      ]
+    ]
   },
   
   // Settings & Configuration

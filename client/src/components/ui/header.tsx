@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "wouter";
-import { Bell, Search, Menu } from "lucide-react";
+import { Bell, Search, Menu, Award } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -54,6 +54,16 @@ const Header = ({ onMenuToggle }: HeaderProps) => {
         </div>
         
         <div className="flex items-center flex-shrink-0 space-x-6">
+          {/* Quick Links */}
+          <div className="hidden md:flex space-x-4">
+            <Link href="/fair-work-demo">
+              <Button variant="outline" size="sm" className="text-primary flex items-center gap-1">
+                <Award className="h-4 w-4" />
+                <span>Fair Work Award Interpreter</span>
+              </Button>
+            </Link>
+          </div>
+
           {/* Notifications */}
           <Button 
             variant="ghost" 
