@@ -139,6 +139,15 @@ const fairworkTestEndpoints = (app: Express) => {
 };
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Health check endpoint
+  app.get('/api/health', (req, res) => {
+    res.json({ 
+      status: 'ok', 
+      timestamp: new Date().toISOString(),
+      version: process.env.npm_package_version || '0.0.1'
+    });
+  });
+  
   // Register special test endpoints for Fair Work API
   fairworkTestEndpoints(app);
   
