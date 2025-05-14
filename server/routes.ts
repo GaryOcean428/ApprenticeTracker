@@ -30,7 +30,7 @@ import { fairWorkRouter } from "./api/fair-work-routes";
 import { authRouter, isAuthenticated, hasRole } from "./api/auth-routes";
 import payrollRouter from "./api/payroll";
 import fairworkRouter from "./api/fairwork";
-import fairworkExtendedRouter from "./api/fairwork-routes";
+import fairworkEnhancedRouter from "./api/fairwork-enhanced";
 import enrichmentRouter from "./api/enrichment";
 import progressReviewsRouter from "./api/progress-reviews";
 import contactsRouter from "./api/contacts-routes";
@@ -789,8 +789,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/api/payroll', payrollRouter); // Payroll routes
   app.use('/api/enrichment', enrichmentRouter); // Enrichment routes
   app.use('/api/progress-reviews', progressReviewsRouter); // Progress Reviews routes
-  app.use('/api/fairwork', fairworkRouter); // Enhanced Fair Work API routes
-  app.use('/api/fairwork/extended', fairworkExtendedRouter); // Extended Fair Work API features
+  app.use('/api/fairwork', fairworkRouter); // Basic Fair Work API routes
+  app.use('/api/fairwork-enhanced', fairworkEnhancedRouter); // Enhanced Fair Work API features with detailed award interpretation
   app.use('/api/financial', financialRouter); // Financial management routes
   app.use('/api/compliance', complianceRouter); // Compliance management routes
   setupWhsRoutes(app); // Work Health & Safety routes
