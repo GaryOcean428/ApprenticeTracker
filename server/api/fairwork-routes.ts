@@ -2,7 +2,7 @@ import { Request, Response, Router } from 'express';
 import { z } from 'zod';
 import { db } from '../db';
 import { eq } from 'drizzle-orm';
-import { awards, awardClassifications, awardRates } from '@shared/schema/awards';
+import { awards, awardClassifications, awardRates } from '../../shared/schema/awards';
 
 const router = Router();
 
