@@ -1,13 +1,13 @@
 // @ts-check
-import eslint from '@eslint/js';
-import tseslint from 'typescript-eslint';
-import prettierPlugin from 'eslint-plugin-prettier';
-import prettierConfig from 'eslint-config-prettier';
-import reactPlugin from 'eslint-plugin-react';
-import reactHooksPlugin from 'eslint-plugin-react-hooks';
-import reactRefreshPlugin from 'eslint-plugin-react-refresh';
+const eslint = require('@eslint/js');
+const tseslint = require('typescript-eslint');
+const prettierPlugin = require('eslint-plugin-prettier');
+const prettierConfig = require('eslint-config-prettier');
+const reactPlugin = require('eslint-plugin-react');
+const reactHooksPlugin = require('eslint-plugin-react-hooks');
+const reactRefreshPlugin = require('eslint-plugin-react-refresh');
 
-export default tseslint.config(
+module.exports = tseslint.config(
   eslint.configs.recommended,
   ...tseslint.configs.recommended,
   prettierConfig,
