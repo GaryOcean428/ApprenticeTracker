@@ -136,6 +136,9 @@ export const awardUpdateChecks = pgTable('award_update_checks', {
   updateUrl: varchar('update_url', { length: 500 }),
   lastNotifiedDate: timestamp('last_notified_date'),
   status: varchar('status', { length: 20 }).default('pending').notNull(), // 'pending', 'notified', 'updated', 'ignored'
+  aiAnalysis: text('ai_analysis'),                    // JSON string with AI analysis results
+  notificationMessage: text('notification_message'),  // AI-generated notification message
+  impactLevel: varchar('impact_level', { length: 20 }), // 'low', 'medium', 'high'
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 }, (table) => {

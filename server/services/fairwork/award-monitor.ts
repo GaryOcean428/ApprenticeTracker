@@ -14,6 +14,7 @@ import axios from 'axios';
 import logger from '../../utils/logger';
 import { sendEmailNotification } from '../notification-service';
 import { scrapeAwardData } from './award-scraper';
+import { awardAIAnalyzer } from './award-ai-analyzer';
 
 // Constants
 const CHECK_INTERVAL_DAYS = 7; // Check for updates weekly
