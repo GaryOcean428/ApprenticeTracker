@@ -444,4 +444,210 @@ export class FairWorkApiClient {
       throw error;
     }
   }
+
+  /**
+   * Get apprentice pay rates for a specific award
+   * Uses the API's apprentice-specific filtering
+   * @param awardCode The award code (e.g., MA000025)
+   * @param apprenticeYear The year of apprenticeship (1-4)
+   * @param options Additional options for filtering
+   */
+  async getApprenticeRates(
+    awardCode: string, 
+    apprenticeYear?: number,
+    options: {
+      isAdult?: boolean;
+      hasCompletedYear12?: boolean;
+      operativeFrom?: string;
+      operativeTo?: string;
+    } = {}
+  ): Promise<PayRate[]> {
+    try {
+      // Set up options for calling the pay rates endpoint
+      const payRateOptions: any = {
+        employeeRateTypeCode: 'AP', // AP = Apprentice in Fair Work API
+      };
+      
+      // Add apprentice year if provided
+      if (apprenticeYear) {
+        payRateOptions.apprenticeYear = apprenticeYear;
+      }
+      
+      // Add operative date range if provided
+      if (options.operativeFrom) payRateOptions.operativeFrom = options.operativeFrom;
+      if (options.operativeTo) payRateOptions.operativeTo = options.operativeTo;
+      
+      // Get apprentice rates from the API
+      const rates = await this.getPayRates(awardCode, payRateOptions);
+      
+      // If no rates are returned, try the fallback calculation
+      if (rates.length === 0) {
+        logger.info('No apprentice rates found directly, trying fallback calculation', { 
+          awardCode, apprenticeYear, options 
+        });
+        return await this.calculateApprenticeRatesByReference(awardCode, apprenticeYear, options);
+      }
+      
+      // Sort rates by most recent effective date
+      return rates.sort((a, b) => {
+        return new Date(b.effective_from).getTime() - new Date(a.effective_from).getTime();
+      });
+    } catch (error) {
+      logger.error('Failed to fetch apprentice rates', { error, awardCode, apprenticeYear });
+      // If direct API call fails, try the fallback approach
+      return await this.calculateApprenticeRatesByReference(awardCode, apprenticeYear, options);
+    }
+  }
+  
+  /**
+   * Calculate apprentice rates based on reference classification percentages
+   * This is a fallback when direct API calls for apprentice rates don't return results
+   * Implements the percentage-based calculations defined in the awards
+   */
+  private async calculateApprenticeRatesByReference(
+    awardCode: string,
+    apprenticeYear?: number,
+    options: {
+      isAdult?: boolean;
+      hasCompletedYear12?: boolean;
+      operativeFrom?: string;
+      operativeTo?: string;
+    } = {}
+  ): Promise<PayRate[]> {
+    try {
+      const { isAdult = false, hasCompletedYear12 = false } = options;
+      
+      // Get the classifications for this award to find the reference classification
+      const classifications = await this.getAwardClassifications(awardCode);
+      
+      // Different awards use different reference classifications for apprentice percentages
+      let referenceClassLevel: string | undefined;
+      
+      // Use award-specific logic to determine reference classification
+      if (awardCode === 'MA000025') { // Electrical Award
+        // Clause 16.4(a)(ii) specifies Electrical worker grade 5 as reference
+        const referenceClass = classifications.find(c => 
+          c.name.toLowerCase().includes('electrical worker grade 5')
+        );
+        if (referenceClass) {
+          referenceClassLevel = referenceClass.fair_work_level_code;
+        }
+      } else if (awardCode === 'MA000036') { // Plumbing Award
+        // For plumbing, use Plumbing and Mechanical Services Tradesperson / Level 1
+        const referenceClass = classifications.find(c => 
+          c.name.toLowerCase().includes('plumbing and mechanical services tradesperson') ||
+          c.name.toLowerCase().includes('level 1')
+        );
+        if (referenceClass) {
+          referenceClassLevel = referenceClass.fair_work_level_code;
+        }
+      } else if (awardCode === 'MA000003') { // Building and Construction Award
+        // Use Level 3 - CW/ECW 3 for Building and Construction
+        const referenceClass = classifications.find(c => 
+          c.name.toLowerCase().includes('cw/ecw 3') ||
+          c.name.toLowerCase().includes('level 3')
+        );
+        if (referenceClass) {
+          referenceClassLevel = referenceClass.fair_work_level_code;
+        }
+      }
+      
+      if (!referenceClassLevel) {
+        throw new Error(`Could not find reference classification for award ${awardCode}`);
+      }
+      
+      // Get the reference pay rate
+      const referenceRates = await this.getPayRates(awardCode, { 
+        employeeRateTypeCode: 'ST', // Standard rate
+        classificationLevel: parseInt(referenceClassLevel)
+      });
+      
+      if (!referenceRates.length) {
+        throw new Error('Reference classification rates not found');
+      }
+      
+      // Sort by most recent effective date and take the first one
+      const referenceRate = referenceRates.sort((a, b) => {
+        return new Date(b.effective_from).getTime() - new Date(a.effective_from).getTime();
+      })[0];
+      
+      // Calculate percentage based on award rules
+      let percentage = 0;
+      
+      // If no specific apprenticeYear provided, we'll create rates for all years
+      const yearsToCalculate = apprenticeYear ? [apprenticeYear] : [1, 2, 3, 4];
+      
+      // Create an array to hold results for all years
+      const calculatedRates: PayRate[] = [];
+      
+      // Get percentages from award-specific rules
+      for (const year of yearsToCalculate) {
+        if (awardCode === 'MA000025') { // Electrical Award MA000025
+          // Based on clause 16.4(a)(ii) for junior apprentices and 16.4(b)(ii) for adult apprentices
+          if (isAdult) {
+            // Adult apprentice percentages from 16.4(b)(ii)
+            switch (year) {
+              case 1: percentage = 0.80; break; // 80%
+              case 2: percentage = 0.85; break; // 85%
+              case 3: percentage = 0.90; break; // 90%
+              case 4: percentage = 0.95; break; // 95%
+              default: percentage = 0.50; // Default
+            }
+          } else {
+            // Junior apprentice percentages from 16.4(a)(ii)
+            switch (year) {
+              case 1: percentage = hasCompletedYear12 ? 0.55 : 0.50; break; // 55% with Y12, 50% without
+              case 2: percentage = hasCompletedYear12 ? 0.65 : 0.60; break; // 65% with Y12, 60% without
+              case 3: percentage = 0.70; break; // 70%
+              case 4: percentage = 0.80; break; // 80%
+              default: percentage = 0.50; // Default
+            }
+          }
+        } else {
+          // Generic percentages for other awards (adapt as needed)
+          switch (year) {
+            case 1: percentage = 0.50; break; // 50%
+            case 2: percentage = 0.60; break; // 60%
+            case 3: percentage = 0.70; break; // 70%
+            case 4: percentage = 0.90; break; // 90%
+            default: percentage = 0.50; // Default
+          }
+        }
+        
+        // Calculate the hourly rate based on the percentage
+        const hourlyRate = referenceRate.hourly_rate * percentage;
+        
+        // Create a PayRate object for this year
+        calculatedRates.push({
+          id: `calculated-apprentice-${awardCode}-year${year}`,
+          classification_id: referenceRate.classification_id,
+          hourly_rate: parseFloat(hourlyRate.toFixed(2)),
+          effective_from: referenceRate.effective_from,
+          effective_to: referenceRate.effective_to,
+          is_apprentice_rate: true,
+          apprenticeship_year: year,
+          rate_description: `${year}${this.getOrdinalSuffix(year)} Year Apprentice`,
+          base_classification: `Based on ${referenceRate.rate_description || 'Reference Classification'}`,
+          base_percentage: percentage * 100
+        });
+      }
+      
+      return calculatedRates;
+    } catch (error) {
+      logger.error('Failed to calculate apprentice rates by reference', { error, awardCode });
+      return [];
+    }
+  }
+
+  /**
+   * Helper function to get ordinal suffix for a number
+   */
+  private getOrdinalSuffix(num: number): string {
+    const j = num % 10;
+    const k = num % 100;
+    if (j === 1 && k !== 11) return 'st';
+    if (j === 2 && k !== 12) return 'nd';
+    if (j === 3 && k !== 13) return 'rd';
+    return 'th';
+  }
 }

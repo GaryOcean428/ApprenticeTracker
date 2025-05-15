@@ -124,6 +124,27 @@ export const customPayRates = pgTable('custom_pay_rates', {
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });
 
+// Award Update Checks Table - tracks when awards are checked for updates
+export const awardUpdateChecks = pgTable('award_update_checks', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  awardCode: varchar('award_code', { length: 20 }).notNull(),
+  awardName: varchar('award_name', { length: 200 }).notNull(),
+  checkDate: timestamp('check_date').notNull().defaultNow(),
+  currentVersion: varchar('current_version', { length: 50 }).notNull(),
+  latestVersion: varchar('latest_version', { length: 50 }),
+  updateAvailable: boolean('update_available').default(false).notNull(),
+  updateUrl: varchar('update_url', { length: 500 }),
+  lastNotifiedDate: timestamp('last_notified_date'),
+  status: varchar('status', { length: 20 }).default('pending').notNull(), // 'pending', 'notified', 'updated', 'ignored'
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+}, (table) => {
+  return {
+    awardCodeIdx: index('award_update_check_code_idx').on(table.awardCode),
+    statusIdx: index('award_update_check_status_idx').on(table.status),
+  };
+});
+
 // Define Zod schemas for validation
 export const insertAwardSchema = createInsertSchema(awards);
 export const insertAwardClassificationSchema = createInsertSchema(awardClassifications);
@@ -131,6 +152,7 @@ export const insertAwardRateSchema = createInsertSchema(awardRates);
 export const insertEnterpriseAgreementSchema = createInsertSchema(enterpriseAgreements);
 export const insertEnterpriseAgreementRateSchema = createInsertSchema(enterpriseAgreementRates);
 export const insertCustomPayRateSchema = createInsertSchema(customPayRates);
+export const insertAwardUpdateCheckSchema = createInsertSchema(awardUpdateChecks);
 
 // Define types for use in the application
 export type Award = typeof awards.$inferSelect;
@@ -150,3 +172,6 @@ export type InsertEnterpriseAgreementRate = z.infer<typeof insertEnterpriseAgree
 
 export type CustomPayRate = typeof customPayRates.$inferSelect;
 export type InsertCustomPayRate = z.infer<typeof insertCustomPayRateSchema>;
+
+export type AwardUpdateCheck = typeof awardUpdateChecks.$inferSelect;
+export type InsertAwardUpdateCheck = z.infer<typeof insertAwardUpdateCheckSchema>;
