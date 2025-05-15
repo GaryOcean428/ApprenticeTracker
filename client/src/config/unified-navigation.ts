@@ -256,6 +256,7 @@ export const MAIN_NAV_SECTIONS: NavSection[] = [
         { title: "User Management", href: "/settings/users" },
         { title: "Permissions & Roles", href: "/settings/permissions" },
         { title: "System Configuration", href: "/settings/configuration" },
+        { title: "Award Updates", href: "/admin/award-updates" },
         { title: "Integrations", href: "/settings/integrations" },
         { title: "Import/Export", href: "/settings/import-export" }
       ]

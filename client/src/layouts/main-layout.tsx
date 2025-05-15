@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Header from "@/components/ui/header";
 import { UnifiedNavigation } from "@/components/navigation/UnifiedNavigation";
+import FairWorkUpdateNotification from "@/components/fair-work/FairWorkUpdateNotification";
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -29,6 +30,12 @@ const MainLayout = ({ children }: MainLayoutProps) => {
       
       <div className="flex flex-col flex-1 w-full">
         <Header onMenuToggle={toggleMobileSidebar} />
+        
+        <div className="w-full">
+          <FairWorkUpdateNotification 
+            onUpdateClick={() => window.location.href = '/admin/award-updates'} 
+          />
+        </div>
         
         <main className="h-full overflow-y-auto">
           <div className="container px-6 mx-auto py-6">
