@@ -10,6 +10,8 @@ import { body, param, query, validationResult } from 'express-validator';
 import { awardRateCalculator } from '../../services/award-rate-calculator';
 import { fairWorkDataSync } from '../../services/fairwork/data-sync';
 import { FairWorkApiClient } from '../../services/fairwork/api-client';
+import { awardMonitor } from '../../services/fairwork/award-monitor';
+import { getAwardUpdates, checkForUpdates, updateAward, ignoreAwardUpdate } from './award-updates';
 import logger from '../../utils/logger';
 import { isAuthenticated } from '../../middleware/auth';
 
@@ -246,5 +248,62 @@ router.get('/status', isAuthenticated, async (req: express.Request, res: express
     });
   }
 });
+
+/**
+ * @route GET /api/fairwork/award-updates
+ * @desc Get award updates
+ * @access Private
+ */
+router.get('/award-updates', isAuthenticated, getAwardUpdates);
+
+/**
+ * @route POST /api/fairwork/award-updates/check
+ * @desc Trigger a manual check for award updates
+ * @access Private (admin only)
+ */
+router.post('/award-updates/check', isAuthenticated, async (req, res, next) => {
+  // Check if user has admin permissions
+  if (!req.user || req.user.role !== 'admin') {
+    return res.status(403).json({ error: 'Insufficient permissions' });
+  }
+  
+  await checkForUpdates(req, res);
+});
+
+/**
+ * @route PATCH /api/fairwork/awards/:awardCode
+ * @desc Update an award with new information
+ * @access Private (admin only)
+ */
+router.patch('/awards/:awardCode', isAuthenticated, async (req, res, next) => {
+  // Check if user has admin permissions
+  if (!req.user || req.user.role !== 'admin') {
+    return res.status(403).json({ error: 'Insufficient permissions' });
+  }
+  
+  await updateAward(req, res);
+});
+
+/**
+ * @route POST /api/fairwork/award-updates/:updateId/ignore
+ * @desc Ignore an award update
+ * @access Private (admin only)
+ */
+router.post('/award-updates/:updateId/ignore', isAuthenticated, async (req, res, next) => {
+  // Check if user has admin permissions
+  if (!req.user || req.user.role !== 'admin') {
+    return res.status(403).json({ error: 'Insufficient permissions' });
+  }
+  
+  await ignoreAwardUpdate(req, res);
+});
+
+// Initialize the Fair Work award monitoring service
+// This service monitors awards for updates and sends notifications
+try {
+  awardMonitor.initialize();
+} catch (error) {
+  logger.error('Failed to initialize award monitoring service', { error });
+}
 
 export default router;

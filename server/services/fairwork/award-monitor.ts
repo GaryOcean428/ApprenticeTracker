@@ -7,7 +7,7 @@
  */
 
 import { db } from '../../db';
-import { awards, awardUpdateChecks } from '@shared/schema';
+import { awards, awardUpdateChecks } from '@shared/schema/awards';
 import { FairWorkApiClient } from './api-client';
 import { sql, eq, desc, gte } from 'drizzle-orm';
 import axios from 'axios';
@@ -356,15 +356,17 @@ export class AwardMonitorService {
    */
   private isNewVersion(dbAward: any, apiAward: any): boolean {
     // If the API award has a version number and it's different, that's a new version
+    const dbVersion = dbAward.version || '1.0';
+    
     if (apiAward.version_number && 
-        dbAward.version !== apiAward.version_number.toString()) {
+        dbVersion !== apiAward.version_number.toString()) {
       return true;
     }
     
     // If the API award has an effective date and it's newer, that's a new version
-    if (apiAward.effective_date && dbAward.effectiveDate) {
+    if (apiAward.effective_date && dbAward.effectiveFrom) {
       const apiDate = new Date(apiAward.effective_date);
-      const dbDate = new Date(dbAward.effectiveDate);
+      const dbDate = new Date(dbAward.effectiveFrom);
       
       if (apiDate > dbDate) {
         return true;
@@ -497,7 +499,7 @@ export class AwardMonitorService {
    * Ignore an award update
    * This can be used in the admin UI to dismiss updates that don't need action
    */
-  public async ignoreAwardUpdate(updateId: number): Promise<boolean> {
+  public async ignoreAwardUpdate(updateId: string): Promise<boolean> {
     try {
       await db
         .update(awardUpdateChecks)
