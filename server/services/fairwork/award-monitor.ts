@@ -207,7 +207,7 @@ export class AwardMonitorService {
       latestVersion: string;
       updateUrl: string;
     }
-  ): Promise<void> {
+  ): Promise<string | null> {
     try {
       // Check if we already have a pending update for this award
       const [existingUpdate] = await db
@@ -217,6 +217,8 @@ export class AwardMonitorService {
           eq(awardUpdateChecks.awardCode, awardCode),
           eq(awardUpdateChecks.status, 'pending')
         );
+      
+      let updateId: string;
       
       if (existingUpdate) {
         // Update the existing record
@@ -229,10 +231,11 @@ export class AwardMonitorService {
           })
           .where(eq(awardUpdateChecks.id, existingUpdate.id));
         
+        updateId = existingUpdate.id;
         logger.info(`Updated existing award update record for ${awardCode}`);
       } else {
         // Create a new record
-        await db
+        const [newRecord] = await db
           .insert(awardUpdateChecks)
           .values({
             awardCode,
@@ -243,12 +246,76 @@ export class AwardMonitorService {
             updateAvailable: true,
             updateUrl: updateInfo.updateUrl,
             status: 'pending'
-          });
+          })
+          .returning();
         
+        updateId = newRecord.id;
         logger.info(`Created new award update record for ${awardCode}`);
       }
+      
+      // If AI analysis is available, process the award update with AI
+      if (awardAIAnalyzer.isAvailable()) {
+        await this.processUpdateWithAI(
+          updateId,
+          awardCode,
+          awardName,
+          updateInfo.currentVersion,
+          updateInfo.latestVersion,
+          updateInfo.updateUrl
+        );
+      }
+      
+      return updateId;
     } catch (error) {
       logger.error(`Error recording award update for ${awardCode}`, { error });
+      return null;
+    }
+  }
+  
+  /**
+   * Process an award update with AI analysis
+   */
+  private async processUpdateWithAI(
+    updateId: string,
+    awardCode: string,
+    awardName: string,
+    currentVersion: string,
+    latestVersion: string,
+    updateUrl: string | null
+  ): Promise<void> {
+    try {
+      logger.info(`Processing award update with AI for ${awardCode}`, { updateId });
+      
+      // Analyze the changes using AI
+      const analysis = await awardAIAnalyzer.analyzeAwardChanges(
+        awardCode,
+        awardName,
+        currentVersion,
+        latestVersion,
+        updateUrl
+      );
+      
+      // Generate notification message
+      const notificationMessage = await awardAIAnalyzer.generateNotificationMessage(
+        awardCode,
+        awardName,
+        analysis
+      );
+      
+      // Update the record with AI analysis
+      const success = await awardAIAnalyzer.updateRecordWithAnalysis(
+        updateId,
+        analysis,
+        notificationMessage
+      );
+      
+      if (success) {
+        logger.info(`Successfully updated record with AI analysis for ${awardCode}`, { updateId });
+      } else {
+        logger.warn(`Failed to update record with AI analysis for ${awardCode}`, { updateId });
+      }
+    } catch (error) {
+      logger.error(`Error processing award update with AI for ${awardCode}`, { error, updateId });
     }
   }
 

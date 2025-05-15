@@ -11,6 +11,7 @@ import { Request, Response } from 'express';
 import { db } from '../../db';
 import { awardUpdateChecks } from '@shared/schema/awards';
 import { awardMonitor } from '../../services/fairwork/award-monitor';
+import { awardAIAnalyzer } from '../../services/fairwork/award-ai-analyzer';
 import { eq } from 'drizzle-orm';
 import logger from '../../utils/logger';
 
@@ -152,6 +153,88 @@ export async function ignoreAwardUpdate(req: Request, res: Response) {
     res.status(500).json({
       success: false,
       message: 'Failed to ignore award update'
+    });
+  }
+}
+
+/**
+ * Analyze an award update with AI
+ */
+export async function analyzeAwardUpdate(req: Request, res: Response) {
+  try {
+    const { updateId } = req.params;
+    
+    if (!updateId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Update ID is required'
+      });
+    }
+
+    // Check if AI analysis is available
+    if (!awardAIAnalyzer.isAvailable()) {
+      return res.status(503).json({
+        success: false, 
+        message: "AI analysis is not available. API key not configured." 
+      });
+    }
+    
+    // Get the update
+    const [update] = await db
+      .select()
+      .from(awardUpdateChecks)
+      .where(eq(awardUpdateChecks.id, updateId));
+    
+    if (!update) {
+      return res.status(404).json({
+        success: false,
+        message: 'Award update not found'
+      });
+    }
+    
+    // Analyze the award update
+    const analysis = await awardAIAnalyzer.analyzeAwardChanges(
+      update.awardCode,
+      update.awardName,
+      update.currentVersion,
+      update.latestVersion || '',
+      update.updateUrl
+    );
+    
+    // Generate notification message
+    const notificationMessage = await awardAIAnalyzer.generateNotificationMessage(
+      update.awardCode,
+      update.awardName,
+      analysis
+    );
+    
+    // Update the record with AI analysis
+    const success = await awardAIAnalyzer.updateRecordWithAnalysis(
+      updateId,
+      analysis,
+      notificationMessage
+    );
+    
+    if (success) {
+      res.json({
+        success: true,
+        message: 'Award update analyzed successfully',
+        data: {
+          analysis,
+          notificationMessage
+        }
+      });
+    } else {
+      res.status(500).json({
+        success: false,
+        message: 'Failed to save analysis results'
+      });
+    }
+  } catch (error) {
+    logger.error('Error analyzing award update', { error });
+    res.status(500).json({
+      success: false,
+      message: 'Failed to analyze award update'
     });
   }
 }

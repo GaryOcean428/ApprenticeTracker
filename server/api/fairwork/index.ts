@@ -11,7 +11,7 @@ import { awardRateCalculator } from '../../services/award-rate-calculator';
 import { fairWorkDataSync } from '../../services/fairwork/data-sync';
 import { FairWorkApiClient } from '../../services/fairwork/api-client';
 import { awardMonitor } from '../../services/fairwork/award-monitor';
-import { getAwardUpdates, checkForUpdates, updateAward, ignoreAwardUpdate } from './award-updates';
+import { getAwardUpdates, checkForUpdates, updateAward, ignoreAwardUpdate, analyzeAwardUpdate } from './award-updates';
 import logger from '../../utils/logger';
 import { isAuthenticated } from '../../middleware/auth';
 
