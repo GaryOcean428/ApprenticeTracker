@@ -122,6 +122,14 @@ function Router() {
         {/* Protected Dashboard Routes */}
         <ProtectedRoute path="/portal" component={PortalPage} />
         <ProtectedRoute path="/admin" component={Dashboard} />
+        <ProtectedRoute path="/admin/award-updates" component={() => {
+          const AwardUpdates = lazy(() => import("./pages/admin/award-updates"));
+          return (
+            <Suspense fallback={<div className="p-8 flex items-center justify-center"><div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" /></div>}>
+              <AwardUpdates />
+            </Suspense>
+          );
+        }} />
         
         {/* Contacts & Clients Routes */}
         <ProtectedRoute path="/contacts" component={ContactsList} />
