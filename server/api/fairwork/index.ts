@@ -298,6 +298,20 @@ router.post('/award-updates/:updateId/ignore', isAuthenticated, async (req, res,
   await ignoreAwardUpdate(req, res);
 });
 
+/**
+ * @route POST /api/fairwork/award-updates/:updateId/analyze
+ * @desc Analyze an award update with AI
+ * @access Private (admin only)
+ */
+router.post('/award-updates/:updateId/analyze', isAuthenticated, async (req, res, next) => {
+  // Check if user has admin permissions
+  if (!req.user || req.user.role !== 'admin') {
+    return res.status(403).json({ error: 'Insufficient permissions' });
+  }
+  
+  await analyzeAwardUpdate(req, res);
+});
+
 // Initialize the Fair Work award monitoring service
 // This service monitors awards for updates and sends notifications
 try {

@@ -33,7 +33,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Check, X, RefreshCw, ExternalLink } from 'lucide-react';
+import { Loader2, Check, X, RefreshCw, ExternalLink, BrainCircuit } from 'lucide-react';
+import { AwardAnalysisPanel } from '@/components/fair-work/AwardAnalysisPanel';
 
 interface AwardUpdate {
   id: string;
@@ -46,6 +47,9 @@ interface AwardUpdate {
   updateUrl: string | null;
   lastNotifiedDate: string | null;
   status: 'pending' | 'notified' | 'updated' | 'ignored';
+  aiAnalysis: string | null;
+  notificationMessage: string | null;
+  impactLevel: 'low' | 'medium' | 'high' | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -56,6 +60,7 @@ export default function AwardUpdatesPage() {
   const [activeTab, setActiveTab] = useState<string>('notified');
   const [updateDialogOpen, setUpdateDialogOpen] = useState(false);
   const [selectedUpdate, setSelectedUpdate] = useState<AwardUpdate | null>(null);
+  const [viewingUpdate, setViewingUpdate] = useState<AwardUpdate | null>(null);
   const [updateFormData, setUpdateFormData] = useState({
     name: '',
     url: '',
@@ -163,6 +168,19 @@ export default function AwardUpdatesPage() {
       ...updateFormData,
       [e.target.name]: e.target.value,
     });
+  };
+  
+  const handleViewDetails = (update: AwardUpdate) => {
+    setViewingUpdate(update);
+  };
+  
+  const handleCloseDetails = () => {
+    setViewingUpdate(null);
+  };
+  
+  const handleAnalysisComplete = () => {
+    // Refetch the data to get updated analysis
+    queryClient.invalidateQueries({ queryKey: ['/api/fairwork/award-updates', activeTab] });
   };
 
   return (
@@ -272,6 +290,16 @@ export default function AwardUpdatesPage() {
                               </Button>
                             </>
                           )}
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="text-primary border-primary/20 hover:bg-primary/10"
+                            onClick={() => handleViewDetails(update)}
+                          >
+                            <BrainCircuit className="h-4 w-4 mr-1" />
+                            Details
+                          </Button>
+                          
                           {update.updateUrl && (
                             <Button
                               size="sm"
@@ -377,6 +405,64 @@ export default function AwardUpdatesPage() {
               </Button>
             </DialogFooter>
           </form>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Award Details Dialog with AI Analysis */}
+      <Dialog open={!!viewingUpdate} onOpenChange={(open) => !open && handleCloseDetails()}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>Award Update Details</DialogTitle>
+            <DialogDescription>
+              View detailed information about this award update and AI analysis
+            </DialogDescription>
+          </DialogHeader>
+          
+          {viewingUpdate && (
+            <div className="space-y-4 py-2">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-xs text-muted-foreground">Award Code</Label>
+                  <p className="font-medium">{viewingUpdate.awardCode}</p>
+                </div>
+                <div>
+                  <Label className="text-xs text-muted-foreground">Award Name</Label>
+                  <p className="font-medium">{viewingUpdate.awardName}</p>
+                </div>
+                <div>
+                  <Label className="text-xs text-muted-foreground">Current Version</Label>
+                  <p className="font-medium">{viewingUpdate.currentVersion}</p>
+                </div>
+                <div>
+                  <Label className="text-xs text-muted-foreground">New Version</Label>
+                  <p className="font-medium">{viewingUpdate.latestVersion || 'Unknown'}</p>
+                </div>
+                <div>
+                  <Label className="text-xs text-muted-foreground">Date Detected</Label>
+                  <p className="font-medium">{new Date(viewingUpdate.checkDate).toLocaleDateString()}</p>
+                </div>
+                <div>
+                  <Label className="text-xs text-muted-foreground">Status</Label>
+                  <p className="font-medium capitalize">{viewingUpdate.status}</p>
+                </div>
+              </div>
+              
+              {/* AI Analysis Panel */}
+              <AwardAnalysisPanel
+                awardUpdate={viewingUpdate}
+                onAnalysisComplete={handleAnalysisComplete}
+              />
+            </div>
+          )}
+          
+          <DialogFooter className="mt-4">
+            <Button
+              type="button"
+              onClick={handleCloseDetails}
+            >
+              Close
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
