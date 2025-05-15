@@ -39,13 +39,13 @@ export default function FairWorkUpdateNotification({
   });
   
   // Only show notification if there are updates and it hasn't been dismissed
-  if (dismissed || isLoading || !awardUpdates || awardUpdates.length === 0) {
+  if (dismissed || isLoading || !awardUpdates || !awardUpdates.data || awardUpdates.data.length === 0) {
     return null;
   }
   
   // Group the updates by new awards vs. updates to existing awards
-  const newAwards = awardUpdates.filter(u => u.currentVersion === 'Not in system');
-  const updatedAwards = awardUpdates.filter(u => u.currentVersion !== 'Not in system');
+  const newAwards = awardUpdates.data.filter((u: any) => u.currentVersion === 'Not in system');
+  const updatedAwards = awardUpdates.data.filter((u: any) => u.currentVersion !== 'Not in system');
   
   // If there are no updates in either category, don't show the notification
   if (newAwards.length === 0 && updatedAwards.length === 0) {
