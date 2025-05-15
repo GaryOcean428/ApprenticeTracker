@@ -39,6 +39,9 @@ export interface PayRate {
   effective_to?: string;
   is_apprentice_rate?: boolean;
   apprenticeship_year?: number;
+  rate_description?: string;
+  base_classification?: string;
+  base_percentage?: number;
 }
 
 export interface ClassificationHierarchy {
@@ -334,6 +337,7 @@ export class FairWorkApiClient {
     employeeRateTypeCode?: string;
     operativeFrom?: string;
     operativeTo?: string;
+    apprenticeYear?: number;
   } = {}): Promise<PayRate[]> {
     try {
       // Build query parameters
@@ -343,6 +347,7 @@ export class FairWorkApiClient {
       if (options.employeeRateTypeCode) params.employee_rate_type_code = options.employeeRateTypeCode;
       if (options.operativeFrom) params.operative_from = options.operativeFrom;
       if (options.operativeTo) params.operative_to = options.operativeTo;
+      if (options.apprenticeYear) params.apprentice_year = options.apprenticeYear.toString();
       
       // Make the request with query parameters
       const queryString = new URLSearchParams(params).toString();
@@ -361,7 +366,10 @@ export class FairWorkApiClient {
         effective_from: r.operative_from || '',
         effective_to: r.operative_to || undefined,
         is_apprentice_rate: r.employee_rate_type_code === 'AP', // AP = Apprentice
-        apprenticeship_year: r.apprentice_year ? parseInt(r.apprentice_year) : undefined
+        apprenticeship_year: r.apprentice_year ? parseInt(r.apprentice_year) : undefined,
+        rate_description: r.classification || '',
+        base_classification: r.parent_classification_name || '',
+        base_percentage: r.percentage_of_standard_rate ? parseFloat(r.percentage_of_standard_rate) : undefined
       }));
     } catch (error) {
       logger.error('Failed to fetch pay rates', { error, awardCode, options });
