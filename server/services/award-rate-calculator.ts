@@ -136,9 +136,84 @@ export class AwardRateCalculator {
           return apiRate;
         }
         
-        // If we couldn't find a specific rate, calculate a default one
+        // If we couldn't find a specific rate, try to find the reference tradesperson rate
+        // and calculate based on apprentice percentages of that rate
+        const referenceClassification = await this.getReferenceTradeClassification(award.id, awardCode);
+        
+        if (referenceClassification) {
+          logger.info(`Found reference classification: ${referenceClassification.name}`);
+          
+          // Try to get the pay rate for this reference classification
+          const referenceRateQuery = sql`
+            SELECT * FROM pay_rates
+            WHERE classification_id = ${referenceClassification.id}
+              AND is_apprentice_rate = false
+            ORDER BY effective_from DESC
+            LIMIT 1
+          `;
+          
+          const rateResult = await db.execute(referenceRateQuery);
+          const referenceRates = rateResult.rows as any[];
+          
+          if (referenceRates && referenceRates.length > 0) {
+            const referenceRate = referenceRates[0];
+            const referenceHourlyRate = parseFloat(String(referenceRate.hourly_rate));
+            
+            // Calculate the apprentice rate based on percentages of the reference rate
+            let percentage = 0.5; // Default 50%
+            
+            if (isAdult) {
+              // Adult apprentice percentages
+              switch (apprenticeYear) {
+                case 1: percentage = 0.80; break; // 80%
+                case 2: percentage = 0.85; break; // 85%
+                case 3: percentage = 0.90; break; // 90%
+                case 4: percentage = 0.95; break; // 95%
+                default: percentage = 0.50; // Default fallback
+              }
+            } else {
+              // Junior apprentice percentages
+              if (hasCompletedYear12) {
+                // With Year 12 completion
+                switch (apprenticeYear) {
+                  case 1: percentage = 0.55; break; // 55%
+                  case 2: percentage = 0.65; break; // 65%
+                  case 3: percentage = 0.75; break; // 75%
+                  case 4: percentage = 0.90; break; // 90%
+                  default: percentage = 0.50; // Default fallback
+                }
+              } else {
+                // Without Year 12 completion
+                switch (apprenticeYear) {
+                  case 1: percentage = 0.50; break; // 50%
+                  case 2: percentage = 0.60; break; // 60%
+                  case 3: percentage = 0.70; break; // 70%
+                  case 4: percentage = 0.80; break; // 80%
+                  default: percentage = 0.50; // Default fallback
+                }
+              }
+            }
+            
+            const calculatedRate = Math.round(referenceHourlyRate * percentage * 100) / 100;
+            logger.info(`Calculated apprentice pay rate: $${calculatedRate}/hr (${percentage * 100}% of $${referenceHourlyRate}/hr)`);
+            
+            // Cache this rate in the database for future use
+            await this.cacheApprenticePayRate(
+              award.id, 
+              apprenticeClassification.id, 
+              apprenticeYear, 
+              calculatedRate, 
+              isAdult, 
+              hasCompletedYear12
+            );
+            
+            return calculatedRate;
+          }
+        }
+        
+        // Fallback to default calculation if we can't find reference rates
         const calculatedRate = this.calculateDefaultApprenticeRate(apprenticeYear, isAdult, hasCompletedYear12);
-        logger.info(`Calculated apprentice pay rate: $${calculatedRate}/hr`);
+        logger.info(`Fell back to default apprentice pay rate: $${calculatedRate}/hr`);
         
         // Cache this rate in the database for future use
         await this.cacheApprenticePayRate(
@@ -157,7 +232,23 @@ export class AwardRateCalculator {
         // If API fails, use a fallback calculation
         // This ensures we always return something usable
         const fallbackRate = this.calculateDefaultApprenticeRate(apprenticeYear, isAdult, hasCompletedYear12);
-        logger.info(`Using fallback apprentice pay rate: $${fallbackRate}/hr`);
+        logger.info(`Using fallback apprentice pay rate due to API error: $${fallbackRate}/hr`);
+        
+        // Cache this calculated rate so we have something in the database
+        try {
+          await this.cacheApprenticePayRate(
+            award.id, 
+            apprenticeClassification.id, 
+            apprenticeYear, 
+            fallbackRate, 
+            isAdult, 
+            hasCompletedYear12
+          );
+        } catch (cacheError) {
+          logger.error('Error caching fallback apprentice rate', { error: cacheError });
+          // Continue even if caching fails
+        }
+        
         return fallbackRate;
       }
     } catch (error) {
@@ -349,9 +440,92 @@ export class AwardRateCalculator {
       return null;
     }
   }
+  
+  /**
+   * Find reference tradesperson classification for apprentice rate calculations
+   * This is used to determine the base rate from which apprentice percentages are calculated
+   */
+  private async getReferenceTradeClassification(awardId: number, awardCode: string): Promise<any> {
+    try {
+      // Get all classifications for this award
+      const query = sql`
+        SELECT * FROM award_classifications 
+        WHERE award_id = ${awardId}
+      `;
+      
+      const result = await db.execute(query);
+      const classifications = result.rows as any[];
+      
+      if (!classifications || classifications.length === 0) {
+        logger.warn(`No classifications found for award ${awardCode}`);
+        return null;
+      }
+      
+      // Different awards use different reference classifications for apprentice percentages
+      // This follows similar logic to what we use in the FairWork API client
+      
+      if (awardCode === 'MA000025') { // Electrical Award
+        // Electrical worker grade 5 is the reference (C10 equivalent)
+        return classifications.find(c => 
+          (c.name || '').toLowerCase().includes('electrical worker grade 5'));
+      } 
+      else if (awardCode === 'MA000036') { // Plumbing Award
+        // For plumbing, use Plumbing and Mechanical Services Tradesperson / Level 1
+        return classifications.find(c => 
+          (c.name || '').toLowerCase().includes('plumbing and mechanical services tradesperson') ||
+          (c.name || '').toLowerCase().includes('level 1'));
+      } 
+      else if (awardCode === 'MA000003') { // Building and Construction Award
+        // Use Level 3 - CW/ECW 3 for Building and Construction
+        return classifications.find(c => 
+          (c.name || '').toLowerCase().includes('cw/ecw 3') ||
+          (c.name || '').toLowerCase().includes('level 3'));
+      }
+      else if (awardCode === 'MA000010') { // Manufacturing Award
+        // Use C10 - Engineering/Manufacturing Tradesperson Level I
+        return classifications.find(c => 
+          (c.name || '').toLowerCase().includes('c10') ||
+          (c.name || '').toLowerCase().includes('tradesperson level 1'));
+      }
+      
+      // For other awards, look for common tradesperson reference levels
+      const tradePersonLevel = classifications.find(c => {
+        const name = (c.name || '').toLowerCase();
+        return name.includes('c10') || 
+               name.includes('tradesperson') || 
+               name.includes('level 1') ||
+               name.includes('qualified');
+      });
+      
+      if (tradePersonLevel) {
+        return tradePersonLevel;
+      }
+      
+      // If we can't find a specific tradesperson classification,
+      // return a level that's in the middle of the classification range
+      if (classifications.length > 0) {
+        // Sort by level ascending
+        const sortedByLevel = [...classifications].sort((a, b) => {
+          const levelA = parseInt(a.level.toString()) || 0;
+          const levelB = parseInt(b.level.toString()) || 0;
+          return levelA - levelB;
+        });
+        
+        // Return a classification roughly midway through the levels
+        // This is because tradesperson levels tend to be in the middle of most awards
+        const midIndex = Math.floor(sortedByLevel.length / 2);
+        return sortedByLevel[midIndex];
+      }
+      
+      return null;
+    } catch (error) {
+      logger.error('Error finding reference trade classification', { error, awardId, awardCode });
+      return null;
+    }
+  }
 
   /**
-   * Calculate a default apprentice pay rate based on common patterns
+   * Calculate a default apprentice pay rate based on Fair Work award percentages
    * This is a fallback method when API data is not available
    */
   private calculateDefaultApprenticeRate(
@@ -359,39 +533,53 @@ export class AwardRateCalculator {
     isAdult: boolean = true,
     hasCompletedYear12: boolean = true
   ): number {
-    // Base rate for first year apprentice
-    let baseRate = 21.75;
+    // Base tradesperson rate (Level C10 or equivalent) for most common awards
+    // This is the reference rate from which apprentice rates are calculated
+    const baseJourneymanRate = 27.91; // Updated base rate for 2024-2025
     
-    // Apply progression based on year
-    switch (apprenticeYear) {
-      case 1:
-        baseRate = 21.75;
-        break;
-      case 2:
-        baseRate = 23.50;
-        break;
-      case 3:
-        baseRate = 25.25;
-        break;
-      case 4:
-        baseRate = 27.00;
-        break;
-      default:
-        baseRate = 21.75 + ((apprenticeYear - 1) * 1.75);
-    }
+    // Use proper percentage-based calculation according to Fair Work
+    let percentage = 0;
     
-    // Apply adult loading if applicable
     if (isAdult) {
-      baseRate *= 1.15; // 15% adult loading
+      // Adult apprentice percentages (generally based on common awards)
+      switch (apprenticeYear) {
+        case 1: percentage = 0.80; break; // 80% of journeyman rate
+        case 2: percentage = 0.85; break; // 85% of journeyman rate
+        case 3: percentage = 0.90; break; // 90% of journeyman rate
+        case 4: percentage = 0.95; break; // 95% of journeyman rate
+        default: percentage = 0.50; // Default fallback
+      }
+    } else {
+      // Junior apprentice percentages
+      if (hasCompletedYear12) {
+        // With Year 12 completion
+        switch (apprenticeYear) {
+          case 1: percentage = 0.55; break; // 55% of journeyman rate
+          case 2: percentage = 0.65; break; // 65% of journeyman rate
+          case 3: percentage = 0.75; break; // 75% of journeyman rate
+          case 4: percentage = 0.90; break; // 90% of journeyman rate
+          default: percentage = 0.50; // Default fallback
+        }
+      } else {
+        // Without Year 12 completion
+        switch (apprenticeYear) {
+          case 1: percentage = 0.50; break; // 50% of journeyman rate
+          case 2: percentage = 0.60; break; // 60% of journeyman rate
+          case 3: percentage = 0.70; break; // 70% of journeyman rate
+          case 4: percentage = 0.80; break; // 80% of journeyman rate
+          default: percentage = 0.50; // Default fallback
+        }
+      }
     }
     
-    // Apply completed Year 12 loading if applicable
-    if (hasCompletedYear12) {
-      baseRate *= 1.05; // 5% Year 12 loading
-    }
+    // Calculate rate using the proper percentage of journeyman rate
+    const calculatedRate = baseJourneymanRate * percentage;
+    
+    // Log the calculation for debugging
+    logger.debug(`Calculated apprentice rate: ${calculatedRate.toFixed(2)} (${percentage * 100}% of ${baseJourneymanRate})`);
     
     // Return the rate rounded to 2 decimal places
-    return Math.round(baseRate * 100) / 100;
+    return Math.round(calculatedRate * 100) / 100;
   }
 
   /**
