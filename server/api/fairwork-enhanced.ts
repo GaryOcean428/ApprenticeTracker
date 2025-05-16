@@ -58,15 +58,44 @@ function calculateApprenticeRate(params: {
   // Base rates depend on award and year level
   let baseHourlyRate = 0;
   
-  // Building and Construction General On-site Award
-  if (awardCode === "MA000003") {
+  // Use the exact Fair Work rates for 2024/2025 FY
+  
+  // Electrical Award (MA000025) - Use exact rates provided
+  if (awardCode === "MA000025") {
+    if (isAdult) {
+      // Adult apprentice exact rates
+      switch (apprenticeYear) {
+        case 1: baseHourlyRate = 23.91; break; // 1st year adult apprentice
+        case 2: baseHourlyRate = 26.42; break; // 2nd year adult apprentice
+        case 3: baseHourlyRate = 26.42; break; // 3rd year adult apprentice
+        case 4: baseHourlyRate = 26.42; break; // 4th year adult apprentice
+        default: baseHourlyRate = 23.91; // Default to 1st year
+      }
+    } else if (hasCompletedYear12) {
+      // Junior apprentice with Year 12 completion
+      switch (apprenticeYear) {
+        case 1: baseHourlyRate = 16.62; break; // 1st year with Year 12
+        case 2: baseHourlyRate = 19.53; break; // 2nd year with Year 12
+        case 3: baseHourlyRate = 20.99; break; // 3rd year with Year 12
+        case 4: baseHourlyRate = 24.49; break; // 4th year with Year 12
+        default: baseHourlyRate = 16.62; // Default to 1st year
+      }
+    } else {
+      // Junior apprentice without Year 12 completion
+      switch (apprenticeYear) {
+        case 1: baseHourlyRate = 15.16; break; // 1st year without Year 12
+        case 2: baseHourlyRate = 18.08; break; // 2nd year without Year 12
+        case 3: baseHourlyRate = 20.99; break; // 3rd year without Year 12
+        case 4: baseHourlyRate = 24.49; break; // 4th year without Year 12
+        default: baseHourlyRate = 15.16; // Default to 1st year
+      }
+    }
+  }
+  // Building and Construction Award (MA000003)
+  else if (awardCode === "MA000003") {
     baseHourlyRate = 22.50 + (apprenticeYear * 3.25);
   }
-  // Electrical Award
-  else if (awardCode === "MA000025") {
-    baseHourlyRate = 23.75 + (apprenticeYear * 3.50);
-  }
-  // Plumbing Award
+  // Plumbing Award (MA000036)
   else if (awardCode === "MA000036") {
     baseHourlyRate = 23.25 + (apprenticeYear * 3.40);
   }
@@ -75,26 +104,47 @@ function calculateApprenticeRate(params: {
     baseHourlyRate = 22.00 + (apprenticeYear * 3.00);
   }
   
-  // Apply modifiers
-  const adultBonus = isAdult ? 5.50 : 0;
-  const year12Bonus = hasCompletedYear12 ? 1.75 : 0;
+  // Don't apply modifiers for MA000025 since we're using exact rates
+  let adultBonus = 0;
+  let year12Bonus = 0;
   
-  // Sector multipliers
+  // Only apply modifiers for other awards
+  if (awardCode !== "MA000025") {
+    adultBonus = isAdult ? 5.50 : 0;
+    year12Bonus = hasCompletedYear12 ? 1.75 : 0;
+  }
+  
+  // For Electrical Award (MA000025), only apply sector modifier, not year adjustments
+  // since we're using exact rates for the current financial year
   let sectorMultiplier = 1.0;
   if (sector === "commercial") sectorMultiplier = 1.1;
   else if (sector === "civil") sectorMultiplier = 1.2;
   else if (sector === "industrial") sectorMultiplier = 1.15;
   
-  // Year adjustments (reflect annual increases)
-  const currentYear = new Date().getFullYear();
-  const yearAdjustment = (year - currentYear) * 0.03; // 3% annual increase
+  // Year adjustments only apply to awards other than MA000025
+  let yearAdjustment = 0;
+  if (awardCode !== "MA000025") {
+    const currentYear = new Date().getFullYear();
+    yearAdjustment = (year - currentYear) * 0.03; // 3% annual increase
+  }
   
   // Pure base rate before any modifiers
   const pureBaseRate = baseHourlyRate;
   
   // Calculate final rates with all modifiers applied
-  const hourlyRate = (baseHourlyRate + adultBonus + year12Bonus) * 
-                     sectorMultiplier * (1 + yearAdjustment);
+  let hourlyRate = 0;
+  
+  if (awardCode === "MA000025") {
+    // For Electrical Award, only apply sector multiplier if not standard
+    hourlyRate = baseHourlyRate;
+    if (sector && sector !== "standard") {
+      hourlyRate = baseHourlyRate * sectorMultiplier;
+    }
+  } else {
+    // For other awards, apply all modifiers
+    hourlyRate = (baseHourlyRate + adultBonus + year12Bonus) * 
+                 sectorMultiplier * (1 + yearAdjustment);
+  }
   const weeklyRate = hourlyRate * 38; // Standard 38-hour week
   
   return {
