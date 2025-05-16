@@ -584,23 +584,37 @@ export class FairWorkApiClient {
       for (const year of yearsToCalculate) {
         if (awardCode === 'MA000025') { // Electrical Award MA000025
           // Based on clause 16.4(a)(ii) for junior apprentices and 16.4(b)(ii) for adult apprentices
+          // Updated with 2024/2025 FY exact percentages based on provided rates
+          
           if (isAdult) {
             // Adult apprentice percentages from 16.4(b)(ii)
+            // Updated based on the reference data provided
             switch (year) {
-              case 1: percentage = 0.80; break; // 80%
-              case 2: percentage = 0.85; break; // 85%
-              case 3: percentage = 0.90; break; // 90%
-              case 4: percentage = 0.95; break; // 95%
-              default: percentage = 0.50; // Default
+              case 1: percentage = 0.80; break; // $23.91/hr 
+              case 2: percentage = 0.885; break; // $26.42/hr
+              case 3: percentage = 0.885; break; // $26.42/hr
+              case 4: percentage = 0.885; break; // $26.42/hr
+              default: percentage = 0.80; // Default to 80%
             }
           } else {
             // Junior apprentice percentages from 16.4(a)(ii)
-            switch (year) {
-              case 1: percentage = hasCompletedYear12 ? 0.55 : 0.50; break; // 55% with Y12, 50% without
-              case 2: percentage = hasCompletedYear12 ? 0.65 : 0.60; break; // 65% with Y12, 60% without
-              case 3: percentage = 0.70; break; // 70%
-              case 4: percentage = 0.80; break; // 80%
-              default: percentage = 0.50; // Default
+            // Updated based on the reference data provided
+            if (hasCompletedYear12) {
+              switch (year) {
+                case 1: percentage = 0.55; break; // $16.62/hr (55% of base)
+                case 2: percentage = 0.65; break; // $19.53/hr (65% of base) 
+                case 3: percentage = 0.70; break; // $20.99/hr (70% of base)
+                case 4: percentage = 0.82; break; // $24.49/hr (82% of base)
+                default: percentage = 0.55; // Default
+              }
+            } else {
+              switch (year) {
+                case 1: percentage = 0.50; break; // $15.16/hr (50% of base)
+                case 2: percentage = 0.60; break; // $18.08/hr (60% of base)
+                case 3: percentage = 0.70; break; // $20.99/hr (70% of base)
+                case 4: percentage = 0.82; break; // $24.49/hr (82% of base)
+                default: percentage = 0.50; // Default
+              }
             }
           }
         } else {

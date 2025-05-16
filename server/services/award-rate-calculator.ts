@@ -525,61 +525,52 @@ export class AwardRateCalculator {
   }
 
   /**
-   * Calculate a default apprentice pay rate based on Fair Work award percentages
+   * Calculate a default apprentice pay rate based on exact Fair Work award rates
    * This is a fallback method when API data is not available
+   * Updated with 2024/2025 FY rates based on reference data
    */
   private calculateDefaultApprenticeRate(
     apprenticeYear: number, 
     isAdult: boolean = true,
     hasCompletedYear12: boolean = true
   ): number {
-    // Base tradesperson rate (Level C10 or equivalent) for most common awards
-    // This is the reference rate from which apprentice rates are calculated
-    const baseJourneymanRate = 27.91; // Updated base rate for 2024-2025
+    // Calculate rate based on exact Fair Work rates for 2024-2025 financial year
+    // instead of using percentage calculations
     
-    // Use proper percentage-based calculation according to Fair Work
-    let percentage = 0;
-    
+    // These are the exact rates from Fair Work for Electrical Award (MA000025)
+    // as per reference data provided
+
     if (isAdult) {
-      // Adult apprentice percentages (generally based on common awards)
+      // Adult apprentice exact rates - these are the same regardless of Year 12 completion
       switch (apprenticeYear) {
-        case 1: percentage = 0.80; break; // 80% of journeyman rate
-        case 2: percentage = 0.85; break; // 85% of journeyman rate
-        case 3: percentage = 0.90; break; // 90% of journeyman rate
-        case 4: percentage = 0.95; break; // 95% of journeyman rate
-        default: percentage = 0.50; // Default fallback
+        case 1: return 23.91; // 1st year adult apprentice
+        case 2: return 26.42; // 2nd year adult apprentice
+        case 3: return 26.42; // 3rd year adult apprentice
+        case 4: return 26.42; // 4th year adult apprentice
+        default: return 23.91; // Default to 1st year
       }
     } else {
-      // Junior apprentice percentages
+      // Junior apprentice rates
       if (hasCompletedYear12) {
         // With Year 12 completion
         switch (apprenticeYear) {
-          case 1: percentage = 0.55; break; // 55% of journeyman rate
-          case 2: percentage = 0.65; break; // 65% of journeyman rate
-          case 3: percentage = 0.75; break; // 75% of journeyman rate
-          case 4: percentage = 0.90; break; // 90% of journeyman rate
-          default: percentage = 0.50; // Default fallback
+          case 1: return 16.62; // 1st year with Year 12
+          case 2: return 19.53; // 2nd year with Year 12
+          case 3: return 20.99; // 3rd year with Year 12
+          case 4: return 24.49; // 4th year with Year 12
+          default: return 16.62; // Default to 1st year
         }
       } else {
         // Without Year 12 completion
         switch (apprenticeYear) {
-          case 1: percentage = 0.50; break; // 50% of journeyman rate
-          case 2: percentage = 0.60; break; // 60% of journeyman rate
-          case 3: percentage = 0.70; break; // 70% of journeyman rate
-          case 4: percentage = 0.80; break; // 80% of journeyman rate
-          default: percentage = 0.50; // Default fallback
+          case 1: return 15.16; // 1st year without Year 12
+          case 2: return 18.08; // 2nd year without Year 12
+          case 3: return 20.99; // 3rd year without Year 12
+          case 4: return 24.49; // 4th year without Year 12
+          default: return 15.16; // Default to 1st year
         }
       }
     }
-    
-    // Calculate rate using the proper percentage of journeyman rate
-    const calculatedRate = baseJourneymanRate * percentage;
-    
-    // Log the calculation for debugging
-    logger.debug(`Calculated apprentice rate: ${calculatedRate.toFixed(2)} (${percentage * 100}% of ${baseJourneymanRate})`);
-    
-    // Return the rate rounded to 2 decimal places
-    return Math.round(calculatedRate * 100) / 100;
   }
 
   /**
