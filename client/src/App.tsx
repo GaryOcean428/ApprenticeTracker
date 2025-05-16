@@ -263,6 +263,14 @@ function Router() {
         <ProtectedRoute path="/awards" component={AwardsList} />
         <ProtectedRoute path="/awards/create" component={CreateAward} />
         <Route path="/fair-work-demo" component={FairWorkDemoPage} />
+        <Route path="/api-test" component={() => {
+          const ApiTestPage = lazy(() => import("./pages/api-test"));
+          return (
+            <Suspense fallback={<div className="p-8 flex items-center justify-center"><div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"/></div>}>
+              <ApiTestPage />
+            </Suspense>
+          );
+        }} />
         <Route path="/awards/:id" component={(params: {params: any}) => {
           const AwardDetail = lazy(() => import("./pages/awards/[id]/index"));
           return (
