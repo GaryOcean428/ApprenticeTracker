@@ -5,7 +5,17 @@ import { z } from 'zod';
 // Enums for WHS module
 export const incidentTypeEnum = pgEnum('whs_incident_type', ['incident', 'hazard', 'near_miss']);
 export const incidentSeverityEnum = pgEnum('whs_incident_severity', ['low', 'medium', 'high']);
-export const incidentStatusEnum = pgEnum('whs_incident_status', ['reported', 'investigating', 'action-required', 'resolved', 'closed']);
+export const incidentStatusEnum = pgEnum('whs_incident_status', [
+  'reported', 
+  'investigating', 
+  'action-required', 
+  'remediation-in-progress', 
+  'pending-review', 
+  'resolved', 
+  'closed', 
+  'escalated', 
+  'requires-followup'
+]);
 
 export const riskAssessmentStatusEnum = pgEnum('whs_risk_assessment_status', ['draft', 'in-progress', 'completed', 'review-required', 'expired']);
 export const inspectionStatusEnum = pgEnum('whs_inspection_status', ['scheduled', 'in-progress', 'completed', 'overdue', 'cancelled']);
@@ -28,6 +38,12 @@ export const whs_incidents = pgTable('whs_incidents', {
   apprentice_name: varchar('apprentice_name', { length: 100 }),
   host_employer_id: uuid('host_employer_id'),
   host_employer_name: varchar('host_employer_name', { length: 100 }),
+  host_supervisor_id: uuid('host_supervisor_id'),
+  host_supervisor_name: varchar('host_supervisor_name', { length: 100 }),
+  host_whs_contact_id: uuid('host_whs_contact_id'),
+  host_whs_contact_name: varchar('host_whs_contact_name', { length: 100 }),
+  host_notified: boolean('host_notified').default(false),
+  host_notification_date: timestamp('host_notification_date'),
   immediate_actions: text('immediate_actions'),
   investigation_notes: text('investigation_notes'),
   resolution_details: text('resolution_details'),
@@ -37,6 +53,8 @@ export const whs_incidents = pgTable('whs_incidents', {
   notifiable_incident: boolean('notifiable_incident').default(false),
   authority_notified: boolean('authority_notified').default(false),
   authority_reference: varchar('authority_reference', { length: 100 }),
+  followup_required: boolean('followup_required').default(false),
+  followup_date: timestamp('followup_date'),
   created_at: timestamp('created_at').notNull().defaultNow(),
   updated_at: timestamp('updated_at').notNull().defaultNow(),
 });
@@ -132,18 +150,102 @@ export const whs_policies = pgTable('whs_policies', {
 
 // Define Zod schemas for validation and type inference
 export const insertIncidentSchema = createInsertSchema(whs_incidents, {
+  title: z.string().min(5, 'Title must be at least 5 characters').max(200, 'Title must not exceed 200 characters'),
   description: z.string().min(10, 'Description must be at least 10 characters'),
-  title: z.string().min(5, 'Title must be at least 5 characters'),
+  location: z.string().min(3, 'Location must be at least 3 characters').max(200, 'Location must not exceed 200 characters'),
+  date_occurred: z.string().refine(val => !isNaN(Date.parse(val)), {
+    message: 'Invalid date format for date occurred'
+  }),
+  date_reported: z.string().refine(val => !isNaN(Date.parse(val)), {
+    message: 'Invalid date format for date reported'
+  }),
+  reporter_id: z.string().uuid('Invalid reporter ID format'),
+  reporter_name: z.string().min(2, 'Reporter name must be at least 2 characters').optional(),
+  immediate_actions: z.string().optional(),
+  investigation_notes: z.string().optional(),
+  type: z.enum(['incident', 'hazard', 'near_miss']),
+  severity: z.enum(['low', 'medium', 'high']),
+  status: z.enum([
+    'reported', 
+    'investigating', 
+    'action-required', 
+    'remediation-in-progress',
+    'pending-review',
+    'resolved', 
+    'closed',
+    'escalated',
+    'requires-followup'
+  ]),
+  notifiable_incident: z.boolean().optional(),
+  host_employer_id: z.string().uuid('Invalid host employer ID format').optional(),
+  host_employer_name: z.string().optional(),
+  host_supervisor_id: z.string().uuid('Invalid host supervisor ID format').optional(),
+  host_supervisor_name: z.string().optional(),
+  host_whs_contact_id: z.string().uuid('Invalid host WHS contact ID format').optional(),
+  host_whs_contact_name: z.string().optional(),
+  host_notified: z.boolean().optional(),
+  host_notification_date: z.string().refine(val => !isNaN(Date.parse(val)) || !val, {
+    message: 'Invalid date format for host notification date'
+  }).optional(),
+  followup_required: z.boolean().optional(),
+  followup_date: z.string().refine(val => !isNaN(Date.parse(val)) || !val, {
+    message: 'Invalid date format for followup date'
+  }).optional(),
 });
 
 export const insertWitnessSchema = createInsertSchema(whs_witnesses, {
-  name: z.string().min(2, 'Witness name must be at least 2 characters'),
+  name: z.string().min(2, 'Witness name must be at least 2 characters').max(100, 'Witness name must not exceed 100 characters'),
+  incident_id: z.string().uuid('Invalid incident ID format'),
+  contact: z.string().optional(),
+  statement: z.string().optional(),
 });
 
-export const insertDocumentSchema = createInsertSchema(whs_documents);
-export const insertRiskAssessmentSchema = createInsertSchema(whs_risk_assessments);
-export const insertInspectionSchema = createInsertSchema(whs_inspections);
-export const insertPolicySchema = createInsertSchema(whs_policies);
+export const insertDocumentSchema = createInsertSchema(whs_documents, {
+  title: z.string().min(3, 'Document title must be at least 3 characters').max(200, 'Document title must not exceed 200 characters'),
+  filename: z.string().min(1, 'Filename is required').max(200, 'Filename must not exceed 200 characters'),
+  file_path: z.string().min(1, 'File path is required').max(500, 'File path must not exceed 500 characters'),
+  file_type: z.string().min(1, 'File type is required').max(50, 'File type must not exceed 50 characters'),
+  file_size: z.number().int('File size must be an integer').positive('File size must be positive'),
+  uploaded_by_id: z.string().uuid('Invalid uploader ID format'),
+});
+
+export const insertRiskAssessmentSchema = createInsertSchema(whs_risk_assessments, {
+  title: z.string().min(5, 'Title must be at least 5 characters').max(200, 'Title must not exceed 200 characters'),
+  description: z.string().min(10, 'Description must be at least 10 characters'),
+  location: z.string().min(3, 'Location must be at least 3 characters').max(200, 'Location must not exceed 200 characters'),
+  assessment_date: z.string().refine(val => !isNaN(Date.parse(val)), {
+    message: 'Invalid date format for assessment date'
+  }),
+  status: z.enum(['draft', 'in-progress', 'completed', 'review-required', 'expired']),
+  work_area: z.string().max(200, 'Work area must not exceed 200 characters').optional(),
+  findings: z.string().optional(),
+  recommendations: z.string().optional(),
+  action_plan: z.string().optional(),
+});
+
+export const insertInspectionSchema = createInsertSchema(whs_inspections, {
+  title: z.string().min(5, 'Title must be at least 5 characters').max(200, 'Title must not exceed 200 characters'),
+  location: z.string().min(3, 'Location must be at least 3 characters').max(200, 'Location must not exceed 200 characters'),
+  inspection_date: z.string().refine(val => !isNaN(Date.parse(val)), {
+    message: 'Invalid date format for inspection date'
+  }),
+  inspector_id: z.string().uuid('Invalid inspector ID format'),
+  inspector_name: z.string().min(2, 'Inspector name must be at least 2 characters').max(100, 'Inspector name must not exceed 100 characters'),
+  status: z.enum(['scheduled', 'in-progress', 'completed', 'overdue', 'cancelled']),
+  description: z.string().optional(),
+  findings: z.string().optional(),
+  compliance_score: z.number().int('Compliance score must be an integer').min(0, 'Compliance score must be at least 0').max(100, 'Compliance score must not exceed 100').optional(),
+});
+
+export const insertPolicySchema = createInsertSchema(whs_policies, {
+  title: z.string().min(5, 'Title must be at least 5 characters').max(200, 'Title must not exceed 200 characters'),
+  description: z.string().min(10, 'Description must be at least 10 characters'),
+  content: z.string().min(20, 'Content must be at least 20 characters'),
+  document_type: z.string().min(1, 'Document type is required').max(50, 'Document type must not exceed 50 characters'),
+  status: z.enum(['draft', 'active', 'review-needed', 'archived']),
+  version: z.string().min(1, 'Version is required').max(50, 'Version must not exceed 50 characters'),
+  file_path: z.string().max(500, 'File path must not exceed 500 characters').optional(),
+});
 
 // Define types
 export type Incident = typeof whs_incidents.$inferSelect;
@@ -159,7 +261,70 @@ export type RiskAssessment = typeof whs_risk_assessments.$inferSelect;
 export type InsertRiskAssessment = z.infer<typeof insertRiskAssessmentSchema>;
 
 export type Inspection = typeof whs_inspections.$inferSelect;
-export type InsertInspection = z.infer<typeof insertInspectionSchema>;
+// WHS Metrics/Reports Table
+export const whs_metrics = pgTable('whs_metrics', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  report_name: varchar('report_name', { length: 100 }).notNull(),
+  report_type: varchar('report_type', { length: 50 }).notNull(), // 'incident', 'risk', 'inspection', 'compliance'
+  parameters: json('parameters').default({}), // For storing report parameters
+  date_range_start: timestamp('date_range_start'),
+  date_range_end: timestamp('date_range_end'),
+  created_by_id: uuid('created_by_id').notNull(),
+  created_by_name: varchar('created_by_name', { length: 100 }),
+  host_employer_id: uuid('host_employer_id'),
+  host_employer_name: varchar('host_employer_name', { length: 100 }),
+  metrics_data: json('metrics_data').default({}), // For storing calculated metrics
+  chart_config: json('chart_config').default({}), // For storing chart display settings
+  is_scheduled: boolean('is_scheduled').default(false),
+  schedule_frequency: varchar('schedule_frequency', { length: 50 }), // 'daily', 'weekly', 'monthly'
+  recipients: json('recipients').default([]), // For storing email recipients
+  last_run_at: timestamp('last_run_at'),
+  next_run_at: timestamp('next_run_at'),
+  created_at: timestamp('created_at').notNull().defaultNow(),
+  updated_at: timestamp('updated_at').notNull().defaultNow(),
+});
 
-export type Policy = typeof whs_policies.$inferSelect;
-export type InsertPolicy = z.infer<typeof insertPolicySchema>;
+// WHS Metrics/Reports Type
+export type WHSMetric = typeof whs_metrics.$inferSelect;
+
+// WHS Export Template Table
+export const whs_export_templates = pgTable('whs_export_templates', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  template_name: varchar('template_name', { length: 100 }).notNull(),
+  export_type: varchar('export_type', { length: 50 }).notNull(), // 'pdf', 'excel', 'csv'
+  report_type: varchar('report_type', { length: 50 }).notNull(), // 'incident', 'risk', 'inspection', 'compliance'
+  template_content: json('template_content').default({}), // For storing template structure
+  header_content: text('header_content'),
+  footer_content: text('footer_content'),
+  created_by_id: uuid('created_by_id').notNull(),
+  created_by_name: varchar('created_by_name', { length: 100 }),
+  is_default: boolean('is_default').default(false),
+  created_at: timestamp('created_at').notNull().defaultNow(),
+  updated_at: timestamp('updated_at').notNull().defaultNow(),
+});
+
+// WHS Export Template Type
+export type WHSExportTemplate = typeof whs_export_templates.$inferSelect;
+
+// Define Zod schemas for validation 
+export const insertMetricSchema = createInsertSchema(whs_metrics, {
+  report_name: z.string().min(3, 'Report name must be at least 3 characters').max(100, 'Report name must not exceed 100 characters'),
+  report_type: z.string().min(3, 'Report type is required').max(50, 'Report type must not exceed 50 characters'),
+  created_by_id: z.string().uuid('Invalid creator ID format'),
+  date_range_start: z.string().refine(val => !isNaN(Date.parse(val)) || !val, {
+    message: 'Invalid date format for range start'
+  }).optional(),
+  date_range_end: z.string().refine(val => !isNaN(Date.parse(val)) || !val, {
+    message: 'Invalid date format for range end'
+  }).optional(),
+});
+
+export const insertExportTemplateSchema = createInsertSchema(whs_export_templates, {
+  template_name: z.string().min(3, 'Template name must be at least 3 characters').max(100, 'Template name must not exceed 100 characters'),
+  export_type: z.string().min(2, 'Export type is required').max(50, 'Export type must not exceed 50 characters'),
+  report_type: z.string().min(3, 'Report type is required').max(50, 'Report type must not exceed 50 characters'),
+  created_by_id: z.string().uuid('Invalid creator ID format'),
+});
+
+export type InsertWHSMetric = z.infer<typeof insertMetricSchema>;
+export type InsertWHSExportTemplate = z.infer<typeof insertExportTemplateSchema>;
