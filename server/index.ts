@@ -156,6 +156,17 @@ app.use((req, res, next) => {
     serveStatic(app);
   }
 
+  // Add health check endpoint
+  app.get('/', (req, res) => {
+    res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
+  });
+
+  // Global error handler
+  app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+    log(`Error: ${err.message}`);
+    res.status(500).json({ error: 'Internal Server Error', message: err.message });
+  });
+
   // ALWAYS serve the app on port 5000
   // this serves both the API and the client.
   // It is the only port that is not firewalled.
@@ -167,8 +178,12 @@ app.use((req, res, next) => {
   }, () => {
     log(`serving on port ${port}`);
     
-    // Initialize scheduled tasks
-    initializeScheduledTasks();
-    log("Scheduled tasks initialized");
+    // Initialize scheduled tasks with error handling
+    try {
+      initializeScheduledTasks();
+      log("Scheduled tasks initialized");
+    } catch (error) {
+      log(`Failed to initialize scheduled tasks: ${error}`);
+    }
   });
 })();
