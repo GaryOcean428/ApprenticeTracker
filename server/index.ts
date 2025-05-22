@@ -161,10 +161,7 @@ app.use((req, res, next) => {
     serveStatic(app);
   }
 
-  // Add health check endpoint
-  app.get('/', (req, res) => {
-    res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
-  });
+  // This health check is already defined above - removing duplicate
 
   // Global error handler
   app.use((err: any, req: Request, res: Response, next: NextFunction) => {
@@ -172,9 +169,9 @@ app.use((req, res, next) => {
     res.status(500).json({ error: 'Internal Server Error', message: err.message });
   });
 
-  // In deployment, Replit expects port 3001, so we need to use that in production
-  // For development, we use port 5000
-  const port = process.env.NODE_ENV === 'production' ? 3001 : 5000;
+  // Use PORT from environment variable for deployment compatibility
+  // Default to 3001 for production, 5000 for development
+  const port = process.env.PORT || (process.env.NODE_ENV === 'production' ? 3001 : 5000);
   
   // Log environment information for debugging
   log(`Environment: ${process.env.NODE_ENV || 'development'}`);
