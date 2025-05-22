@@ -23,9 +23,14 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// Add a simple health check endpoint for deployment
+// Add a robust health check endpoint for deployment
 app.get('/', (req, res) => {
-  res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
+  res.status(200).json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    service: 'apprentice-tracker',
+    environment: process.env.NODE_ENV || 'development'
+  });
 });
 
 app.use((req, res, next) => {
@@ -167,16 +172,20 @@ app.use((req, res, next) => {
     res.status(500).json({ error: 'Internal Server Error', message: err.message });
   });
 
-  // ALWAYS serve the app on port 5000
-  // this serves both the API and the client.
-  // It is the only port that is not firewalled.
-  const port = 5000;
+  // In deployment, Replit expects port 3001, so we need to use that in production
+  // For development, we use port 5000
+  const port = process.env.NODE_ENV === 'production' ? 3001 : 5000;
+  
+  // Log environment information for debugging
+  log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+  log(`Using port: ${port}`);
+  
   server.listen({
     port,
     host: "0.0.0.0",
     reusePort: true,
   }, () => {
-    log(`serving on port ${port}`);
+    log(`Server successfully started on port ${port}`);
     
     // Initialize scheduled tasks with error handling
     try {
