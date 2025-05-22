@@ -23,6 +23,11 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+// Add a simple health check endpoint for deployment
+app.get('/', (req, res) => {
+  res.status(200).send('OK');
+});
+
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;

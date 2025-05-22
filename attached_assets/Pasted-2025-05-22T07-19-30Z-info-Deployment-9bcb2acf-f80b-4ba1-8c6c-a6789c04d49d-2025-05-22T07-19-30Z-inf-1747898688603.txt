@@ -1,0 +1,85 @@
+2025-05-22T07:19:30Z info: Deployment: 9bcb2acf-f80b-4ba1-8c6c-a6789c04d49d
+2025-05-22T07:19:30Z info: Build: 7fbedaf2-30da-4785-8f57-b996f91120b3
+2025-05-22T07:19:30Z info: Connecting to builder
+2025-05-22T07:19:33Z info: Builder connected
+2025-05-22T07:19:33Z info: Installing packages
+2025-05-22T07:19:34Z info: Starting Build
+
+> rest-express@1.0.0 build
+> vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+
+
+vite v6.3.4 building for production...
+
+transforming...
+
+✓ 3509 modules transformed.
+
+rendering chunks...
+
+[plugin vite:reporter] 
+(!) /home/runner/workspace/client/src/pages/financial/expenses/index.tsx is dynamically imported by /home/runner/workspace/client/src/App.tsx but also statically imported by /home/runner/workspace/client/src/App.tsx, dynamic import will not move module into another chunk.
+
+
+[plugin vite:reporter] 
+(!) /home/runner/workspace/client/src/pages/financial/invoicing/index.tsx is dynamically imported by /home/runner/workspace/client/src/App.tsx but also statically imported by /home/runner/workspace/client/src/App.tsx, dynamic import will not move module into another chunk.
+
+
+computing gzip size...
+
+../dist/public/index.html                                      0.63 kB │ gzip:   0.39 kB
+../dist/public/assets/500x160 Black Logo (1)-xXIE341-.png      7.27 kB
+../dist/public/assets/index-BXcuJWHi.css                     102.59 kB │ gzip:  16.60 kB
+../dist/public/assets/isToday-DCSc_YgP.js                      0.09 kB │ gzip:   0.10 kB
+../dist/public/assets/dashboard-shell-CDp5GHCq.js              0.17 kB │ gzip:   0.16 kB
+../dist/public/assets/arrow-right-ypLLnHbf.js                  0.33 kB │ gzip:   0.27 kB
+../dist/public/assets/circle-arrow-right-DLZo0-X-.js           0.38 kB │ gzip:   0.29 kB
+../dist/public/assets/square-check-big-BnRHInyb.js             0.39 kB │ gzip:   0.29 kB
+../dist/public/assets/file-check-BSxuEkFa.js                   0.43 kB │ gzip:   0.30 kB
+../dist/public/assets/page-header-DHNLm3X7.js                  0.47 kB │ gzip:   0.29 kB
+../dist/public/assets/skeleton-table-C2Bo_Nf1.js               0.50 kB │ gzip:   0.27 kB
+../dist/public/assets/date-picker-c6ADIa-C.js                  0.57 kB │ gzip:   0.38 kB
+../dist/public/assets/isThisWeek-BGLwzFJD.js                   0.63 kB │ gzip:   0.34 kB
+../dist/public/assets/hard-hat-hirzjT-e.js                     0.95 kB │ gzip:   0.44 kB
+../dist/public/assets/breadcrumb-B0_lBPvQ.js                   1.20 kB │ gzip:   0.54 kB
+../dist/public/assets/api-test-CIv4QpmZ.js                     1.76 kB │ gzip:   0.76 kB
+../dist/public/assets/index-Cmjp7ghA.js                        3.95 kB │ gzip:   1.17 kB
+../dist/public/assets/agreements-BRkfQRGq.js                   4.56 kB │ gzip:   1.51 kB
+../dist/public/assets/edit-DhSZFG6f.js                         4.78 kB │ gzip:   1.69 kB
+
+✓ built in 23.53s
+
+
+  dist/index.js  736.1kb
+
+⚡ Done in 161ms
+
+npm notice
+npm notice New major version of npm available! 10.8.2 -> 11.4.1
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.4.1
+npm notice To update run: npm install -g npm@11.4.1
+npm notice
+
+2025-05-22T07:20:06Z info: Pushing pid1 binary layer...
+2025-05-22T07:20:07Z info: Pushing hosting layer...
+2025-05-22T07:20:07Z info: Pushing nix-0 layer...
+2025-05-22T07:20:07Z info: Created pid1 binary layer
+2025-05-22T07:20:07Z info: Created hosting layer
+2025-05-22T07:20:19Z info: Created nix-0 layer
+2025-05-22T07:20:19Z info: uploading image for cached layer
+2025-05-22T07:20:19Z info: pushed cache image manifest
+2025-05-22T07:20:20Z info: pushed cache soci index manifest
+2025-05-22T07:20:20Z info: uploading cached layer
+2025-05-22T07:20:20Z info: successfully uploaded cached layer
+2025-05-22T07:20:33Z info: Created Repl layer
+2025-05-22T07:20:34Z info: Pushed image manifest
+2025-05-22T07:20:34Z info: Pushed soci index manifest
+2025-05-22T07:20:39Z info: Creating Autoscale service
+forwarding local port 5000 to external port 80 (mapped as 1104)
+starting up user application
+[INFO] Syncing awards from Fair Work API...
+[ERROR] Error checking for Fair Work award updates
+    "length": 110,
+Import completed successfully!
+    "file": "parse_relation.c",
+2025-05-22T07:22:05Z error: The deployment is failing health checks. This can happen if the application isn't responding, responds with an error, or doesn't respond in time. Health checks are sent to the / endpoint by default and must respond as soon as possible. Make sure that the / endpoint is implemented and returns a 200 status code in a timely manner. Avoid doing expensive or long running operations on the / endpoint, prefer deferring them to a different route. Check the logs for more information.
