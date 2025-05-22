@@ -25,7 +25,7 @@ app.use(express.urlencoded({ extended: false }));
 
 // Add a simple health check endpoint for deployment
 app.get('/', (req, res) => {
-  res.status(200).send('OK');
+  res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
 app.use((req, res, next) => {
