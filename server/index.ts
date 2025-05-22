@@ -23,8 +23,8 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// Add a robust health check endpoint for deployment
-app.get('/', (req, res) => {
+// Add a robust health check endpoint for deployment at /api/health instead of root
+app.get('/api/health', (req, res) => {
   res.status(200).json({
     status: 'ok',
     timestamp: new Date().toISOString(),
