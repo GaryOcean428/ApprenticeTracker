@@ -23,12 +23,14 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// Health check endpoint at root path for deployment compatibility
-// This will be overridden by the static file server in development mode
-app.get('/', (req, res) => {
-  // Simple text response for health checks
-  res.status(200).send('Health check OK');
-});
+// Health check endpoint is only used in production mode
+// In development mode, it's overridden by the static file serving
+if (process.env.NODE_ENV === 'production') {
+  app.get('/', (req, res) => {
+    // Simple text response for health checks
+    res.status(200).send('Health check OK');
+  });
+}
 
 // Additional health check endpoint for API testing
 app.get('/health-check', (req, res) => {
