@@ -23,8 +23,14 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// Health check endpoint at /health-check for deployment compatibility
-// Root path is handled by static file serving for the UI
+// Health check endpoint at root path for deployment compatibility
+// This will be overridden by the static file server in development mode
+app.get('/', (req, res) => {
+  // Simple text response for health checks
+  res.status(200).send('Health check OK');
+});
+
+// Additional health check endpoint for API testing
 app.get('/health-check', (req, res) => {
   // Simple text response for health checks
   res.status(200).send('OK');
@@ -181,8 +187,8 @@ app.use((req, res, next) => {
   });
 
   // Use PORT from environment variable for deployment compatibility
-  // Default to 3001 for production, 5000 for development
-  const port = process.env.PORT || (process.env.NODE_ENV === 'production' ? 3001 : 5000);
+  // Default to 5000 for both production and development since that's what Replit expects
+  const port = process.env.PORT || 5000;
   
   // Log environment information for debugging
   log(`Environment: ${process.env.NODE_ENV || 'development'}`);

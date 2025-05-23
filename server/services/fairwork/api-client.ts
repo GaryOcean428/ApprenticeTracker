@@ -125,6 +125,13 @@ export class FairWorkApiClient {
   private client: AxiosInstance;
 
   constructor(config: FairWorkApiConfig) {
+    // Log configuration for debugging (don't log the actual API key)
+    logger.info('Creating Fair Work API client', { 
+      baseUrl: config.baseUrl,
+      hasApiKey: !!config.apiKey,
+      environment: config.environment || 'production'
+    });
+    
     this.client = axios.create({
       baseURL: config.baseUrl,
       timeout: config.timeout || 10000,

@@ -24,7 +24,9 @@ logger.info('Fair Work API Configuration', {
 
 const fairWorkApiClient = new FairWorkApiClient({
   baseUrl: process.env.FAIRWORK_API_URL || 'https://api.fairwork.gov.au',
-  apiKey: process.env.FAIRWORK_API_KEY || ''
+  apiKey: process.env.FAIRWORK_API_KEY || '',
+  // Add retries and timeout to make API more resilient
+  timeout: 15000
 });
 
 // Test connection during startup to verify API credentials
