@@ -23,14 +23,14 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// Health check endpoint is only used in production mode
-// In development mode, it's overridden by the static file serving
-if (process.env.NODE_ENV === 'production') {
-  app.get('/', (req, res) => {
-    // Simple text response for health checks
-    res.status(200).send('Health check OK');
+// Health check endpoint for deployment
+app.get('/', (req, res) => {
+  res.status(200).json({
+    status: 'healthy',
+    environment: process.env.NODE_ENV || 'development',
+    timestamp: new Date().toISOString()
   });
-}
+});
 
 // Additional health check endpoint for API testing
 app.get('/health-check', (req, res) => {
