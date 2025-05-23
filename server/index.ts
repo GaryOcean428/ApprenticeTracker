@@ -23,13 +23,23 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// Add a robust health check endpoint for deployment at /api/health instead of root
+// Add health check endpoints at both root and /api/health for deployment compatibility
+app.get('/', (req, res) => {
+  // Simple text response for root path (for basic health checks)
+  res.status(200).send('OK');
+});
+
 app.get('/api/health', (req, res) => {
+  // Detailed JSON response for API health checks
   res.status(200).json({
     status: 'ok',
     timestamp: new Date().toISOString(),
     service: 'apprentice-tracker',
-    environment: process.env.NODE_ENV || 'development'
+    environment: process.env.NODE_ENV || 'development',
+    fairwork_api: {
+      url_configured: !!process.env.FAIRWORK_API_URL,
+      key_configured: !!process.env.FAIRWORK_API_KEY
+    }
   });
 });
 
