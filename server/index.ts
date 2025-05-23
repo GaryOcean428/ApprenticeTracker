@@ -23,9 +23,10 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// Add health check endpoints at both root and /api/health for deployment compatibility
-app.get('/', (req, res) => {
-  // Simple text response for root path (for basic health checks)
+// Health check endpoint at /health-check for deployment compatibility
+// Root path is handled by static file serving for the UI
+app.get('/health-check', (req, res) => {
+  // Simple text response for health checks
   res.status(200).send('OK');
 });
 
