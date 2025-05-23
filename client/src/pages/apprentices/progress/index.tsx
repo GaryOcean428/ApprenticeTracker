@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
-import { PlusCircle, Search, Calendar, Filter, Tag, User } from "lucide-react";
+import { PlusCircle, Search, Calendar, Filter, Tag, User, ArrowUp, ArrowDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,6 +25,8 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationPrevious, PaginationNext } from "@/components/ui/pagination";
 
 interface ApprenticeProgress {
   id: number;
@@ -46,8 +48,13 @@ export default function ProgressTracking() {
     qualification: "all-qualifications",
     status: "all-statuses",
     progressRange: "all",
+    startDateRange: { start: "", end: "" },
+    targetDateRange: { start: "", end: "" },
   });
   const [activeTab, setActiveTab] = useState("all");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
+  const [sortConfig, setSortConfig] = useState({ key: "", direction: "ascending" });
 
   const { data: progressData, isLoading, error } = useQuery<ApprenticeProgress[]>({
     queryKey: ["/api/apprentices/progress"],
@@ -86,6 +93,14 @@ export default function ProgressTracking() {
       filter.progressRange === "76-99" ? (item.progress > 75 && item.progress < 100) :
       filter.progressRange === "completed" ? item.progress === 100 : true;
 
+    const matchesStartDateRange =
+      (!filter.startDateRange.start || new Date(item.startDate) >= new Date(filter.startDateRange.start)) &&
+      (!filter.startDateRange.end || new Date(item.startDate) <= new Date(filter.startDateRange.end));
+
+    const matchesTargetDateRange =
+      (!filter.targetDateRange.start || new Date(item.targetDate) >= new Date(filter.targetDateRange.start)) &&
+      (!filter.targetDateRange.end || new Date(item.targetDate) <= new Date(filter.targetDateRange.end));
+
     // Filter by tab
     const matchesTab =
       activeTab === "all" ||
@@ -96,8 +111,26 @@ export default function ProgressTracking() {
       (activeTab === "completed" && 
         (item.status === "Completed" || item.progress === 100));
 
-    return matchesSearch && matchesQualification && matchesStatus && matchesProgressRange && matchesTab;
+    return matchesSearch && matchesQualification && matchesStatus && matchesProgressRange && matchesStartDateRange && matchesTargetDateRange && matchesTab;
   });
+
+  // Sort data
+  const sortedData = filteredData?.sort((a, b) => {
+    if (sortConfig.key) {
+      const aValue = a[sortConfig.key as keyof ApprenticeProgress];
+      const bValue = b[sortConfig.key as keyof ApprenticeProgress];
+      if (aValue < bValue) {
+        return sortConfig.direction === "ascending" ? -1 : 1;
+      }
+      if (aValue > bValue) {
+        return sortConfig.direction === "ascending" ? 1 : -1;
+      }
+    }
+    return 0;
+  });
+
+  // Paginate data
+  const paginatedData = sortedData?.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   // Extract unique values for filters
   const uniqueQualifications = [
@@ -131,6 +164,15 @@ export default function ProgressTracking() {
     if (progress < 30) return "bg-red-500";
     if (progress < 70) return "bg-yellow-500";
     return "bg-green-500";
+  };
+
+  // Handle sorting
+  const handleSort = (key: string) => {
+    let direction = "ascending";
+    if (sortConfig.key === key && sortConfig.direction === "ascending") {
+      direction = "descending";
+    }
+    setSortConfig({ key, direction });
   };
 
   return (
@@ -229,7 +271,37 @@ export default function ProgressTracking() {
             </SelectContent>
           </Select>
 
-          {(filter.qualification !== "all-qualifications" || filter.status !== "all-statuses" || filter.progressRange !== "all") && (
+          <div className="flex items-center gap-2">
+            <Input
+              type="date"
+              placeholder="Start Date From"
+              value={filter.startDateRange.start}
+              onChange={(e) => setFilter({ ...filter, startDateRange: { ...filter.startDateRange, start: e.target.value } })}
+            />
+            <Input
+              type="date"
+              placeholder="Start Date To"
+              value={filter.startDateRange.end}
+              onChange={(e) => setFilter({ ...filter, startDateRange: { ...filter.startDateRange, end: e.target.value } })}
+            />
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Input
+              type="date"
+              placeholder="Target Date From"
+              value={filter.targetDateRange.start}
+              onChange={(e) => setFilter({ ...filter, targetDateRange: { ...filter.targetDateRange, start: e.target.value } })}
+            />
+            <Input
+              type="date"
+              placeholder="Target Date To"
+              value={filter.targetDateRange.end}
+              onChange={(e) => setFilter({ ...filter, targetDateRange: { ...filter.targetDateRange, end: e.target.value } })}
+            />
+          </div>
+
+          {(filter.qualification !== "all-qualifications" || filter.status !== "all-statuses" || filter.progressRange !== "all" || filter.startDateRange.start || filter.startDateRange.end || filter.targetDateRange.start || filter.targetDateRange.end) && (
             <Button
               variant="outline"
               onClick={() =>
@@ -237,6 +309,8 @@ export default function ProgressTracking() {
                   qualification: "all-qualifications",
                   status: "all-statuses",
                   progressRange: "all",
+                  startDateRange: { start: "", end: "" },
+                  targetDateRange: { start: "", end: "" },
                 })
               }
               className="flex gap-1 items-center"
@@ -260,13 +334,34 @@ export default function ProgressTracking() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Apprentice</TableHead>
-                  <TableHead>Qualification</TableHead>
-                  <TableHead>Progress</TableHead>
-                  <TableHead>Start Date</TableHead>
-                  <TableHead>Target Date</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Last Updated</TableHead>
+                  <TableHead onClick={() => handleSort("apprenticeName")}>
+                    Apprentice
+                    {sortConfig.key === "apprenticeName" && (sortConfig.direction === "ascending" ? <ArrowUp className="ml-1 h-4 w-4" /> : <ArrowDown className="ml-1 h-4 w-4" />)}
+                  </TableHead>
+                  <TableHead onClick={() => handleSort("qualificationName")}>
+                    Qualification
+                    {sortConfig.key === "qualificationName" && (sortConfig.direction === "ascending" ? <ArrowUp className="ml-1 h-4 w-4" /> : <ArrowDown className="ml-1 h-4 w-4" />)}
+                  </TableHead>
+                  <TableHead onClick={() => handleSort("progress")}>
+                    Progress
+                    {sortConfig.key === "progress" && (sortConfig.direction === "ascending" ? <ArrowUp className="ml-1 h-4 w-4" /> : <ArrowDown className="ml-1 h-4 w-4" />)}
+                  </TableHead>
+                  <TableHead onClick={() => handleSort("startDate")}>
+                    Start Date
+                    {sortConfig.key === "startDate" && (sortConfig.direction === "ascending" ? <ArrowUp className="ml-1 h-4 w-4" /> : <ArrowDown className="ml-1 h-4 w-4" />)}
+                  </TableHead>
+                  <TableHead onClick={() => handleSort("targetDate")}>
+                    Target Date
+                    {sortConfig.key === "targetDate" && (sortConfig.direction === "ascending" ? <ArrowUp className="ml-1 h-4 w-4" /> : <ArrowDown className="ml-1 h-4 w-4" />)}
+                  </TableHead>
+                  <TableHead onClick={() => handleSort("status")}>
+                    Status
+                    {sortConfig.key === "status" && (sortConfig.direction === "ascending" ? <ArrowUp className="ml-1 h-4 w-4" /> : <ArrowDown className="ml-1 h-4 w-4" />)}
+                  </TableHead>
+                  <TableHead onClick={() => handleSort("lastUpdated")}>
+                    Last Updated
+                    {sortConfig.key === "lastUpdated" && (sortConfig.direction === "ascending" ? <ArrowUp className="ml-1 h-4 w-4" /> : <ArrowDown className="ml-1 h-4 w-4" />)}
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -299,7 +394,7 @@ export default function ProgressTracking() {
                       </TableRow>
                     ))}
 
-                {!isLoading && filteredData?.length === 0 && (
+                {!isLoading && paginatedData?.length === 0 && (
                   <TableRow>
                     <TableCell colSpan={7} className="text-center py-6 text-muted-foreground">
                       No progress records found.
@@ -308,7 +403,7 @@ export default function ProgressTracking() {
                 )}
 
                 {!isLoading &&
-                  filteredData?.map((item) => (
+                  paginatedData?.map((item) => (
                     <TableRow key={item.id} className="cursor-pointer hover:bg-muted/50" onClick={() => navigate(`/apprentices/${item.apprenticeId}`)}>
                       <TableCell className="font-medium">{item.apprenticeName}</TableCell>
                       <TableCell>
@@ -318,10 +413,19 @@ export default function ProgressTracking() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <div className="space-y-1">
-                          <Progress value={item.progress} className={`h-2 ${getProgressColor(item.progress, item.status)}`} />
-                          <div className="text-xs text-muted-foreground">{item.progress}% Complete</div>
-                        </div>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger>
+                              <div className="space-y-1">
+                                <Progress value={item.progress} className={`h-2 ${getProgressColor(item.progress, item.status)}`} />
+                                <div className="text-xs text-muted-foreground">{item.progress}% Complete</div>
+                              </div>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>{item.progress}% Complete</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
                       </TableCell>
                       <TableCell>{new Date(item.startDate).toLocaleDateString()}</TableCell>
                       <TableCell>{new Date(item.targetDate).toLocaleDateString()}</TableCell>
@@ -334,6 +438,25 @@ export default function ProgressTracking() {
           </div>
         </CardContent>
       </Card>
+
+      <Pagination className="mt-6">
+        <PaginationPrevious onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))} />
+        <PaginationContent>
+          {Array(Math.ceil((filteredData?.length || 0) / itemsPerPage))
+            .fill(0)
+            .map((_, i) => (
+              <PaginationItem key={i}>
+                <PaginationLink
+                  isActive={currentPage === i + 1}
+                  onClick={() => setCurrentPage(i + 1)}
+                >
+                  {i + 1}
+                </PaginationLink>
+              </PaginationItem>
+            ))}
+        </PaginationContent>
+        <PaginationNext onClick={() => setCurrentPage((prev) => Math.min(prev + 1, Math.ceil((filteredData?.length || 0) / itemsPerPage)))} />
+      </Pagination>
     </>
   );
 }
