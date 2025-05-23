@@ -26,15 +26,7 @@
   --text-muted: #718096;
 }
 
-/* Apply softer theme for better viewing comfort */
-@layer base {
-  body {
-    background-color: var(--background-primary);
-    color: var(--text-primary);
-  }
-}
-
-/* Enhanced theme color applications */
+/* Apply brand colors to existing theme */
 .bg-primary {
   background-color: var(--braden-sky);
 }
@@ -49,6 +41,14 @@
 
 .text-secondary {
   color: var(--braden-navy);
+}
+
+/* Apply softer theme for better viewing comfort */
+@layer base {
+  body {
+    background-color: var(--background-primary);
+    color: var(--text-primary);
+  }
 }
 
 /* Card and container styling for softer appearance */
@@ -178,137 +178,61 @@ h1, h2, h3, h4, h5, h6 {
   border-color: var(--braden-gold);
 }
 
-/* Add additional utility classes as needed */
-
-/*
-:root {
-  /* Braden Group Brand Colors - Light Theme */
-  --background: 0 0% 100%;
-  --foreground: 220 10% 6%;
-  --muted: 210 20% 95%;
-  --muted-foreground: 220 10% 40%;
-  --popover: 0 0% 100%;
-  --popover-foreground: 220 10% 6%;
-  --card: 0 0% 100%;
-  --card-foreground: 220 10% 6%;
-  --border: 210 20% 90%;
-  --input: 210 20% 90%;
-  --primary: 210 100% 50%; /* Bright blue primary color */
-  --primary-foreground: 0 0% 100%;
-  --secondary: 227 77% 60%; /* Secondary blue color */
-  --secondary-foreground: 0 0% 100%;
-  --accent: 262 83% 58%; /* Purple for accents */
-  --accent-foreground: 0 0% 100%;
-  --destructive: 0 84.2% 60.2%;
-  --destructive-foreground: 60 9.1% 97.8%;
-  --success: 142 69% 50%;
-  --success-foreground: 0 0% 100%;
-  --warning: 38 92% 50%;
-  --warning-foreground: 0 0% 100%;
-  --info: 214 95% 60%;
-  --info-foreground: 0 0% 100%;
-  --ring: 210 100% 50%;
-  --radius: 0.5rem;
-  
-  /* Chart colors */
-  --chart-1: 210 100% 50%;
-  --chart-2: 227 77% 60%;
-  --chart-3: 262 83% 58%;
-  --chart-4: 38 92% 50%;
-  --chart-5: 142 69% 50%;
-  
-  /* Sidebar theming */
-  --sidebar-background: 0 0% 100%;
-  --sidebar-foreground: 220 10% 6%;
-  --sidebar-primary: 210 100% 50%;
-  --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 210 20% 95%;
-  --sidebar-accent-foreground: 220 10% 6%;
-  --sidebar-border: 210 20% 90%;
-  --sidebar-ring: 210 100% 50%;
-}
-*/
-
-/*
-.dark {
-  /* Braden Group Brand Colors - Dark Theme */
-  --background: 222 30% 10%; /* Dark blue-black background */
-  --foreground: 0 0% 98%;
-  --muted: 220 20% 15%;
-  --muted-foreground: 220 10% 70%;
-  --popover: 222 30% 10%;
-  --popover-foreground: 0 0% 98%;
-  --card: 222 30% 10%;
-  --card-foreground: 0 0% 98%;
-  --border: 220 20% 20%;
-  --input: 220 20% 20%;
-  --primary: 210 100% 50%; /* Bright blue primary color */
-  --primary-foreground: 0 0% 100%;
-  --secondary: 214 95% 60%; /* Slightly darker blue for secondary */
-  --secondary-foreground: 0 0% 100%;
-  --accent: 262 83% 58%; /* Purple for accents */
-  --accent-foreground: 0 0% 100%;
-  --destructive: 0 84% 60%;
-  --destructive-foreground: 0 0% 98%;
-  --success: 142 69% 45%;
-  --success-foreground: 0 0% 100%;
-  --warning: 38 92% 50%;
-  --warning-foreground: 0 0% 100%;
-  --info: 214 95% 60%;
-  --info-foreground: 0 0% 100%;
-  --ring: 214 95% 60%;
-  
-  /* Sidebar theming - matching the dark sidebar from screenshots */
-  --sidebar-background: 222 30% 10%;
-  --sidebar-foreground: 0 0% 98%;
-  --sidebar-primary: 210 100% 50%;
-  --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 220 20% 15%;
-  --sidebar-accent-foreground: 0 0% 98%;
-  --sidebar-border: 220 20% 20%;
-  --sidebar-ring: 214 95% 60%;
-}
-*/
-
-/* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+/* Dashboard card color variants */
+.dashboard-card-blue {
+  border-top: 3px solid var(--braden-sky);
 }
 
-::-webkit-scrollbar-track {
-  background: #f1f1f1;
+.dashboard-card-gold {
+  border-top: 3px solid var(--braden-gold);
 }
 
-::-webkit-scrollbar-thumb {
-  background: #c5c5c5;
-  border-radius: 4px;
+.dashboard-card-red {
+  border-top: 3px solid var(--braden-red);
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: #a5a5a5;
+.dashboard-card-green {
+  border-top: 3px solid var(--braden-forest);
 }
 
-/* Dark mode scrollbar */
-.dark ::-webkit-scrollbar-track {
-  background: #1a1e2a;
+/* Dashboard metrics styling */
+.metric-card {
+  padding: 1rem;
+  border-radius: 0.5rem;
+  background-color: white;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  transition: transform 0.2s, box-shadow 0.2s;
 }
 
-.dark ::-webkit-scrollbar-thumb {
-  background: #2d3348;
-  border-radius: 4px;
+.metric-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.08);
 }
 
-.dark ::-webkit-scrollbar-thumb:hover {
-  background: #3e4663;
+.metric-value {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-primary);
 }
 
-@layer base {
-  * {
-    @apply border-border;
-  }
+.metric-label {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
 
-  body {
-    @apply font-sans antialiased bg-light-bg-primary dark:bg-dark-bg-primary text-light-text-primary dark:text-dark-text-primary;
-  }
+/* Form element styling */
+input, select, textarea {
+  border-radius: 0.375rem;
+  border: 1px solid #e2e8f0;
+  padding: 0.5rem 0.75rem;
+  background-color: white;
+  color: var(--text-primary);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+input:focus, select:focus, textarea:focus {
+  border-color: var(--braden-sky);
+  box-shadow: 0 0 0 2px rgba(93, 173, 226, 0.2);
+  outline: none;
 }
