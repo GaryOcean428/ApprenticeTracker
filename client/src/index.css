@@ -180,6 +180,7 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Add additional utility classes as needed */
 
+/*
 :root {
   /* Braden Group Brand Colors - Light Theme */
   --background: 0 0% 100%;
@@ -226,7 +227,9 @@ h1, h2, h3, h4, h5, h6 {
   --sidebar-border: 210 20% 90%;
   --sidebar-ring: 210 100% 50%;
 }
+*/
 
+/*
 .dark {
   /* Braden Group Brand Colors - Dark Theme */
   --background: 222 30% 10%; /* Dark blue-black background */
@@ -265,6 +268,7 @@ h1, h2, h3, h4, h5, h6 {
   --sidebar-border: 220 20% 20%;
   --sidebar-ring: 214 95% 60%;
 }
+*/
 
 /* Custom scrollbar */
 ::-webkit-scrollbar {
@@ -305,6 +309,6 @@ h1, h2, h3, h4, h5, h6 {
   }
 
   body {
-    @apply font-sans antialiased bg-background text-foreground;
+    @apply font-sans antialiased bg-light-bg-primary dark:bg-dark-bg-primary text-light-text-primary dark:text-dark-text-primary;
   }
 }
