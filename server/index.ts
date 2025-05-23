@@ -32,6 +32,15 @@ app.get('/', (req, res) => {
   });
 });
 
+// Health check endpoint for deployment
+app.get('/', (req, res) => {
+  res.status(200).json({
+    status: 'healthy',
+    environment: process.env.NODE_ENV || 'development',
+    timestamp: new Date().toISOString()
+  });
+});
+
 // Additional health check endpoint for API testing
 app.get('/health-check', (req, res) => {
   // Simple text response for health checks
