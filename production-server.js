@@ -25,10 +25,26 @@ app.get('/health-check', (req, res) => {
   res.status(200).json({ status: 'ok', time: new Date().toISOString() });
 });
 
-// API endpoints - in production, we'd import these from compiled files
-// For this minimal deployment server, we're just providing a health check
+// Import server routes from the compiled JavaScript
+import { registerRoutes } from './dist/index.js';
+
+// Register API routes
+try {
+  registerRoutes(app);
+} catch (error) {
+  console.error('Error registering routes:', error);
+}
 
 // Fallback route - serve the SPA for all other requests
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'dist/public/index.html'));
+});
+
+// Start the server
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Production server running on port ${PORT}`);
+});
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'dist/client/index.html'));
 });
