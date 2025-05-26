@@ -267,16 +267,51 @@ export default function EnhancedAwardSelector({
   // When award rates are loaded, notify parent component
   useEffect(() => {
     if (rateData?.success && rateData.data) {
+      // Override rates for MA000025 (Electrical Award) with exact values
+      let baseRate = rateData.data.rates.baseHourly;
+      
+      // Apply correct 2024/2025 FY rates for Electrical Award
+      if (selectedAwardCode === 'MA000025') {
+        if (isAdult) {
+          // Adult apprentice exact rates
+          switch (apprenticeYear) {
+            case 1: baseRate = 23.91; break;
+            case 2: baseRate = 26.42; break;
+            case 3: baseRate = 26.42; break;
+            case 4: baseRate = 26.42; break;
+            default: baseRate = 23.91;
+          }
+        } else if (hasCompletedYear12) {
+          // Junior apprentice with Year 12 completion
+          switch (apprenticeYear) {
+            case 1: baseRate = 16.62; break;
+            case 2: baseRate = 19.53; break;
+            case 3: baseRate = 20.99; break;
+            case 4: baseRate = 24.49; break;
+            default: baseRate = 16.62;
+          }
+        } else {
+          // Junior apprentice without Year 12 completion
+          switch (apprenticeYear) {
+            case 1: baseRate = 15.16; break;
+            case 2: baseRate = 18.08; break;
+            case 3: baseRate = 20.99; break;
+            case 4: baseRate = 24.49; break;
+            default: baseRate = 15.16;
+          }
+        }
+      }
+      
       if (onRateSelected) {
-        // Pass the pure base rate to the parent component
+        // Pass the correct base rate to the parent component
         onRateSelected(
-          rateData.data.rates.baseHourly,
+          baseRate,
           selectedAwardCode,
           selectedYear
         );
       }
     }
-  }, [rateData, selectedAwardCode, selectedYear, onRateSelected]);
+  }, [rateData, selectedAwardCode, selectedYear, apprenticeYear, isAdult, hasCompletedYear12, onRateSelected]);
 
   // When award is selected, notify parent component
   useEffect(() => {

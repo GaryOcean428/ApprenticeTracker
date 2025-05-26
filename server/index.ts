@@ -23,6 +23,38 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+// Health check endpoint ONLY for production mode
+// In development, this route should be handled by Vite for the UI
+if (process.env.NODE_ENV === 'production') {
+  app.get('/', (req, res) => {
+    res.status(200).json({
+      status: 'healthy',
+      environment: 'production',
+      timestamp: new Date().toISOString()
+    });
+  });
+}
+
+// Additional health check endpoint for API testing
+app.get('/health-check', (req, res) => {
+  // Simple text response for health checks
+  res.status(200).send('OK');
+});
+
+app.get('/api/health', (req, res) => {
+  // Detailed JSON response for API health checks
+  res.status(200).json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    service: 'apprentice-tracker',
+    environment: process.env.NODE_ENV || 'development',
+    fairwork_api: {
+      url_configured: !!process.env.FAIRWORK_API_URL,
+      key_configured: !!process.env.FAIRWORK_API_KEY
+    }
+  });
+});
+
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
@@ -151,19 +183,35 @@ app.use((req, res, next) => {
     serveStatic(app);
   }
 
-  // ALWAYS serve the app on port 5000
-  // this serves both the API and the client.
-  // It is the only port that is not firewalled.
-  const port = 5000;
+  // This health check is already defined above - removing duplicate
+
+  // Global error handler
+  app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+    log(`Error: ${err.message}`);
+    res.status(500).json({ error: 'Internal Server Error', message: err.message });
+  });
+
+  // Use PORT from environment variable for deployment compatibility
+  // Default to 5000 for both production and development since that's what Replit expects
+  const port = process.env.PORT || 5000;
+  
+  // Log environment information for debugging
+  log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+  log(`Using port: ${port}`);
+  
   server.listen({
     port,
     host: "0.0.0.0",
     reusePort: true,
   }, () => {
-    log(`serving on port ${port}`);
+    log(`Server successfully started on port ${port}`);
     
-    // Initialize scheduled tasks
-    initializeScheduledTasks();
-    log("Scheduled tasks initialized");
+    // Initialize scheduled tasks with error handling
+    try {
+      initializeScheduledTasks();
+      log("Scheduled tasks initialized");
+    } catch (error) {
+      log(`Failed to initialize scheduled tasks: ${error}`);
+    }
   });
 })();

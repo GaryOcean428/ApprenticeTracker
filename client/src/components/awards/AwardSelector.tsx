@@ -85,17 +85,19 @@ export function AwardSelector({
   const { toast } = useToast();
 
   // Fetch all awards
-  const { data: awards, isLoading: isLoadingAwards } = useQuery({
+  const { data: awardsResponse, isLoading: isLoadingAwards } = useQuery({
     queryKey: ['/api/fairwork/awards'],
-    select: (data) => data?.data?.awards || [],
   });
+  
+  const awards = awardsResponse?.data?.awards || [];
 
   // Fetch classifications for selected award
-  const { data: classifications, isLoading: isLoadingClassifications } = useQuery({
+  const { data: classificationsResponse, isLoading: isLoadingClassifications } = useQuery({
     queryKey: ['/api/fairwork/awards', selectedAward?.code, 'classifications'],
     enabled: !!selectedAward?.code,
-    select: (data) => data?.data?.classifications || [],
   });
+  
+  const classifications = classificationsResponse?.data?.classifications || [];
 
   // Extract unique industries and sectors for filtering
   const industries = React.useMemo(() => {
@@ -225,10 +227,10 @@ export function AwardSelector({
                 <SelectValue placeholder="Industry" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Industries</SelectItem>
+                <SelectItem value="all_industries">All Industries</SelectItem>
                 {industries.map((industry) => (
-                  <SelectItem key={industry} value={industry}>
-                    {industry}
+                  <SelectItem key={industry} value={industry || "unknown"}>
+                    {industry || "Unknown"}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -243,10 +245,10 @@ export function AwardSelector({
                 <SelectValue placeholder="Sector" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Sectors</SelectItem>
+                <SelectItem value="all_sectors">All Sectors</SelectItem>
                 {sectors.map((sector) => (
-                  <SelectItem key={sector} value={sector}>
-                    {sector}
+                  <SelectItem key={sector} value={sector || "unknown"}>
+                    {sector || "Unknown"}
                   </SelectItem>
                 ))}
               </SelectContent>

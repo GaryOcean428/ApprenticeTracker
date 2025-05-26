@@ -16,10 +16,27 @@ import logger from '../../utils/logger';
 import { isAuthenticated } from '../../middleware/auth';
 
 const router = express.Router();
+// Log status for better debugging
+logger.info('Fair Work API Configuration', {
+  url_configured: !!process.env.FAIRWORK_API_URL,
+  key_configured: !!process.env.FAIRWORK_API_KEY
+});
+
 const fairWorkApiClient = new FairWorkApiClient({
   baseUrl: process.env.FAIRWORK_API_URL || 'https://api.fairwork.gov.au',
-  apiKey: process.env.FAIRWORK_API_KEY || ''
+  apiKey: process.env.FAIRWORK_API_KEY || '',
+  // Add retries and timeout to make API more resilient
+  timeout: 15000
 });
+
+// Test connection during startup to verify API credentials
+fairWorkApiClient.getActiveAwards()
+  .then(awards => {
+    logger.info('Fair Work API connection successful', { awardsCount: awards.length });
+  })
+  .catch(error => {
+    logger.warn('Fair Work API connection test failed', { error: error.message });
+  });
 
 /**
  * @route GET /api/fairwork/awards

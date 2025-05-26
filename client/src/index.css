@@ -3,20 +3,38 @@
 @tailwind utilities;
 
 :root {
-  /* Braden Group Color Palette */
-  --braden-red: #ab233a;
-  --braden-dark-red: #811a2c;
-  --braden-gold: #cbb26a;
-  --braden-light-gold: #d8c690;
-  --braden-bronze: #be9e44;
-  --braden-navy: #2c3e50;
-  --braden-slate: #95a5a6;
-  --braden-sky: #3498db;
-  --braden-forest: #27ae60;
-  --braden-lavender: #9b59b6;
+  /* Braden Group Color Palette - Softened for better eye comfort */
+  --braden-red: #c04b5f;
+  --braden-dark-red: #9e3a4a;
+  --braden-gold: #d6c285;
+  --braden-light-gold: #e5d9b3;
+  --braden-bronze: #c9b06c;
+  --braden-navy: #3d5269;
+  --braden-slate: #b0bec5;
+  --braden-sky: #5dade2;
+  --braden-forest: #52be80;
+  --braden-lavender: #af7ac5;
+  
+  /* Background colors - softer */
+  --background-primary: #f8f9fa;
+  --background-secondary: #f0f2f5;
+  --background-tertiary: #e9ecef;
+  
+  /* Text colors - lowered contrast for comfort */
+  --text-primary: #2d3748;
+  --text-secondary: #4a5568;
+  --text-muted: #718096;
 }
 
-/* Apply brand colors to existing theme */
+/* Apply softer theme for better viewing comfort */
+@layer base {
+  body {
+    background-color: var(--background-primary);
+    color: var(--text-primary);
+  }
+}
+
+/* Enhanced theme color applications */
 .bg-primary {
   background-color: var(--braden-sky);
 }
@@ -31,6 +49,68 @@
 
 .text-secondary {
   color: var(--braden-navy);
+}
+
+/* Card and container styling for softer appearance */
+.card, .dashboard-card {
+  background-color: white;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+  border-radius: 0.5rem;
+}
+
+/* Dashboard card specific soft styling */
+.dashboard-card {
+  background-color: rgba(255, 255, 255, 0.9);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dashboard-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+/* Softer table styling */
+table {
+  background-color: white;
+  border-collapse: separate;
+  border-spacing: 0;
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+/* Typography adjustments for better readability */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+/* User profile menu styling */
+.user-profile-menu {
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  overflow: hidden;
+  min-width: 250px;
+}
+
+.user-profile-header {
+  padding: 1rem;
+  border-bottom: 1px solid var(--background-tertiary);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.user-profile-item {
+  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  transition: background-color 0.2s;
+}
+
+.user-profile-item:hover {
+  background-color: var(--background-secondary);
 }
 
 .bg-accent {
@@ -100,6 +180,7 @@
 
 /* Add additional utility classes as needed */
 
+/*
 :root {
   /* Braden Group Brand Colors - Light Theme */
   --background: 0 0% 100%;
@@ -146,7 +227,9 @@
   --sidebar-border: 210 20% 90%;
   --sidebar-ring: 210 100% 50%;
 }
+*/
 
+/*
 .dark {
   /* Braden Group Brand Colors - Dark Theme */
   --background: 222 30% 10%; /* Dark blue-black background */
@@ -185,6 +268,7 @@
   --sidebar-border: 220 20% 20%;
   --sidebar-ring: 214 95% 60%;
 }
+*/
 
 /* Custom scrollbar */
 ::-webkit-scrollbar {
@@ -225,6 +309,6 @@
   }
 
   body {
-    @apply font-sans antialiased bg-background text-foreground;
+    @apply font-sans antialiased bg-light-bg-primary dark:bg-dark-bg-primary text-light-text-primary dark:text-dark-text-primary;
   }
 }
