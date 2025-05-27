@@ -23,6 +23,10 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+// Use PORT from environment variable for deployment compatibility
+// Default to 5000 for both production and development since that's what Replit expects
+const port = process.env.PORT || 5000;
+
 // Health check endpoint for deployment (works in all environments)
 app.get('/', (req, res) => {
   res.status(200).json({
@@ -189,10 +193,6 @@ app.use((req, res, next) => {
     res.status(500).json({ error: 'Internal Server Error', message: err.message });
   });
 
-  // Use PORT from environment variable for deployment compatibility
-  // Default to 5000 for both production and development since that's what Replit expects
-  const port = process.env.PORT || 5000;
-  
   // Log environment information for debugging
   log(`Environment: ${process.env.NODE_ENV || 'development'}`);
   log(`Using port: ${port}`);
