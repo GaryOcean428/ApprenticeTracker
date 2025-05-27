@@ -227,4 +227,7 @@ app.use((req, res, next) => {
       log('Process terminated');
     });
   });
-})();
+})().catch((error) => {
+  log(`Fatal error during startup: ${error}`);
+  process.exit(1);
+});
