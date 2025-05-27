@@ -23,16 +23,15 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// Health check endpoint only for production deployment
-if (process.env.NODE_ENV === 'production') {
-  app.get('/', (req, res) => {
-    res.status(200).json({
-      status: 'healthy',
-      environment: 'production',
-      timestamp: new Date().toISOString()
-    });
+// Health check endpoint for deployment (works in all environments)
+app.get('/', (req, res) => {
+  res.status(200).json({
+    status: 'healthy',
+    environment: process.env.NODE_ENV || 'development',
+    timestamp: new Date().toISOString(),
+    port: port
   });
-}
+});
 
 // Additional health check endpoint for API testing
 app.get('/health-check', (req, res) => {
@@ -198,7 +197,7 @@ app.use((req, res, next) => {
   log(`Environment: ${process.env.NODE_ENV || 'development'}`);
   log(`Using port: ${port}`);
   
-  server.listen({
+  const serverInstance = server.listen({
     port,
     host: "0.0.0.0",
     reusePort: true,
@@ -212,5 +211,20 @@ app.use((req, res, next) => {
     } catch (error) {
       log(`Failed to initialize scheduled tasks: ${error}`);
     }
+  });
+
+  // Ensure the server keeps running
+  process.on('SIGTERM', () => {
+    log('SIGTERM received, shutting down gracefully');
+    serverInstance.close(() => {
+      log('Process terminated');
+    });
+  });
+
+  process.on('SIGINT', () => {
+    log('SIGINT received, shutting down gracefully');
+    serverInstance.close(() => {
+      log('Process terminated');
+    });
   });
 })();
