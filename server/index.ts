@@ -27,15 +27,17 @@ app.use(express.urlencoded({ extended: false }));
 // Default to 5000 for both production and development since that's what Replit expects
 const port = process.env.PORT || 5000;
 
-// Health check endpoint for deployment (works in all environments)
-app.get('/', (req, res) => {
-  res.status(200).json({
-    status: 'healthy',
-    environment: process.env.NODE_ENV || 'development',
-    timestamp: new Date().toISOString(),
-    port: port
+// Health check endpoint only for production deployment
+if (process.env.NODE_ENV === 'production') {
+  app.get('/', (req, res) => {
+    res.status(200).json({
+      status: 'healthy',
+      environment: 'production',
+      timestamp: new Date().toISOString(),
+      port: port
+    });
   });
-});
+}
 
 // Additional health check endpoint for API testing
 app.get('/health-check', (req, res) => {
