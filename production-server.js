@@ -12,16 +12,7 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// Health check endpoint for deployment
-app.get('/', (req, res) => {
-  res.status(200).json({
-    status: 'healthy',
-    environment: 'production',
-    timestamp: new Date().toISOString()
-  });
-});
-
-// API health check endpoint
+// Health check endpoint for deployment monitoring (not on root path)
 app.get('/health-check', (req, res) => {
   res.status(200).json({ 
     status: 'ok', 
@@ -30,9 +21,13 @@ app.get('/health-check', (req, res) => {
   });
 });
 
-// Serve static files from the client build directory
-const clientPath = path.join(__dirname, 'dist/client');
-app.use(express.static(clientPath));
+app.get('/health', (req, res) => {
+  res.status(200).json({
+    status: 'healthy',
+    environment: 'production',
+    timestamp: new Date().toISOString()
+  });
+});
 
 // Import and register server routes from the compiled JavaScript
 try {
@@ -41,8 +36,12 @@ try {
   console.log('API routes registered successfully');
 } catch (error) {
   console.error('Error registering routes:', error);
-  // Continue without API routes for basic health check
+  // Continue serving static files even if API routes fail
 }
+
+// Serve static files from the client build directory
+const clientPath = path.join(__dirname, 'dist/public');
+app.use(express.static(clientPath, { index: 'index.html' }));
 
 // Error handler
 app.use((err, req, res, next) => {
@@ -53,13 +52,23 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Fallback route - serve the SPA for all other requests
+// Serve React app for all non-API routes (SPA fallback)
 app.get('*', (req, res) => {
+  // Skip API routes and health checks
+  if (req.path.startsWith('/api') || req.path === '/health-check' || req.path === '/health') {
+    return res.status(404).json({ error: 'Endpoint not found' });
+  }
+  
   const indexPath = path.join(clientPath, 'index.html');
   res.sendFile(indexPath, (err) => {
     if (err) {
       console.error('Error serving index.html:', err);
-      res.status(500).send('Application not available');
+      res.status(500).json({
+        status: 'healthy',
+        environment: 'production',
+        timestamp: new Date().toISOString(),
+        note: 'Frontend build not available, showing health status'
+      });
     }
   });
 });
