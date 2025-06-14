@@ -1447,6 +1447,9 @@ export type ProgressReviewDocument = typeof progressReviewDocuments.$inferSelect
 export type InsertProgressReviewDocument = z.infer<typeof insertProgressReviewDocumentSchema>;
 
 // Export module schemas
+export * from './schema/awards';
+export * from './schema/billing';
+export * from './schema/claims';
 export * from './schema/whs';
 export * from './schema/labour-hire';
 export * from './schema/contacts';

@@ -3,6 +3,16 @@ import {
   apprentices, hostEmployers, trainingContracts, placements, 
   documents, complianceRecords, timesheets, timesheetDetails, 
   activityLogs, tasks, qualifications, hostEmployerPreferredQualifications,
+  awards, awardClassifications, payRates, penaltyRules, allowanceRules,
+  publicHolidays, chargeRateCalculations, quotes, quoteLineItems,
+  fairworkComplianceLogs, enterpriseAgreements, gtoOrganizations,
+  gtoComplianceStandards, complianceAssessments, apprenticeRecruitment,
+  hostEmployerAgreements, apprenticeInduction, complaints, appeals,
+  unitsOfCompetency, qualificationStructure, apprenticeUnitProgress,
+  apprenticeQualifications, enrichmentPrograms, enrichmentParticipants,
+  enrichmentWorkshops, workshopAttendees, progressReviewTemplates,
+  progressReviews, progressReviewParticipants, progressReviewActionItems,
+  progressReviewDocuments,
   type Role, type InsertRole,
   type Permission, type InsertPermission,
   type RolePermission, type InsertRolePermission,
@@ -19,7 +29,39 @@ import {
   type ActivityLog, type InsertActivityLog,
   type Task, type InsertTask,
   type Qualification, type InsertQualification,
-  type HostEmployerPreferredQualification, type InsertHostEmployerPreferredQualification
+  type HostEmployerPreferredQualification, type InsertHostEmployerPreferredQualification,
+  type Award, type InsertAward,
+  type AwardClassification, type InsertAwardClassification,
+  type PayRate, type InsertPayRate,
+  type PenaltyRule, type InsertPenaltyRule,
+  type AllowanceRule, type InsertAllowanceRule,
+  type PublicHoliday, type InsertPublicHoliday,
+  type ChargeRateCalculation, type InsertChargeRateCalculation,
+  type Quote, type InsertQuote,
+  type QuoteLineItem, type InsertQuoteLineItem,
+  type FairworkComplianceLog, type InsertFairworkComplianceLog,
+  type EnterpriseAgreement, type InsertEnterpriseAgreement,
+  type GtoOrganization, type InsertGtoOrganization,
+  type GtoComplianceStandard, type InsertGtoComplianceStandard,
+  type ComplianceAssessment, type InsertComplianceAssessment,
+  type ApprenticeRecruitment, type InsertApprenticeRecruitment,
+  type HostEmployerAgreement, type InsertHostEmployerAgreement,
+  type ApprenticeInduction, type InsertApprenticeInduction,
+  type Complaint, type InsertComplaint,
+  type Appeal, type InsertAppeal,
+  type UnitOfCompetency, type InsertUnitOfCompetency,
+  type QualificationStructure, type InsertQualificationStructure,
+  type ApprenticeUnitProgress, type InsertApprenticeUnitProgress,
+  type ApprenticeQualification, type InsertApprenticeQualification,
+  type EnrichmentProgram, type InsertEnrichmentProgram,
+  type EnrichmentParticipant, type InsertEnrichmentParticipant,
+  type EnrichmentWorkshop, type InsertEnrichmentWorkshop,
+  type WorkshopAttendee, type InsertWorkshopAttendee,
+  type ProgressReviewTemplate, type InsertProgressReviewTemplate,
+  type ProgressReview, type InsertProgressReview,
+  type ProgressReviewParticipant, type InsertProgressReviewParticipant,
+  type ProgressReviewActionItem, type InsertProgressReviewActionItem,
+  type ProgressReviewDocument, type InsertProgressReviewDocument
 } from "@shared/schema";
 
 // Import labour hire types
@@ -152,6 +194,13 @@ export interface IStorage {
   getTimesheetsByApprentice(apprenticeId: number): Promise<Timesheet[]>;
   createTimesheet(timesheet: InsertTimesheet): Promise<Timesheet>;
   updateTimesheet(id: number, timesheet: Partial<InsertTimesheet>): Promise<Timesheet | undefined>;
+
+  // Timesheet Detail methods
+  getTimesheetDetail(id: number): Promise<TimesheetDetail | undefined>;
+  getTimesheetDetailsByTimesheet(timesheetId: number): Promise<TimesheetDetail[]>;
+  createTimesheetDetail(detail: InsertTimesheetDetail): Promise<TimesheetDetail>;
+  updateTimesheetDetail(id: number, detail: Partial<InsertTimesheetDetail>): Promise<TimesheetDetail | undefined>;
+  deleteTimesheetDetail(id: number): Promise<boolean>;
 
   // Activity Log methods
   createActivityLog(log: InsertActivityLog): Promise<ActivityLog>;
@@ -314,6 +363,216 @@ export interface IStorage {
   createClientInteraction(interaction: InsertClientInteraction): Promise<ClientInteraction>;
   updateClientInteraction(id: number, interaction: Partial<InsertClientInteraction>): Promise<ClientInteraction | undefined>;
   deleteClientInteraction(id: number): Promise<boolean>;
+
+  // Award methods
+  getAward(id: number): Promise<Award | undefined>;
+  getAwardByCode(code: string): Promise<Award | undefined>;
+  getAllAwards(): Promise<Award[]>;
+  createAward(award: InsertAward): Promise<Award>;
+  updateAward(id: number, award: Partial<InsertAward>): Promise<Award | undefined>;
+  deleteAward(id: number): Promise<boolean>;
+
+  // Award Classification methods
+  getAwardClassification(id: number): Promise<AwardClassification | undefined>;
+  getAwardClassificationsByAward(awardId: number): Promise<AwardClassification[]>;
+  getAllAwardClassifications(): Promise<AwardClassification[]>;
+  createAwardClassification(classification: InsertAwardClassification): Promise<AwardClassification>;
+  updateAwardClassification(id: number, classification: Partial<InsertAwardClassification>): Promise<AwardClassification | undefined>;
+  deleteAwardClassification(id: number): Promise<boolean>;
+
+  // Pay Rate methods
+  getPayRate(id: number): Promise<PayRate | undefined>;
+  getPayRatesByClassification(classificationId: number): Promise<PayRate[]>;
+  getCurrentPayRates(): Promise<PayRate[]>;
+  getAllPayRates(): Promise<PayRate[]>;
+  createPayRate(payRate: InsertPayRate): Promise<PayRate>;
+  updatePayRate(id: number, payRate: Partial<InsertPayRate>): Promise<PayRate | undefined>;
+  deletePayRate(id: number): Promise<boolean>;
+
+  // Penalty Rule methods
+  getPenaltyRule(id: number): Promise<PenaltyRule | undefined>;
+  getPenaltyRulesByAward(awardId: number): Promise<PenaltyRule[]>;
+  getAllPenaltyRules(): Promise<PenaltyRule[]>;
+  createPenaltyRule(rule: InsertPenaltyRule): Promise<PenaltyRule>;
+  updatePenaltyRule(id: number, rule: Partial<InsertPenaltyRule>): Promise<PenaltyRule | undefined>;
+  deletePenaltyRule(id: number): Promise<boolean>;
+
+  // Allowance Rule methods
+  getAllowanceRule(id: number): Promise<AllowanceRule | undefined>;
+  getAllowanceRulesByAward(awardId: number): Promise<AllowanceRule[]>;
+  getAllAllowanceRules(): Promise<AllowanceRule[]>;
+  createAllowanceRule(rule: InsertAllowanceRule): Promise<AllowanceRule>;
+  updateAllowanceRule(id: number, rule: Partial<InsertAllowanceRule>): Promise<AllowanceRule | undefined>;
+  deleteAllowanceRule(id: number): Promise<boolean>;
+
+  // Public Holiday methods
+  getPublicHoliday(id: number): Promise<PublicHoliday | undefined>;
+  getPublicHolidaysByState(state: string): Promise<PublicHoliday[]>;
+  getPublicHolidaysByYear(year: number): Promise<PublicHoliday[]>;
+  getAllPublicHolidays(): Promise<PublicHoliday[]>;
+  createPublicHoliday(holiday: InsertPublicHoliday): Promise<PublicHoliday>;
+  updatePublicHoliday(id: number, holiday: Partial<InsertPublicHoliday>): Promise<PublicHoliday | undefined>;
+  deletePublicHoliday(id: number): Promise<boolean>;
+
+  // Charge Rate Calculation methods
+  getChargeRateCalculation(id: number): Promise<ChargeRateCalculation | undefined>;
+  getChargeRateCalculationsByApprentice(apprenticeId: number): Promise<ChargeRateCalculation[]>;
+  getChargeRateCalculationsByHost(hostEmployerId: number): Promise<ChargeRateCalculation[]>;
+  getAllChargeRateCalculations(): Promise<ChargeRateCalculation[]>;
+  createChargeRateCalculation(calculation: InsertChargeRateCalculation): Promise<ChargeRateCalculation>;
+  updateChargeRateCalculation(id: number, calculation: Partial<InsertChargeRateCalculation>): Promise<ChargeRateCalculation | undefined>;
+  approveChargeRateCalculation(id: number, approvedBy: number): Promise<ChargeRateCalculation | undefined>;
+  deleteChargeRateCalculation(id: number): Promise<boolean>;
+
+  // Quote methods
+  getQuote(id: number): Promise<Quote | undefined>;
+  getQuotesByHost(hostEmployerId: number): Promise<Quote[]>;
+  getAllQuotes(): Promise<Quote[]>;
+  createQuote(quote: InsertQuote): Promise<Quote>;
+  updateQuote(id: number, quote: Partial<InsertQuote>): Promise<Quote | undefined>;
+  acceptQuote(id: number, acceptedBy: string): Promise<Quote | undefined>;
+  rejectQuote(id: number, reason: string): Promise<Quote | undefined>;
+  deleteQuote(id: number): Promise<boolean>;
+
+  // Quote Line Item methods
+  getQuoteLineItem(id: number): Promise<QuoteLineItem | undefined>;
+  getQuoteLineItemsByQuote(quoteId: number): Promise<QuoteLineItem[]>;
+  createQuoteLineItem(item: InsertQuoteLineItem): Promise<QuoteLineItem>;
+  updateQuoteLineItem(id: number, item: Partial<InsertQuoteLineItem>): Promise<QuoteLineItem | undefined>;
+  deleteQuoteLineItem(id: number): Promise<boolean>;
+
+  // Fair Work Compliance Log methods
+  getFairworkComplianceLog(id: number): Promise<FairworkComplianceLog | undefined>;
+  getFairworkComplianceLogsByEmployee(employeeId: number): Promise<FairworkComplianceLog[]>;
+  getFairworkComplianceLogsByTimesheet(timesheetId: number): Promise<FairworkComplianceLog[]>;
+  getAllFairworkComplianceLogs(): Promise<FairworkComplianceLog[]>;
+  createFairworkComplianceLog(log: InsertFairworkComplianceLog): Promise<FairworkComplianceLog>;
+  updateFairworkComplianceLog(id: number, log: Partial<InsertFairworkComplianceLog>): Promise<FairworkComplianceLog | undefined>;
+  deleteFairworkComplianceLog(id: number): Promise<boolean>;
+
+  // Enterprise Agreement methods
+  getEnterpriseAgreement(id: number): Promise<EnterpriseAgreement | undefined>;
+  getAllEnterpriseAgreements(): Promise<EnterpriseAgreement[]>;
+  getActiveEnterpriseAgreements(): Promise<EnterpriseAgreement[]>;
+  createEnterpriseAgreement(agreement: InsertEnterpriseAgreement): Promise<EnterpriseAgreement>;
+  updateEnterpriseAgreement(id: number, agreement: Partial<InsertEnterpriseAgreement>): Promise<EnterpriseAgreement | undefined>;
+  deleteEnterpriseAgreement(id: number): Promise<boolean>;
+
+  // GTO Organization methods
+  getGtoOrganization(id: number): Promise<GtoOrganization | undefined>;
+  getAllGtoOrganizations(): Promise<GtoOrganization[]>;
+  getActiveGtoOrganizations(): Promise<GtoOrganization[]>;
+  createGtoOrganization(organization: InsertGtoOrganization): Promise<GtoOrganization>;
+  updateGtoOrganization(id: number, organization: Partial<InsertGtoOrganization>): Promise<GtoOrganization | undefined>;
+  deleteGtoOrganization(id: number): Promise<boolean>;
+
+  // Units of Competency methods
+  getUnitOfCompetency(id: number): Promise<UnitOfCompetency | undefined>;
+  getUnitOfCompetencyByCode(unitCode: string): Promise<UnitOfCompetency | undefined>;
+  getAllUnitsOfCompetency(): Promise<UnitOfCompetency[]>;
+  searchUnitsOfCompetency(query: string): Promise<UnitOfCompetency[]>;
+  createUnitOfCompetency(unit: InsertUnitOfCompetency): Promise<UnitOfCompetency>;
+  updateUnitOfCompetency(id: number, unit: Partial<InsertUnitOfCompetency>): Promise<UnitOfCompetency | undefined>;
+  deleteUnitOfCompetency(id: number): Promise<boolean>;
+
+  // Qualification Structure methods
+  getQualificationStructure(qualificationId: number): Promise<QualificationStructure[]>;
+  addUnitToQualification(structure: InsertQualificationStructure): Promise<QualificationStructure>;
+  removeUnitFromQualification(qualificationId: number, unitId: number): Promise<boolean>;
+  updateQualificationStructure(id: number, structure: Partial<InsertQualificationStructure>): Promise<QualificationStructure | undefined>;
+
+  // Apprentice Unit Progress methods
+  getApprenticeUnitProgress(id: number): Promise<ApprenticeUnitProgress | undefined>;
+  getApprenticeUnitProgressByApprentice(apprenticeId: number): Promise<ApprenticeUnitProgress[]>;
+  getApprenticeUnitProgressByUnit(unitId: number): Promise<ApprenticeUnitProgress[]>;
+  createApprenticeUnitProgress(progress: InsertApprenticeUnitProgress): Promise<ApprenticeUnitProgress>;
+  updateApprenticeUnitProgress(id: number, progress: Partial<InsertApprenticeUnitProgress>): Promise<ApprenticeUnitProgress | undefined>;
+  completeApprenticeUnit(id: number, assessorId: number, result: string): Promise<ApprenticeUnitProgress | undefined>;
+  deleteApprenticeUnitProgress(id: number): Promise<boolean>;
+
+  // Apprentice Qualification methods
+  getApprenticeQualification(id: number): Promise<ApprenticeQualification | undefined>;
+  getApprenticeQualificationsByApprentice(apprenticeId: number): Promise<ApprenticeQualification[]>;
+  getApprenticeQualificationsByQualification(qualificationId: number): Promise<ApprenticeQualification[]>;
+  createApprenticeQualification(qualification: InsertApprenticeQualification): Promise<ApprenticeQualification>;
+  updateApprenticeQualification(id: number, qualification: Partial<InsertApprenticeQualification>): Promise<ApprenticeQualification | undefined>;
+  completeApprenticeQualification(id: number, completionDate: Date, certificateNumber?: string): Promise<ApprenticeQualification | undefined>;
+  deleteApprenticeQualification(id: number): Promise<boolean>;
+
+  // Enrichment Program methods
+  getEnrichmentProgram(id: number): Promise<EnrichmentProgram | undefined>;
+  getAllEnrichmentPrograms(): Promise<EnrichmentProgram[]>;
+  getActiveEnrichmentPrograms(): Promise<EnrichmentProgram[]>;
+  createEnrichmentProgram(program: InsertEnrichmentProgram): Promise<EnrichmentProgram>;
+  updateEnrichmentProgram(id: number, program: Partial<InsertEnrichmentProgram>): Promise<EnrichmentProgram | undefined>;
+  deleteEnrichmentProgram(id: number): Promise<boolean>;
+
+  // Enrichment Participant methods
+  getEnrichmentParticipant(id: number): Promise<EnrichmentParticipant | undefined>;
+  getEnrichmentParticipantsByProgram(programId: number): Promise<EnrichmentParticipant[]>;
+  getEnrichmentParticipantsByApprentice(apprenticeId: number): Promise<EnrichmentParticipant[]>;
+  enrollApprenticeInProgram(participant: InsertEnrichmentParticipant): Promise<EnrichmentParticipant>;
+  updateEnrichmentParticipant(id: number, participant: Partial<InsertEnrichmentParticipant>): Promise<EnrichmentParticipant | undefined>;
+  completeEnrichmentProgram(id: number, completionDate: Date, feedback?: string): Promise<EnrichmentParticipant | undefined>;
+  withdrawFromEnrichmentProgram(id: number, reason?: string): Promise<EnrichmentParticipant | undefined>;
+
+  // Enrichment Workshop methods
+  getEnrichmentWorkshop(id: number): Promise<EnrichmentWorkshop | undefined>;
+  getEnrichmentWorkshopsByProgram(programId: number): Promise<EnrichmentWorkshop[]>;
+  getAllEnrichmentWorkshops(): Promise<EnrichmentWorkshop[]>;
+  createEnrichmentWorkshop(workshop: InsertEnrichmentWorkshop): Promise<EnrichmentWorkshop>;
+  updateEnrichmentWorkshop(id: number, workshop: Partial<InsertEnrichmentWorkshop>): Promise<EnrichmentWorkshop | undefined>;
+  deleteEnrichmentWorkshop(id: number): Promise<boolean>;
+
+  // Workshop Attendee methods
+  getWorkshopAttendee(id: number): Promise<WorkshopAttendee | undefined>;
+  getWorkshopAttendeesByWorkshop(workshopId: number): Promise<WorkshopAttendee[]>;
+  getWorkshopAttendeesByApprentice(apprenticeId: number): Promise<WorkshopAttendee[]>;
+  registerForWorkshop(attendee: InsertWorkshopAttendee): Promise<WorkshopAttendee>;
+  updateWorkshopAttendee(id: number, attendee: Partial<InsertWorkshopAttendee>): Promise<WorkshopAttendee | undefined>;
+  markWorkshopAttendance(id: number, status: string): Promise<WorkshopAttendee | undefined>;
+  cancelWorkshopRegistration(id: number): Promise<boolean>;
+
+  // Progress Review Template methods
+  getProgressReviewTemplate(id: number): Promise<ProgressReviewTemplate | undefined>;
+  getAllProgressReviewTemplates(): Promise<ProgressReviewTemplate[]>;
+  getActiveProgressReviewTemplates(): Promise<ProgressReviewTemplate[]>;
+  createProgressReviewTemplate(template: InsertProgressReviewTemplate): Promise<ProgressReviewTemplate>;
+  updateProgressReviewTemplate(id: number, template: Partial<InsertProgressReviewTemplate>): Promise<ProgressReviewTemplate | undefined>;
+  deleteProgressReviewTemplate(id: number): Promise<boolean>;
+
+  // Progress Review methods
+  getProgressReview(id: number): Promise<ProgressReview | undefined>;
+  getProgressReviewsByApprentice(apprenticeId: number): Promise<ProgressReview[]>;
+  getProgressReviewsByReviewer(reviewerId: number): Promise<ProgressReview[]>;
+  getAllProgressReviews(): Promise<ProgressReview[]>;
+  createProgressReview(review: InsertProgressReview): Promise<ProgressReview>;
+  updateProgressReview(id: number, review: Partial<InsertProgressReview>): Promise<ProgressReview | undefined>;
+  completeProgressReview(id: number, summary: string, rating?: number): Promise<ProgressReview | undefined>;
+  cancelProgressReview(id: number): Promise<ProgressReview | undefined>;
+  deleteProgressReview(id: number): Promise<boolean>;
+
+  // Progress Review Participant methods
+  getProgressReviewParticipant(id: number): Promise<ProgressReviewParticipant | undefined>;
+  getProgressReviewParticipantsByReview(reviewId: number): Promise<ProgressReviewParticipant[]>;
+  addProgressReviewParticipant(participant: InsertProgressReviewParticipant): Promise<ProgressReviewParticipant>;
+  updateProgressReviewParticipant(id: number, participant: Partial<InsertProgressReviewParticipant>): Promise<ProgressReviewParticipant | undefined>;
+  removeProgressReviewParticipant(id: number): Promise<boolean>;
+
+  // Progress Review Action Item methods
+  getProgressReviewActionItem(id: number): Promise<ProgressReviewActionItem | undefined>;
+  getProgressReviewActionItemsByReview(reviewId: number): Promise<ProgressReviewActionItem[]>;
+  getProgressReviewActionItemsByAssignee(assigneeId: number): Promise<ProgressReviewActionItem[]>;
+  createProgressReviewActionItem(actionItem: InsertProgressReviewActionItem): Promise<ProgressReviewActionItem>;
+  updateProgressReviewActionItem(id: number, actionItem: Partial<InsertProgressReviewActionItem>): Promise<ProgressReviewActionItem | undefined>;
+  completeProgressReviewActionItem(id: number, completionNotes?: string): Promise<ProgressReviewActionItem | undefined>;
+  deleteProgressReviewActionItem(id: number): Promise<boolean>;
+
+  // Progress Review Document methods
+  getProgressReviewDocument(id: number): Promise<ProgressReviewDocument | undefined>;
+  getProgressReviewDocumentsByReview(reviewId: number): Promise<ProgressReviewDocument[]>;
+  addProgressReviewDocument(document: InsertProgressReviewDocument): Promise<ProgressReviewDocument>;
+  removeProgressReviewDocument(id: number): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
