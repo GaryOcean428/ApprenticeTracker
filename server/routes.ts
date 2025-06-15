@@ -40,6 +40,7 @@ import complianceRouter from "./api/compliance";
 import { setupWhsRoutes } from "./api/whs/index";
 import labourHireRouter from "./api/labour-hire-routes";
 import tagsRouter from "./api/tags-routes";
+import rateTemplatesRouter from "./api/rate-templates-routes"; // Import the new router
 import { eq, and } from "drizzle-orm";
 import { db } from "./db"; // Assuming db connection is defined here
 import { users, gtoOrganizations } from "@shared/schema";
@@ -798,6 +799,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/api/contacts', contactsRouter); // Unified Contacts System routes
   app.use('/api/clients', clientsRouter); // Client Management System routes
   app.use('/api/tags', tagsRouter); // Contact Tags routes
+  app.use('/api/rate-templates', rateTemplatesRouter); // Register the new rate templates router
   
   // Register host employer routes
   registerHostRoutes(app);

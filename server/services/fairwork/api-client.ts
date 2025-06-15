@@ -42,6 +42,24 @@ export interface PayRate {
   rate_description?: string;
   base_classification?: string;
   base_percentage?: number;
+  // Fields from FWA API that might be useful for PayRate
+  employeeRateTypeCode?: string;
+  classificationFixedId?: number;
+}
+
+// New detailed Allowance interface
+export interface AllowanceWithValue {
+  id: string; // e.g., wage_allowance_fixed_id from API
+  code?: string; // Official code if available (e.g., from allowanceCode)
+  name: string; // Description or title of the allowance (e.g., from description)
+  value: number; // The monetary value of the allowance (e.g., from allowance_amount)
+  unit: string; // e.g., 'per week', 'per hour', 'per day' (e.g., from payment_frequency)
+  effective_from: string; // YYYY-MM-DD
+  effective_to?: string | null; // YYYY-MM-DD or null
+  allowanceFixedId?: number; // FWA specific ID
+  allowanceTypeDescription?: string; // e.g. "All Purpose"
+  paymentType?: string; // e.g. "Payable"
+  // Add any other relevant fields returned by the FWA API for wage allowances
 }
 
 export interface ClassificationHierarchy {
@@ -290,15 +308,44 @@ export class FairWorkApiClient {
    * Get wage allowances for a specific award
    * Endpoint: GET /api/v1/awards/{id_or_code}/wage-allowances
    */
-  async getWageAllowances(awardCode: string): Promise<any[]> {
+  async getWageAllowances(awardCode: string, options?: { operativeFrom?: string, operativeTo?: string }): Promise<AllowanceWithValue[]> {
+    const params: Record<string, string> = { };
+    // Note: FWA API for wage-allowances might not support operative_from/to in query.
+    // If so, client-side filtering will be essential (handled in getEffectiveAwardAllowance).
+    // For now, let's pass them if provided, assuming API might support it or ignore gracefully.
+    if (options?.operativeFrom) params.operative_from = options.operativeFrom;
+    if (options?.operativeTo) params.operative_to = options.operativeTo;
+
     try {
-      const response = await this.request<any>(`/awards/${awardCode}/wage-allowances`);
-      // Extract wage allowances from the response based on API structure
-      const allowances = response.results || [];
-      return allowances;
-    } catch (error) {
-      logger.error('Failed to fetch wage allowances', { error, awardCode });
-      return [];
+      const response = await this.request<any>( // AxiosInstance returns any for data by default
+        `/awards/${awardCode}/wage-allowances`,
+        { params }
+      );
+
+      const rawAllowances = response.results || [];
+      if (!Array.isArray(rawAllowances)) {
+        logger.warn(`Unexpected response structure for wage allowances, award ${awardCode}:`, response);
+        return [];
+      }
+
+      return rawAllowances.map((item: any) => ({
+        id: item.wage_allowance_fixed_id?.toString() || `synthetic-${item.allowance_code || Math.random().toString(36).substring(2, 9)}`,
+        code: item.allowance_code,
+        name: item.description || "Unknown Allowance",
+        value: parseFloat(item.allowance_amount) || 0,
+        unit: item.payment_frequency || "N/A",
+        effective_from: item.operative_from || item.effective_from || new Date(0).toISOString().split('T')[0], // Ensure a default valid date
+        effective_to: item.operative_to || item.effective_to, // Can be null
+        allowanceFixedId: item.wage_allowance_fixed_id,
+        allowanceTypeDescription: item.allowance_type_description,
+        paymentType: item.payment_type
+      })) as AllowanceWithValue[];
+    } catch (error: any) {
+      logger.error(
+        `Error fetching wage allowances for award ${awardCode}: ${error.message}`,
+        { status: (error as ApiError).statusCode, data: (error as ApiError).responseData, awardCode, options }
+      );
+      return []; // Return empty array on error to allow other operations to proceed.
     }
   }
 
@@ -670,5 +717,121 @@ export class FairWorkApiClient {
     if (j === 2 && k !== 12) return 'nd';
     if (j === 3 && k !== 13) return 'rd';
     return 'th';
+  }
+
+  async getEffectiveClassificationRate(
+    awardCode: string,
+    classificationFixedId: number,
+    effectiveDate: string, // YYYY-MM-DD
+    preferredRateType: string = 'Adult'
+  ): Promise<PayRate | null> {
+    try {
+      const rates = await this.getPayRates(awardCode, {
+        classificationFixedId,
+        operativeFrom: effectiveDate,
+        operativeTo: effectiveDate
+      });
+
+      const activeRates = rates.filter(rate => {
+        const fromDate = new Date(rate.effective_from);
+        const effDate = new Date(effectiveDate);
+        // Ensure effective_to is handled correctly if null (meaning ongoing)
+        const toDate = rate.effective_to ? new Date(rate.effective_to) : null;
+
+        return fromDate <= effDate && (!toDate || toDate >= effDate);
+      });
+
+      if (activeRates.length === 0) {
+        logger.info(`No active rates found for ${awardCode} / CFID ${classificationFixedId} on ${effectiveDate}`);
+        return null;
+      }
+
+      let selectedRate: PayRate | undefined;
+
+      if (preferredRateType) {
+        selectedRate = activeRates.find(r => r.employeeRateTypeCode === preferredRateType);
+      }
+
+      if (!selectedRate) {
+        // Fallback logic: if preferred not found, or not specified.
+        // Prioritize non-apprentice if preferredRateType isn't 'AP' or similar.
+        if (preferredRateType && !preferredRateType.toUpperCase().startsWith('AP')) {
+            selectedRate = activeRates.find(r => r.employeeRateTypeCode && !r.employeeRateTypeCode.toUpperCase().startsWith('AP'));
+        }
+        if (!selectedRate && activeRates.length > 0) {
+             // If still no specific match, take the first available active rate as a general fallback
+            selectedRate = activeRates[0];
+            logger.info(`No rate found for preferred type '${preferredRateType}', selected first available: ${selectedRate.employeeRateTypeCode}`);
+        }
+      }
+
+      // If multiple rates of the selected type are active (e.g. two 'Adult' rates), pick latest effective_from
+      if (selectedRate) {
+        const sameTypeRates = activeRates.filter(r => r.employeeRateTypeCode === selectedRate?.employeeRateTypeCode);
+        if (sameTypeRates.length > 1) {
+            selectedRate = sameTypeRates.sort((a, b) => new Date(b.effective_from).getTime() - new Date(a.effective_from).getTime())[0];
+            logger.warn(`Multiple active rates of type ${selectedRate?.employeeRateTypeCode} found for ${awardCode} / CFID ${classificationFixedId} on ${effectiveDate}. Selected the one with latest effective_from: ${selectedRate?.effective_from}`);
+        }
+      }
+
+      return selectedRate || null;
+
+    } catch (error) {
+      logger.error(`Error in getEffectiveClassificationRate for ${awardCode} / CFID ${classificationFixedId} on ${effectiveDate}:`, error);
+      return null;
+    }
+  }
+
+  async getEffectiveAwardAllowance(
+    awardCode: string,
+    allowanceIdentifier: string | number, // Can be ID (number) or code/name (string)
+    effectiveDate: string // YYYY-MM-DD
+  ): Promise<AllowanceWithValue | null> {
+    try {
+      // FWA API for allowances might not filter by date in query, so get all and filter client-side.
+      const allAllowances = await this.getWageAllowances(awardCode);
+
+      const activeAllowances = allAllowances.filter(allowance => {
+        const fromDate = new Date(allowance.effective_from);
+        const effDate = new Date(effectiveDate);
+        const toDate = allowance.effective_to ? new Date(allowance.effective_to) : null;
+        return fromDate <= effDate && (!toDate || toDate >= effDate);
+      });
+
+      if (activeAllowances.length === 0) {
+        logger.info(`No active allowances found for award ${awardCode} on ${effectiveDate} matching identifier '${allowanceIdentifier}'`);
+        return null;
+      }
+
+      let foundAllowance: AllowanceWithValue | undefined;
+      const identifierStr = allowanceIdentifier.toString().toLowerCase();
+
+      if (typeof allowanceIdentifier === 'number') {
+        foundAllowance = activeAllowances.find(a => a.allowanceFixedId === allowanceIdentifier);
+      } else {
+        // Prioritize matching by code first, then by name/description
+        foundAllowance = activeAllowances.find(a => a.code && a.code.toLowerCase() === identifierStr);
+        if (!foundAllowance) {
+          foundAllowance = activeAllowances.find(a => a.name.toLowerCase().includes(identifierStr));
+        }
+      }
+
+      // If multiple matches by name (e.g. by partial name), prefer one with latest effective_from.
+      if (foundAllowance && typeof allowanceIdentifier === 'string' && !foundAllowance.code) { // implies it was a name match
+          const potentialMatchesByName = activeAllowances.filter(a => a.name.toLowerCase().includes(identifierStr));
+          if (potentialMatchesByName.length > 1) {
+              logger.warn(`Multiple allowances match name/description '${allowanceIdentifier}' for award ${awardCode} on ${effectiveDate}. Selecting one with latest effective_from.`);
+              foundAllowance = potentialMatchesByName.sort((a,b) => new Date(b.effective_from).getTime() - new Date(a.effective_from).getTime())[0];
+          } else if (potentialMatchesByName.length === 1) {
+              foundAllowance = potentialMatchesByName[0];
+          }
+      }
+
+      return foundAllowance || null;
+
+    } catch (error) {
+      logger.error(`Error in getEffectiveAwardAllowance for ${awardCode} / ${allowanceIdentifier} on ${effectiveDate}:`, error);
+      return null;
+    }
   }
 }

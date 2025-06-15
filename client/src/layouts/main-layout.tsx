@@ -15,7 +15,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
   };
   
   return (
-    <div className="flex h-screen overflow-hidden bg-background">
+    <div className="flex h-screen overflow-hidden bg-light-bg-primary dark:bg-dark-bg-primary">
       {/* Sidebar - hidden on mobile unless toggled */}
       <div className={`${mobileSidebarOpen ? 'block' : 'hidden'} md:block md:w-64 md:static fixed inset-0 z-40 md:z-auto`}>
         <div className="h-full">
@@ -37,7 +37,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
           />
         </div>
         
-        <main className="h-full overflow-y-auto">
+        <main className="h-full overflow-y-auto bg-grid-light dark:bg-grid-dark">
           <div className="container px-6 mx-auto py-6">
             {children}
           </div>

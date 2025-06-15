@@ -13,7 +13,8 @@ import {
   penaltyRules,
   allowanceRules
 } from '@shared/schema';
-import { awardRateCalculator } from './award-rate-calculator';
+// import { awardRateCalculator } from './award-rate-calculator'; // To be replaced
+import { RateTemplateService, rateTemplateService } from './RateTemplateService'; // Import new service
 
 /**
  * Types for charge rate calculations
@@ -75,6 +76,12 @@ export interface CalculationResult {
  * Based on the R8 calculation system
  */
 export class ChargeRateCalculator {
+  private rateTemplateService: RateTemplateService;
+
+  constructor(rateTemplateService: RateTemplateService) {
+    this.rateTemplateService = rateTemplateService;
+  }
+
   /**
    * Cost configuration for calculating charge rates
    */
@@ -368,122 +375,69 @@ export class ChargeRateCalculator {
           )
         );
 
-      // Initialize pay rate to a default value
-      let payRate = 25.0; // Default hourly rate
-      let awardCode: string | null = null;
-      let awardId: number | undefined;
-      let apprenticeYear = 1;
-      let isAdult = true;
-      let hasCompletedYear12 = true;
+      // Initialize pay rate to a default value (will be overwritten by RateTemplateService)
+      let payRate = 0.0;
+      // awardId will be implicitly handled by the rate template's components.
+      // If penaltyEstimates needs an explicit awardId, this part needs further thought.
+      // For now, we assume the template itself contains all necessary award info or references.
+      let awardId: number | undefined = undefined; // Will not be determined by old logic anymore
+
+      // --- Determine Pay Rate using RateTemplateService ---
+      // Placeholder: Determine rate_template_id
+      // Logic: placementDetails.rateTemplateId > apprentice.defaultRateTemplateId > hostEmployer.defaultRateTemplateId > system_default (e.g., 1)
+      // Actual field names on apprentice/hostEmployer might need adjustment based on schema.
+      // For now, let's assume a simple placeholder or a direct way to get it.
+      // @ts-ignore - apprentice might not have defaultRateTemplateId, hostEmployer might not.
+      const templateIdFromPlacement = existingPlacement && 'rateTemplateId' in existingPlacement && existingPlacement.rateTemplateId ? parseInt(existingPlacement.rateTemplateId.toString()) : null;
+      // @ts-ignore
+      const templateIdFromApprentice = apprentice && 'defaultRateTemplateId' in apprentice && apprentice.defaultRateTemplateId ? parseInt(apprentice.defaultRateTemplateId.toString()) : null;
+      // @ts-ignore
+      const templateIdFromHost = hostEmployer && 'defaultRateTemplateId' in hostEmployer && hostEmployer.defaultRateTemplateId ? parseInt(hostEmployer.defaultRateTemplateId.toString()) : null;
       
-      // Try to get award ID and code from related tables
-      try {
-        // Check if there's an award ID directly associated with the placement
-        if (existingPlacement) {
-          if ('awardId' in existingPlacement && existingPlacement.awardId) {
-            awardId = parseInt(existingPlacement.awardId.toString());
-            logger.info(`Using award ID ${awardId} from placement`);
-            
-            // Fetch award code from the awards table
-            const [award] = await db
-              .select()
-              .from(awards)
-              .where(eq(awards.id, awardId));
-              
-            if (award) {
-              awardCode = award.code;
-              logger.info(`Found award code ${awardCode} for ID ${awardId}`);
-            }
-          }
-          
-          // Get apprentice year and education information if available in placement
-          if ('apprenticeYear' in existingPlacement && existingPlacement.apprenticeYear) {
-            apprenticeYear = parseInt(existingPlacement.apprenticeYear.toString());
-          }
-          
-          if ('isAdult' in existingPlacement && existingPlacement.isAdult !== undefined) {
-            isAdult = existingPlacement.isAdult === true || existingPlacement.isAdult === 'true';
-          }
-          
-          if ('hasCompletedYear12' in existingPlacement && existingPlacement.hasCompletedYear12 !== undefined) {
-            hasCompletedYear12 = existingPlacement.hasCompletedYear12 === true || existingPlacement.hasCompletedYear12 === 'true';
-          }
-          
-          logger.info(`Apprentice details: Year ${apprenticeYear}, Adult: ${isAdult}, Year 12: ${hasCompletedYear12}`);
-        }
-        
-        // If no award ID yet, check if apprentice has a training contract with an award
-        if (!awardId && apprentice && apprentice.id) {
-          // Get apprentice training details
-          if ('apprenticeYear' in apprentice && apprentice.apprenticeYear) {
-            apprenticeYear = parseInt(apprentice.apprenticeYear.toString());
-          }
-          
-          if ('isAdult' in apprentice && apprentice.isAdult !== undefined) {
-            isAdult = apprentice.isAdult === true || apprentice.isAdult === 'true';
-          }
-          
-          if ('hasCompletedYear12' in apprentice && apprentice.hasCompletedYear12 !== undefined) {
-            hasCompletedYear12 = apprentice.hasCompletedYear12 === true || apprentice.hasCompletedYear12 === 'true';
-          }
-          
-          // Fetch training contract for the apprentice to see if there's an award associated
-          const [trainingContract] = await db
-            .select()
-            .from(placements)
-            .where(eq(placements.apprenticeId, apprentice.id))
-            .limit(1);
-            
-          if (trainingContract && 'awardId' in trainingContract && trainingContract.awardId) {
-            awardId = parseInt(trainingContract.awardId.toString());
-            logger.info(`Using award ID ${awardId} from training contract`);
-            
-            // Fetch award code from the awards table
-            const [award] = await db
-              .select()
-              .from(awards)
-              .where(eq(awards.id, awardId));
-              
-            if (award) {
-              awardCode = award.code;
-              logger.info(`Found award code ${awardCode} for ID ${awardId}`);
-            }
-          }
-        }
-      } catch (error) {
-        logger.warn('Error determining award information for charge rate calculation', { error });
+      const rateTemplateId = templateIdFromPlacement || templateIdFromApprentice || templateIdFromHost || 1; // Fallback to 1
+      // TODO: Add a check if '1' is a valid/existing template ID or handle error if no template ID found.
+
+      if (!rateTemplateId) {
+          logger.error('No Rate Template ID could be determined for charge rate calculation.');
+          throw new Error('Rate Template ID not found for calculation.');
       }
+      logger.info(`Using Rate Template ID: ${rateTemplateId} for apprentice ${apprenticeId}, host ${hostEmployerId}`);
       
-      // If we have an award code, get the pay rate from Fair Work API
-      if (awardCode) {
-        try {
-          logger.info(`Getting award pay rate for award ${awardCode} and apprentice year ${apprenticeYear}`);
-          const fairworkRate = await awardRateCalculator.getApprenticePayRate(
-            awardCode,
-            apprenticeYear,
-            isAdult,
-            hasCompletedYear12
-          );
-          
-          if (fairworkRate) {
-            logger.info(`Using Fair Work award rate: $${fairworkRate}/hr`);
-            payRate = fairworkRate;
-          } else {
-            logger.warn(`No Fair Work rate found for award ${awardCode}, using default rate of $${payRate}/hr`);
-          }
-        } catch (error) {
-          logger.error('Error getting Fair Work award rate', { error, awardCode });
-        }
-      } else {
-        logger.info(`No award code found, using default rate of $${payRate}/hr`);
+      // @ts-ignore - apprentice object might not have these exact fields, adjust as per actual schema
+      const apprenticeYear = 'apprenticeshipYear' in apprentice && apprentice.apprenticeshipYear ? apprentice.apprenticeshipYear : 1;
+      // @ts-ignore
+      const isAdult = 'isAdult' in apprentice && apprentice.isAdult !== undefined ? apprentice.isAdult : true;
+      // @ts-ignore
+      const hasCompletedYear12 = 'hasCompletedYear12' in apprentice && apprentice.hasCompletedYear12 !== undefined ? apprentice.hasCompletedYear12 : true;
+
+      const calculationContext = {
+        effectiveDate: existingPlacement?.startDate || new Date(), // Use placement start date or today
+        apprenticeId: apprentice.id,
+        apprenticeYear: apprenticeYear,
+        isAdult: isAdult,
+        hasCompletedYear12: hasCompletedYear12,
+        hostEmployerId: hostEmployerId,
+        // Any other context needed by templates, e.g. day_of_week, time_of_day for specific calculations.
+        // For a general charge rate, these might be less critical unless penalties are pre-calculated.
+      };
+
+      const rateCalculationResult = await this.rateTemplateService.calculateRateFromTemplate(rateTemplateId, calculationContext);
+
+      if (!rateCalculationResult || typeof rateCalculationResult.final_rate !== 'number') {
+        logger.error(`Could not determine pay rate using RateTemplateService for template ${rateTemplateId}, apprentice ${apprenticeId}. Warnings: ${rateCalculationResult?.warnings?.join(', ')}`);
+        // Potentially use a fallback or throw a more specific error
+        throw new Error('Could not determine pay rate via RateTemplateService.');
       }
+      payRate = rateCalculationResult.final_rate;
+      logger.info(`Determined pay rate for apprentice ${apprenticeId} via RateTemplateService: $${payRate}/hr. Breakdown: ${JSON.stringify(rateCalculationResult.breakdown)}`);
       
-      // Override with negotiated rate from placement if it exists
-      if (existingPlacement && existingPlacement.negotiatedRate) {
-        const negotiatedRate = parseFloat(existingPlacement.negotiatedRate.toString());
-        logger.info(`Using negotiated rate: $${negotiatedRate}/hr from placement`);
-        payRate = negotiatedRate;
-      }
+      // If an awardId is needed for penaltyEstimates, and it's not part of rateCalculationResult,
+      // this part needs to be re-evaluated. For now, we'll pass undefined for awardId to calculateChargeRate.
+      // It's possible the rate template itself should define the award for penalty purposes,
+      // or penalty components should be part of the template.
+      // awardId = rateCalculationResult.awardId; // If template service could return this.
+
+      // --- End RateTemplateService Pay Rate Determination ---
 
       // Use custom rates from host employer if available, otherwise use default values
       const customMargin = customMarginRate !== null ? customMarginRate : this.defaultCostConfig.defaultMargin;
@@ -703,4 +657,5 @@ export class ChargeRateCalculator {
 }
 
 // Create and export a singleton instance
-export const chargeRateCalculator = new ChargeRateCalculator();
+// export const chargeRateCalculator = new ChargeRateCalculator(); // Old instantiation
+export const chargeRateCalculator = new ChargeRateCalculator(rateTemplateService); // New - passing the service instance

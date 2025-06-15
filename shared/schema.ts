@@ -1451,3 +1451,4 @@ export * from './schema/whs';
 export * from './schema/labour-hire';
 export * from './schema/contacts';
 export * from './schema/clients';
+export * from "./schema/rate-templates";

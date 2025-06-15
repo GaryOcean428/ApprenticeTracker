@@ -158,6 +158,43 @@ router.post('/calculate', authenticateUser, async (req, res) => {
   }
 });
 
+// POST /api/payroll/charge-rates/calculate-and-save - Calculate and save charge rate using RateTemplateService logic
+const calculateAndSaveChargeRateSchema = z.object({
+  apprenticeId: z.number().int().positive(),
+  hostEmployerId: z.number().int().positive(),
+  // Optional: placementDetails could be passed if needed by calculateAndSaveChargeRate's future versions
+  // placementDetails: z.object({ /* ... */ }).optional(),
+});
+
+router.post('/calculate-and-save', authenticateUser, requirePermission('create', 'charge_rate'), async (req: any, res: any) => {
+  try {
+    const { apprenticeId, hostEmployerId } = calculateAndSaveChargeRateSchema.parse(req.body);
+
+    logger.info(`Received request to calculate and save charge rate for apprentice ${apprenticeId} and host ${hostEmployerId}`);
+
+    // The calculator instance is imported and should be the refactored one from the previous subtask
+    // which now uses RateTemplateService internally.
+    const result = await calculator.calculateAndSaveChargeRate(apprenticeId, hostEmployerId);
+    // If calculateAndSaveChargeRate needs placementDetails, they would be passed here from req.body
+
+    logger.info('Charge rate calculated and saved successfully via service', { calculationId: result.calculationId });
+    res.status(201).json({ success: true, data: result });
+
+  } catch (error: any) {
+    if (error instanceof z.ZodError) {
+      logger.warn('Validation error for /calculate-and-save endpoint', { errors: error.errors });
+      return res.status(400).json({ success: false, error: 'Validation failed', details: error.errors });
+    }
+    logger.error('Error in /calculate-and-save charge rate:', { error: error.message, stack: error.stack });
+    // Distinguish between service errors (e.g., template not found) and unexpected errors
+    if (error.message.includes('Rate Template ID not found') || error.message.includes('Could not determine pay rate')) {
+      return res.status(400).json({ success: false, error: error.message });
+    }
+    res.status(500).json({ success: false, error: 'Failed to calculate and save charge rate' });
+  }
+});
+
+
 /**
  * @route POST /api/payroll/charge-rates
  * @description Create a new charge rate calculation

@@ -40,13 +40,13 @@ const Dashboard = () => {
   
   return (
     <>
-      <h2 className="my-6 text-2xl font-semibold text-foreground">Dashboard</h2>
+      <h2 className="my-6 text-2xl font-semibold text-light-text-primary dark:text-dark-text-primary">Dashboard</h2>
       
       {/* Metrics Cards */}
       <div className="grid gap-6 mb-8 md:grid-cols-2 xl:grid-cols-4">
         {isLoadingMetrics ? (
           Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="bg-white dark:bg-card rounded-lg shadow-sm p-4">
+            <div key={i} className="bg-light-bg-secondary dark:bg-dark-bg-secondary rounded-lg shadow-card-light dark:shadow-card-dark p-4">
               <div className="flex items-center">
                 <Skeleton className="h-12 w-12 rounded-full mr-4" />
                 <div className="flex-1">
@@ -141,8 +141,8 @@ const Dashboard = () => {
           </div>
         </div>
         
-        <div className="min-w-0 p-4 bg-white dark:bg-card rounded-lg shadow-sm">
-          <h4 className="mb-4 font-semibold text-foreground flex items-center">
+        <div className="min-w-0 p-4 bg-light-bg-secondary dark:bg-dark-bg-secondary rounded-lg shadow-card-light dark:shadow-card-dark">
+          <h4 className="mb-4 font-semibold text-light-text-primary dark:text-dark-text-primary flex items-center">
             <FileText className="text-secondary mr-2 h-5 w-5" /> Document Center
           </h4>
           <ul className="space-y-3 mb-4">
@@ -150,29 +150,29 @@ const Dashboard = () => {
               <div className="text-destructive mr-2">
                 <FileText className="h-4 w-4" />
               </div>
-              <span className="text-sm text-muted-foreground">Safety Manual v2.3</span>
-              <span className="text-xs ml-auto text-muted-foreground">2d ago</span>
+              <span className="text-sm text-light-text-tertiary dark:text-dark-text-tertiary">Safety Manual v2.3</span>
+              <span className="text-xs ml-auto text-light-text-tertiary dark:text-dark-text-tertiary">2d ago</span>
             </li>
             <li className="flex items-center">
               <div className="text-success mr-2">
                 <FileText className="h-4 w-4" />
               </div>
-              <span className="text-sm text-muted-foreground">Monthly Progress Report</span>
-              <span className="text-xs ml-auto text-muted-foreground">1w ago</span>
+              <span className="text-sm text-light-text-tertiary dark:text-dark-text-tertiary">Monthly Progress Report</span>
+              <span className="text-xs ml-auto text-light-text-tertiary dark:text-dark-text-tertiary">1w ago</span>
             </li>
             <li className="flex items-center">
               <div className="text-info mr-2">
                 <FileText className="h-4 w-4" />
               </div>
-              <span className="text-sm text-muted-foreground">Contract Template</span>
-              <span className="text-xs ml-auto text-muted-foreground">2w ago</span>
+              <span className="text-sm text-light-text-tertiary dark:text-dark-text-tertiary">Contract Template</span>
+              <span className="text-xs ml-auto text-light-text-tertiary dark:text-dark-text-tertiary">2w ago</span>
             </li>
             <li className="flex items-center">
               <div className="text-destructive mr-2">
                 <FileText className="h-4 w-4" />
               </div>
-              <span className="text-sm text-muted-foreground">Training Guidelines</span>
-              <span className="text-xs ml-auto text-muted-foreground">1m ago</span>
+              <span className="text-sm text-light-text-tertiary dark:text-dark-text-tertiary">Training Guidelines</span>
+              <span className="text-xs ml-auto text-light-text-tertiary dark:text-dark-text-tertiary">1m ago</span>
             </li>
           </ul>
           <Link href="/documents" className="text-sm font-medium text-primary hover:underline">
