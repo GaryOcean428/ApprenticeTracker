@@ -29,7 +29,7 @@ import { registerTGARoutes } from "./api/tga-routes";
 import { fairWorkRouter } from "./api/fair-work-routes";
 import { authRouter, isAuthenticated, hasRole } from "./api/auth-routes";
 import payrollRouter from "./api/payroll";
-import fairworkRouter from "./api/fairwork";
+import fairworkApiRouter from "./api/fairwork";
 import fairworkEnhancedRouter from "./api/fairwork-enhanced";
 import enrichmentRouter from "./api/enrichment";
 import progressReviewsRouter from "./api/progress-reviews";
@@ -2602,6 +2602,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Register VET Training routes for Units of Competency and Qualifications
   app.use("/api/vet", vetRouter);
+  
+  // Register Fair Work routes (multiple implementations)
+  app.use("/api/fair-work", fairWorkRouter);
+  app.use("/api/fairwork", fairworkApiRouter);
+  app.use("/api/fairwork-enhanced", fairworkEnhancedRouter);
   
   const httpServer = createServer(app);
   return httpServer;
