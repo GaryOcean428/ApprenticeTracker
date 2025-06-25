@@ -2,6 +2,7 @@
 // This is used for deployment since Node.js can't directly run TypeScript files
 import express from 'express';
 import path from 'path';
+import fs from 'fs';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -88,9 +89,13 @@ const clientPath = path.join(__dirname, 'public');
 // Ensure favicon exists at root level for production
 const rootFaviconPath = path.join(__dirname, 'favicon.ico');
 const distFaviconPath = path.join(__dirname, 'dist', 'public', 'favicon.ico');
-if (!require('fs').existsSync(rootFaviconPath) && require('fs').existsSync(distFaviconPath)) {
-  require('fs').copyFileSync(distFaviconPath, rootFaviconPath);
-  console.log('Favicon copied to root for production serving');
+try {
+  if (!fs.existsSync(rootFaviconPath) && fs.existsSync(distFaviconPath)) {
+    fs.copyFileSync(distFaviconPath, rootFaviconPath);
+    console.log('Favicon copied to root for production serving');
+  }
+} catch (error) {
+  console.log('Could not copy favicon:', error.message);
 }
 
 // Priority favicon route before static middleware
