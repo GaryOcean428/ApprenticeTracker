@@ -13,6 +13,11 @@ const PORT = process.env.PORT || 5000;
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+// Handle favicon request to prevent 500 errors
+app.get('/favicon.ico', (req, res) => {
+  res.status(204).end();
+});
+
 // Essential health check endpoint for deployment
 app.get('/', (req, res) => {
   res.status(200).json({

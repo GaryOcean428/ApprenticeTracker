@@ -12,6 +12,11 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+// Handle favicon request to prevent 500 errors
+app.get('/favicon.ico', (req, res) => {
+  res.status(204).end();
+});
+
 // Health check endpoint for deployment monitoring (not on root path)
 app.get('/health-check', (req, res) => {
   res.status(200).json({ 
