@@ -127,7 +127,7 @@ authRouter.post('/login', validateBody(loginSchema), async (req: Request, res: R
     // Return token and user info
     return res.status(200).json({
       success: true,
-      token: `Bearer ${token}`,
+      token: token,
       user: {
         id: user.id,
         username: user.username,

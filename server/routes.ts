@@ -780,12 +780,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   // API Routes - prefix all routes with /api
 
+  // Register authentication routes first (highest priority)
+  app.use('/api/auth', authRouter); // Authentication routes (login, register, verify)
+  
   // Register specialized route handlers
   app.use('/api/gto-compliance', gtoComplianceRouter);
   app.use('/api/vet', vetRouter);
   app.use('/api/settings', settingsRouter);
   app.use('/api', fairWorkRouter); // Routes like /api/awards, /api/enterprise-agreements
-  app.use('/api/auth', authRouter); // Authentication routes (login, register, verify)
   app.use('/api/payroll', payrollRouter); // Payroll routes
   app.use('/api/enrichment', enrichmentRouter); // Enrichment routes
   app.use('/api/progress-reviews', progressReviewsRouter); // Progress Reviews routes

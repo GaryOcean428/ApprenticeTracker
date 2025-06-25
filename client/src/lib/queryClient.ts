@@ -14,18 +14,19 @@ export async function apiRequest(
 ): Promise<Response> {
   // Set up headers
   const headers: Record<string, string> = {};
-  
+
   // Add Content-Type header if we have data
   if (data) {
     headers['Content-Type'] = 'application/json';
   }
-  
+
   // Add Authorization header if we have a token
   const token = localStorage.getItem('authToken');
+
   if (token) {
-    headers['Authorization'] = token;
+    headers['Authorization'] = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
   }
-  
+
   const res = await fetch(url, {
     method,
     headers,
@@ -44,7 +45,7 @@ export const getQueryFn: <T>(options: {
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
     const headers: Record<string, string> = {};
-    
+
     // Add Authorization header if we have a token
     const token = localStorage.getItem('authToken');
     if (token) {

@@ -40,11 +40,12 @@ export function isAuthenticated(req: Request, res: Response, next: NextFunction)
     // Get the token from the Authorization header
     const authHeader = req.headers.authorization;
     
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    if (!authHeader) {
       return res.status(401).json({ error: 'Unauthorized - No token provided' });
     }
     
-    const token = authHeader.split(' ')[1];
+    // Handle both "Bearer token" and just "token" formats
+    const token = authHeader.startsWith('Bearer ') ? authHeader.split(' ')[1] : authHeader;
     
     if (!token) {
       return res.status(401).json({ error: 'Unauthorized - Invalid token format' });
