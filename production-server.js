@@ -53,8 +53,20 @@ try {
       res.status(200).json({ user: null, authenticated: false });
     });
     
+    app.post('/api/auth/login', (req, res) => {
+      res.status(401).json({ error: 'Authentication service unavailable' });
+    });
+    
     app.get('/api/fairwork/award-updates', (req, res) => {
       res.status(200).json({ success: true, data: [] });
+    });
+    
+    // Catch-all for other API routes
+    app.use('/api/*', (req, res) => {
+      res.status(503).json({ 
+        error: 'Service temporarily unavailable',
+        message: 'API routes not loaded properly'
+      });
     });
     
     console.log('Essential API routes registered manually');
@@ -84,14 +96,17 @@ app.get('/favicon.ico', (req, res) => {
   });
 });
 
+// Serve static files with proper error handling
 app.use(express.static(clientPath, { 
-  index: 'index.html',
+  index: false, // Don't auto-serve index.html
   setHeaders: (res, filePath) => {
     // Set proper MIME types for assets
     if (filePath.endsWith('.js')) {
       res.setHeader('Content-Type', 'application/javascript');
+      res.setHeader('Cache-Control', 'public, max-age=31536000');
     } else if (filePath.endsWith('.css')) {
       res.setHeader('Content-Type', 'text/css');
+      res.setHeader('Cache-Control', 'public, max-age=31536000');
     } else if (filePath.endsWith('.png')) {
       res.setHeader('Content-Type', 'image/png');
     } else if (filePath.endsWith('.ico')) {
@@ -100,34 +115,66 @@ app.use(express.static(clientPath, {
   }
 }));
 
+// Add specific handling for common asset types that might be missing
+app.get('*.css', (req, res) => {
+  console.log(`CSS file requested but not found: ${req.path}`);
+  res.status(404).type('text/css').send('/* CSS file not found */');
+});
+
+app.get('*.js', (req, res) => {
+  console.log(`JS file requested but not found: ${req.path}`);
+  res.status(404).type('application/javascript').send('// JS file not found');
+});
+
 // Serve assets from attached_assets directory
 app.use('/assets', express.static(path.join(__dirname, 'attached_assets')));
 
-// Error handler
+// Error handler with proper JSON responses
 app.use((err, req, res, next) => {
   console.error(`Server Error: ${err.message}`);
-  res.status(500).json({ 
-    error: 'Internal Server Error', 
-    message: process.env.NODE_ENV === 'production' ? 'Server Error' : err.message 
-  });
-});
-
-// Serve React app for all non-API routes (SPA fallback)
-app.get('*', (req, res) => {
-  // Skip API routes and health checks
-  if (req.path.startsWith('/api') || req.path === '/health-check' || req.path === '/health') {
-    return res.status(404).json({ error: 'Endpoint not found' });
+  console.error(`Stack: ${err.stack}`);
+  
+  // Ensure we always return JSON for API routes
+  if (req.path.startsWith('/api/')) {
+    return res.status(500).json({ 
+      error: 'Internal Server Error',
+      message: process.env.NODE_ENV === 'production' ? 'Server Error' : err.message 
+    });
   }
   
+  // For non-API routes, return HTML error page
+  res.status(500).send(`
+    <!DOCTYPE html>
+    <html>
+    <head><title>Server Error</title></head>
+    <body>
+      <h1>Server Error</h1>
+      <p>Something went wrong. Please try again later.</p>
+    </body>
+    </html>
+  `);
+});
+
+// Handle all remaining requests
+app.use('*', (req, res) => {
+  // API routes that weren't handled by route registration
+  if (req.path.startsWith('/api/')) {
+    console.log(`Unhandled API route: ${req.method} ${req.path}`);
+    return res.status(404).json({ 
+      error: 'API endpoint not found',
+      path: req.path,
+      method: req.method
+    });
+  }
+  
+  // Serve React app for all other routes
   const indexPath = path.join(clientPath, 'index.html');
   res.sendFile(indexPath, (err) => {
     if (err) {
       console.error('Error serving index.html:', err);
-      res.status(200).json({
-        status: 'healthy',
-        environment: 'production',
-        timestamp: new Date().toISOString(),
-        message: 'CRM7 Australian Apprentice Management Platform'
+      res.status(500).json({
+        error: 'Frontend not available',
+        message: 'Build files not found'
       });
     }
   });
