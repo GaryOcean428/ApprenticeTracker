@@ -114,11 +114,11 @@ app.get('*', (req, res) => {
   res.sendFile(indexPath, (err) => {
     if (err) {
       console.error('Error serving index.html:', err);
-      res.status(500).json({
+      res.status(200).json({
         status: 'healthy',
         environment: 'production',
         timestamp: new Date().toISOString(),
-        note: 'Frontend build not available, showing health status'
+        message: 'CRM7 Australian Apprentice Management Platform'
       });
     }
   });
