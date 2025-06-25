@@ -84,7 +84,7 @@ try {
 }
 
 // Serve static files from the client build directory with explicit favicon handling
-const clientPath = path.join(__dirname, 'public');
+const clientPath = path.join(__dirname, 'dist', 'public');
 
 // Ensure favicon exists at root level for production
 const rootFaviconPath = path.join(__dirname, 'favicon.ico');
