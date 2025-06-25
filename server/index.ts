@@ -23,6 +23,11 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+// Handle favicon request specifically to prevent 500 errors
+app.get('/favicon.ico', (req, res) => {
+  res.status(204).end();
+});
+
 // Use PORT from environment variable for deployment compatibility
 // Default to 5000 for both production and development since that's what Replit expects
 const port = process.env.PORT || 5000;
