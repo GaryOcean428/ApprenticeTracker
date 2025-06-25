@@ -269,9 +269,9 @@ router.get('/status', isAuthenticated, async (req: express.Request, res: express
 /**
  * @route GET /api/fairwork/award-updates
  * @desc Get award updates
- * @access Private
+ * @access Public
  */
-router.get('/award-updates', isAuthenticated, getAwardUpdates);
+router.get('/award-updates', getAwardUpdates);
 
 /**
  * @route POST /api/fairwork/award-updates/check

@@ -130,6 +130,7 @@ npm run start:prod
 - June 25, 2025. Initial setup
 - June 25, 2025. Fixed deployment syntax error in use-auth.tsx and corrected production server configuration
 - June 25, 2025. Resolved deployment issues: Fixed 401 Fair Work API errors and styling problems in production
+- June 25, 2025. Successfully removed authentication middleware from Fair Work award-updates endpoint, resolving 401 errors
 
 ## User Preferences
 
