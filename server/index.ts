@@ -249,3 +249,6 @@ app.use((req, res, next) => {
   log(`Fatal error during startup: ${error}`);
   process.exit(1);
 });
+
+// Export registerRoutes for production server
+export { registerRoutes } from './routes';
