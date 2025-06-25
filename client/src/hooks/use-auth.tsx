@@ -123,7 +123,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         
         // Store the token in localStorage
         localStorage.setItem('authToken', data.token);
-      return data.user;
+        return data.user;
+      } catch (error) {
+        console.error('Login error:', error);
+        throw error;
+      }
     },
   });
 

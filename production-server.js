@@ -31,7 +31,7 @@ app.get('/health', (req, res) => {
 
 // Import and register server routes from the compiled JavaScript
 try {
-  const { registerRoutes } = await import('./dist/server/index.js');
+  const { registerRoutes } = await import('./dist/index.js');
   await registerRoutes(app);
   console.log('API routes registered successfully');
 } catch (error) {
