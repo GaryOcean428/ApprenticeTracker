@@ -802,7 +802,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/api/payroll', payrollRouter); // Payroll routes
   app.use('/api/enrichment', enrichmentRouter); // Enrichment routes
   app.use('/api/progress-reviews', progressReviewsRouter); // Progress Reviews routes
-  app.use('/api/fairwork', fairworkRouter); // Basic Fair Work API routes
+  app.use('/api/fairwork', fairworkApiRouter); // Main Fair Work API routes
   app.use('/api/fairwork-enhanced', fairworkEnhancedRouter); // Enhanced Fair Work API features with detailed award interpretation
   app.use('/api/financial', financialRouter); // Financial management routes
   app.use('/api/compliance', complianceRouter); // Compliance management routes
@@ -2603,9 +2603,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Register VET Training routes for Units of Competency and Qualifications
   app.use("/api/vet", vetRouter);
   
-  // Register Fair Work routes (multiple implementations)
+  // Register Fair Work routes (consolidated)
   app.use("/api/fair-work", fairWorkRouter);
-  app.use("/api/fairwork", fairworkApiRouter);
   app.use("/api/fairwork-enhanced", fairworkEnhancedRouter);
   
   const httpServer = createServer(app);

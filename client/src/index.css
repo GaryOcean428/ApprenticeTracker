@@ -157,65 +157,60 @@
   @apply flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50;
 }
 
-/* Card and container styling for softer appearance */
-.card, .dashboard-card {
-  background-color: white;
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.03);
-  border-radius: 0.5rem;
+/* Additional component utilities */
+.prose {
+  @apply max-w-none text-foreground;
 }
 
-/* Dashboard card specific soft styling */
-.dashboard-card {
-  background-color: rgba(255, 255, 255, 0.9);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+.prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
+  @apply text-foreground;
 }
 
-.dashboard-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+/* Navigation styling */
+.nav-link {
+  @apply flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground;
 }
 
-/* Softer table styling */
-table {
-  background-color: white;
-  border-collapse: separate;
-  border-spacing: 0;
-  border-radius: 0.5rem;
-  overflow: hidden;
+.nav-link.active {
+  @apply bg-accent text-accent-foreground;
 }
 
-/* Typography adjustments for better readability */
-h1, h2, h3, h4, h5, h6 {
-  color: var(--text-primary);
-  font-weight: 600;
+/* Status badge styling */
+.status-badge {
+  @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium;
 }
 
-/* User profile menu styling */
-.user-profile-menu {
-  background-color: white;
-  border-radius: 0.5rem;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  overflow: hidden;
-  min-width: 250px;
+.status-badge.success {
+  @apply bg-green-100 text-green-800;
 }
 
-.user-profile-header {
-  padding: 1rem;
-  border-bottom: 1px solid var(--background-tertiary);
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+.status-badge.warning {
+  @apply bg-yellow-100 text-yellow-800;
 }
 
-.user-profile-item {
-  padding: 0.75rem 1rem;
-  display: flex;
-  align-items: center;
-  transition: background-color 0.2s;
+.status-badge.error {
+  @apply bg-red-100 text-red-800;
 }
 
-.user-profile-item:hover {
+/* Ensure proper spacing and typography */
+.container {
+  @apply mx-auto max-w-7xl px-4 sm:px-6 lg:px-8;
+}
+
+/* Responsive grid layouts */
+.grid-cols-auto-fit {
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+}
+
+/* Loading states */
+.loading-skeleton {
+  @apply animate-pulse bg-muted rounded;
+}
+
+/* Focus states for accessibility */
+.focus-ring {
+  @apply focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2;
+}
   background-color: var(--background-secondary);
 }
 
