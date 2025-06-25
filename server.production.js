@@ -7,7 +7,10 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+// Use port 80 for production deployment (Replit maps this to external port 5000)
+const PORT = process.env.NODE_ENV === 'production' 
+  ? (process.env.PORT || 80)
+  : (process.env.PORT || 5000);
 
 // Basic middleware
 app.use(express.json());
@@ -58,7 +61,50 @@ app.get('*', (req, res) => {
   });
 });
 
-// Start server
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Production server running on port ${PORT}`);
+// Start server with error handling
+const startServer = (port) => {
+  const server = app.listen(port, '0.0.0.0', () => {
+    console.log(`Production server running on port ${port}`);
+    console.log(`Environment: ${process.env.NODE_ENV || 'production'}`);
+  });
+
+  server.on('error', (error) => {
+    if (error.code === 'EADDRINUSE') {
+      console.error(`Port ${port} is already in use`);
+      if (port === 5000) {
+        console.log('Trying alternative port 8080...');
+        startServer(8080);
+      } else if (port === 8080) {
+        console.log('Trying alternative port 3000...');
+        startServer(3000);
+      } else {
+        console.error('No available ports found');
+        process.exit(1);
+      }
+    } else {
+      console.error('Server error:', error);
+      process.exit(1);
+    }
+  });
+
+  return server;
+};
+
+const server = startServer(PORT);
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+  console.log('Received SIGTERM, shutting down gracefully');
+  server.close(() => {
+    console.log('Process terminated');
+    process.exit(0);
+  });
+});
+
+process.on('SIGINT', () => {
+  console.log('Received SIGINT, shutting down gracefully');
+  server.close(() => {
+    console.log('Process terminated');
+    process.exit(0);
+  });
 });

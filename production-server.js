@@ -226,23 +226,41 @@ app.use('*', (req, res) => {
   });
 });
 
-// Start server with error handling
-const PORT = process.env.PORT || 5000;
-const server = app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Production server running on port ${PORT}`);
-  console.log(`Environment: ${process.env.NODE_ENV || 'production'}`);
-  console.log(`Static files served from: ${clientPath}`);
-});
+// Start server with error handling and port detection
+const PORT = process.env.NODE_ENV === 'production' 
+  ? (process.env.PORT || 80)  // Use port 80 for production deployment
+  : (process.env.PORT || 5000); // Keep 5000 for development fallback
 
-server.on('error', (error) => {
-  if (error.code === 'EADDRINUSE') {
-    console.error(`Port ${PORT} is already in use`);
-    process.exit(1);
-  } else {
-    console.error('Server error:', error);
-    process.exit(1);
-  }
-});
+const startServer = (port) => {
+  const server = app.listen(port, '0.0.0.0', () => {
+    console.log(`Production server running on port ${port}`);
+    console.log(`Environment: ${process.env.NODE_ENV || 'production'}`);
+    console.log(`Static files served from: ${clientPath}`);
+  });
+
+  server.on('error', (error) => {
+    if (error.code === 'EADDRINUSE') {
+      console.error(`Port ${port} is already in use`);
+      if (port === 5000) {
+        console.log('Trying alternative port 8080...');
+        startServer(8080);
+      } else if (port === 8080) {
+        console.log('Trying alternative port 3000...');
+        startServer(3000);
+      } else {
+        console.error('No available ports found');
+        process.exit(1);
+      }
+    } else {
+      console.error('Server error:', error);
+      process.exit(1);
+    }
+  });
+
+  return server;
+};
+
+const server = startServer(PORT);
 
 // Graceful shutdown
 process.on('SIGTERM', () => {

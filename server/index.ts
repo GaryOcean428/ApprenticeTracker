@@ -29,8 +29,10 @@ app.get('/favicon.ico', (req, res) => {
 });
 
 // Use PORT from environment variable for deployment compatibility
-// Default to 5000 for both production and development since that's what Replit expects
-const port = process.env.PORT || 5000;
+// Use different default ports for development vs production to avoid conflicts
+const port = process.env.NODE_ENV === 'production' 
+  ? (process.env.PORT || 80)  // Production uses port 80 (mapped to 5000 externally by Replit)
+  : (process.env.PORT || 5001); // Development uses port 5001 to avoid conflicts
 
 // Health check endpoint only for production deployment
 if (process.env.NODE_ENV === 'production') {
@@ -220,21 +222,65 @@ app.use((req, res, next) => {
   log(`Environment: ${process.env.NODE_ENV || 'development'}`);
   log(`Using port: ${port}`);
   
-  const serverInstance = server.listen({
-    port,
-    host: "0.0.0.0",
-    reusePort: true,
-  }, () => {
-    log(`Server successfully started on port ${port}`);
+  // Add port conflict detection and graceful handling
+  const startServerWithFallback = (targetPort: number): Promise<any> => {
+    return new Promise((resolve, reject) => {
+      const serverInstance = server.listen({
+        port: targetPort,
+        host: "0.0.0.0",
+        reusePort: true,
+      }, () => {
+        log(`Server successfully started on port ${targetPort}`);
+        
+        // Initialize scheduled tasks with error handling
+        try {
+          initializeScheduledTasks();
+          log("Scheduled tasks initialized");
+        } catch (error) {
+          log(`Failed to initialize scheduled tasks: ${error}`);
+        }
+        
+        resolve(serverInstance);
+      });
+
+      serverInstance.on('error', (error: any) => {
+        if (error.code === 'EADDRINUSE') {
+          log(`Port ${targetPort} is already in use`);
+          reject(error);
+        } else {
+          log(`Server error on port ${targetPort}: ${error.message}`);
+          reject(error);
+        }
+      });
+    });
+  };
+
+  let serverInstance;
+  try {
+    serverInstance = await startServerWithFallback(port);
+  } catch (error) {
+    // Try alternative ports if the default port is in use
+    const alternativePorts = process.env.NODE_ENV === 'production' 
+      ? [8080, 3000, 5001] 
+      : [5002, 5003, 8080];
     
-    // Initialize scheduled tasks with error handling
-    try {
-      initializeScheduledTasks();
-      log("Scheduled tasks initialized");
-    } catch (error) {
-      log(`Failed to initialize scheduled tasks: ${error}`);
+    let started = false;
+    for (const altPort of alternativePorts) {
+      try {
+        log(`Trying alternative port ${altPort}...`);
+        serverInstance = await startServerWithFallback(altPort);
+        started = true;
+        break;
+      } catch (altError) {
+        log(`Port ${altPort} also in use, trying next...`);
+      }
     }
-  });
+    
+    if (!started) {
+      log('No available ports found. Exiting...');
+      process.exit(1);
+    }
+  }
 
   // Ensure the server keeps running
   process.on('SIGTERM', () => {
