@@ -113,7 +113,7 @@
 /* Base component styles */
 @layer base {
   button {
-    @apply inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50;
+    @apply inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-600 disabled:pointer-events-none disabled:opacity-50;
   }
 }
 
@@ -145,34 +145,34 @@
 }
 
 .table-row {
-  @apply border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted;
+  @apply border-b transition-colors hover:bg-gray-50;
 }
 
 .table-cell {
-  @apply p-2 align-middle [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px];
+  @apply p-2 align-middle;
 }
 
 /* Form styling */
 .form-control {
-  @apply flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50;
+  @apply flex h-9 w-full rounded-md border border-gray-300 bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-600 disabled:cursor-not-allowed disabled:opacity-50;
 }
 
 /* Additional component utilities */
 .prose {
-  @apply max-w-none text-foreground;
+  @apply max-w-none text-gray-900;
 }
 
 .prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
-  @apply text-foreground;
+  @apply text-gray-900;
 }
 
 /* Navigation styling */
 .nav-link {
-  @apply flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground;
+  @apply flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-gray-100 hover:text-gray-900;
 }
 
 .nav-link.active {
-  @apply bg-accent text-accent-foreground;
+  @apply bg-gray-100 text-gray-900;
 }
 
 /* Status badge styling */
@@ -204,22 +204,12 @@
 
 /* Loading states */
 .loading-skeleton {
-  @apply animate-pulse bg-muted rounded;
+  @apply animate-pulse bg-gray-200 rounded;
 }
 
 /* Focus states for accessibility */
 .focus-ring {
-  @apply focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2;
-}
-  background-color: var(--background-secondary);
-}
-
-.bg-accent {
-  background-color: var(--braden-gold);
-}
-
-.text-accent {
-  color: var(--braden-gold);
+  @apply focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2;
 }
 
 /* Brand-specific utility classes */
@@ -255,12 +245,28 @@
   color: var(--braden-light-gold);
 }
 
+.bg-braden-bronze {
+  background-color: var(--braden-bronze);
+}
+
+.text-braden-bronze {
+  color: var(--braden-bronze);
+}
+
 .bg-braden-navy {
   background-color: var(--braden-navy);
 }
 
 .text-braden-navy {
   color: var(--braden-navy);
+}
+
+.bg-braden-slate {
+  background-color: var(--braden-slate);
+}
+
+.text-braden-slate {
+  color: var(--braden-slate);
 }
 
 .bg-braden-sky {
@@ -271,54 +277,20 @@
   color: var(--braden-sky);
 }
 
-.border-braden-sky {
-  border-color: var(--braden-sky);
+.bg-braden-forest {
+  background-color: var(--braden-forest);
 }
 
-.border-braden-gold {
-  border-color: var(--braden-gold);
+.text-braden-forest {
+  color: var(--braden-forest);
 }
 
-/* Dashboard card color variants */
-.dashboard-card-blue {
-  border-top: 3px solid var(--braden-sky);
+.bg-braden-lavender {
+  background-color: var(--braden-lavender);
 }
 
-.dashboard-card-gold {
-  border-top: 3px solid var(--braden-gold);
-}
-
-.dashboard-card-red {
-  border-top: 3px solid var(--braden-red);
-}
-
-.dashboard-card-green {
-  border-top: 3px solid var(--braden-forest);
-}
-
-/* Dashboard metrics styling */
-.metric-card {
-  padding: 1rem;
-  border-radius: 0.5rem;
-  background-color: white;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-  transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.metric-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0,0,0,0.08);
-}
-
-.metric-value {
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
-.metric-label {
-  font-size: 0.875rem;
-  color: var(--text-muted);
+.text-braden-lavender {
+  color: var(--braden-lavender);
 }
 
 /* Form element styling */

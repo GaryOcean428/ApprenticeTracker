@@ -11,11 +11,58 @@ export default {
         sm: "calc(var(--radius) - 4px)",
       },
       colors: {
-        // Brand colors
+        background: "hsl(var(--background))",
+        foreground: "hsl(var(--foreground))",
+        card: {
+          DEFAULT: "hsl(var(--card))",
+          foreground: "hsl(var(--card-foreground))",
+        },
+        popover: {
+          DEFAULT: "hsl(var(--popover))",
+          foreground: "hsl(var(--popover-foreground))",
+        },
         primary: {
-          light: '#6366f1', // Purple from your CRM7 logo
-          DEFAULT: '#4f46e5',
-          dark: '#4338ca',
+          DEFAULT: "hsl(var(--primary))",
+          foreground: "hsl(var(--primary-foreground))",
+        },
+        secondary: {
+          DEFAULT: "hsl(var(--secondary))",
+          foreground: "hsl(var(--secondary-foreground))",
+        },
+        muted: {
+          DEFAULT: "hsl(var(--muted))",
+          foreground: "hsl(var(--muted-foreground))",
+        },
+        accent: {
+          DEFAULT: "hsl(var(--accent))",
+          foreground: "hsl(var(--accent-foreground))",
+        },
+        destructive: {
+          DEFAULT: "hsl(var(--destructive))",
+          foreground: "hsl(var(--destructive-foreground))",
+        },
+        border: "hsl(var(--border))",
+        input: "hsl(var(--input))",
+        ring: "hsl(var(--ring))",
+        chart: {
+          "1": "hsl(var(--chart-1))",
+          "2": "hsl(var(--chart-2))",
+          "3": "hsl(var(--chart-3))",
+          "4": "hsl(var(--chart-4))",
+          "5": "hsl(var(--chart-5))",
+        },
+        // Brand colors
+        braden: {
+          red: '#c04b5f',
+          'dark-red': '#9e3a4a',
+          gold: '#d6c285',
+          'light-gold': '#e5d9b3',
+          bronze: '#c9b06c',
+          navy: '#3d5269',
+          slate: '#b0bec5',
+          sky: '#5dade2',
+          forest: '#52be80',
+          lavender: '#af7ac5',
         },
         // Success colors (for positive metrics)
         success: {
