@@ -64,50 +64,7 @@ export default {
           forest: '#52be80',
           lavender: '#af7ac5',
         },
-        // Success colors (for positive metrics)
-        success: {
-          light: '#34d399', // Light green for indicators
-          DEFAULT: '#10b981', // Medium green for text
-          dark: '#059669',   // Dark green for hover states
-        },
-        // Danger colors (for negative metrics)
-        danger: {
-          light: '#f87171', // Light red for indicators
-          DEFAULT: '#ef4444', // Medium red for text
-          dark: '#dc2626',  // Dark red for hover states
-        },
-        // Neutral colors for light theme
-        light: {
-          bg: {
-            primary: '#ffffff',
-            secondary: '#f9fafb',
-            tertiary: '#f3f4f6',
-          },
-          text: {
-            primary: '#111827',
-            secondary: '#4b5563',
-            tertiary: '#6b7280',
-          },
-        },
-        // Dark theme colors with blues and neons
-        dark: {
-          bg: {
-            primary: '#0f172a',   // Dark blue background
-            secondary: '#1e293b', // Slightly lighter blue for cards
-            tertiary: '#334155',  // Even lighter blue for hover states
-          },
-          text: {
-            primary: '#f8fafc',     // Very light blue/white for primary text
-            secondary: '#cbd5e1',   // Light blue for secondary text
-            tertiary: '#94a3b8',    // Muted blue for tertiary text
-          },
-          accent: {
-            blue: '#3b82f6',      // Neon blue
-            purple: '#8b5cf6',    // Neon purple
-            green: '#10b981',     // Neon green
-            pink: '#ec4899',      // Neon pink
-          }
-        },
+
       },
       backgroundImage: {
         'grid-light': 'url("data:image/svg+xml,%3csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 32 32\' width=\'32\' height=\'32\' fill=\'none\' stroke=\'rgb(0 0 0 / 0.02)\'%3e%3cpath d=\'M0 .5H31.5V32\'/%3e%3c/svg%3e")',

@@ -119,7 +119,7 @@
 
 /* Card and container styling for softer appearance */
 .card {
-  @apply bg-card text-card-foreground rounded-lg border shadow-sm;
+  @apply bg-white text-gray-900 rounded-lg border border-gray-200 shadow-sm;
 }
 
 .dashboard-card {
@@ -128,11 +128,11 @@
 
 /* Button variants */
 .btn-primary {
-  @apply bg-primary text-primary-foreground shadow hover:bg-primary/90;
+  @apply bg-blue-600 text-white shadow hover:bg-blue-700;
 }
 
 .btn-secondary {
-  @apply bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80;
+  @apply bg-gray-100 text-gray-900 shadow-sm hover:bg-gray-200;
 }
 
 /* Table styling */
