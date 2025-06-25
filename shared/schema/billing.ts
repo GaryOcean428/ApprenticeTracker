@@ -8,7 +8,7 @@ export const paymentMethodEnum = pgEnum('payment_method', ['direct-deposit', 'cr
 export const rateTypeEnum = pgEnum('rate_type', ['base', 'overtime', 'holiday', 'weekend', 'penalty', 'allowance']);
 
 // Award Rates Table
-export const award_rates = pgTable('award_rates', {
+export const billingAwardRates = pgTable('billing_award_rates', {
   id: uuid('id').defaultRandom().primaryKey(),
   award_code: varchar('award_code', { length: 50 }).notNull(),
   award_name: varchar('award_name', { length: 200 }).notNull(),
@@ -79,7 +79,7 @@ export const host_employer_rates = pgTable('host_employer_rates', {
   agreement_end_date: date('agreement_end_date'),
   is_active: boolean('is_active').default(true),
   base_rate: numeric('base_rate', { precision: 10, scale: 2 }).notNull(),
-  award_reference: uuid('award_reference').references(() => award_rates.id),
+  award_reference: uuid('award_reference').references(() => billingAwardRates.id),
   award_code: varchar('award_code', { length: 50 }),
   use_fair_work_rates: boolean('use_fair_work_rates').default(false),
   markup_percentage: numeric('markup_percentage', { precision: 5, scale: 2 }).default('0'),
@@ -190,7 +190,7 @@ export const invoice_templates = pgTable('invoice_templates', {
 });
 
 // Define Zod schemas for validation and type inference
-export const insertAwardRateSchema = createInsertSchema(award_rates, {
+export const insertBillingAwardRateSchema = createInsertSchema(billingAwardRates, {
   award_code: z.string().min(2, 'Award code must be at least 2 characters').max(50, 'Award code must not exceed 50 characters'),
   award_name: z.string().min(3, 'Award name must be at least 3 characters').max(200, 'Award name must not exceed 200 characters'),
   classification_code: z.string().min(1, 'Classification code is required').max(50, 'Classification code must not exceed 50 characters'),
@@ -298,8 +298,8 @@ export const insertInvoiceTemplateSchema = createInsertSchema(invoice_templates,
 });
 
 // Define types
-export type AwardRate = typeof award_rates.$inferSelect;
-export type InsertAwardRate = z.infer<typeof insertAwardRateSchema>;
+export type BillingAwardRate = typeof billingAwardRates.$inferSelect;
+export type InsertBillingAwardRate = z.infer<typeof insertBillingAwardRateSchema>;
 
 export type AwardPenalty = typeof award_penalties.$inferSelect;
 export type InsertAwardPenalty = z.infer<typeof insertAwardPenaltySchema>;
