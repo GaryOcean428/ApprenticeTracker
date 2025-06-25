@@ -95,23 +95,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const loginMutation = useMutation({
     mutationFn: async (credentials: LoginCredentials) => {
-      const response = await apiRequest('POST', '/api/auth/login', credentials);
-
-      if (!response.ok) {
-        try {
-          const errorData = await response.json();
-          throw new Error(errorData.message || 'Login failed');
-        } catch (jsonError) {
-          // If JSON parsing fails, it's likely an HTML error page
-          const text = await response.text();
-          console.error('Failed to parse JSON error:', text);
-          throw new Error('Login failed due to server error.');
+      console.log('Attempting login with endpoint: /api/auth/login');
+      
+      try {
+        const response = await apiRequest('POST', '/api/auth/login', credentials);
+        
+        console.log('Login response status:', response.status);
+        
+        if (!response.ok) {
+          let errorMessage = 'Login failed';
+          
+          try {
+            const errorData = await response.json();
+            errorMessage = errorData.message || errorMessage;
+          } catch (jsonError) {
+            // If JSON parsing fails, it's likely an HTML error page
+            const text = await response.text();
+            console.error('Failed to parse JSON error response:', text);
+            errorMessage = `Login failed (${response.status}): Server error`;
+          }
+          
+          throw new Error(errorMessage);
         }
-      }
 
-      const data = await response.json();
-      // Store the token in localStorage
-      localStorage.setItem('authToken', data.token);
+        const data = await response.json();
+        console.log('Login successful, storing token');
+        
+        // Store the token in localStorage
+        localStorage.setItem('authToken', data.token);
       return data.user;
     },
   });

@@ -68,12 +68,12 @@ export async function parseApiResponse<T>(
   schema?: z.ZodType<T>
 ): Promise<T> {
   const data = await response.json();
-  
+
   if (!response.ok) {
     const errorMessage = data.error || response.statusText || 'An unknown error occurred';
     throw new Error(errorMessage);
   }
-  
+
   if (schema) {
     try {
       return schema.parse(data);
@@ -82,8 +82,35 @@ export async function parseApiResponse<T>(
       throw new Error('The server returned invalid data');
     }
   }
-  
+
   return data as T;
+}
+
+// API Configuration - use relative paths in production
+const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '' : 'http://localhost:5000');
+
+export async function apiRequest(
+  method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH',
+  endpoint: string,
+  data?: any,
+  options?: RequestInit
+): Promise<Response> {
+  const url = `${API_BASE_URL}${endpoint}`;
+  try {
+    const response = await fetch(url, {
+      method,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: data ? JSON.stringify(data) : undefined,
+      ...options,
+    });
+
+    return response;
+  } catch (error: any) {
+    console.error(`API request failed: ${error.message}`);
+    throw error;
+  }
 }
 
 /**
@@ -97,7 +124,7 @@ export const api = {
     const response = await apiRequest('GET', url);
     return parseApiResponse<T>(response, schema);
   },
-  
+
   /**
    * POST request with automatic JSON parsing and validation
    */
@@ -105,7 +132,7 @@ export const api = {
     const response = await apiRequest('POST', url, data);
     return parseApiResponse<T>(response, schema);
   },
-  
+
   /**
    * PUT request with automatic JSON parsing and validation
    */
@@ -113,7 +140,7 @@ export const api = {
     const response = await apiRequest('PUT', url, data);
     return parseApiResponse<T>(response, schema);
   },
-  
+
   /**
    * PATCH request with automatic JSON parsing and validation
    */
@@ -121,7 +148,7 @@ export const api = {
     const response = await apiRequest('PATCH', url, data);
     return parseApiResponse<T>(response, schema);
   },
-  
+
   /**
    * DELETE request with automatic JSON parsing and validation
    */
@@ -148,23 +175,23 @@ export function createApiEndpoints<T, CreateType, UpdateType = Partial<CreateTyp
      * Get all items
      */
     getAll: () => api.get<T[]>(basePath, schemas?.list),
-    
+
     /**
      * Get a single item by ID
      */
     getById: (id: number | string) => api.get<T>(`${basePath}/${id}`, schemas?.single),
-    
+
     /**
      * Create a new item
      */
     create: (data: CreateType) => api.post<T, CreateType>(basePath, data, schemas?.single),
-    
+
     /**
      * Update an existing item
      */
     update: (id: number | string, data: UpdateType) => 
       api.patch<T, UpdateType>(`${basePath}/${id}`, data, schemas?.single),
-    
+
     /**
      * Delete an item
      */
@@ -247,7 +274,7 @@ export const jobsApi = {
       }
     ];
   },
-  
+
   /**
    * Submit a job application
    */

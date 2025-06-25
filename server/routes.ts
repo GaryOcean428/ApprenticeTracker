@@ -780,8 +780,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   // API Routes - prefix all routes with /api
 
+  // Add debug logging for all API requests
+  app.use('/api', (req, res, next) => {
+    console.log(`[API] ${req.method} ${req.path} - ${new Date().toISOString()}`);
+    next();
+  });
+
   // Register authentication routes first (highest priority)
   app.use('/api/auth', (req, res, next) => {
+    console.log(`[AUTH] ${req.method} ${req.path} - Headers:`, req.headers['content-type']);
     // Ensure JSON responses for auth endpoints
     res.setHeader('Content-Type', 'application/json');
     next();

@@ -170,10 +170,26 @@ app.use((req, res, next) => {
   
   const server = await registerRoutes(app);
 
+  // Add a catch-all for unmatched API routes to help debug 404s
+  app.use('/api/*', (req, res) => {
+    log(`[404] Unmatched API route: ${req.method} ${req.originalUrl}`);
+    res.status(404).json({ 
+      success: false, 
+      message: `API route not found: ${req.method} ${req.originalUrl}`,
+      availableRoutes: [
+        'GET /api/health',
+        'POST /api/auth/login',
+        'POST /api/auth/register', 
+        'GET /api/auth/verify'
+      ]
+    });
+  });
+
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
 
+    log(`[ERROR] ${status}: ${message}`);
     res.status(status).json({ message });
     throw err;
   });
