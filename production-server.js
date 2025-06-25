@@ -205,6 +205,16 @@ app.use('*', (req, res) => {
   
   // Serve React app for all other routes
   const indexPath = path.join(clientPath, 'index.html');
+  
+  // Check if build files exist before attempting to serve
+  if (!fs.existsSync(indexPath)) {
+    console.error('Frontend build files not found at:', indexPath);
+    return res.status(503).json({
+      error: 'Application not ready',
+      message: 'Frontend build files are missing. Please run npm run build first.'
+    });
+  }
+  
   res.sendFile(indexPath, (err) => {
     if (err) {
       console.error('Error serving index.html:', err);
@@ -216,9 +226,37 @@ app.use('*', (req, res) => {
   });
 });
 
-// Start server
+// Start server with error handling
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, '0.0.0.0', () => {
+const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`Production server running on port ${PORT}`);
   console.log(`Environment: ${process.env.NODE_ENV || 'production'}`);
+  console.log(`Static files served from: ${clientPath}`);
+});
+
+server.on('error', (error) => {
+  if (error.code === 'EADDRINUSE') {
+    console.error(`Port ${PORT} is already in use`);
+    process.exit(1);
+  } else {
+    console.error('Server error:', error);
+    process.exit(1);
+  }
+});
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+  console.log('Received SIGTERM, shutting down gracefully');
+  server.close(() => {
+    console.log('Process terminated');
+    process.exit(0);
+  });
+});
+
+process.on('SIGINT', () => {
+  console.log('Received SIGINT, shutting down gracefully');
+  server.close(() => {
+    console.log('Process terminated');
+    process.exit(0);
+  });
 });
