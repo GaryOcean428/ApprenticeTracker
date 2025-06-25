@@ -23,14 +23,18 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// Health check endpoint ONLY for production mode
-// In development, this route should be handled by Vite for the UI
+// Use PORT from environment variable for deployment compatibility
+// Default to 5000 for both production and development since that's what Replit expects
+const port = process.env.PORT || 5000;
+
+// Health check endpoint only for production deployment
 if (process.env.NODE_ENV === 'production') {
   app.get('/', (req, res) => {
     res.status(200).json({
       status: 'healthy',
       environment: 'production',
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      port: port
     });
   });
 }
@@ -191,15 +195,11 @@ app.use((req, res, next) => {
     res.status(500).json({ error: 'Internal Server Error', message: err.message });
   });
 
-  // Use PORT from environment variable for deployment compatibility
-  // Default to 5000 for both production and development since that's what Replit expects
-  const port = process.env.PORT || 5000;
-  
   // Log environment information for debugging
   log(`Environment: ${process.env.NODE_ENV || 'development'}`);
   log(`Using port: ${port}`);
   
-  server.listen({
+  const serverInstance = server.listen({
     port,
     host: "0.0.0.0",
     reusePort: true,
@@ -214,4 +214,22 @@ app.use((req, res, next) => {
       log(`Failed to initialize scheduled tasks: ${error}`);
     }
   });
-})();
+
+  // Ensure the server keeps running
+  process.on('SIGTERM', () => {
+    log('SIGTERM received, shutting down gracefully');
+    serverInstance.close(() => {
+      log('Process terminated');
+    });
+  });
+
+  process.on('SIGINT', () => {
+    log('SIGINT received, shutting down gracefully');
+    serverInstance.close(() => {
+      log('Process terminated');
+    });
+  });
+})().catch((error) => {
+  log(`Fatal error during startup: ${error}`);
+  process.exit(1);
+});

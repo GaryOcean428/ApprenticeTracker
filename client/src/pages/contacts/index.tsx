@@ -341,7 +341,7 @@ export default function ContactsPage() {
   };
   
   // Filter contacts based on search query
-  const filteredContacts = contacts.filter(contact => {
+  const filteredContacts = (Array.isArray(contacts) ? contacts : []).filter(contact => {
     const searchLower = searchQuery.toLowerCase();
     const fullName = `${contact.firstName} ${contact.lastName}`.toLowerCase();
     
