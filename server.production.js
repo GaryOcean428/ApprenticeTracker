@@ -7,10 +7,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-// Use port 80 for production deployment (Replit maps this to external port 5000)
-const PORT = process.env.NODE_ENV === 'production' 
-  ? (process.env.PORT || 80)
-  : (process.env.PORT || 5000);
+// Use port 5000 for production deployment (Replit maps this to external port 80)
+const PORT = process.env.PORT || 5000;
 
 // Basic middleware
 app.use(express.json());

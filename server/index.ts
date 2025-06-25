@@ -29,10 +29,8 @@ app.get('/favicon.ico', (req, res) => {
 });
 
 // Use PORT from environment variable for deployment compatibility
-// Use different default ports for development vs production to avoid conflicts
-const port = process.env.NODE_ENV === 'production' 
-  ? (process.env.PORT || 80)  // Production uses port 80 (mapped to 5000 externally by Replit)
-  : (process.env.PORT || 5001); // Development uses port 5001 to avoid conflicts
+// Use port 5001 for development to avoid conflicts with production server on 5000
+const port = process.env.PORT || 5001;
 
 // Health check endpoint only for production deployment
 if (process.env.NODE_ENV === 'production') {
