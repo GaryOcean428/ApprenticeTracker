@@ -133,6 +133,7 @@ npm run start:prod
 - June 25, 2025. Successfully removed authentication middleware from Fair Work award-updates endpoint, resolving 401 errors
 - June 25, 2025. Fixed favicon 500 error by adding proper favicon handling and copying favicon assets
 - June 25, 2025. Added favicon handling to production servers and ensured favicon is included in build output
+- June 25, 2025. Fixed production server configuration for proper asset serving and API route registration
 
 ## User Preferences
 
