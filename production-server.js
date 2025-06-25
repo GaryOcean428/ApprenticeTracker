@@ -83,17 +83,48 @@ try {
 }
 
 // Serve static files from the client build directory with explicit favicon handling
-const clientPath = path.join(__dirname, 'dist/public');
+const clientPath = path.join(__dirname, 'public');
+
+// Ensure favicon exists at root level for production
+const rootFaviconPath = path.join(__dirname, 'favicon.ico');
+const distFaviconPath = path.join(__dirname, 'dist', 'public', 'favicon.ico');
+if (!require('fs').existsSync(rootFaviconPath) && require('fs').existsSync(distFaviconPath)) {
+  require('fs').copyFileSync(distFaviconPath, rootFaviconPath);
+  console.log('Favicon copied to root for production serving');
+}
 
 // Priority favicon route before static middleware
 app.get('/favicon.ico', (req, res) => {
-  const faviconPath = path.join(clientPath, 'favicon.ico');
-  res.sendFile(faviconPath, (err) => {
-    if (err) {
-      console.log('Favicon not found, returning 204');
-      res.status(204).end();
+  // Try multiple potential favicon locations
+  const faviconPaths = [
+    path.join(__dirname, 'favicon.ico'),
+    path.join(__dirname, 'public', 'favicon.ico'),
+    path.join(__dirname, 'dist', 'public', 'favicon.ico'),
+    path.join(__dirname, 'client', 'public', 'favicon.ico')
+  ];
+  
+  let served = false;
+  
+  const tryNextPath = (index) => {
+    if (index >= faviconPaths.length || served) {
+      if (!served) {
+        res.status(204).end();
+      }
+      return;
     }
-  });
+    
+    const currentPath = faviconPaths[index];
+    res.sendFile(currentPath, (err) => {
+      if (err) {
+        tryNextPath(index + 1);
+      } else {
+        served = true;
+        console.log(`Favicon served from: ${currentPath}`);
+      }
+    });
+  };
+  
+  tryNextPath(0);
 });
 
 // Serve static files with proper error handling
