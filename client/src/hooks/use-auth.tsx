@@ -96,12 +96,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const loginMutation = useMutation({
     mutationFn: async (credentials: LoginCredentials) => {
       const response = await apiRequest('POST', '/api/auth/login', credentials);
-      
+
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Login failed');
+        try {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Login failed');
+        } catch (jsonError) {
+          // If JSON parsing fails, it's likely an HTML error page
+          const text = await response.text();
+          console.error('Failed to parse JSON error:', text);
+          throw new Error('Login failed due to server error.');
+        }
       }
-      
+
       const data = await response.json();
       // Store the token in localStorage
       localStorage.setItem('authToken', data.token);
@@ -112,12 +119,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const registerMutation = useMutation({
     mutationFn: async (userData: RegisterData) => {
       const response = await apiRequest('POST', '/api/auth/register', userData);
-      
+
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || 'Registration failed');
       }
-      
+
       return await response.json();
     },
   });

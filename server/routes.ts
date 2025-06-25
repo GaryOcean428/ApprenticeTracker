@@ -781,7 +781,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // API Routes - prefix all routes with /api
 
   // Register authentication routes first (highest priority)
-  app.use('/api/auth', authRouter); // Authentication routes (login, register, verify)
+  app.use('/api/auth', (req, res, next) => {
+    // Ensure JSON responses for auth endpoints
+    res.setHeader('Content-Type', 'application/json');
+    next();
+  }, authRouter); // Authentication routes (login, register, verify)
   
   // Register specialized route handlers
   app.use('/api/gto-compliance', gtoComplianceRouter);

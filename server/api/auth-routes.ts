@@ -58,6 +58,9 @@ function validateBody<T>(schema: z.ZodType<T>) {
  */
 authRouter.post('/login', validateBody(loginSchema), async (req: Request, res: Response) => {
   try {
+    // Ensure we always return JSON
+    res.setHeader('Content-Type', 'application/json');
+    
     const { username, password } = req.body;
 
     // Find user by username
@@ -155,6 +158,9 @@ authRouter.post('/login', validateBody(loginSchema), async (req: Request, res: R
  */
 authRouter.post('/register', validateBody(registerSchema), async (req: Request, res: Response) => {
   try {
+    // Ensure we always return JSON
+    res.setHeader('Content-Type', 'application/json');
+    
     const { username, password, email, firstName, lastName, role, roleId, organizationId } = req.body;
 
     // Check if username already exists
@@ -245,6 +251,9 @@ authRouter.post('/register', validateBody(registerSchema), async (req: Request, 
  */
 authRouter.get('/verify', async (req: Request, res: Response) => {
   try {
+    // Ensure we always return JSON
+    res.setHeader('Content-Type', 'application/json');
+    
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
