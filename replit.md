@@ -134,6 +134,7 @@ npm run start:prod
 - June 25, 2025. Fixed favicon 500 error by adding proper favicon handling and copying favicon assets
 - June 25, 2025. Added favicon handling to production servers and ensured favicon is included in build output
 - June 25, 2025. Fixed production server configuration for proper asset serving and API route registration
+- June 25, 2025. Moved favicon handling to priority route before static middleware to prevent 500 errors
 
 ## User Preferences
 

@@ -12,10 +12,7 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// Handle favicon request to prevent 500 errors
-app.get('/favicon.ico', (req, res) => {
-  res.status(204).end();
-});
+// Remove duplicate favicon handler - moved below
 
 // Health check endpoint for deployment monitoring (not on root path)
 app.get('/health-check', (req, res) => {
@@ -73,8 +70,20 @@ try {
   });
 }
 
-// Serve static files from the client build directory
+// Serve static files from the client build directory with explicit favicon handling
 const clientPath = path.join(__dirname, 'dist/public');
+
+// Priority favicon route before static middleware
+app.get('/favicon.ico', (req, res) => {
+  const faviconPath = path.join(clientPath, 'favicon.ico');
+  res.sendFile(faviconPath, (err) => {
+    if (err) {
+      console.log('Favicon not found, returning 204');
+      res.status(204).end();
+    }
+  });
+});
+
 app.use(express.static(clientPath, { 
   index: 'index.html',
   setHeaders: (res, filePath) => {

@@ -15,7 +15,14 @@ app.use(express.urlencoded({ extended: false }));
 
 // Handle favicon request to prevent 500 errors
 app.get('/favicon.ico', (req, res) => {
-  res.status(204).end();
+  // Try to serve the actual favicon first
+  const faviconPath = path.join(__dirname, 'dist/public/favicon.ico');
+  res.sendFile(faviconPath, (err) => {
+    if (err) {
+      // If file doesn't exist, return 204 No Content
+      res.status(204).end();
+    }
+  });
 });
 
 // Essential health check endpoint for deployment
