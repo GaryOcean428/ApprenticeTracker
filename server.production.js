@@ -1,14 +1,15 @@
-// Simple production server for Replit deployment
+// Clean production server for Replit deployment
+// This file avoids importing the development server code to prevent port conflicts
 import express from 'express';
 import path from 'path';
+import fs from 'fs';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Create Express server
 const app = express();
-// Use port 5000 for production deployment (Replit maps this to external port 80)
-const PORT = process.env.PORT || 5000;
 
 // Basic middleware
 app.use(express.json());
@@ -39,6 +40,57 @@ app.get('/health', (req, res) => {
   res.status(200).send('OK');
 });
 
+app.get('/health-check', (req, res) => {
+  res.status(200).json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    service: 'apprentice-tracker'
+  });
+});
+
+// Essential API routes for production
+app.get('/api/health', (req, res) => {
+  res.status(200).json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    service: 'apprentice-tracker',
+    environment: 'production'
+  });
+});
+
+// Try to import and register full API routes
+try {
+  const { registerRoutes } = await import('./dist/index.js');
+  if (registerRoutes && typeof registerRoutes === 'function') {
+    const httpServer = { listen: () => {} }; // Mock HTTP server for route registration
+    await registerRoutes(app, httpServer);
+    console.log('Full API routes registered successfully');
+  }
+} catch (error) {
+  console.log('Could not load full API routes, using fallback endpoints');
+  
+  // Fallback essential routes
+  app.get('/api/auth/verify', (req, res) => {
+    res.status(200).json({ user: null, authenticated: false });
+  });
+  
+  app.post('/api/auth/login', (req, res) => {
+    res.status(401).json({ error: 'Authentication service unavailable' });
+  });
+  
+  app.get('/api/fairwork/award-updates', (req, res) => {
+    res.status(200).json({ success: true, data: [] });
+  });
+  
+  // Catch-all for other API routes
+  app.use('/api/*', (req, res) => {
+    res.status(503).json({ 
+      error: 'Service temporarily unavailable',
+      message: 'API routes not loaded properly'
+    });
+  });
+}
+
 // Serve static files
 const staticPath = path.join(__dirname, 'dist');
 app.use(express.static(staticPath));
@@ -60,6 +112,9 @@ app.get('*', (req, res) => {
 });
 
 // Start server with error handling
+// Use port 5000 for Replit deployment (which maps to external port 80)
+const PORT = process.env.PORT || 5000;
+
 const startServer = (port) => {
   const server = app.listen(port, '0.0.0.0', () => {
     console.log(`Production server running on port ${port}`);

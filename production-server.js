@@ -227,8 +227,8 @@ app.use('*', (req, res) => {
 });
 
 // Start server with error handling and port detection
-// For Replit deployment, use port 5000 which maps to external port 80
-const PORT = process.env.PORT || 5000;
+// For Replit deployment, use port 80 for direct external access
+const PORT = process.env.PORT || 80;
 
 const startServer = (port) => {
   const server = app.listen(port, '0.0.0.0', () => {
@@ -241,12 +241,18 @@ const startServer = (port) => {
   server.on('error', (error) => {
     if (error.code === 'EADDRINUSE') {
       console.error(`Port ${port} is already in use`);
-      // Only try alternative ports for development fallback
-      if (process.env.NODE_ENV !== 'production' && port === 5000) {
-        console.log('Trying alternative port 8080...');
+      // Try alternative ports for production deployment
+      if (port === 80) {
+        console.log('Port 80 in use, trying port 8080...');
         startServer(8080);
+      } else if (port === 8080) {
+        console.log('Port 8080 in use, trying port 5000...');
+        startServer(5000);
+      } else if (port === 5000) {
+        console.log('Port 5000 in use, trying port 3000...');
+        startServer(3000);
       } else {
-        console.error('Production port conflict - exiting');
+        console.error('All production ports in use - exiting');
         process.exit(1);
       }
     } else {

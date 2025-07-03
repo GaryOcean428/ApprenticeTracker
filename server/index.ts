@@ -30,7 +30,7 @@ app.get('/favicon.ico', (req, res) => {
 
 // Use PORT from environment variable for deployment compatibility
 // Use port 5000 for development (workflow expects this port)
-const port = process.env.PORT || 5000;
+const port = parseInt(process.env.PORT || '5000', 10);
 
 // Health check endpoint only for production deployment
 if (process.env.NODE_ENV === 'production') {

@@ -139,6 +139,7 @@ npm run start:prod
 - June 25, 2025. Fixed Toaster component crash and completed production build with all assets
 - June 25, 2025. **DEPLOYMENT FIX COMPLETED**: Resolved ES module syntax errors by replacing require() calls with import statements, added proper error handling, and validated production server startup
 - June 25, 2025. **PORT CONFLICT RESOLUTION**: Fixed EADDRINUSE deployment errors by separating development (port 5001) and production (port 5000) server configurations, added graceful port detection, and resolved Toaster component crashes
+- July 3, 2025. **DEPLOYMENT PORT FIXES**: Resolved port conflicts by maintaining port 5000 for development (as expected by Replit workflows), created clean production server (server.production.js) with improved port detection and fallback handling, and ensured proper separation between development and production environments
 
 ## User Preferences
 
