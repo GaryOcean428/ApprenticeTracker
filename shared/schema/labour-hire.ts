@@ -47,7 +47,7 @@ export const insertLabourHireWorkerSchema = createInsertSchema(labourHireWorkers
   id: true,
   createdAt: true,
   updatedAt: true,
-} as const);
+});
 
 export type LabourHireWorker = typeof labourHireWorkers.$inferSelect;
 export type InsertLabourHireWorker = z.infer<typeof insertLabourHireWorkerSchema>;
@@ -74,7 +74,7 @@ export const insertLabourHirePlacementSchema = createInsertSchema(labourHirePlac
   id: true,
   createdAt: true,
   updatedAt: true,
-} as const);
+});
 
 export type LabourHirePlacement = typeof labourHirePlacements.$inferSelect;
 export type InsertLabourHirePlacement = z.infer<typeof insertLabourHirePlacementSchema>;
@@ -102,7 +102,7 @@ export const insertLabourHireTimesheetSchema = createInsertSchema(labourHireTime
   id: true,
   createdAt: true,
   updatedAt: true,
-} as const);
+});
 
 export type LabourHireTimesheet = typeof labourHireTimesheets.$inferSelect;
 export type InsertLabourHireTimesheet = z.infer<typeof insertLabourHireTimesheetSchema>;
@@ -126,7 +126,7 @@ export const insertLabourHireTimesheetDetailSchema = createInsertSchema(labourHi
   id: true,
   createdAt: true,
   updatedAt: true,
-} as const);
+});
 
 export type LabourHireTimesheetDetail = typeof labourHireTimesheetDetails.$inferSelect;
 export type InsertLabourHireTimesheetDetail = z.infer<typeof insertLabourHireTimesheetDetailSchema>;
@@ -150,7 +150,7 @@ export const insertLabourHireWorkerDocumentSchema = createInsertSchema(labourHir
   id: true,
   createdAt: true,
   updatedAt: true,
-} as const);
+});
 
 export type LabourHireWorkerDocument = typeof labourHireWorkerDocuments.$inferSelect;
 export type InsertLabourHireWorkerDocument = z.infer<typeof insertLabourHireWorkerDocumentSchema>;

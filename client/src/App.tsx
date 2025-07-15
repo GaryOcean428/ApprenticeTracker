@@ -80,6 +80,26 @@ import ReviewsListPage from './pages/progress-reviews/reviews';
 
 // Financial Pages - using dynamic imports for better code splitting
 
+// Helper function to create lazy-loaded protected routes
+const createLazyRoute = (importPath: string, showFullLoader = true) => {
+  return () => {
+    const Component = lazy(() => import(importPath));
+    const fallback = showFullLoader ? (
+      <div className="p-8 flex items-center justify-center">
+        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+      </div>
+    ) : (
+      <div>Loading...</div>
+    );
+    
+    return (
+      <Suspense fallback={fallback}>
+        <Component />
+      </Suspense>
+    );
+  };
+};
+
 function Router() {
   const [location] = useLocation();
   const isPublicRoute = [
@@ -120,20 +140,7 @@ function Router() {
         <ProtectedRoute path="/admin" component={Dashboard} />
         <ProtectedRoute
           path="/admin/award-updates"
-          component={() => {
-            const AwardUpdates = lazy(() => import('./pages/admin/award-updates'));
-            return (
-              <Suspense
-                fallback={
-                  <div className="p-8 flex items-center justify-center">
-                    <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
-                  </div>
-                }
-              >
-                <AwardUpdates />
-              </Suspense>
-            );
-          }}
+          component={createLazyRoute('./pages/admin/award-updates')}
         />
 
         {/* Contacts & Clients Routes */}
@@ -1179,73 +1186,21 @@ function Router() {
         />
 
         {/* Accounts & Finance Routes */}
-        <ProtectedRoute
-          path="/invoicing"
-          component={() => {
-            const InvoicingPage = lazy(() => import('./pages/financial/invoicing'));
-            return (
-              <Suspense
-                fallback={
-                  <div className="p-8 flex items-center justify-center">
-                    <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
-                  </div>
-                }
-              >
-                <InvoicingPage />
-              </Suspense>
-            );
-          }}
+        <ProtectedRoute 
+          path="/invoicing" 
+          component={createLazyRoute('./pages/financial/invoicing')} 
         />
-        <ProtectedRoute
-          path="/financial-reports"
-          component={() => {
-            const FinancialReportsPage = lazy(() => import('./pages/financial/reports'));
-            return (
-              <Suspense
-                fallback={
-                  <div className="p-8 flex items-center justify-center">
-                    <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
-                  </div>
-                }
-              >
-                <FinancialReportsPage />
-              </Suspense>
-            );
-          }}
+        <ProtectedRoute 
+          path="/financial-reports" 
+          component={createLazyRoute('./pages/financial/reports')} 
         />
-        <ProtectedRoute
-          path="/budget"
-          component={() => {
-            const BudgetPlanningPage = lazy(() => import('./pages/financial/budget'));
-            return (
-              <Suspense
-                fallback={
-                  <div className="p-8 flex items-center justify-center">
-                    <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
-                  </div>
-                }
-              >
-                <BudgetPlanningPage />
-              </Suspense>
-            );
-          }}
+        <ProtectedRoute 
+          path="/budget" 
+          component={createLazyRoute('./pages/financial/budget')} 
         />
-        <ProtectedRoute
-          path="/expenses"
-          component={() => {
-            const ExpensesPage = lazy(() => import('./pages/financial/expenses'));
-            return (
-              <Suspense
-                fallback={
-                  <div className="p-8 flex items-center justify-center">
-                    <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
-                  </div>
-                }
-              >
-                <ExpensesPage />
-              </Suspense>
-            );
-          }}
+        <ProtectedRoute 
+          path="/expenses" 
+          component={createLazyRoute('./pages/financial/expenses')} 
         />
 
         {/* Progress Reviews Module */}

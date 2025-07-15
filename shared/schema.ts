@@ -21,7 +21,7 @@ export const insertRoleSchema = createInsertSchema(roles).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
-} as const);
+});
 
 // Permissions
 export const permissions = pgTable("permissions", {
@@ -39,7 +39,7 @@ export const insertPermissionSchema = createInsertSchema(permissions).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
-} as const);
+});
 
 // Role Permissions (many-to-many)
 export const rolePermissions = pgTable("role_permissions", {
@@ -52,7 +52,7 @@ export const rolePermissions = pgTable("role_permissions", {
 export const insertRolePermissionSchema = createInsertSchema(rolePermissions).omit({
   id: true,
   createdAt: true,
-} as const);
+});
 
 // Subscription Plans (for future Stripe integration)
 export const subscriptionPlans = pgTable("subscription_plans", {
@@ -72,7 +72,7 @@ export const insertSubscriptionPlanSchema = createInsertSchema(subscriptionPlans
   id: true,
   createdAt: true,
   updatedAt: true,
-} as const);
+});
 
 // Users
 export const users = pgTable("users", {
@@ -114,7 +114,7 @@ export const insertUserSchema = createInsertSchema(users).pick({
   subscriptionEndsAt: true,
   stripeCustomerId: true,
   stripeSubscriptionId: true
-} as const);
+});
 
 // Apprentices
 export const apprentices = pgTable("apprentices", {
@@ -141,7 +141,7 @@ export const apprentices = pgTable("apprentices", {
 
 export const insertApprenticeSchema = createInsertSchema(apprentices).omit({
   id: true,
-} as const);
+});
 
 // Host Employers
 export const hostEmployers = pgTable("host_employers", {
@@ -182,7 +182,7 @@ export const hostEmployers = pgTable("host_employers", {
 
 export const insertHostEmployerSchema = createInsertSchema(hostEmployers).omit({
   id: true,
-} as const);
+});
 
 // Define host employer relationships
 export const hostEmployerRelations = relations(hostEmployers, ({ one, many }) => ({
@@ -214,7 +214,7 @@ export const trainingContracts = pgTable("training_contracts", {
 
 export const insertTrainingContractSchema = createInsertSchema(trainingContracts).omit({
   id: true,
-} as const);
+});
 
 // Placements
 export const placements = pgTable("placements", {
@@ -242,7 +242,7 @@ export const placements = pgTable("placements", {
 
 export const insertPlacementSchema = createInsertSchema(placements).omit({
   id: true,
-} as const);
+});
 
 // Define placement relationships
 export const placementsRelations = relations(placements, ({ one }) => ({
@@ -281,7 +281,7 @@ export const documents = pgTable("documents", {
 export const insertDocumentSchema = createInsertSchema(documents).omit({
   id: true,
   uploadDate: true,
-} as const);
+});
 
 // Compliance Records
 export const complianceRecords = pgTable("compliance_records", {
@@ -297,7 +297,7 @@ export const complianceRecords = pgTable("compliance_records", {
 
 export const insertComplianceRecordSchema = createInsertSchema(complianceRecords).omit({
   id: true,
-} as const);
+});
 
 // Timesheets
 export const timesheets = pgTable("timesheets", {
@@ -317,7 +317,7 @@ export const insertTimesheetSchema = createInsertSchema(timesheets).omit({
   id: true,
   submittedDate: true,
   approvalDate: true,
-} as const);
+});
 
 // Timesheet Details
 export const timesheetDetails = pgTable("timesheet_details", {
@@ -341,7 +341,7 @@ export const timesheetDetails = pgTable("timesheet_details", {
 
 export const insertTimesheetDetailSchema = createInsertSchema(timesheetDetails).omit({
   id: true,
-} as const);
+});
 
 // Define timesheet detail relationships
 export const timesheetDetailsRelations = relations(timesheetDetails, ({ one }) => ({
@@ -380,7 +380,7 @@ export const insertTimesheetCalculationSchema = createInsertSchema(timesheetCalc
   id: true,
   calculatedAt: true,
   payrollProcessedDate: true,
-} as const);
+});
 
 // Define timesheet calculation relationships
 export const timesheetCalculationsRelations = relations(timesheetCalculations, ({ one }) => ({
@@ -404,7 +404,7 @@ export const activityLogs = pgTable("activity_logs", {
 export const insertActivityLogSchema = createInsertSchema(activityLogs).omit({
   id: true,
   timestamp: true,
-} as const);
+});
 
 // Tasks
 export const tasks = pgTable("tasks", {
@@ -426,7 +426,7 @@ export const insertTaskSchema = createInsertSchema(tasks).omit({
   id: true,
   createdAt: true,
   completedAt: true,
-} as const);
+});
 
 // Fair Work Awards
 export const awards = pgTable("awards", {
@@ -448,7 +448,7 @@ export const insertAwardSchema = createInsertSchema(awards).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
-} as const);
+});
 
 // Award Classifications
 export const awardClassifications = pgTable("award_classifications", {
@@ -469,7 +469,7 @@ export const insertAwardClassificationSchema = createInsertSchema(awardClassific
   id: true,
   createdAt: true,
   updatedAt: true,
-} as const);
+});
 
 // Pay Rates
 export const payRates = pgTable("pay_rates", {
@@ -490,7 +490,7 @@ export const insertPayRateSchema = createInsertSchema(payRates).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
-} as const);
+});
 
 // Penalty Rules
 export const penaltyRules = pgTable("penalty_rules", {
@@ -512,7 +512,7 @@ export const insertPenaltyRuleSchema = createInsertSchema(penaltyRules).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
-} as const);
+});
 
 // Allowance Rules
 export const allowanceRules = pgTable("allowance_rules", {
@@ -531,7 +531,7 @@ export const insertAllowanceRuleSchema = createInsertSchema(allowanceRules).omit
   id: true,
   createdAt: true,
   updatedAt: true,
-} as const);
+});
 
 // Public Holidays
 export const publicHolidays = pgTable("public_holidays", {
@@ -548,7 +548,7 @@ export const insertPublicHolidaySchema = createInsertSchema(publicHolidays).omit
   id: true,
   createdAt: true,
   updatedAt: true,
-} as const);
+});
 
 // Charge Rate Calculations
 export const chargeRateCalculations = pgTable("charge_rate_calculations", {
@@ -576,7 +576,7 @@ export const insertChargeRateCalculationSchema = createInsertSchema(chargeRateCa
   id: true,
   calculationDate: true,
   approvedDate: true,
-} as const);
+});
 
 // Define charge rate calculation relationships
 export const chargeRateCalculationsRelations = relations(chargeRateCalculations, ({ one }) => ({
@@ -618,7 +618,7 @@ export const insertQuoteSchema = createInsertSchema(quotes).omit({
   quoteDate: true,
   createdAt: true,
   updatedAt: true,
-} as const);
+});
 
 // Define quote relationships
 export const quotesRelations = relations(quotes, ({ one, many }) => ({
@@ -652,7 +652,7 @@ export const quoteLineItems = pgTable("quote_line_items", {
 
 export const insertQuoteLineItemSchema = createInsertSchema(quoteLineItems).omit({
   id: true,
-} as const);
+});
 
 // Define quote line item relationships
 export const quoteLineItemsRelations = relations(quoteLineItems, ({ one }) => ({
@@ -689,7 +689,7 @@ export const fairworkComplianceLogs = pgTable("fairwork_compliance_logs", {
 export const insertFairworkComplianceLogSchema = createInsertSchema(fairworkComplianceLogs).omit({
   id: true,
   createdAt: true,
-} as const);
+});
 
 // Define Fair Work compliance log relationships
 export const fairworkComplianceLogsRelations = relations(fairworkComplianceLogs, ({ one }) => ({
@@ -725,7 +725,7 @@ export const insertEnterpriseAgreementSchema = createInsertSchema(enterpriseAgre
   id: true,
   createdAt: true,
   updatedAt: true,
-} as const);
+});
 
 // GTO Organizations
 export const gtoOrganizations = pgTable("gto_organizations", {
@@ -755,7 +755,7 @@ export const insertGtoOrganizationSchema = createInsertSchema(gtoOrganizations).
   id: true,
   createdAt: true,
   updatedAt: true,
-} as const);
+});
 
 // External Portals Configuration
 export const externalPortals = pgTable("external_portals", {
@@ -775,7 +775,7 @@ export const insertExternalPortalSchema = createInsertSchema(externalPortals).om
   id: true,
   createdAt: true,
   updatedAt: true,
-} as const);
+});
 
 // Extend existing tables
 
@@ -903,7 +903,7 @@ export const insertGtoComplianceStandardSchema = createInsertSchema(gtoComplianc
   id: true,
   createdAt: true,
   updatedAt: true,
-} as const);
+});
 
 export const complianceAssessments = pgTable("compliance_assessments", {
   id: serial("id").primaryKey(),
@@ -923,7 +923,7 @@ export const insertComplianceAssessmentSchema = createInsertSchema(complianceAss
   id: true,
   createdAt: true,
   updatedAt: true,
-} as const);
+});
 
 export const apprenticeRecruitment = pgTable("apprentice_recruitment", {
   id: serial("id").primaryKey(),
@@ -952,7 +952,7 @@ export const insertApprenticeRecruitmentSchema = createInsertSchema(apprenticeRe
   id: true,
   createdAt: true,
   updatedAt: true,
-} as const);
+});
 
 export const hostEmployerAgreements = pgTable("host_employer_agreements", {
   id: serial("id").primaryKey(),
@@ -977,7 +977,7 @@ export const insertHostEmployerAgreementSchema = createInsertSchema(hostEmployer
   id: true,
   createdAt: true,
   updatedAt: true,
-} as const);
+});
 
 export const apprenticeInduction = pgTable("apprentice_induction", {
   id: serial("id").primaryKey(),
@@ -999,7 +999,7 @@ export const insertApprenticeInductionSchema = createInsertSchema(apprenticeIndu
   id: true,
   createdAt: true,
   updatedAt: true,
-} as const);
+});
 
 export const complaints = pgTable("complaints", {
   id: serial("id").primaryKey(),
@@ -1020,7 +1020,7 @@ export const insertComplaintSchema = createInsertSchema(complaints).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
-} as const);
+});
 
 export const appeals = pgTable("appeals", {
   id: serial("id").primaryKey(),
@@ -1043,7 +1043,7 @@ export const insertAppealSchema = createInsertSchema(appeals).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
-} as const);
+});
 
 export type GtoComplianceStandard = typeof gtoComplianceStandards.$inferSelect;
 export type InsertGtoComplianceStandard = z.infer<typeof insertGtoComplianceStandardSchema>;
@@ -1092,7 +1092,7 @@ export const insertUnitOfCompetencySchema = createInsertSchema(unitsOfCompetency
   id: true,
   createdAt: true,
   updatedAt: true,
-} as const);
+});
 
 // Qualifications - made up of multiple Units of Competency
 export const qualifications = pgTable("qualifications", {
@@ -1120,7 +1120,7 @@ export const insertQualificationSchema = createInsertSchema(qualifications).omit
   id: true,
   createdAt: true,
   updatedAt: true,
-} as const);
+});
 
 // Qualification Structure - connects Qualifications to Units of Competency
 export const qualificationStructure = pgTable("qualification_structure", {
@@ -1138,7 +1138,7 @@ export const insertQualificationStructureSchema = createInsertSchema(qualificati
   id: true,
   createdAt: true,
   updatedAt: true,
-} as const);
+});
 
 // Apprentice Unit Progress - tracks individual unit progression for apprentices
 export const apprenticeUnitProgress = pgTable("apprentice_unit_progress", {
@@ -1161,7 +1161,7 @@ export const insertApprenticeUnitProgressSchema = createInsertSchema(apprenticeU
   id: true,
   createdAt: true,
   updatedAt: true,
-} as const);
+});
 
 // Apprentice Qualification Enrollment - tracks which qualifications an apprentice is enrolled in
 export const apprenticeQualifications = pgTable("apprentice_qualifications", {
@@ -1188,7 +1188,7 @@ export const insertApprenticeQualificationSchema = createInsertSchema(apprentice
   id: true,
   createdAt: true,
   updatedAt: true,
-} as const);
+});
 
 export type UnitOfCompetency = typeof unitsOfCompetency.$inferSelect;
 export type InsertUnitOfCompetency = z.infer<typeof insertUnitOfCompetencySchema>;
@@ -1221,7 +1221,7 @@ export const insertHostEmployerPreferredQualificationSchema = createInsertSchema
   id: true,
   createdAt: true,
   updatedAt: true,
-} as const);
+});
 
 export type HostEmployerPreferredQualification = typeof hostEmployerPreferredQualifications.$inferSelect;
 export type InsertHostEmployerPreferredQualification = z.infer<typeof insertHostEmployerPreferredQualificationSchema>;
@@ -1249,7 +1249,7 @@ export const insertEnrichmentProgramSchema = createInsertSchema(enrichmentProgra
   id: true,
   createdAt: true,
   updatedAt: true,
-} as const);
+});
 
 // Enrichment Program Participants
 export const enrichmentParticipants = pgTable("enrichment_participants", {
@@ -1270,7 +1270,7 @@ export const insertEnrichmentParticipantSchema = createInsertSchema(enrichmentPa
   id: true,
   createdAt: true,
   updatedAt: true,
-} as const);
+});
 
 // Enrichment Workshops/Events
 export const enrichmentWorkshops = pgTable("enrichment_workshops", {
@@ -1293,7 +1293,7 @@ export const insertEnrichmentWorkshopSchema = createInsertSchema(enrichmentWorks
   id: true,
   createdAt: true,
   updatedAt: true,
-} as const);
+});
 
 // Workshop Attendees
 export const workshopAttendees = pgTable("workshop_attendees", {
@@ -1312,7 +1312,7 @@ export const insertWorkshopAttendeeSchema = createInsertSchema(workshopAttendees
   id: true,
   createdAt: true,
   updatedAt: true,
-} as const);
+});
 
 // Types export
 export type EnrichmentProgram = typeof enrichmentPrograms.$inferSelect;
@@ -1344,7 +1344,7 @@ export const insertProgressReviewTemplateSchema = createInsertSchema(progressRev
   id: true,
   createdAt: true,
   updatedAt: true,
-} as const);
+});
 
 // Progress Reviews
 export const progressReviews = pgTable("progress_reviews", {
@@ -1376,7 +1376,7 @@ export const insertProgressReviewSchema = createInsertSchema(progressReviews).om
   id: true,
   createdAt: true,
   updatedAt: true,
-} as const);
+});
 
 // Progress Review Participants
 export const progressReviewParticipants = pgTable("progress_review_participants", {
@@ -1392,7 +1392,7 @@ export const progressReviewParticipants = pgTable("progress_review_participants"
 export const insertProgressReviewParticipantSchema = createInsertSchema(progressReviewParticipants).omit({
   id: true,
   createdAt: true,
-} as const);
+});
 
 // Progress Review Action Items
 export const progressReviewActionItems = pgTable("progress_review_action_items", {
@@ -1414,7 +1414,7 @@ export const insertProgressReviewActionItemSchema = createInsertSchema(progressR
   id: true,
   createdAt: true,
   updatedAt: true,
-} as const);
+});
 
 // Progress Review Documents
 export const progressReviewDocuments = pgTable("progress_review_documents", {
@@ -1428,7 +1428,7 @@ export const progressReviewDocuments = pgTable("progress_review_documents", {
 export const insertProgressReviewDocumentSchema = createInsertSchema(progressReviewDocuments).omit({
   id: true,
   createdAt: true,
-} as const);
+});
 
 // Types for Progress Reviews
 export type ProgressReviewTemplate = typeof progressReviewTemplates.$inferSelect;
