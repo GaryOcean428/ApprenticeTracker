@@ -17,10 +17,10 @@ export const roles = pgTable("roles", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
-export const insertRoleSchema = createInsertSchema(roles).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
+export const insertRoleSchema = z.object({
+  name: z.string(),
+  description: z.string().optional(),
+  isSystem: z.boolean().optional(),
 });
 
 // Permissions
@@ -35,10 +35,12 @@ export const permissions = pgTable("permissions", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
-export const insertPermissionSchema = createInsertSchema(permissions).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
+export const insertPermissionSchema = z.object({
+  name: z.string(),
+  description: z.string().optional(),
+  category: z.string().optional(),
+  action: z.string(),
+  resource: z.string(),
 });
 
 // Role Permissions (many-to-many)
@@ -49,9 +51,9 @@ export const rolePermissions = pgTable("role_permissions", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
-export const insertRolePermissionSchema = createInsertSchema(rolePermissions).omit({
-  id: true,
-  createdAt: true,
+export const insertRolePermissionSchema = z.object({
+  roleId: z.number(),
+  permissionId: z.number(),
 });
 
 // Subscription Plans (for future Stripe integration)
@@ -68,10 +70,13 @@ export const subscriptionPlans = pgTable("subscription_plans", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
-export const insertSubscriptionPlanSchema = createInsertSchema(subscriptionPlans).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
+export const insertSubscriptionPlanSchema = z.object({
+  name: z.string(),
+  description: z.string().optional(),
+  price: z.number(),
+  billingCycle: z.string(),
+  features: z.string().optional(),
+  stripePriceId: z.string().optional(),
 });
 
 // Users
