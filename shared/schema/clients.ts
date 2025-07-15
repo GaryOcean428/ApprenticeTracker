@@ -17,10 +17,10 @@ export const clientTypes = pgTable("client_types", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
-export const insertClientTypeSchema = createInsertSchema(clientTypes).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
+export const insertClientTypeSchema = z.object({
+  name: z.string(),
+  description: z.string().optional(),
+  isActive: z.boolean().optional(),
 });
 
 export type ClientType = typeof clientTypes.$inferSelect;

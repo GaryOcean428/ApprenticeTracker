@@ -103,22 +103,22 @@ export const users = pgTable("users", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
-export const insertUserSchema = createInsertSchema(users).pick({
-  username: true,
-  password: true,
-  email: true,
-  firstName: true,
-  lastName: true,
-  role: true,
-  roleId: true,
-  organizationId: true,
-  profileImage: true,
-  isActive: true,
-  subscriptionPlanId: true,
-  subscriptionStatus: true,
-  subscriptionEndsAt: true,
-  stripeCustomerId: true,
-  stripeSubscriptionId: true
+export const insertUserSchema = z.object({
+  username: z.string(),
+  password: z.string(),
+  email: z.string().email(),
+  firstName: z.string(),
+  lastName: z.string(),
+  role: z.string().optional(),
+  roleId: z.number().optional(),
+  organizationId: z.number().optional(),
+  profileImage: z.string().optional(),
+  isActive: z.boolean().optional(),
+  subscriptionPlanId: z.number().optional(),
+  subscriptionStatus: z.string().optional(),
+  subscriptionEndsAt: z.date().optional(),
+  stripeCustomerId: z.string().optional(),
+  stripeSubscriptionId: z.string().optional(),
 });
 
 // Apprentices
@@ -144,8 +144,20 @@ export const apprentices = pgTable("apprentices", {
   gtoId: integer("gto_id"),                                      // Reference to GTO organization
 });
 
-export const insertApprenticeSchema = createInsertSchema(apprentices).omit({
-  id: true,
+export const insertApprenticeSchema = z.object({
+  firstName: z.string(),
+  lastName: z.string(),
+  dateOfBirth: z.date().optional(),
+  email: z.string().email().optional(),
+  phone: z.string().optional(),
+  address: z.string().optional(),
+  emergencyContactName: z.string().optional(),
+  emergencyContactPhone: z.string().optional(),
+  qualificationId: z.number().optional(),
+  startDate: z.date().optional(),
+  apprenticeshipYear: z.number().optional(),
+  gtoEnrolled: z.boolean().optional(),
+  gtoId: z.number().optional(),
 });
 
 // Host Employers
