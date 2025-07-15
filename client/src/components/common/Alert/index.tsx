@@ -10,9 +10,12 @@ const alertVariants = cva(
       variant: {
         default: 'bg-background text-foreground',
         info: 'border-blue-500/30 text-blue-800 dark:text-blue-300 bg-blue-500/10 [&>svg]:text-blue-500',
-        success: 'border-green-500/30 text-green-800 dark:text-green-300 bg-green-500/10 [&>svg]:text-green-500',
-        warning: 'border-yellow-500/30 text-yellow-800 dark:text-yellow-300 bg-yellow-500/10 [&>svg]:text-yellow-500',
-        error: 'border-red-500/30 text-red-800 dark:text-red-300 bg-red-500/10 [&>svg]:text-red-500',
+        success:
+          'border-green-500/30 text-green-800 dark:text-green-300 bg-green-500/10 [&>svg]:text-green-500',
+        warning:
+          'border-yellow-500/30 text-yellow-800 dark:text-yellow-300 bg-yellow-500/10 [&>svg]:text-yellow-500',
+        error:
+          'border-red-500/30 text-red-800 dark:text-red-300 bg-red-500/10 [&>svg]:text-red-500',
       },
     },
     defaultVariants: {
@@ -35,14 +38,9 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
       error: XCircle,
       default: null,
     }[variant || 'default'];
-    
+
     return (
-      <div
-        ref={ref}
-        role="alert"
-        className={cn(alertVariants({ variant }), className)}
-        {...props}
-      >
+      <div ref={ref} role="alert" className={cn(alertVariants({ variant }), className)} {...props}>
         {IconComponent && <IconComponent className="h-4 w-4" />}
         {children}
       </div>
@@ -66,11 +64,7 @@ export interface AlertDescriptionProps extends HTMLAttributes<HTMLParagraphEleme
 
 const AlertDescription = React.forwardRef<HTMLParagraphElement, AlertDescriptionProps>(
   ({ className, ...props }, ref) => (
-    <div
-      ref={ref}
-      className={cn('text-sm [&_p]:leading-relaxed', className)}
-      {...props}
-    />
+    <div ref={ref} className={cn('text-sm [&_p]:leading-relaxed', className)} {...props} />
   )
 );
 

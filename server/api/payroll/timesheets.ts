@@ -11,20 +11,23 @@ export async function getTimesheets(req: Request, res: Response) {
   try {
     // Join with the apprentices table to get the apprentice name
     // Also join with the users table to get the approver name
-    const timesheetData = await db.select({
-      id: timesheets.id,
-      apprenticeId: timesheets.apprenticeId,
-      apprenticeName: sql<string>`CONCAT(${apprentices.firstName}, ' ', ${apprentices.lastName})`,
-      weekStarting: timesheets.weekStarting,
-      // Calculate weekEnding by adding 6 days to weekStarting
-      weekEnding: sql<string>`(${timesheets.weekStarting}::date + interval '6 days')::text`,
-      status: timesheets.status,
-      totalHours: timesheets.totalHours,
-      submittedDate: timesheets.submittedDate,
-      // Get the approver name from the users table
-      approvedByName: sql<string | null>`CASE WHEN ${timesheets.approvedBy} IS NOT NULL THEN CONCAT(${users.firstName}, ' ', ${users.lastName}) ELSE NULL END`,
-      approvalDate: timesheets.approvalDate,
-    })
+    const timesheetData = await db
+      .select({
+        id: timesheets.id,
+        apprenticeId: timesheets.apprenticeId,
+        apprenticeName: sql<string>`CONCAT(${apprentices.firstName}, ' ', ${apprentices.lastName})`,
+        weekStarting: timesheets.weekStarting,
+        // Calculate weekEnding by adding 6 days to weekStarting
+        weekEnding: sql<string>`(${timesheets.weekStarting}::date + interval '6 days')::text`,
+        status: timesheets.status,
+        totalHours: timesheets.totalHours,
+        submittedDate: timesheets.submittedDate,
+        // Get the approver name from the users table
+        approvedByName: sql<
+          string | null
+        >`CASE WHEN ${timesheets.approvedBy} IS NOT NULL THEN CONCAT(${users.firstName}, ' ', ${users.lastName}) ELSE NULL END`,
+        approvalDate: timesheets.approvalDate,
+      })
       .from(timesheets)
       .leftJoin(apprentices, eq(timesheets.apprenticeId, apprentices.id))
       .leftJoin(users, eq(timesheets.approvedBy, users.id));
@@ -48,18 +51,21 @@ export async function getTimesheet(req: Request, res: Response) {
   }
 
   try {
-    const [timesheet] = await db.select({
-      id: timesheets.id,
-      apprenticeId: timesheets.apprenticeId,
-      apprenticeName: sql<string>`CONCAT(${apprentices.firstName}, ' ', ${apprentices.lastName})`,
-      weekStarting: timesheets.weekStarting,
-      weekEnding: sql<string>`(${timesheets.weekStarting}::date + interval '6 days')::text`,
-      status: timesheets.status,
-      totalHours: timesheets.totalHours,
-      submittedDate: timesheets.submittedDate,
-      approvedByName: sql<string | null>`CASE WHEN ${timesheets.approvedBy} IS NOT NULL THEN CONCAT(${users.firstName}, ' ', ${users.lastName}) ELSE NULL END`,
-      approvalDate: timesheets.approvalDate,
-    })
+    const [timesheet] = await db
+      .select({
+        id: timesheets.id,
+        apprenticeId: timesheets.apprenticeId,
+        apprenticeName: sql<string>`CONCAT(${apprentices.firstName}, ' ', ${apprentices.lastName})`,
+        weekStarting: timesheets.weekStarting,
+        weekEnding: sql<string>`(${timesheets.weekStarting}::date + interval '6 days')::text`,
+        status: timesheets.status,
+        totalHours: timesheets.totalHours,
+        submittedDate: timesheets.submittedDate,
+        approvedByName: sql<
+          string | null
+        >`CASE WHEN ${timesheets.approvedBy} IS NOT NULL THEN CONCAT(${users.firstName}, ' ', ${users.lastName}) ELSE NULL END`,
+        approvalDate: timesheets.approvalDate,
+      })
       .from(timesheets)
       .leftJoin(apprentices, eq(timesheets.apprenticeId, apprentices.id))
       .leftJoin(users, eq(timesheets.approvedBy, users.id))
@@ -105,9 +111,9 @@ export async function approveTimesheet(req: Request, res: Response) {
 
     // Check if the timesheet is in a status that can be approved
     if (existingTimesheet.status !== 'submitted') {
-      return res.status(400).json({ 
+      return res.status(400).json({
         message: 'Only submitted timesheets can be approved',
-        currentStatus: existingTimesheet.status
+        currentStatus: existingTimesheet.status,
       });
     }
 
@@ -123,18 +129,21 @@ export async function approveTimesheet(req: Request, res: Response) {
       .returning();
 
     // Get the full timesheet details with apprentice name
-    const [fullTimesheet] = await db.select({
-      id: timesheets.id,
-      apprenticeId: timesheets.apprenticeId,
-      apprenticeName: sql<string>`CONCAT(${apprentices.firstName}, ' ', ${apprentices.lastName})`,
-      weekStarting: timesheets.weekStarting,
-      weekEnding: sql<string>`(${timesheets.weekStarting}::date + interval '6 days')::text`,
-      status: timesheets.status,
-      totalHours: timesheets.totalHours,
-      submittedDate: timesheets.submittedDate,
-      approvedByName: sql<string | null>`CASE WHEN ${timesheets.approvedBy} IS NOT NULL THEN CONCAT(${users.firstName}, ' ', ${users.lastName}) ELSE NULL END`,
-      approvalDate: timesheets.approvalDate,
-    })
+    const [fullTimesheet] = await db
+      .select({
+        id: timesheets.id,
+        apprenticeId: timesheets.apprenticeId,
+        apprenticeName: sql<string>`CONCAT(${apprentices.firstName}, ' ', ${apprentices.lastName})`,
+        weekStarting: timesheets.weekStarting,
+        weekEnding: sql<string>`(${timesheets.weekStarting}::date + interval '6 days')::text`,
+        status: timesheets.status,
+        totalHours: timesheets.totalHours,
+        submittedDate: timesheets.submittedDate,
+        approvedByName: sql<
+          string | null
+        >`CASE WHEN ${timesheets.approvedBy} IS NOT NULL THEN CONCAT(${users.firstName}, ' ', ${users.lastName}) ELSE NULL END`,
+        approvalDate: timesheets.approvalDate,
+      })
       .from(timesheets)
       .leftJoin(apprentices, eq(timesheets.apprenticeId, apprentices.id))
       .leftJoin(users, eq(timesheets.approvedBy, users.id))
@@ -183,7 +192,7 @@ export async function rejectTimesheet(req: Request, res: Response) {
     if (existingTimesheet.status !== 'submitted') {
       return res.status(400).json({
         message: 'Only submitted timesheets can be rejected',
-        currentStatus: existingTimesheet.status
+        currentStatus: existingTimesheet.status,
       });
     }
 
@@ -198,19 +207,22 @@ export async function rejectTimesheet(req: Request, res: Response) {
       .returning();
 
     // Get the full timesheet details with apprentice name
-    const [fullTimesheet] = await db.select({
-      id: timesheets.id,
-      apprenticeId: timesheets.apprenticeId,
-      apprenticeName: sql<string>`CONCAT(${apprentices.firstName}, ' ', ${apprentices.lastName})`,
-      weekStarting: timesheets.weekStarting,
-      weekEnding: sql<string>`(${timesheets.weekStarting}::date + interval '6 days')::text`,
-      status: timesheets.status,
-      totalHours: timesheets.totalHours,
-      submittedDate: timesheets.submittedDate,
-      approvedByName: sql<string | null>`CASE WHEN ${timesheets.approvedBy} IS NOT NULL THEN CONCAT(${users.firstName}, ' ', ${users.lastName}) ELSE NULL END`,
-      approvalDate: timesheets.approvalDate,
-      notes: timesheets.notes,
-    })
+    const [fullTimesheet] = await db
+      .select({
+        id: timesheets.id,
+        apprenticeId: timesheets.apprenticeId,
+        apprenticeName: sql<string>`CONCAT(${apprentices.firstName}, ' ', ${apprentices.lastName})`,
+        weekStarting: timesheets.weekStarting,
+        weekEnding: sql<string>`(${timesheets.weekStarting}::date + interval '6 days')::text`,
+        status: timesheets.status,
+        totalHours: timesheets.totalHours,
+        submittedDate: timesheets.submittedDate,
+        approvedByName: sql<
+          string | null
+        >`CASE WHEN ${timesheets.approvedBy} IS NOT NULL THEN CONCAT(${users.firstName}, ' ', ${users.lastName}) ELSE NULL END`,
+        approvalDate: timesheets.approvalDate,
+        notes: timesheets.notes,
+      })
       .from(timesheets)
       .leftJoin(apprentices, eq(timesheets.apprenticeId, apprentices.id))
       .leftJoin(users, eq(timesheets.approvedBy, users.id))

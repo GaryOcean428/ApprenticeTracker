@@ -1,12 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { 
-  Card, 
-  CardContent, 
-  CardHeader, 
-  CardTitle,
-  CardDescription
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import {
   Table,
   TableBody,
@@ -33,17 +27,17 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { 
+import {
   Clipboard,
-  Search, 
-  Plus, 
+  Search,
+  Plus,
   RefreshCw,
   Eye,
   Download,
   Calendar,
   Building,
   CheckSquare,
-  MapPin
+  MapPin,
 } from 'lucide-react';
 
 export default function InspectionsList() {
@@ -91,12 +85,10 @@ export default function InspectionsList() {
     return (
       <div className="inline-flex items-center">
         <div className="w-20 bg-muted rounded-full h-2 mr-2">
-          <div 
+          <div
             className={`h-2 rounded-full ${
-              score >= 90 ? 'bg-green-500' : 
-              score >= 70 ? 'bg-amber-500' : 
-              'bg-red-500'
-            }`} 
+              score >= 90 ? 'bg-green-500' : score >= 70 ? 'bg-amber-500' : 'bg-red-500'
+            }`}
             style={{ width: `${score}%` }}
           />
         </div>
@@ -129,13 +121,13 @@ export default function InspectionsList() {
                   placeholder="Search inspections..."
                   className="pl-8"
                   value={search}
-                  onChange={(e) => setSearch(e.target.value)}
+                  onChange={e => setSearch(e.target.value)}
                 />
               </div>
               <Button type="submit">Search</Button>
             </form>
             <div className="flex flex-wrap sm:flex-nowrap gap-2">
-              <Select value={status || ''} onValueChange={(value) => setStatus(value || null)}>
+              <Select value={status || ''} onValueChange={value => setStatus(value || null)}>
                 <SelectTrigger className="w-[160px]">
                   <SelectValue placeholder="Status" />
                 </SelectTrigger>
@@ -219,7 +211,9 @@ export default function InspectionsList() {
                                 <DialogTitle>Site Inspection Details</DialogTitle>
                               </DialogHeader>
                               <div className="py-4">
-                                <p className="text-center text-muted-foreground">Inspection details view to be implemented.</p>
+                                <p className="text-center text-muted-foreground">
+                                  Inspection details view to be implemented.
+                                </p>
                               </div>
                             </DialogContent>
                           </Dialog>
@@ -229,7 +223,7 @@ export default function InspectionsList() {
                         </div>
                       </TableCell>
                     </TableRow>
-                    
+
                     <TableRow>
                       <TableCell className="font-medium">
                         <div className="flex items-center gap-2">
@@ -270,7 +264,9 @@ export default function InspectionsList() {
                                 <DialogTitle>Site Inspection Details</DialogTitle>
                               </DialogHeader>
                               <div className="py-4">
-                                <p className="text-center text-muted-foreground">Inspection details view to be implemented.</p>
+                                <p className="text-center text-muted-foreground">
+                                  Inspection details view to be implemented.
+                                </p>
                               </div>
                             </DialogContent>
                           </Dialog>
@@ -280,7 +276,7 @@ export default function InspectionsList() {
                         </div>
                       </TableCell>
                     </TableRow>
-                    
+
                     <TableRow>
                       <TableCell className="font-medium">
                         <div className="flex items-center gap-2">
@@ -321,7 +317,9 @@ export default function InspectionsList() {
                                 <DialogTitle>Site Inspection Details</DialogTitle>
                               </DialogHeader>
                               <div className="py-4">
-                                <p className="text-center text-muted-foreground">Inspection details view to be implemented.</p>
+                                <p className="text-center text-muted-foreground">
+                                  Inspection details view to be implemented.
+                                </p>
                               </div>
                             </DialogContent>
                           </Dialog>
@@ -331,7 +329,7 @@ export default function InspectionsList() {
                         </div>
                       </TableCell>
                     </TableRow>
-                    
+
                     <TableRow>
                       <TableCell className="font-medium">
                         <div className="flex items-center gap-2">
@@ -387,11 +385,7 @@ export default function InspectionsList() {
                   >
                     Previous
                   </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setPage(page + 1)}
-                  >
+                  <Button variant="outline" size="sm" onClick={() => setPage(page + 1)}>
                     Next
                   </Button>
                 </div>

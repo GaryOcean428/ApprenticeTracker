@@ -1,29 +1,25 @@
-import { 
-  UseQueryOptions, 
-  UseQueryResult,
-  useQuery,
-  QueryKey
-} from '@tanstack/react-query';
+import { UseQueryOptions, UseQueryResult, useQuery, QueryKey } from '@tanstack/react-query';
 import { getQueryFn } from './queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { z } from 'zod';
 
-export interface OptimizedQueryOptions<TData> extends Omit<UseQueryOptions<TData, Error>, 'queryKey'> {
+export interface OptimizedQueryOptions<TData>
+  extends Omit<UseQueryOptions<TData, Error>, 'queryKey'> {
   /**
    * The API endpoint to fetch data from
    */
   endpoint: string;
-  
+
   /**
    * Optional Zod schema to validate response data against
    */
   schema?: z.ZodType<TData>;
-  
+
   /**
    * Optional key segments to append to the query key
    */
   keySegments?: (string | number)[];
-  
+
   /**
    * Optional configuration for how the query should behave on error
    */
@@ -35,13 +31,13 @@ export interface OptimizedQueryOptions<TData> extends Omit<UseQueryOptions<TData
     /** Whether to retry on error */
     retry?: boolean;
   };
-  
+
   /**
    * How long (in ms) this data should be considered fresh
    * @default 60000 (1 minute)
    */
   staleTime?: number;
-  
+
   /**
    * How long (in ms) to keep this data in the cache
    * @default 300000 (5 minutes)
@@ -56,23 +52,23 @@ export function useOptimizedQuery<TData>(
   options: OptimizedQueryOptions<TData>
 ): UseQueryResult<TData, Error> {
   const { toast } = useToast();
-  
+
   const {
     endpoint,
     schema,
     keySegments = [],
     errorConfig = {
       showToast: true,
-      retry: true
+      retry: true,
     },
     staleTime,
     gcTime,
     ...queryOptions
   } = options;
-  
+
   // Build query key from endpoint and additional segments
   const queryKey: QueryKey = [endpoint, ...keySegments];
-  
+
   // Execute the query with optimized settings
   const query = useQuery<TData>({
     queryKey,
@@ -80,20 +76,23 @@ export function useOptimizedQuery<TData>(
     gcTime,
     retry: errorConfig.retry ? 2 : false,
     ...queryOptions,
-    queryFn: getQueryFn({ 
-      on401: "returnNull"
+    queryFn: getQueryFn({
+      on401: 'returnNull',
     }),
   });
-  
+
   // Handle validation and errors
   if (query.error && errorConfig.showToast) {
     toast({
       title: 'Error',
-      description: errorConfig.toastMessage || (query.error as Error).message || 'An error occurred while fetching data',
+      description:
+        errorConfig.toastMessage ||
+        (query.error as Error).message ||
+        'An error occurred while fetching data',
       variant: 'destructive',
     });
   }
-  
+
   // Handle data validation if schema is provided
   if (query.data && schema) {
     try {
@@ -107,7 +106,7 @@ export function useOptimizedQuery<TData>(
       });
     }
   }
-  
+
   return query;
 }
 
@@ -115,12 +114,15 @@ export function useOptimizedQuery<TData>(
  * Helper to create a query with data validation
  */
 export function createValidatedQuery<T>(endpointPath: string, schema: z.ZodType<T>) {
-  return (keySegments: (string | number)[] = [], options: Partial<OptimizedQueryOptions<T>> = {}) => {
+  return (
+    keySegments: (string | number)[] = [],
+    options: Partial<OptimizedQueryOptions<T>> = {}
+  ) => {
     return useOptimizedQuery<T>({
       endpoint: endpointPath,
       schema,
       keySegments,
-      ...options
+      ...options,
     });
   };
 }

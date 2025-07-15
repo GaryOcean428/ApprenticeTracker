@@ -1,12 +1,12 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { 
-  Card, 
+import {
+  Card,
   CardContent,
   CardHeader,
   CardTitle,
-  CardDescription, 
-  CardFooter 
+  CardDescription,
+  CardFooter,
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -108,9 +108,7 @@ export default function IncidentDetailsView({ incidentId }: IncidentDetailsViewP
         </div>
         <div className="flex items-center gap-2">
           {getStatusBadge(incident.status)}
-          {incident.notifiable_incident && (
-            <Badge variant="destructive">Notifiable</Badge>
-          )}
+          {incident.notifiable_incident && <Badge variant="destructive">Notifiable</Badge>}
         </div>
       </div>
 
@@ -211,20 +209,20 @@ export default function IncidentDetailsView({ incidentId }: IncidentDetailsViewP
           <TabsTrigger value="witnesses">Witnesses</TabsTrigger>
           <TabsTrigger value="documents">Documents</TabsTrigger>
         </TabsList>
-        
+
         <TabsContent value="description" className="space-y-4">
           <Card>
             <CardHeader>
               <CardTitle>Incident Description</CardTitle>
-              <CardDescription>
-                Detailed account of the incident or hazard
-              </CardDescription>
+              <CardDescription>Detailed account of the incident or hazard</CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="whitespace-pre-line">{incident.description || 'No description provided.'}</p>
+              <p className="whitespace-pre-line">
+                {incident.description || 'No description provided.'}
+              </p>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardHeader>
               <CardTitle>Immediate Actions Taken</CardTitle>
@@ -233,24 +231,26 @@ export default function IncidentDetailsView({ incidentId }: IncidentDetailsViewP
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="whitespace-pre-line">{incident.immediate_actions || 'No immediate actions recorded.'}</p>
+              <p className="whitespace-pre-line">
+                {incident.immediate_actions || 'No immediate actions recorded.'}
+              </p>
             </CardContent>
           </Card>
         </TabsContent>
-        
+
         <TabsContent value="investigation" className="space-y-4">
           <Card>
             <CardHeader>
               <CardTitle>Investigation Notes</CardTitle>
-              <CardDescription>
-                Findings from the investigation into the incident
-              </CardDescription>
+              <CardDescription>Findings from the investigation into the incident</CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="whitespace-pre-line">{incident.investigation_notes || 'No investigation notes recorded yet.'}</p>
+              <p className="whitespace-pre-line">
+                {incident.investigation_notes || 'No investigation notes recorded yet.'}
+              </p>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardHeader>
               <CardTitle>Resolution Details</CardTitle>
@@ -259,16 +259,20 @@ export default function IncidentDetailsView({ incidentId }: IncidentDetailsViewP
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="whitespace-pre-line">{incident.resolution_details || 'No resolution details recorded yet.'}</p>
+              <p className="whitespace-pre-line">
+                {incident.resolution_details || 'No resolution details recorded yet.'}
+              </p>
               {incident.resolution_date && (
                 <div className="flex items-center gap-2 mt-4">
                   <CheckCircle className="h-4 w-4 text-green-500" />
-                  <span className="text-sm">Resolved on: {new Date(incident.resolution_date).toLocaleDateString()}</span>
+                  <span className="text-sm">
+                    Resolved on: {new Date(incident.resolution_date).toLocaleDateString()}
+                  </span>
                 </div>
               )}
             </CardContent>
           </Card>
-          
+
           {incident.notifiable_incident && (
             <Card>
               <CardHeader className="bg-red-50 border-b border-red-100">
@@ -276,9 +280,7 @@ export default function IncidentDetailsView({ incidentId }: IncidentDetailsViewP
                   <Info className="h-5 w-5 text-red-500" />
                   <CardTitle>Regulatory Authority Notification</CardTitle>
                 </div>
-                <CardDescription>
-                  Details of notification to relevant authorities
-                </CardDescription>
+                <CardDescription>Details of notification to relevant authorities</CardDescription>
               </CardHeader>
               <CardContent className="pt-4">
                 <div className="space-y-3">
@@ -297,7 +299,7 @@ export default function IncidentDetailsView({ incidentId }: IncidentDetailsViewP
             </Card>
           )}
         </TabsContent>
-        
+
         <TabsContent value="witnesses">
           <Card>
             <CardHeader>
@@ -310,7 +312,10 @@ export default function IncidentDetailsView({ incidentId }: IncidentDetailsViewP
               {witnesses && witnesses.length > 0 ? (
                 <div className="space-y-6">
                   {witnesses.map((witness: any, index: number) => (
-                    <div key={index} className="border-b pb-4 mb-4 last:border-0 last:mb-0 last:pb-0">
+                    <div
+                      key={index}
+                      className="border-b pb-4 mb-4 last:border-0 last:mb-0 last:pb-0"
+                    >
                       <div className="flex items-center gap-2 mb-3">
                         <Avatar className="h-8 w-8">
                           <AvatarFallback>{witness.name.charAt(0)}</AvatarFallback>
@@ -322,17 +327,21 @@ export default function IncidentDetailsView({ incidentId }: IncidentDetailsViewP
                           )}
                         </div>
                       </div>
-                      <p className="text-sm whitespace-pre-line">{witness.statement || 'No statement provided.'}</p>
+                      <p className="text-sm whitespace-pre-line">
+                        {witness.statement || 'No statement provided.'}
+                      </p>
                     </div>
                   ))}
                 </div>
               ) : (
-                <p className="text-center py-4 text-muted-foreground">No witnesses recorded for this incident.</p>
+                <p className="text-center py-4 text-muted-foreground">
+                  No witnesses recorded for this incident.
+                </p>
               )}
             </CardContent>
           </Card>
         </TabsContent>
-        
+
         <TabsContent value="documents">
           <Card>
             <CardHeader>
@@ -374,7 +383,9 @@ export default function IncidentDetailsView({ incidentId }: IncidentDetailsViewP
                   </TableBody>
                 </Table>
               ) : (
-                <p className="text-center py-4 text-muted-foreground">No documents attached to this incident.</p>
+                <p className="text-center py-4 text-muted-foreground">
+                  No documents attached to this incident.
+                </p>
               )}
             </CardContent>
             <CardFooter className="bg-muted/50 border-t">
@@ -388,12 +399,8 @@ export default function IncidentDetailsView({ incidentId }: IncidentDetailsViewP
       </Tabs>
 
       <div className="flex justify-end gap-2 mt-6">
-        <Button variant="outline">
-          Print Report
-        </Button>
-        <Button>
-          Edit Incident
-        </Button>
+        <Button variant="outline">Print Report</Button>
+        <Button>Edit Incident</Button>
       </div>
     </div>
   );

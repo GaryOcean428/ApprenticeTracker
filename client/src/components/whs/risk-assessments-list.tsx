@@ -1,12 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { 
-  Card, 
-  CardContent, 
-  CardHeader, 
-  CardTitle,
-  CardDescription 
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import NewRiskAssessmentForm from './new-risk-assessment-form';
 import {
   Table,
@@ -36,15 +30,15 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
-import { 
+import {
   FileSpreadsheet,
-  Search, 
-  Plus, 
+  Search,
+  Plus,
   RefreshCw,
   Eye,
   Pencil,
   Trash,
-  Calendar
+  Calendar,
 } from 'lucide-react';
 
 export default function RiskAssessmentsList() {
@@ -134,11 +128,11 @@ export default function RiskAssessmentsList() {
                     Document a workplace hazard assessment to identify and control risks
                   </DialogDescription>
                 </DialogHeader>
-                <NewRiskAssessmentForm 
+                <NewRiskAssessmentForm
                   onSuccess={() => {
                     setNewAssessmentDialogOpen(false);
                     refetch();
-                  }} 
+                  }}
                   onCancel={() => setNewAssessmentDialogOpen(false)}
                 />
               </DialogContent>
@@ -154,13 +148,13 @@ export default function RiskAssessmentsList() {
                   placeholder="Search assessments..."
                   className="pl-8"
                   value={search}
-                  onChange={(e) => setSearch(e.target.value)}
+                  onChange={e => setSearch(e.target.value)}
                 />
               </div>
               <Button type="submit">Search</Button>
             </form>
             <div className="flex flex-wrap sm:flex-nowrap gap-2">
-              <Select value={status || ''} onValueChange={(value) => setStatus(value || null)}>
+              <Select value={status || ''} onValueChange={value => setStatus(value || null)}>
                 <SelectTrigger className="w-[160px]">
                   <SelectValue placeholder="Status" />
                 </SelectTrigger>
@@ -238,7 +232,9 @@ export default function RiskAssessmentsList() {
                                   <DialogTitle>Risk Assessment Details</DialogTitle>
                                 </DialogHeader>
                                 <div className="py-4">
-                                  <p className="text-center text-muted-foreground">Risk assessment details view to be implemented.</p>
+                                  <p className="text-center text-muted-foreground">
+                                    Risk assessment details view to be implemented.
+                                  </p>
                                 </div>
                               </DialogContent>
                             </Dialog>
@@ -265,9 +261,11 @@ export default function RiskAssessmentsList() {
 
               <div className="flex justify-between items-center mt-4">
                 <div className="text-sm text-muted-foreground">
-                  Showing {data?.pagination?.total ? 
-                    `${(page - 1) * limit + 1}-${Math.min(page * limit, data.pagination.total)} of ${data.pagination.total}` : 
-                    '0'} assessments
+                  Showing{' '}
+                  {data?.pagination?.total
+                    ? `${(page - 1) * limit + 1}-${Math.min(page * limit, data.pagination.total)} of ${data.pagination.total}`
+                    : '0'}{' '}
+                  assessments
                 </div>
                 <div className="flex gap-2">
                   <Button

@@ -2,10 +2,32 @@ import { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
@@ -13,7 +35,15 @@ import { apiRequest, queryClient } from '@/lib/queryClient';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
 import { PlusCircle, Trash2, Edit, Shield, Lock, Layers } from 'lucide-react';
 
 // Define types based on schema
@@ -124,7 +154,11 @@ const PermissionsManagement = () => {
   // Update permission mutation
   const updatePermissionMutation = useMutation({
     mutationFn: async (data: { id: number; permissionData: PermissionFormValues }) => {
-      const response = await apiRequest('PATCH', `/api/permissions/${data.id}`, data.permissionData);
+      const response = await apiRequest(
+        'PATCH',
+        `/api/permissions/${data.id}`,
+        data.permissionData
+      );
       return await response.json();
     },
     onSuccess: () => {
@@ -255,7 +289,9 @@ const PermissionsManagement = () => {
   // Assign permission to role mutation
   const assignPermissionMutation = useMutation({
     mutationFn: async (data: { roleId: number; permissionId: number }) => {
-      const response = await apiRequest('POST', `/api/roles/${data.roleId}/permissions`, { permissionId: data.permissionId });
+      const response = await apiRequest('POST', `/api/roles/${data.roleId}/permissions`, {
+        permissionId: data.permissionId,
+      });
       return await response.json();
     },
     onSuccess: () => {
@@ -409,11 +445,7 @@ const PermissionsManagement = () => {
       <TableCell className="font-medium">{role.name}</TableCell>
       <TableCell>{role.description || '-'}</TableCell>
       <TableCell>
-        {role.isSystem ? (
-          <Badge>System Role</Badge>
-        ) : (
-          <Badge variant="outline">Custom Role</Badge>
-        )}
+        {role.isSystem ? <Badge>System Role</Badge> : <Badge variant="outline">Custom Role</Badge>}
       </TableCell>
       <TableCell className="text-right">
         <Button
@@ -461,11 +493,13 @@ const PermissionsManagement = () => {
             <CardHeader>
               <CardTitle className="flex justify-between items-center">
                 <span>Role Management</span>
-                <Button onClick={() => {
-                  setSelectedRole(null);
-                  roleForm.reset();
-                  setIsRoleDialogOpen(true);
-                }}>
+                <Button
+                  onClick={() => {
+                    setSelectedRole(null);
+                    roleForm.reset();
+                    setIsRoleDialogOpen(true);
+                  }}
+                >
                   <PlusCircle className="h-4 w-4 mr-2" /> Add New Role
                 </Button>
               </CardTitle>
@@ -512,11 +546,13 @@ const PermissionsManagement = () => {
             <CardHeader>
               <CardTitle className="flex justify-between items-center">
                 <span>Permission Management</span>
-                <Button onClick={() => {
-                  setSelectedPermission(null);
-                  permissionForm.reset();
-                  setIsPermissionDialogOpen(true);
-                }}>
+                <Button
+                  onClick={() => {
+                    setSelectedPermission(null);
+                    permissionForm.reset();
+                    setIsPermissionDialogOpen(true);
+                  }}
+                >
                   <PlusCircle className="h-4 w-4 mr-2" /> Add New Permission
                 </Button>
               </CardTitle>
@@ -544,7 +580,9 @@ const PermissionsManagement = () => {
                       </TableCell>
                     </TableRow>
                   ) : permissions && permissions.length > 0 ? (
-                    permissions.map(permission => <PermissionRow key={permission.id} permission={permission} />)
+                    permissions.map(permission => (
+                      <PermissionRow key={permission.id} permission={permission} />
+                    ))
                   ) : (
                     <TableRow>
                       <TableCell colSpan={5} className="text-center py-8">
@@ -563,7 +601,9 @@ const PermissionsManagement = () => {
       <Dialog open={isPermissionDialogOpen} onOpenChange={setIsPermissionDialogOpen}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
-            <DialogTitle>{selectedPermission ? 'Edit Permission' : 'Add New Permission'}</DialogTitle>
+            <DialogTitle>
+              {selectedPermission ? 'Edit Permission' : 'Add New Permission'}
+            </DialogTitle>
             <DialogDescription>
               {selectedPermission
                 ? 'Update the permission details below'
@@ -581,14 +621,12 @@ const PermissionsManagement = () => {
                     <FormControl>
                       <Input placeholder="e.g., view-users" {...field} />
                     </FormControl>
-                    <FormDescription>
-                      A unique name for this permission
-                    </FormDescription>
+                    <FormDescription>A unique name for this permission</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              
+
               <FormField
                 control={permissionForm.control}
                 name="resource"
@@ -598,14 +636,12 @@ const PermissionsManagement = () => {
                     <FormControl>
                       <Input placeholder="e.g., users" {...field} />
                     </FormControl>
-                    <FormDescription>
-                      The resource that this permission applies to
-                    </FormDescription>
+                    <FormDescription>The resource that this permission applies to</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              
+
               <FormField
                 control={permissionForm.control}
                 name="action"
@@ -615,14 +651,12 @@ const PermissionsManagement = () => {
                     <FormControl>
                       <Input placeholder="e.g., read, create, update, delete" {...field} />
                     </FormControl>
-                    <FormDescription>
-                      The action allowed on the resource
-                    </FormDescription>
+                    <FormDescription>The action allowed on the resource</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              
+
               <FormField
                 control={permissionForm.control}
                 name="category"
@@ -630,7 +664,11 @@ const PermissionsManagement = () => {
                   <FormItem>
                     <FormLabel>Category</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g., user-management" {...field} value={field.value || ''} />
+                      <Input
+                        placeholder="e.g., user-management"
+                        {...field}
+                        value={field.value || ''}
+                      />
                     </FormControl>
                     <FormDescription>
                       Optional category to group related permissions
@@ -639,7 +677,7 @@ const PermissionsManagement = () => {
                   </FormItem>
                 )}
               />
-              
+
               <FormField
                 control={permissionForm.control}
                 name="description"
@@ -647,20 +685,26 @@ const PermissionsManagement = () => {
                   <FormItem>
                     <FormLabel>Description</FormLabel>
                     <FormControl>
-                      <Input placeholder="Describe what this permission allows" {...field} value={field.value || ''} />
+                      <Input
+                        placeholder="Describe what this permission allows"
+                        {...field}
+                        value={field.value || ''}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              
+
               <DialogFooter>
-                <Button variant="outline" type="button" onClick={() => setIsPermissionDialogOpen(false)}>
+                <Button
+                  variant="outline"
+                  type="button"
+                  onClick={() => setIsPermissionDialogOpen(false)}
+                >
                   Cancel
                 </Button>
-                <Button type="submit">
-                  {selectedPermission ? 'Update' : 'Create'} Permission
-                </Button>
+                <Button type="submit">{selectedPermission ? 'Update' : 'Create'} Permission</Button>
               </DialogFooter>
             </form>
           </Form>
@@ -689,14 +733,12 @@ const PermissionsManagement = () => {
                     <FormControl>
                       <Input placeholder="e.g., Field Officer" {...field} />
                     </FormControl>
-                    <FormDescription>
-                      A unique name for this role
-                    </FormDescription>
+                    <FormDescription>A unique name for this role</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              
+
               <FormField
                 control={roleForm.control}
                 name="description"
@@ -704,7 +746,11 @@ const PermissionsManagement = () => {
                   <FormItem>
                     <FormLabel>Description</FormLabel>
                     <FormControl>
-                      <Input placeholder="Describe this role's responsibilities" {...field} value={field.value || ''} />
+                      <Input
+                        placeholder="Describe this role's responsibilities"
+                        {...field}
+                        value={field.value || ''}
+                      />
                     </FormControl>
                     <FormDescription>
                       A clear explanation of what users with this role can do
@@ -713,22 +759,17 @@ const PermissionsManagement = () => {
                   </FormItem>
                 )}
               />
-              
+
               <FormField
                 control={roleForm.control}
                 name="isSystem"
                 render={({ field }) => (
                   <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
                     <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
+                      <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                     </FormControl>
                     <div className="space-y-1 leading-none">
-                      <FormLabel>
-                        System Role
-                      </FormLabel>
+                      <FormLabel>System Role</FormLabel>
                       <FormDescription>
                         System roles cannot be deleted and have special privileges
                       </FormDescription>
@@ -736,14 +777,12 @@ const PermissionsManagement = () => {
                   </FormItem>
                 )}
               />
-              
+
               <DialogFooter>
                 <Button variant="outline" type="button" onClick={() => setIsRoleDialogOpen(false)}>
                   Cancel
                 </Button>
-                <Button type="submit">
-                  {selectedRole ? 'Update' : 'Create'} Role
-                </Button>
+                <Button type="submit">{selectedRole ? 'Update' : 'Create'} Role</Button>
               </DialogFooter>
             </form>
           </Form>
@@ -756,7 +795,8 @@ const PermissionsManagement = () => {
           <DialogHeader>
             <DialogTitle>Manage Permissions: {selectedRole?.name}</DialogTitle>
             <DialogDescription>
-              Select permissions to assign to this role. Users with this role will inherit all assigned permissions.
+              Select permissions to assign to this role. Users with this role will inherit all
+              assigned permissions.
             </DialogDescription>
           </DialogHeader>
           <div className="max-h-[400px] overflow-y-auto border rounded-md">
@@ -785,7 +825,7 @@ const PermissionsManagement = () => {
                       <TableCell className="text-right">
                         <Checkbox
                           checked={isPermissionAssigned(permission.id)}
-                          onCheckedChange={(checked) => {
+                          onCheckedChange={checked => {
                             if (checked) {
                               handleAssignPermission(permission.id);
                             } else {
@@ -807,9 +847,7 @@ const PermissionsManagement = () => {
             </Table>
           </div>
           <DialogFooter>
-            <Button onClick={() => setIsRolePermissionsDialogOpen(false)}>
-              Done
-            </Button>
+            <Button onClick={() => setIsRolePermissionsDialogOpen(false)}>Done</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

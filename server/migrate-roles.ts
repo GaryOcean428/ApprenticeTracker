@@ -1,12 +1,12 @@
-import { db } from "./db";
-import { sql } from "drizzle-orm";
+import { db } from './db';
+import { sql } from 'drizzle-orm';
 
 /**
  * This script creates the role-based access control tables and updates the users table
  */
 export async function migrateRolesSchema() {
-  console.log("Starting Role Management schema migration...");
-  
+  console.log('Starting Role Management schema migration...');
+
   try {
     // Create roles table
     await db.execute(sql`
@@ -19,7 +19,7 @@ export async function migrateRolesSchema() {
         updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
       );
     `);
-    console.log("Created roles table");
+    console.log('Created roles table');
 
     // Create permissions table
     await db.execute(sql`
@@ -34,7 +34,7 @@ export async function migrateRolesSchema() {
         updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
       );
     `);
-    console.log("Created permissions table");
+    console.log('Created permissions table');
 
     // Create role_permissions table (many-to-many relationship)
     await db.execute(sql`
@@ -46,7 +46,7 @@ export async function migrateRolesSchema() {
         UNIQUE(role_id, permission_id)
       );
     `);
-    console.log("Created role_permissions table");
+    console.log('Created role_permissions table');
 
     // Create subscription_plans table
     await db.execute(sql`
@@ -63,11 +63,11 @@ export async function migrateRolesSchema() {
         updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
       );
     `);
-    console.log("Created subscription_plans table");
+    console.log('Created subscription_plans table');
 
     // Add columns to users table if they don't exist - but do it one by one to handle partial migrations
-    console.log("Checking and adding missing columns to users table...");
-    
+    console.log('Checking and adding missing columns to users table...');
+
     // Array of columns to check and add if missing
     const columnsToAdd = [
       { name: 'role_id', definition: 'INTEGER REFERENCES roles(id)' },
@@ -81,9 +81,9 @@ export async function migrateRolesSchema() {
       { name: 'subscription_ends_at', definition: 'TIMESTAMP WITH TIME ZONE' },
       { name: 'last_login', definition: 'TIMESTAMP WITH TIME ZONE' },
       { name: 'created_at', definition: 'TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()' },
-      { name: 'updated_at', definition: 'TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()' }
+      { name: 'updated_at', definition: 'TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()' },
     ];
-    
+
     // Check and add each column individually
     for (const column of columnsToAdd) {
       try {
@@ -91,9 +91,11 @@ export async function migrateRolesSchema() {
           SELECT column_name FROM information_schema.columns 
           WHERE table_name='users' AND column_name=${column.name};
         `);
-        
+
         if (columnExists.rows.length === 0) {
-          await db.execute(sql.raw(`ALTER TABLE users ADD COLUMN ${column.name} ${column.definition};`));
+          await db.execute(
+            sql.raw(`ALTER TABLE users ADD COLUMN ${column.name} ${column.definition};`)
+          );
           console.log(`Added ${column.name} column to users table`);
         } else {
           console.log(`Column ${column.name} already exists in users table`);
@@ -103,9 +105,9 @@ export async function migrateRolesSchema() {
       }
     }
 
-    console.log("Role Management schema migration completed successfully!");
+    console.log('Role Management schema migration completed successfully!');
   } catch (error) {
-    console.error("Error in Role Management schema migration:", error);
+    console.error('Error in Role Management schema migration:', error);
     throw error;
   }
 }

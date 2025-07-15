@@ -1,23 +1,23 @@
-import express, { type Request, Response, NextFunction } from "express";
-import { registerRoutes } from "./routes";
-import { setupVite, serveStatic, log } from "./vite";
-import { seedDatabase } from "./seed-db";
-import { migrateFairWorkSchema } from "./migrate-db";
-import { migrateGtoComplianceSchema } from "./migrate-gto-compliance";
-import { seedGtoComplianceStandards } from "./seed-gto-compliance";
-import { seedEnrichmentData } from "./seed-enrichment";
-import { migrateVetSchema } from "./migrate-vet";
-import { migrateRolesSchema } from "./migrate-roles";
-import { migrateHostPreferredQualifications } from "./migrate-host-preferred-quals";
-import { migrateEnrichmentSchema } from "./migrate-enrichment";
-import { migrateProgressReviewsSchema } from "./migrate-progress-reviews";
-import { migrateHostEmployersFields } from "./migrate-host-employers-fields";
-import { migrateWHS } from "./migrate-whs";
-import { migrateWhsDocuments } from "./migrate-whs-documents";
-import { migrateWhsRiskAssessments } from "./migrate-whs-risk-assessments";
-import { migrateLabourHireSchema } from "./migrate-labour-hire";
-import { migrateUnifiedContactsSystem, seedContactTags } from "./migrate-unified-contacts";
-import { initializeScheduledTasks } from "./scheduled-tasks";
+import express, { type Request, Response, NextFunction } from 'express';
+import { registerRoutes } from './routes';
+import { setupVite, serveStatic, log } from './vite';
+import { seedDatabase } from './seed-db';
+import { migrateFairWorkSchema } from './migrate-db';
+import { migrateGtoComplianceSchema } from './migrate-gto-compliance';
+import { seedGtoComplianceStandards } from './seed-gto-compliance';
+import { seedEnrichmentData } from './seed-enrichment';
+import { migrateVetSchema } from './migrate-vet';
+import { migrateRolesSchema } from './migrate-roles';
+import { migrateHostPreferredQualifications } from './migrate-host-preferred-quals';
+import { migrateEnrichmentSchema } from './migrate-enrichment';
+import { migrateProgressReviewsSchema } from './migrate-progress-reviews';
+import { migrateHostEmployersFields } from './migrate-host-employers-fields';
+import { migrateWHS } from './migrate-whs';
+import { migrateWhsDocuments } from './migrate-whs-documents';
+import { migrateWhsRiskAssessments } from './migrate-whs-risk-assessments';
+import { migrateLabourHireSchema } from './migrate-labour-hire';
+import { migrateUnifiedContactsSystem, seedContactTags } from './migrate-unified-contacts';
+import { initializeScheduledTasks } from './scheduled-tasks';
 
 const app = express();
 app.use(express.json());
@@ -34,7 +34,7 @@ if (process.env.NODE_ENV === 'production') {
       status: 'healthy',
       environment: 'production',
       timestamp: new Date().toISOString(),
-      port: port
+      port: port,
     });
   });
 }
@@ -54,8 +54,8 @@ app.get('/api/health', (req, res) => {
     environment: process.env.NODE_ENV || 'development',
     fairwork_api: {
       url_configured: !!process.env.FAIRWORK_API_URL,
-      key_configured: !!process.env.FAIRWORK_API_KEY
-    }
+      key_configured: !!process.env.FAIRWORK_API_KEY,
+    },
   });
 });
 
@@ -70,16 +70,16 @@ app.use((req, res, next) => {
     return originalResJson.apply(res, [bodyJson, ...args]);
   };
 
-  res.on("finish", () => {
+  res.on('finish', () => {
     const duration = Date.now() - start;
-    if (path.startsWith("/api")) {
+    if (path.startsWith('/api')) {
       let logLine = `${req.method} ${path} ${res.statusCode} in ${duration}ms`;
       if (capturedJsonResponse) {
         logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
       }
 
       if (logLine.length > 80) {
-        logLine = logLine.slice(0, 79) + "…";
+        logLine = logLine.slice(0, 79) + '…';
       }
 
       log(logLine);
@@ -94,100 +94,100 @@ app.use((req, res, next) => {
   try {
     // Migrate Role Management schema
     await migrateRolesSchema();
-    log("Role Management schema migration completed");
-    
+    log('Role Management schema migration completed');
+
     // Migrate Fair Work schema
     await migrateFairWorkSchema();
-    log("Fair Work schema migration completed");
+    log('Fair Work schema migration completed');
 
     // Migrate GTO Compliance schema
     await migrateGtoComplianceSchema();
-    log("GTO Compliance schema migration completed");
-    
+    log('GTO Compliance schema migration completed');
+
     // Migrate VET Training schema
     await migrateVetSchema();
-    log("VET Training schema migration completed");
-    
+    log('VET Training schema migration completed');
+
     // Migrate Host Employer Preferred Qualifications schema
     await migrateHostPreferredQualifications();
-    log("Host Preferred Qualifications schema migration completed");
-    
+    log('Host Preferred Qualifications schema migration completed');
+
     // Migrate Enrichment Program tables
     await migrateEnrichmentSchema();
-    log("Enrichment Program schema migration completed");
-    
+    log('Enrichment Program schema migration completed');
+
     // Migrate Progress Reviews schema
     await migrateProgressReviewsSchema();
-    log("Progress Reviews schema migration completed");
-    
+    log('Progress Reviews schema migration completed');
+
     // Migrate Host Employers Fields
     await migrateHostEmployersFields();
-    log("Host Employers Fields migration completed");
-    
+    log('Host Employers Fields migration completed');
+
     // Migrate Work Health and Safety (WHS) tables
     await migrateWHS();
-    log("Work Health and Safety (WHS) tables migration completed");
-    
+    log('Work Health and Safety (WHS) tables migration completed');
+
     // Update WHS documents schema with missing relationship fields
     await migrateWhsDocuments();
-    log("WHS documents schema updated successfully");
-    
+    log('WHS documents schema updated successfully');
+
     // Update WHS Risk Assessments schema with new fields
     await migrateWhsRiskAssessments();
-    log("WHS Risk Assessments schema updated successfully");
-    
+    log('WHS Risk Assessments schema updated successfully');
+
     // Migrate Labour Hire Workers schema
     await migrateLabourHireSchema();
-    log("Labour Hire Workers schema migration completed");
-    
+    log('Labour Hire Workers schema migration completed');
+
     // Migrate Unified Contacts and Clients schema
     await migrateUnifiedContactsSystem();
-    log("Unified Contacts and Clients schema migration completed");
+    log('Unified Contacts and Clients schema migration completed');
   } catch (error) {
-    log("Error migrating database schema: " + error);
+    log('Error migrating database schema: ' + error);
   }
 
   // Seed the database with initial data if needed
   try {
     // Seed main database tables
     await seedDatabase();
-    log("Database seeded successfully");
-    
+    log('Database seeded successfully');
+
     // Seed GTO Compliance Standards
     await seedGtoComplianceStandards();
-    log("GTO Compliance Standards seeded successfully");
-    
+    log('GTO Compliance Standards seeded successfully');
+
     // Seed Enrichment Program data
     await seedEnrichmentData();
-    log("Enrichment Program data seeded successfully");
-    
+    log('Enrichment Program data seeded successfully');
+
     // Seed Contact Tags for unified contact system
     await seedContactTags();
-    log("Contact Tags seeded successfully");
+    log('Contact Tags seeded successfully');
   } catch (error) {
-    log("Error seeding database: " + error);
+    log('Error seeding database: ' + error);
   }
-  
+
   const server = await registerRoutes(app);
 
   // Add a catch-all for unmatched API routes to help debug 404s
   app.use('/api/*', (req, res) => {
     log(`[404] Unmatched API route: ${req.method} ${req.originalUrl}`);
-    res.status(404).json({ 
-      success: false, 
+    res.status(404).json({
+      success: false,
       message: `API route not found: ${req.method} ${req.originalUrl}`,
       availableRoutes: [
         'GET /api/health',
         'POST /api/auth/login',
-        'POST /api/auth/register', 
-        'GET /api/auth/verify'
-      ]
+        'POST /api/auth/register',
+        'GET /api/auth/verify',
+      ],
     });
   });
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
-    const message = err.message || "Internal Server Error";
+    const message = err.message || 'Internal Server Error';
 
     log(`[ERROR] ${status}: ${message}`);
     res.status(status).json({ message });
@@ -197,7 +197,7 @@ app.use((req, res, next) => {
   // importantly only setup vite in development and after
   // setting up all the other routes so the catch-all route
   // doesn't interfere with the other routes
-  if (app.get("env") === "development") {
+  if (app.get('env') === 'development') {
     await setupVite(app, server);
   } else {
     serveStatic(app);
@@ -214,22 +214,25 @@ app.use((req, res, next) => {
   // Log environment information for debugging
   log(`Environment: ${process.env.NODE_ENV || 'development'}`);
   log(`Using port: ${port}`);
-  
-  const serverInstance = server.listen({
-    port,
-    host: "0.0.0.0",
-    reusePort: true,
-  }, () => {
-    log(`Server successfully started on port ${port}`);
-    
-    // Initialize scheduled tasks with error handling
-    try {
-      initializeScheduledTasks();
-      log("Scheduled tasks initialized");
-    } catch (error) {
-      log(`Failed to initialize scheduled tasks: ${error}`);
+
+  const serverInstance = server.listen(
+    {
+      port,
+      host: '0.0.0.0',
+      reusePort: true,
+    },
+    () => {
+      log(`Server successfully started on port ${port}`);
+
+      // Initialize scheduled tasks with error handling
+      try {
+        initializeScheduledTasks();
+        log('Scheduled tasks initialized');
+      } catch (error) {
+        log(`Failed to initialize scheduled tasks: ${error}`);
+      }
     }
-  });
+  );
 
   // Ensure the server keeps running
   process.on('SIGTERM', () => {
@@ -245,7 +248,7 @@ app.use((req, res, next) => {
       log('Process terminated');
     });
   });
-})().catch((error) => {
+})().catch(error => {
   log(`Fatal error during startup: ${error}`);
   process.exit(1);
 });

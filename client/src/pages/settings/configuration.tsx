@@ -2,12 +2,33 @@ import { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
@@ -245,10 +266,10 @@ const SystemConfiguration = () => {
         title: 'Testing SMTP connection',
         description: 'Please wait...',
       });
-      
+
       const response = await apiRequest('POST', '/api/settings/email/test', emailForm.getValues());
       const result = await response.json();
-      
+
       if (result.success) {
         toast({
           title: 'Success',
@@ -315,9 +336,7 @@ const SystemConfiguration = () => {
                             <FormControl>
                               <Input {...field} />
                             </FormControl>
-                            <FormDescription>
-                              The name of your application
-                            </FormDescription>
+                            <FormDescription>The name of your application</FormDescription>
                             <FormMessage />
                           </FormItem>
                         )}
@@ -331,9 +350,7 @@ const SystemConfiguration = () => {
                             <FormControl>
                               <Input {...field} />
                             </FormControl>
-                            <FormDescription>
-                              The URL of your application
-                            </FormDescription>
+                            <FormDescription>The URL of your application</FormDescription>
                             <FormMessage />
                           </FormItem>
                         )}
@@ -423,10 +440,7 @@ const SystemConfiguration = () => {
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>Date Format</FormLabel>
-                            <Select
-                              value={field.value}
-                              onValueChange={field.onChange}
-                            >
+                            <Select value={field.value} onValueChange={field.onChange}>
                               <FormControl>
                                 <SelectTrigger>
                                   <SelectValue placeholder="Select date format" />
@@ -448,10 +462,7 @@ const SystemConfiguration = () => {
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>Time Format</FormLabel>
-                            <Select
-                              value={field.value}
-                              onValueChange={field.onChange}
-                            >
+                            <Select value={field.value} onValueChange={field.onChange}>
                               <FormControl>
                                 <SelectTrigger>
                                   <SelectValue placeholder="Select time format" />
@@ -472,10 +483,7 @@ const SystemConfiguration = () => {
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>Default Timezone</FormLabel>
-                            <Select
-                              value={field.value}
-                              onValueChange={field.onChange}
-                            >
+                            <Select value={field.value} onValueChange={field.onChange}>
                               <FormControl>
                                 <SelectTrigger>
                                   <SelectValue placeholder="Select timezone" />
@@ -483,9 +491,15 @@ const SystemConfiguration = () => {
                               </FormControl>
                               <SelectContent>
                                 <SelectItem value="Australia/Sydney">Australia/Sydney</SelectItem>
-                                <SelectItem value="Australia/Melbourne">Australia/Melbourne</SelectItem>
-                                <SelectItem value="Australia/Brisbane">Australia/Brisbane</SelectItem>
-                                <SelectItem value="Australia/Adelaide">Australia/Adelaide</SelectItem>
+                                <SelectItem value="Australia/Melbourne">
+                                  Australia/Melbourne
+                                </SelectItem>
+                                <SelectItem value="Australia/Brisbane">
+                                  Australia/Brisbane
+                                </SelectItem>
+                                <SelectItem value="Australia/Adelaide">
+                                  Australia/Adelaide
+                                </SelectItem>
                                 <SelectItem value="Australia/Perth">Australia/Perth</SelectItem>
                                 <SelectItem value="Australia/Darwin">Australia/Darwin</SelectItem>
                                 <SelectItem value="Australia/Hobart">Australia/Hobart</SelectItem>
@@ -514,10 +528,7 @@ const SystemConfiguration = () => {
                               </FormDescription>
                             </div>
                             <FormControl>
-                              <Switch
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                              />
+                              <Switch checked={field.value} onCheckedChange={field.onChange} />
                             </FormControl>
                           </FormItem>
                         )}
@@ -534,10 +545,7 @@ const SystemConfiguration = () => {
                               </FormDescription>
                             </div>
                             <FormControl>
-                              <Switch
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                              />
+                              <Switch checked={field.value} onCheckedChange={field.onChange} />
                             </FormControl>
                           </FormItem>
                         )}
@@ -575,10 +583,7 @@ const SystemConfiguration = () => {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Mail Driver</FormLabel>
-                          <Select
-                            value={field.value}
-                            onValueChange={field.onChange}
-                          >
+                          <Select value={field.value} onValueChange={field.onChange}>
                             <FormControl>
                               <SelectTrigger>
                                 <SelectValue placeholder="Select mail driver" />
@@ -662,10 +667,7 @@ const SystemConfiguration = () => {
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>Encryption</FormLabel>
-                            <Select
-                              value={field.value}
-                              onValueChange={field.onChange}
-                            >
+                            <Select value={field.value} onValueChange={field.onChange}>
                               <FormControl>
                                 <SelectTrigger>
                                   <SelectValue placeholder="Select encryption type" />
@@ -743,10 +745,7 @@ const SystemConfiguration = () => {
                             </FormDescription>
                           </div>
                           <FormControl>
-                            <Switch
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
+                            <Switch checked={field.value} onCheckedChange={field.onChange} />
                           </FormControl>
                         </FormItem>
                       )}
@@ -773,7 +772,10 @@ const SystemConfiguration = () => {
             </CardHeader>
             <CardContent>
               <Form {...notificationForm}>
-                <form onSubmit={notificationForm.handleSubmit(onNotificationSubmit)} className="space-y-6">
+                <form
+                  onSubmit={notificationForm.handleSubmit(onNotificationSubmit)}
+                  className="space-y-6"
+                >
                   <div>
                     <h3 className="text-lg font-medium">Notification Channels</h3>
                     <Separator className="my-4" />
@@ -785,15 +787,10 @@ const SystemConfiguration = () => {
                           <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                             <div className="space-y-0.5">
                               <FormLabel className="text-base">Email Notifications</FormLabel>
-                              <FormDescription>
-                                Send notifications via email
-                              </FormDescription>
+                              <FormDescription>Send notifications via email</FormDescription>
                             </div>
                             <FormControl>
-                              <Switch
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                              />
+                              <Switch checked={field.value} onCheckedChange={field.onChange} />
                             </FormControl>
                           </FormItem>
                         )}
@@ -810,10 +807,7 @@ const SystemConfiguration = () => {
                               </FormDescription>
                             </div>
                             <FormControl>
-                              <Switch
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                              />
+                              <Switch checked={field.value} onCheckedChange={field.onChange} />
                             </FormControl>
                           </FormItem>
                         )}
@@ -830,10 +824,7 @@ const SystemConfiguration = () => {
                               </FormDescription>
                             </div>
                             <FormControl>
-                              <Switch
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                              />
+                              <Switch checked={field.value} onCheckedChange={field.onChange} />
                             </FormControl>
                           </FormItem>
                         )}
@@ -857,10 +848,7 @@ const SystemConfiguration = () => {
                               </FormDescription>
                             </div>
                             <FormControl>
-                              <Switch
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                              />
+                              <Switch checked={field.value} onCheckedChange={field.onChange} />
                             </FormControl>
                           </FormItem>
                         )}
@@ -877,10 +865,7 @@ const SystemConfiguration = () => {
                               </FormDescription>
                             </div>
                             <FormControl>
-                              <Switch
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                              />
+                              <Switch checked={field.value} onCheckedChange={field.onChange} />
                             </FormControl>
                           </FormItem>
                         )}
@@ -898,16 +883,15 @@ const SystemConfiguration = () => {
                         render={({ field }) => (
                           <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                             <div className="space-y-0.5">
-                              <FormLabel className="text-base">Automatic Deadline Reminders</FormLabel>
+                              <FormLabel className="text-base">
+                                Automatic Deadline Reminders
+                              </FormLabel>
                               <FormDescription>
                                 Send reminders before deadlines are due
                               </FormDescription>
                             </div>
                             <FormControl>
-                              <Switch
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                              />
+                              <Switch checked={field.value} onCheckedChange={field.onChange} />
                             </FormControl>
                           </FormItem>
                         )}
@@ -919,13 +903,13 @@ const SystemConfiguration = () => {
                           <FormItem>
                             <FormLabel>Reminder Days Before Deadline</FormLabel>
                             <FormControl>
-                              <Input 
-                                type="number" 
-                                min={1} 
-                                max={14} 
-                                {...field} 
-                                value={field.value} 
-                                onChange={e => field.onChange(parseInt(e.target.value))} 
+                              <Input
+                                type="number"
+                                min={1}
+                                max={14}
+                                {...field}
+                                value={field.value}
+                                onChange={e => field.onChange(parseInt(e.target.value))}
                               />
                             </FormControl>
                             <FormDescription>
@@ -969,16 +953,15 @@ const SystemConfiguration = () => {
                         render={({ field }) => (
                           <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                             <div className="space-y-0.5">
-                              <FormLabel className="text-base">Enable Multi-Factor Authentication</FormLabel>
+                              <FormLabel className="text-base">
+                                Enable Multi-Factor Authentication
+                              </FormLabel>
                               <FormDescription>
                                 Require two-factor authentication for account access
                               </FormDescription>
                             </div>
                             <FormControl>
-                              <Switch
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                              />
+                              <Switch checked={field.value} onCheckedChange={field.onChange} />
                             </FormControl>
                           </FormItem>
                         )}
@@ -989,16 +972,15 @@ const SystemConfiguration = () => {
                         render={({ field }) => (
                           <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                             <div className="space-y-0.5">
-                              <FormLabel className="text-base">Require MFA for Administrators</FormLabel>
+                              <FormLabel className="text-base">
+                                Require MFA for Administrators
+                              </FormLabel>
                               <FormDescription>
                                 Make MFA mandatory for admin and developer accounts
                               </FormDescription>
                             </div>
                             <FormControl>
-                              <Switch
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                              />
+                              <Switch checked={field.value} onCheckedChange={field.onChange} />
                             </FormControl>
                           </FormItem>
                         )}
@@ -1017,18 +999,16 @@ const SystemConfiguration = () => {
                           <FormItem>
                             <FormLabel>Minimum Password Length</FormLabel>
                             <FormControl>
-                              <Input 
-                                type="number" 
-                                min={6} 
-                                max={32} 
-                                {...field} 
-                                value={field.value} 
-                                onChange={e => field.onChange(parseInt(e.target.value))} 
+                              <Input
+                                type="number"
+                                min={6}
+                                max={32}
+                                {...field}
+                                value={field.value}
+                                onChange={e => field.onChange(parseInt(e.target.value))}
                               />
                             </FormControl>
-                            <FormDescription>
-                              Minimum number of characters (6-32)
-                            </FormDescription>
+                            <FormDescription>Minimum number of characters (6-32)</FormDescription>
                             <FormMessage />
                           </FormItem>
                         )}
@@ -1040,13 +1020,13 @@ const SystemConfiguration = () => {
                           <FormItem>
                             <FormLabel>Password Expiry (Days)</FormLabel>
                             <FormControl>
-                              <Input 
-                                type="number" 
-                                min={0} 
-                                max={365} 
-                                {...field} 
-                                value={field.value} 
-                                onChange={e => field.onChange(parseInt(e.target.value))} 
+                              <Input
+                                type="number"
+                                min={0}
+                                max={365}
+                                {...field}
+                                value={field.value}
+                                onChange={e => field.onChange(parseInt(e.target.value))}
                               />
                             </FormControl>
                             <FormDescription>
@@ -1062,10 +1042,7 @@ const SystemConfiguration = () => {
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>Password Complexity</FormLabel>
-                            <Select
-                              value={field.value}
-                              onValueChange={field.onChange}
-                            >
+                            <Select value={field.value} onValueChange={field.onChange}>
                               <FormControl>
                                 <SelectTrigger>
                                   <SelectValue placeholder="Select complexity level" />
@@ -1074,12 +1051,12 @@ const SystemConfiguration = () => {
                               <SelectContent>
                                 <SelectItem value="low">Low (letters only)</SelectItem>
                                 <SelectItem value="medium">Medium (letters & numbers)</SelectItem>
-                                <SelectItem value="high">High (letters, numbers & special characters)</SelectItem>
+                                <SelectItem value="high">
+                                  High (letters, numbers & special characters)
+                                </SelectItem>
                               </SelectContent>
                             </Select>
-                            <FormDescription>
-                              Required password complexity level
-                            </FormDescription>
+                            <FormDescription>Required password complexity level</FormDescription>
                             <FormMessage />
                           </FormItem>
                         )}
@@ -1098,13 +1075,13 @@ const SystemConfiguration = () => {
                           <FormItem>
                             <FormLabel>Session Timeout (Minutes)</FormLabel>
                             <FormControl>
-                              <Input 
-                                type="number" 
-                                min={5} 
-                                max={1440} 
-                                {...field} 
-                                value={field.value} 
-                                onChange={e => field.onChange(parseInt(e.target.value))} 
+                              <Input
+                                type="number"
+                                min={5}
+                                max={1440}
+                                {...field}
+                                value={field.value}
+                                onChange={e => field.onChange(parseInt(e.target.value))}
                               />
                             </FormControl>
                             <FormDescription>
@@ -1124,7 +1101,8 @@ const SystemConfiguration = () => {
                               <Input {...field} value={field.value || ''} />
                             </FormControl>
                             <FormDescription>
-                              IP ranges allowed to access the system (comma separated, leave blank for all)
+                              IP ranges allowed to access the system (comma separated, leave blank
+                              for all)
                             </FormDescription>
                             <FormMessage />
                           </FormItem>
@@ -1144,13 +1122,13 @@ const SystemConfiguration = () => {
                           <FormItem>
                             <FormLabel>Security Log Retention (Days)</FormLabel>
                             <FormControl>
-                              <Input 
-                                type="number" 
-                                min={30} 
-                                max={730} 
-                                {...field} 
-                                value={field.value} 
-                                onChange={e => field.onChange(parseInt(e.target.value))} 
+                              <Input
+                                type="number"
+                                min={30}
+                                max={730}
+                                {...field}
+                                value={field.value}
+                                onChange={e => field.onChange(parseInt(e.target.value))}
                               />
                             </FormControl>
                             <FormDescription>

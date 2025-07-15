@@ -1,12 +1,12 @@
-import { db } from "./db";
-import { sql } from "drizzle-orm";
+import { db } from './db';
+import { sql } from 'drizzle-orm';
 
 /**
  * This script creates the Fair Work integration tables for Australian Apprentice Management
  */
 export async function migrateFairWorkSchema() {
-  console.log("Starting Fair Work schema migration...");
-  
+  console.log('Starting Fair Work schema migration...');
+
   try {
     // Create awards table
     await db.execute(sql`
@@ -23,7 +23,7 @@ export async function migrateFairWorkSchema() {
         updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
       );
     `);
-    console.log("Created awards table");
+    console.log('Created awards table');
 
     // Create award_classifications table
     await db.execute(sql`
@@ -41,7 +41,7 @@ export async function migrateFairWorkSchema() {
         updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
       );
     `);
-    console.log("Created award_classifications table");
+    console.log('Created award_classifications table');
 
     // Create pay_rates table
     await db.execute(sql`
@@ -59,7 +59,7 @@ export async function migrateFairWorkSchema() {
         updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
       );
     `);
-    console.log("Created pay_rates table");
+    console.log('Created pay_rates table');
 
     // Create penalty_rules table
     await db.execute(sql`
@@ -78,7 +78,7 @@ export async function migrateFairWorkSchema() {
         updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
       );
     `);
-    console.log("Created penalty_rules table");
+    console.log('Created penalty_rules table');
 
     // Create allowance_rules table
     await db.execute(sql`
@@ -94,7 +94,7 @@ export async function migrateFairWorkSchema() {
         updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
       );
     `);
-    console.log("Created allowance_rules table");
+    console.log('Created allowance_rules table');
 
     // Create public_holidays table
     await db.execute(sql`
@@ -108,7 +108,7 @@ export async function migrateFairWorkSchema() {
         updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
       );
     `);
-    console.log("Created public_holidays table");
+    console.log('Created public_holidays table');
 
     // Create fairwork_compliance_logs table
     await db.execute(sql`
@@ -123,7 +123,7 @@ export async function migrateFairWorkSchema() {
         created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
       );
     `);
-    console.log("Created fairwork_compliance_logs table");
+    console.log('Created fairwork_compliance_logs table');
 
     // Create enterprise_agreements table
     await db.execute(sql`
@@ -140,7 +140,7 @@ export async function migrateFairWorkSchema() {
         updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
       );
     `);
-    console.log("Created enterprise_agreements table");
+    console.log('Created enterprise_agreements table');
 
     // Create gto_organizations table
     await db.execute(sql`
@@ -159,7 +159,7 @@ export async function migrateFairWorkSchema() {
         updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
       );
     `);
-    console.log("Created gto_organizations table");
+    console.log('Created gto_organizations table');
 
     // Create external_portals table
     await db.execute(sql`
@@ -176,7 +176,7 @@ export async function migrateFairWorkSchema() {
         updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
       );
     `);
-    console.log("Created external_portals table");
+    console.log('Created external_portals table');
 
     // Add AQF & GTO fields to apprentices table
     await db.execute(sql`
@@ -186,7 +186,7 @@ export async function migrateFairWorkSchema() {
       ADD COLUMN IF NOT EXISTS gto_enrolled BOOLEAN DEFAULT FALSE,
       ADD COLUMN IF NOT EXISTS gto_id INTEGER;
     `);
-    console.log("Added AQF & GTO fields to apprentices table");
+    console.log('Added AQF & GTO fields to apprentices table');
 
     // Add labour hire & GTO fields to host_employers table
     await db.execute(sql`
@@ -194,7 +194,7 @@ export async function migrateFairWorkSchema() {
       ADD COLUMN IF NOT EXISTS is_gto BOOLEAN DEFAULT FALSE,
       ADD COLUMN IF NOT EXISTS labour_hire_licence_no TEXT;
     `);
-    console.log("Added labour hire fields to host_employers table");
+    console.log('Added labour hire fields to host_employers table');
 
     // Add Fair Work & AQF fields to training_contracts table
     await db.execute(sql`
@@ -203,7 +203,7 @@ export async function migrateFairWorkSchema() {
       ADD COLUMN IF NOT EXISTS rto_name TEXT,
       ADD COLUMN IF NOT EXISTS rto_code TEXT;
     `);
-    console.log("Added Fair Work & AQF fields to training_contracts table");
+    console.log('Added Fair Work & AQF fields to training_contracts table');
 
     // Add labour hire & GTO fields to placements table
     await db.execute(sql`
@@ -212,11 +212,11 @@ export async function migrateFairWorkSchema() {
       ADD COLUMN IF NOT EXISTS gto_placement BOOLEAN DEFAULT FALSE,
       ADD COLUMN IF NOT EXISTS eba_id INTEGER REFERENCES enterprise_agreements(id);
     `);
-    console.log("Added labour hire & GTO fields to placements table");
+    console.log('Added labour hire & GTO fields to placements table');
 
-    console.log("Fair Work schema migration completed successfully!");
+    console.log('Fair Work schema migration completed successfully!');
   } catch (error) {
-    console.error("Fair Work schema migration failed:", error);
+    console.error('Fair Work schema migration failed:', error);
     throw error;
   }
 }

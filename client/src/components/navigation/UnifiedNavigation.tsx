@@ -26,28 +26,28 @@ export const UnifiedNavigation: React.FC = () => {
       <div className="p-4 border-b border-border">
         <h1 className="text-lg font-bold">CRM7</h1>
       </div>
-      
+
       <nav className="flex-1 p-2">
         <ul className="space-y-1">
-          {MAIN_NAV_SECTIONS.map((section) => {
+          {MAIN_NAV_SECTIONS.map(section => {
             const SectionIcon = section.icon;
             const hasSubItems = section.subItems && section.subItems.length > 0;
             const isExpanded = expandedSections[section.title] || false;
             const sectionActive = section.href ? isActive(section.href) : false;
-            
+
             return (
               <li key={section.title} className="rounded-lg overflow-hidden">
-                <div 
+                <div
                   className={`flex items-center justify-between p-2 cursor-pointer hover:bg-muted ${sectionActive ? 'bg-muted' : ''}`}
                   onClick={() => hasSubItems && toggleSection(section.title)}
                 >
                   <div className="flex items-center">
                     {SectionIcon && <SectionIcon className="h-5 w-5 mr-2" />}
                     {section.href ? (
-                      <Link 
-                        href={section.href} 
+                      <Link
+                        href={section.href}
                         className={`flex-1 ${sectionActive ? 'font-medium' : ''}`}
-                        onClick={(e) => hasSubItems && e.preventDefault()}
+                        onClick={e => hasSubItems && e.preventDefault()}
                       >
                         {section.title}
                       </Link>
@@ -56,21 +56,21 @@ export const UnifiedNavigation: React.FC = () => {
                     )}
                   </div>
                   {hasSubItems && (
-                    <ChevronDown 
-                      className={`h-4 w-4 transition-transform ${isExpanded ? 'transform rotate-180' : ''}`} 
+                    <ChevronDown
+                      className={`h-4 w-4 transition-transform ${isExpanded ? 'transform rotate-180' : ''}`}
                     />
                   )}
                 </div>
-                
+
                 {hasSubItems && isExpanded && section.subItems && (
                   <div className="pl-8 bg-background/50">
                     {section.subItems?.map((subItemGroup, groupIndex) => (
                       <div key={groupIndex} className="py-1">
-                        {subItemGroup.map((subItem) => {
+                        {subItemGroup.map(subItem => {
                           const subItemActive = isActive(subItem.href);
                           return (
-                            <Link 
-                              key={subItem.href} 
+                            <Link
+                              key={subItem.href}
                               href={subItem.href}
                               className={`block py-1 px-2 text-sm rounded hover:bg-muted ${subItemActive ? 'bg-muted/70 font-medium' : ''}`}
                             >
@@ -87,7 +87,7 @@ export const UnifiedNavigation: React.FC = () => {
           })}
         </ul>
       </nav>
-      
+
       <div className="p-4 border-t border-border text-xs text-muted-foreground">
         <p>CRM7 Workforce Management</p>
         <p>Version 1.0</p>

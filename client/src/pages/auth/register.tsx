@@ -18,21 +18,30 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
 
-const registerSchema = z.object({
-  username: z.string().min(3, 'Username must be at least 3 characters'),
-  password: z.string().min(8, 'Password must be at least 8 characters'),
-  confirmPassword: z.string().min(1, 'Please confirm your password'),
-  email: z.string().email('Invalid email address'),
-  firstName: z.string().min(1, 'First name is required'),
-  lastName: z.string().min(1, 'Last name is required'),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: 'Passwords do not match',
-  path: ['confirmPassword'],
-});
+const registerSchema = z
+  .object({
+    username: z.string().min(3, 'Username must be at least 3 characters'),
+    password: z.string().min(8, 'Password must be at least 8 characters'),
+    confirmPassword: z.string().min(1, 'Please confirm your password'),
+    email: z.string().email('Invalid email address'),
+    firstName: z.string().min(1, 'First name is required'),
+    lastName: z.string().min(1, 'Last name is required'),
+  })
+  .refine(data => data.password === data.confirmPassword, {
+    message: 'Passwords do not match',
+    path: ['confirmPassword'],
+  });
 
 type RegisterFormData = z.infer<typeof registerSchema>;
 
@@ -42,7 +51,7 @@ export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { user, isLoading } = useAuth();
-  
+
   // Redirect to portal if already authenticated
   useEffect(() => {
     if (user && !isLoading) {
@@ -66,14 +75,14 @@ export default function RegisterPage() {
     mutationFn: async (data: RegisterFormData) => {
       // Remove confirmPassword as it's not needed for the API
       const { confirmPassword, ...registerData } = data;
-      
+
       const response = await apiRequest('POST', '/api/auth/register', registerData);
-      
+
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || 'Registration failed');
       }
-      
+
       return await response.json();
     },
     onSuccess: () => {
@@ -81,7 +90,7 @@ export default function RegisterPage() {
         title: 'Registration successful',
         description: 'Your account has been created. Please log in.',
       });
-      
+
       // Redirect to login page
       setLocation('/auth/login');
     },
@@ -120,9 +129,9 @@ export default function RegisterPage() {
                       <FormItem>
                         <FormLabel>First Name</FormLabel>
                         <FormControl>
-                          <Input 
-                            placeholder="First name" 
-                            {...field} 
+                          <Input
+                            placeholder="First name"
+                            {...field}
                             disabled={registerMutation.isPending}
                           />
                         </FormControl>
@@ -138,9 +147,9 @@ export default function RegisterPage() {
                       <FormItem>
                         <FormLabel>Last Name</FormLabel>
                         <FormControl>
-                          <Input 
-                            placeholder="Last name" 
-                            {...field} 
+                          <Input
+                            placeholder="Last name"
+                            {...field}
                             disabled={registerMutation.isPending}
                           />
                         </FormControl>
@@ -157,10 +166,10 @@ export default function RegisterPage() {
                     <FormItem>
                       <FormLabel>Email</FormLabel>
                       <FormControl>
-                        <Input 
+                        <Input
                           type="email"
-                          placeholder="your.email@example.com" 
-                          {...field} 
+                          placeholder="your.email@example.com"
+                          {...field}
                           disabled={registerMutation.isPending}
                         />
                       </FormControl>
@@ -176,9 +185,9 @@ export default function RegisterPage() {
                     <FormItem>
                       <FormLabel>Username</FormLabel>
                       <FormControl>
-                        <Input 
-                          placeholder="Choose a username" 
-                          {...field} 
+                        <Input
+                          placeholder="Choose a username"
+                          {...field}
                           disabled={registerMutation.isPending}
                         />
                       </FormControl>
@@ -259,11 +268,7 @@ export default function RegisterPage() {
                   )}
                 />
 
-                <Button
-                  type="submit"
-                  className="w-full"
-                  disabled={registerMutation.isPending}
-                >
+                <Button type="submit" className="w-full" disabled={registerMutation.isPending}>
                   {registerMutation.isPending ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />

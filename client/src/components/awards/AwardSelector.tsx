@@ -80,7 +80,9 @@ export function AwardSelector({
   const [industryFilter, setIndustryFilter] = useState<string>('');
   const [sectorFilter, setSectorFilter] = useState<string>('');
   const [selectedAward, setSelectedAward] = useState<Award | null>(null);
-  const [selectedClassification, setSelectedClassification] = useState<AwardClassification | null>(null);
+  const [selectedClassification, setSelectedClassification] = useState<AwardClassification | null>(
+    null
+  );
 
   const { toast } = useToast();
 
@@ -88,7 +90,7 @@ export function AwardSelector({
   const { data: awardsResponse, isLoading: isLoadingAwards } = useQuery({
     queryKey: ['/api/fairwork/awards'],
   });
-  
+
   const awards = awardsResponse?.data?.awards || [];
 
   // Fetch classifications for selected award
@@ -96,7 +98,7 @@ export function AwardSelector({
     queryKey: ['/api/fairwork/awards', selectedAward?.code, 'classifications'],
     enabled: !!selectedAward?.code,
   });
-  
+
   const classifications = classificationsResponse?.data?.classifications || [];
 
   // Extract unique industries and sectors for filtering
@@ -122,13 +124,14 @@ export function AwardSelector({
   const filteredAwards = React.useMemo(() => {
     if (!awards) return [];
     return awards.filter((award: Award) => {
-      const matchesSearch = searchTerm === '' || 
+      const matchesSearch =
+        searchTerm === '' ||
         award.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         award.code.toLowerCase().includes(searchTerm.toLowerCase());
-      
+
       const matchesIndustry = industryFilter === '' || award.industry === industryFilter;
       const matchesSector = sectorFilter === '' || award.sector === sectorFilter;
-      
+
       return matchesSearch && matchesIndustry && matchesSector;
     });
   }, [awards, searchTerm, industryFilter, sectorFilter]);
@@ -213,42 +216,36 @@ export function AwardSelector({
                 placeholder="Search by award name or code..."
                 className="pl-8"
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={e => setSearchTerm(e.target.value)}
               />
             </div>
           </div>
           <div className="flex space-x-2">
-            <Select
-              value={industryFilter}
-              onValueChange={setIndustryFilter}
-            >
+            <Select value={industryFilter} onValueChange={setIndustryFilter}>
               <SelectTrigger>
                 <Building2 className="mr-2 h-4 w-4" />
                 <SelectValue placeholder="Industry" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all_industries">All Industries</SelectItem>
-                {industries.map((industry) => (
-                  <SelectItem key={industry} value={industry || "unknown"}>
-                    {industry || "Unknown"}
+                {industries.map(industry => (
+                  <SelectItem key={industry} value={industry || 'unknown'}>
+                    {industry || 'Unknown'}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
 
-            <Select
-              value={sectorFilter}
-              onValueChange={setSectorFilter}
-            >
+            <Select value={sectorFilter} onValueChange={setSectorFilter}>
               <SelectTrigger>
                 <Filter className="mr-2 h-4 w-4" />
                 <SelectValue placeholder="Sector" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all_sectors">All Sectors</SelectItem>
-                {sectors.map((sector) => (
-                  <SelectItem key={sector} value={sector || "unknown"}>
-                    {sector || "Unknown"}
+                {sectors.map(sector => (
+                  <SelectItem key={sector} value={sector || 'unknown'}>
+                    {sector || 'Unknown'}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -270,11 +267,13 @@ export function AwardSelector({
             ) : (
               <div className="space-y-2">
                 {filteredAwards.length === 0 ? (
-                  <p className="text-sm text-muted-foreground py-4">No awards found matching your criteria.</p>
+                  <p className="text-sm text-muted-foreground py-4">
+                    No awards found matching your criteria.
+                  </p>
                 ) : (
                   filteredAwards.map((award: Award) => (
-                    <Card 
-                      key={award.id} 
+                    <Card
+                      key={award.id}
                       className={`cursor-pointer hover:border-primary ${selectedAward?.id === award.id ? 'border-primary bg-primary/5' : ''}`}
                       onClick={() => handleAwardSelect(award)}
                     >
@@ -319,7 +318,9 @@ export function AwardSelector({
               </h3>
               {!selectedAward ? (
                 <div className="flex h-full items-center justify-center border rounded-md p-6">
-                  <p className="text-sm text-muted-foreground">Select an award to view classifications</p>
+                  <p className="text-sm text-muted-foreground">
+                    Select an award to view classifications
+                  </p>
                 </div>
               ) : isLoadingClassifications ? (
                 <div className="space-y-2">
@@ -330,16 +331,21 @@ export function AwardSelector({
               ) : (
                 <div className="space-y-2">
                   {classifications && classifications.length === 0 ? (
-                    <p className="text-sm text-muted-foreground py-4">No classifications found for this award.</p>
+                    <p className="text-sm text-muted-foreground py-4">
+                      No classifications found for this award.
+                    </p>
                   ) : (
-                    classifications && classifications.map((classification: AwardClassification) => (
-                      <Card 
-                        key={classification.id} 
+                    classifications &&
+                    classifications.map((classification: AwardClassification) => (
+                      <Card
+                        key={classification.id}
                         className={`cursor-pointer hover:border-primary ${selectedClassification?.id === classification.id ? 'border-primary bg-primary/5' : ''}`}
                         onClick={() => handleClassificationSelect(classification)}
                       >
                         <CardHeader className="p-3 pb-2">
-                          <CardTitle className="text-sm font-medium">{classification.name}</CardTitle>
+                          <CardTitle className="text-sm font-medium">
+                            {classification.name}
+                          </CardTitle>
                         </CardHeader>
                         <CardContent className="p-3 pt-0">
                           <div className="flex justify-between items-center">
@@ -359,13 +365,13 @@ export function AwardSelector({
         </div>
 
         <DialogFooter className="mt-4">
-          <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-          <Button 
-            onClick={handleConfirm} 
-            disabled={
-              !selectedAward || 
-              (includeClassificationSelection && !selectedClassification)
-            }>
+          <Button variant="outline" onClick={() => setOpen(false)}>
+            Cancel
+          </Button>
+          <Button
+            onClick={handleConfirm}
+            disabled={!selectedAward || (includeClassificationSelection && !selectedClassification)}
+          >
             Confirm Selection
           </Button>
         </DialogFooter>

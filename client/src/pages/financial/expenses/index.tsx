@@ -1,32 +1,32 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'wouter';
-import { 
-  Plus, 
-  Search, 
-  Filter, 
-  Download, 
-  SlidersHorizontal, 
-  ChevronDown, 
+import {
+  Plus,
+  Search,
+  Filter,
+  Download,
+  SlidersHorizontal,
+  ChevronDown,
   Calendar,
   DollarSign,
   MessageSquare,
   BadgeCheck,
-  Clock
+  Clock,
 } from 'lucide-react';
 
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardFooter, 
-  CardHeader, 
-  CardTitle 
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -77,22 +77,22 @@ const DUMMY_EXPENSES: Expense[] = [
     submittedBy: {
       id: 1,
       name: 'John Smith',
-      avatarUrl: ''
+      avatarUrl: '',
     },
     status: 'approved',
     receiptUrl: '/receipts/receipt-123.pdf',
-    notes: 'Monthly office supplies order'
+    notes: 'Monthly office supplies order',
   },
   {
     id: 2,
     description: 'Client meeting lunch',
-    amount: 84.50,
+    amount: 84.5,
     category: 'Meals',
     date: '2025-05-03',
     submittedBy: {
       id: 2,
       name: 'Sarah Johnson',
-      avatarUrl: ''
+      avatarUrl: '',
     },
     status: 'pending',
     receiptUrl: '/receipts/receipt-124.pdf',
@@ -100,17 +100,17 @@ const DUMMY_EXPENSES: Expense[] = [
   {
     id: 3,
     description: 'Travel to Sydney office',
-    amount: 450.00,
+    amount: 450.0,
     category: 'Travel',
     date: '2025-05-05',
     submittedBy: {
       id: 3,
       name: 'Michael Chen',
-      avatarUrl: ''
+      avatarUrl: '',
     },
     status: 'pending',
     receiptUrl: '/receipts/receipt-125.pdf',
-    notes: 'Flight and accommodation for apprentice site visit'
+    notes: 'Flight and accommodation for apprentice site visit',
   },
   {
     id: 4,
@@ -121,7 +121,7 @@ const DUMMY_EXPENSES: Expense[] = [
     submittedBy: {
       id: 1,
       name: 'John Smith',
-      avatarUrl: ''
+      avatarUrl: '',
     },
     status: 'approved',
     receiptUrl: '/receipts/receipt-126.pdf',
@@ -129,18 +129,18 @@ const DUMMY_EXPENSES: Expense[] = [
   {
     id: 5,
     description: 'Industry conference tickets',
-    amount: 350.00,
+    amount: 350.0,
     category: 'Professional Development',
     date: '2025-05-10',
     submittedBy: {
       id: 4,
       name: 'David Wilson',
-      avatarUrl: ''
+      avatarUrl: '',
     },
     status: 'rejected',
     receiptUrl: '/receipts/receipt-127.pdf',
-    notes: 'Rejected - needs manager approval for amounts over $300'
-  }
+    notes: 'Rejected - needs manager approval for amounts over $300',
+  },
 ];
 
 // Expense status badge component
@@ -174,21 +174,19 @@ export default function ExpensesPage() {
 
   const handleExportExpenses = () => {
     toast({
-      title: "Export Started",
-      description: "Your expense report export has started and will be ready shortly.",
+      title: 'Export Started',
+      description: 'Your expense report export has started and will be ready shortly.',
     });
   };
 
   return (
     <div className="container mx-auto p-6">
       <ExpenseFormDialog open={expenseFormOpen} onOpenChange={setExpenseFormOpen} />
-      
+
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Expense Tracking</h1>
-          <p className="text-muted-foreground">
-            Manage and track organization expenses
-          </p>
+          <p className="text-muted-foreground">Manage and track organization expenses</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={handleExportExpenses}>
@@ -210,7 +208,7 @@ export default function ExpensesPage() {
             <TabsTrigger value="approved">Approved</TabsTrigger>
             <TabsTrigger value="rejected">Rejected</TabsTrigger>
           </TabsList>
-          
+
           <div className="flex items-center gap-2">
             <div className="relative">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -219,10 +217,10 @@ export default function ExpensesPage() {
                 placeholder="Search expenses..."
                 className="w-60 pl-8"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={e => setSearchQuery(e.target.value)}
               />
             </div>
-            
+
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="icon">
@@ -271,7 +269,7 @@ export default function ExpensesPage() {
             <CardContent className="p-0">
               {isLoading ? (
                 <div className="p-6 space-y-4">
-                  {[1, 2, 3, 4, 5].map((i) => (
+                  {[1, 2, 3, 4, 5].map(i => (
                     <div key={i} className="flex items-center space-x-4">
                       <Skeleton className="h-12 w-12 rounded-full" />
                       <div className="space-y-2">
@@ -296,7 +294,7 @@ export default function ExpensesPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {expenses?.map((expense) => (
+                    {expenses?.map(expense => (
                       <TableRow key={expense.id}>
                         <TableCell className="font-medium">{expense.description}</TableCell>
                         <TableCell>${expense.amount.toFixed(2)}</TableCell>
@@ -306,12 +304,16 @@ export default function ExpensesPage() {
                           <div className="flex items-center">
                             <Avatar className="h-8 w-8 mr-2">
                               <AvatarImage src={expense.submittedBy.avatarUrl} />
-                              <AvatarFallback>{expense.submittedBy.name.substring(0, 2)}</AvatarFallback>
+                              <AvatarFallback>
+                                {expense.submittedBy.name.substring(0, 2)}
+                              </AvatarFallback>
                             </Avatar>
                             {expense.submittedBy.name}
                           </div>
                         </TableCell>
-                        <TableCell><ExpenseStatusBadge status={expense.status} /></TableCell>
+                        <TableCell>
+                          <ExpenseStatusBadge status={expense.status} />
+                        </TableCell>
                         <TableCell className="text-right">
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
@@ -324,8 +326,12 @@ export default function ExpensesPage() {
                               <DropdownMenuItem>View Details</DropdownMenuItem>
                               <DropdownMenuItem>View Receipt</DropdownMenuItem>
                               <DropdownMenuSeparator />
-                              <DropdownMenuItem disabled={expense.status !== 'pending'}>Approve</DropdownMenuItem>
-                              <DropdownMenuItem disabled={expense.status !== 'pending'}>Reject</DropdownMenuItem>
+                              <DropdownMenuItem disabled={expense.status !== 'pending'}>
+                                Approve
+                              </DropdownMenuItem>
+                              <DropdownMenuItem disabled={expense.status !== 'pending'}>
+                                Reject
+                              </DropdownMenuItem>
                               <DropdownMenuSeparator />
                               <DropdownMenuItem>
                                 <span className="text-destructive">Delete</span>
@@ -359,9 +365,7 @@ export default function ExpensesPage() {
           <Card>
             <CardHeader>
               <CardTitle>Pending Expenses</CardTitle>
-              <CardDescription>
-                Review and approve pending expenses
-              </CardDescription>
+              <CardDescription>Review and approve pending expenses</CardDescription>
             </CardHeader>
             <CardContent>
               <p>Pending expenses content will go here</p>
@@ -373,9 +377,7 @@ export default function ExpensesPage() {
           <Card>
             <CardHeader>
               <CardTitle>Approved Expenses</CardTitle>
-              <CardDescription>
-                All approved expense transactions
-              </CardDescription>
+              <CardDescription>All approved expense transactions</CardDescription>
             </CardHeader>
             <CardContent>
               <p>Approved expenses content will go here</p>
@@ -387,9 +389,7 @@ export default function ExpensesPage() {
           <Card>
             <CardHeader>
               <CardTitle>Rejected Expenses</CardTitle>
-              <CardDescription>
-                View rejected expenses and reasons
-              </CardDescription>
+              <CardDescription>View rejected expenses and reasons</CardDescription>
             </CardHeader>
             <CardContent>
               <p>Rejected expenses content will go here</p>
@@ -408,7 +408,7 @@ export default function ExpensesPage() {
             <p className="text-xs text-muted-foreground">For current period</p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-lg font-medium">Pending Approval</CardTitle>
@@ -420,7 +420,7 @@ export default function ExpensesPage() {
             </p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-lg font-medium">Top Category</CardTitle>

@@ -5,9 +5,9 @@
  * to ensure our system stays up-to-date with the latest rates and rules.
  */
 
-import { FairWorkApiClient } from "./api-client";
-import { FairWorkDataSync } from "./data-sync";
-import logger from "../../utils/logger";
+import { FairWorkApiClient } from './api-client';
+import { FairWorkDataSync } from './data-sync';
+import logger from '../../utils/logger';
 
 // Interval for Fair Work data syncs (in milliseconds)
 // Default to weekly (7 days) updates
@@ -31,13 +31,13 @@ export class FairWorkSyncScheduler {
    */
   async start(): Promise<void> {
     logger.info('Starting Fair Work sync scheduler');
-    
+
     // Perform an initial sync
     await this.performSync();
-    
+
     // Schedule regular syncs
     this.schedule();
-    
+
     // Calculate next sync time for logging
     const nextSyncTime = new Date(Date.now() + this.syncInterval);
     const formattedNextSync = nextSyncTime.toLocaleString();
@@ -63,7 +63,7 @@ export class FairWorkSyncScheduler {
     if (this.syncTimer) {
       clearTimeout(this.syncTimer);
     }
-    
+
     // Schedule the next sync
     this.syncTimer = setTimeout(() => {
       this.performSync()
@@ -77,7 +77,7 @@ export class FairWorkSyncScheduler {
           this.schedule();
         });
     }, this.syncInterval);
-    
+
     // Calculate and log next sync time
     const nextSyncTime = new Date(Date.now() + this.syncInterval);
     logger.info(`Next Fair Work data sync scheduled for ${nextSyncTime.toLocaleString()}`);
@@ -89,25 +89,25 @@ export class FairWorkSyncScheduler {
   private async performSync(): Promise<void> {
     try {
       logger.info('Starting scheduled Fair Work data sync');
-      
+
       // Record the start time
       const startTime = Date.now();
-      
+
       // First sync awards and classifications
       await this.dataSync.syncAwards({
-        forceUpdate: false,  // Only update if changed
+        forceUpdate: false, // Only update if changed
         logResults: true,
         includeAllowances: true,
-        includePenalties: true
+        includePenalties: true,
       });
-      
+
       // Record the completion time
       const endTime = Date.now();
       const duration = (endTime - startTime) / 1000; // Convert to seconds
-      
+
       this.lastSyncTime = new Date();
       logger.info(`Scheduled Fair Work data sync completed in ${duration.toFixed(2)} seconds`);
-      
+
       return Promise.resolve();
     } catch (error) {
       logger.error('Error during scheduled Fair Work data sync', { error });
@@ -118,29 +118,26 @@ export class FairWorkSyncScheduler {
   /**
    * Trigger an immediate sync
    */
-  async triggerSync(options?: {
-    forceUpdate?: boolean;
-    targetAwardCode?: string;
-  }): Promise<void> {
+  async triggerSync(options?: { forceUpdate?: boolean; targetAwardCode?: string }): Promise<void> {
     try {
       logger.info('Triggering immediate Fair Work data sync', { options });
-      
+
       // Record the start time
       const startTime = Date.now();
-      
+
       // Sync awards and classifications
       await this.dataSync.syncAwards({
         forceUpdate: options?.forceUpdate || false,
         logResults: true,
         includeAllowances: true,
         includePenalties: true,
-        targetAwardCode: options?.targetAwardCode
+        targetAwardCode: options?.targetAwardCode,
       });
-      
+
       // Record the completion time
       const endTime = Date.now();
       const duration = (endTime - startTime) / 1000; // Convert to seconds
-      
+
       this.lastSyncTime = new Date();
       logger.info(`Manual Fair Work data sync completed in ${duration.toFixed(2)} seconds`);
     } catch (error) {
@@ -163,12 +160,15 @@ export class FairWorkSyncScheduler {
     if (!this.lastSyncTime) {
       return undefined;
     }
-    
+
     return new Date(this.lastSyncTime.getTime() + this.syncInterval);
   }
 }
 
 // Factory function to create the scheduler
-export const createFairWorkSyncScheduler = (apiClient: FairWorkApiClient, syncInterval?: number) => {
+export const createFairWorkSyncScheduler = (
+  apiClient: FairWorkApiClient,
+  syncInterval?: number
+) => {
   return new FairWorkSyncScheduler(apiClient, syncInterval);
 };

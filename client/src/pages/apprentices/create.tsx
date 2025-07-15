@@ -1,80 +1,79 @@
-import { useState } from "react";
-import { useLocation } from "wouter";
-import { useMutation } from "@tanstack/react-query";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { insertApprenticeSchema } from "@shared/schema";
-import { apiRequest } from "@/lib/queryClient";
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardFooter, 
-  CardHeader, 
-  CardTitle 
-} from "@/components/ui/card";
-import { 
-  Form, 
-  FormControl, 
-  FormDescription, 
-  FormField, 
-  FormItem, 
-  FormLabel, 
-  FormMessage 
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/hooks/use-toast";
-import { 
-  ChevronLeft,
-  CalendarIcon
-} from "lucide-react";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
-import { format } from "date-fns";
-import { cn } from "@/lib/utils";
+import { useState } from 'react';
+import { useLocation } from 'wouter';
+import { useMutation } from '@tanstack/react-query';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { insertApprenticeSchema } from '@shared/schema';
+import { apiRequest } from '@/lib/queryClient';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { useToast } from '@/hooks/use-toast';
+import { ChevronLeft, CalendarIcon } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
 
 // Extend the insertApprenticeSchema with additional validation
-const apprenticeFormSchema = insertApprenticeSchema.extend({
-  dateOfBirth: z.date().optional(),
-  startDate: z.date().optional(),
-  endDate: z.date().optional(),
-  confirmEmail: z.string().email("Invalid email address"),
-}).refine(data => data.email === data.confirmEmail, {
-  message: "Emails don't match",
-  path: ["confirmEmail"],
-});
+const apprenticeFormSchema = insertApprenticeSchema
+  .extend({
+    dateOfBirth: z.date().optional(),
+    startDate: z.date().optional(),
+    endDate: z.date().optional(),
+    confirmEmail: z.string().email('Invalid email address'),
+  })
+  .refine(data => data.email === data.confirmEmail, {
+    message: "Emails don't match",
+    path: ['confirmEmail'],
+  });
 
 type ApprenticeFormValues = z.infer<typeof apprenticeFormSchema>;
 
 const CreateApprentice = () => {
   const [, navigate] = useLocation();
   const { toast } = useToast();
-  
+
   const form = useForm<ApprenticeFormValues>({
     resolver: zodResolver(apprenticeFormSchema),
     defaultValues: {
-      firstName: "",
-      lastName: "",
-      email: "",
-      confirmEmail: "",
-      phone: "",
-      trade: "",
-      status: "active",
+      firstName: '',
+      lastName: '',
+      email: '',
+      confirmEmail: '',
+      phone: '',
+      trade: '',
+      status: 'active',
       progress: 0,
-      notes: "",
+      notes: '',
     },
   });
-  
+
   const createApprenticeMutation = useMutation({
     mutationFn: async (data: ApprenticeFormValues) => {
       // Remove confirmEmail as it's not part of the schema
@@ -84,34 +83,34 @@ const CreateApprentice = () => {
     },
     onSuccess: () => {
       toast({
-        title: "Apprentice created",
-        description: "The apprentice has been created successfully.",
+        title: 'Apprentice created',
+        description: 'The apprentice has been created successfully.',
       });
-      navigate("/apprentices");
+      navigate('/apprentices');
     },
-    onError: (error) => {
+    onError: error => {
       toast({
-        title: "Failed to create apprentice",
+        title: 'Failed to create apprentice',
         description: error.message,
-        variant: "destructive",
+        variant: 'destructive',
       });
     },
   });
-  
+
   const onSubmit = (data: ApprenticeFormValues) => {
     createApprenticeMutation.mutate(data);
   };
-  
+
   return (
     <>
       <div className="flex items-center mb-6">
-        <Button variant="ghost" onClick={() => navigate("/apprentices")} className="mr-4">
+        <Button variant="ghost" onClick={() => navigate('/apprentices')} className="mr-4">
           <ChevronLeft className="h-4 w-4 mr-1" />
           Back
         </Button>
         <h2 className="text-2xl font-semibold text-foreground">Create New Apprentice</h2>
       </div>
-      
+
       <Card className="max-w-3xl mx-auto">
         <CardHeader>
           <CardTitle>Apprentice Information</CardTitle>
@@ -137,7 +136,7 @@ const CreateApprentice = () => {
                     </FormItem>
                   )}
                 />
-                
+
                 <FormField
                   control={form.control}
                   name="lastName"
@@ -151,7 +150,7 @@ const CreateApprentice = () => {
                     </FormItem>
                   )}
                 />
-                
+
                 <FormField
                   control={form.control}
                   name="email"
@@ -165,7 +164,7 @@ const CreateApprentice = () => {
                     </FormItem>
                   )}
                 />
-                
+
                 <FormField
                   control={form.control}
                   name="confirmEmail"
@@ -179,7 +178,7 @@ const CreateApprentice = () => {
                     </FormItem>
                   )}
                 />
-                
+
                 <FormField
                   control={form.control}
                   name="phone"
@@ -193,7 +192,7 @@ const CreateApprentice = () => {
                     </FormItem>
                   )}
                 />
-                
+
                 <FormField
                   control={form.control}
                   name="dateOfBirth"
@@ -204,17 +203,13 @@ const CreateApprentice = () => {
                         <PopoverTrigger asChild>
                           <FormControl>
                             <Button
-                              variant={"outline"}
+                              variant={'outline'}
                               className={cn(
-                                "w-full pl-3 text-left font-normal",
-                                !field.value && "text-muted-foreground"
+                                'w-full pl-3 text-left font-normal',
+                                !field.value && 'text-muted-foreground'
                               )}
                             >
-                              {field.value ? (
-                                format(field.value, "PPP")
-                              ) : (
-                                <span>Pick a date</span>
-                              )}
+                              {field.value ? format(field.value, 'PPP') : <span>Pick a date</span>}
                               <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                             </Button>
                           </FormControl>
@@ -224,9 +219,7 @@ const CreateApprentice = () => {
                             mode="single"
                             selected={field.value}
                             onSelect={field.onChange}
-                            disabled={(date) =>
-                              date > new Date() || date < new Date("1900-01-01")
-                            }
+                            disabled={date => date > new Date() || date < new Date('1900-01-01')}
                             initialFocus
                           />
                         </PopoverContent>
@@ -236,7 +229,7 @@ const CreateApprentice = () => {
                   )}
                 />
               </div>
-              
+
               {/* Apprenticeship Information */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <FormField
@@ -266,7 +259,7 @@ const CreateApprentice = () => {
                     </FormItem>
                   )}
                 />
-                
+
                 <FormField
                   control={form.control}
                   name="status"
@@ -289,7 +282,7 @@ const CreateApprentice = () => {
                     </FormItem>
                   )}
                 />
-                
+
                 <FormField
                   control={form.control}
                   name="startDate"
@@ -300,17 +293,13 @@ const CreateApprentice = () => {
                         <PopoverTrigger asChild>
                           <FormControl>
                             <Button
-                              variant={"outline"}
+                              variant={'outline'}
                               className={cn(
-                                "w-full pl-3 text-left font-normal",
-                                !field.value && "text-muted-foreground"
+                                'w-full pl-3 text-left font-normal',
+                                !field.value && 'text-muted-foreground'
                               )}
                             >
-                              {field.value ? (
-                                format(field.value, "PPP")
-                              ) : (
-                                <span>Pick a date</span>
-                              )}
+                              {field.value ? format(field.value, 'PPP') : <span>Pick a date</span>}
                               <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                             </Button>
                           </FormControl>
@@ -328,7 +317,7 @@ const CreateApprentice = () => {
                     </FormItem>
                   )}
                 />
-                
+
                 <FormField
                   control={form.control}
                   name="endDate"
@@ -339,17 +328,13 @@ const CreateApprentice = () => {
                         <PopoverTrigger asChild>
                           <FormControl>
                             <Button
-                              variant={"outline"}
+                              variant={'outline'}
                               className={cn(
-                                "w-full pl-3 text-left font-normal",
-                                !field.value && "text-muted-foreground"
+                                'w-full pl-3 text-left font-normal',
+                                !field.value && 'text-muted-foreground'
                               )}
                             >
-                              {field.value ? (
-                                format(field.value, "PPP")
-                              ) : (
-                                <span>Pick a date</span>
-                              )}
+                              {field.value ? format(field.value, 'PPP') : <span>Pick a date</span>}
                               <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                             </Button>
                           </FormControl>
@@ -359,8 +344,8 @@ const CreateApprentice = () => {
                             mode="single"
                             selected={field.value}
                             onSelect={field.onChange}
-                            disabled={(date) =>
-                              form.getValues("startDate") && date < form.getValues("startDate")
+                            disabled={date =>
+                              form.getValues('startDate') && date < form.getValues('startDate')
                             }
                             initialFocus
                           />
@@ -370,7 +355,7 @@ const CreateApprentice = () => {
                     </FormItem>
                   )}
                 />
-                
+
                 <FormField
                   control={form.control}
                   name="progress"
@@ -378,24 +363,22 @@ const CreateApprentice = () => {
                     <FormItem>
                       <FormLabel>Progress (%)</FormLabel>
                       <FormControl>
-                        <Input 
-                          type="number" 
-                          min="0" 
-                          max="100" 
+                        <Input
+                          type="number"
+                          min="0"
+                          max="100"
                           placeholder="0"
                           {...field}
-                          onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                          onChange={e => field.onChange(parseInt(e.target.value) || 0)}
                         />
                       </FormControl>
-                      <FormDescription>
-                        Current progress percentage (0-100)
-                      </FormDescription>
+                      <FormDescription>Current progress percentage (0-100)</FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
               </div>
-              
+
               <FormField
                 control={form.control}
                 name="notes"
@@ -403,8 +386,8 @@ const CreateApprentice = () => {
                   <FormItem>
                     <FormLabel>Notes</FormLabel>
                     <FormControl>
-                      <Textarea 
-                        placeholder="Additional notes about the apprentice" 
+                      <Textarea
+                        placeholder="Additional notes about the apprentice"
                         rows={5}
                         {...field}
                       />
@@ -413,21 +396,18 @@ const CreateApprentice = () => {
                   </FormItem>
                 )}
               />
-              
+
               <CardFooter className="px-0 pt-6">
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  onClick={() => navigate("/apprentices")}
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => navigate('/apprentices')}
                   className="mr-2"
                 >
                   Cancel
                 </Button>
-                <Button 
-                  type="submit"
-                  disabled={createApprenticeMutation.isPending}
-                >
-                  {createApprenticeMutation.isPending ? "Creating..." : "Create Apprentice"}
+                <Button type="submit" disabled={createApprenticeMutation.isPending}>
+                  {createApprenticeMutation.isPending ? 'Creating...' : 'Create Apprentice'}
                 </Button>
               </CardFooter>
             </form>

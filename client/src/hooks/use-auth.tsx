@@ -90,21 +90,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     retry: false,
     refetchOnWindowFocus: false,
     staleTime: 5 * 60 * 1000, // 5 minutes
-    initialData: null
+    initialData: null,
   });
 
   const loginMutation = useMutation({
     mutationFn: async (credentials: LoginCredentials) => {
       console.log('Attempting login with endpoint: /api/auth/login');
-      
+
       try {
         const response = await apiRequest('POST', '/api/auth/login', credentials);
-        
+
         console.log('Login response status:', response.status);
-        
+
         if (!response.ok) {
           let errorMessage = 'Login failed';
-          
+
           try {
             const errorData = await response.json();
             errorMessage = errorData.message || errorMessage;
@@ -114,13 +114,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             console.error('Failed to parse JSON error response:', text);
             errorMessage = `Login failed (${response.status}): Server error`;
           }
-          
+
           throw new Error(errorMessage);
         }
 
         const data = await response.json();
         console.log('Login successful, storing token');
-        
+
         // Store the token in localStorage
         localStorage.setItem('authToken', data.token);
         return data.user;

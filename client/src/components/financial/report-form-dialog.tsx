@@ -1,10 +1,10 @@
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { CalendarIcon } from "lucide-react";
-import { format } from "date-fns";
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { CalendarIcon } from 'lucide-react';
+import { format } from 'date-fns';
 
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
+import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -12,7 +12,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 import {
   Form,
   FormControl,
@@ -20,27 +20,23 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
-import { useToast } from "@/hooks/use-toast";
-import { queryClient } from "@/lib/queryClient";
-import { Checkbox } from "@/components/ui/checkbox";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { DateRange } from "react-day-picker";
+} from '@/components/ui/select';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { useToast } from '@/hooks/use-toast';
+import { queryClient } from '@/lib/queryClient';
+import { Checkbox } from '@/components/ui/checkbox';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { DateRange } from 'react-day-picker';
 
 interface ReportFormDialogProps {
   open: boolean;
@@ -59,34 +55,34 @@ type FormValues = {
 };
 
 const REPORT_TYPES = [
-  { id: "profit-loss", name: "Profit & Loss" },
-  { id: "balance-sheet", name: "Balance Sheet" },
-  { id: "cash-flow", name: "Cash Flow" },
-  { id: "tax", name: "Tax" },
-  { id: "custom", name: "Custom" },
+  { id: 'profit-loss', name: 'Profit & Loss' },
+  { id: 'balance-sheet', name: 'Balance Sheet' },
+  { id: 'cash-flow', name: 'Cash Flow' },
+  { id: 'tax', name: 'Tax' },
+  { id: 'custom', name: 'Custom' },
 ];
 
 const REPORT_PERIODS = [
-  { id: "current-month", name: "Current Month" },
-  { id: "current-quarter", name: "Current Quarter" },
-  { id: "ytd", name: "Year to Date" },
-  { id: "last-month", name: "Last Month" },
-  { id: "last-quarter", name: "Last Quarter" },
-  { id: "last-year", name: "Last Year" },
-  { id: "custom", name: "Custom Period" },
+  { id: 'current-month', name: 'Current Month' },
+  { id: 'current-quarter', name: 'Current Quarter' },
+  { id: 'ytd', name: 'Year to Date' },
+  { id: 'last-month', name: 'Last Month' },
+  { id: 'last-quarter', name: 'Last Quarter' },
+  { id: 'last-year', name: 'Last Year' },
+  { id: 'custom', name: 'Custom Period' },
 ];
 
 const REPORT_FORMATS = [
-  { id: "pdf", name: "PDF" },
-  { id: "excel", name: "Excel" },
-  { id: "csv", name: "CSV" },
+  { id: 'pdf', name: 'PDF' },
+  { id: 'excel', name: 'Excel' },
+  { id: 'csv', name: 'CSV' },
 ];
 
 const RECIPIENTS = [
-  { id: "executive", name: "Executive Team" },
-  { id: "finance", name: "Finance Department" },
-  { id: "management", name: "Management Team" },
-  { id: "board", name: "Board of Directors" },
+  { id: 'executive', name: 'Executive Team' },
+  { id: 'finance', name: 'Finance Department' },
+  { id: 'management', name: 'Management Team' },
+  { id: 'board', name: 'Board of Directors' },
 ];
 
 export function ReportFormDialog({ open, onOpenChange }: ReportFormDialogProps) {
@@ -96,26 +92,26 @@ export function ReportFormDialog({ open, onOpenChange }: ReportFormDialogProps) 
 
   const form = useForm<FormValues>({
     defaultValues: {
-      title: "",
-      type: "",
-      period: "",
+      title: '',
+      type: '',
+      period: '',
       dateRange: {
         from: new Date(),
         to: new Date(),
       },
       includeChart: true,
       recipients: [],
-      format: "pdf",
-      notes: "",
+      format: 'pdf',
+      notes: '',
     },
   });
 
-  const watchReportPeriod = form.watch("period");
+  const watchReportPeriod = form.watch('period');
 
   // Update UI based on selected period
-  if (watchReportPeriod === "custom" && !showDateRange) {
+  if (watchReportPeriod === 'custom' && !showDateRange) {
     setShowDateRange(true);
-  } else if (watchReportPeriod !== "custom" && showDateRange) {
+  } else if (watchReportPeriod !== 'custom' && showDateRange) {
     setShowDateRange(false);
   }
 
@@ -124,23 +120,23 @@ export function ReportFormDialog({ open, onOpenChange }: ReportFormDialogProps) 
     try {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
+
       // Format the date range
       const formattedDateRange = {
-        from: data.dateRange.from ? format(data.dateRange.from, "yyyy-MM-dd") : null,
-        to: data.dateRange.to ? format(data.dateRange.to, "yyyy-MM-dd") : null,
+        from: data.dateRange.from ? format(data.dateRange.from, 'yyyy-MM-dd') : null,
+        to: data.dateRange.to ? format(data.dateRange.to, 'yyyy-MM-dd') : null,
       };
-      
+
       // In a real application, you would send this data to your backend
-      console.log("Generating report:", {
+      console.log('Generating report:', {
         ...data,
         dateRange: formattedDateRange,
       });
 
       // Show success toast
       toast({
-        title: "Report generated",
-        description: "Your financial report has been successfully generated.",
+        title: 'Report generated',
+        description: 'Your financial report has been successfully generated.',
       });
 
       // Reset form and close dialog
@@ -150,11 +146,11 @@ export function ReportFormDialog({ open, onOpenChange }: ReportFormDialogProps) 
       // Invalidate reports query to refresh the list
       queryClient.invalidateQueries({ queryKey: ['financial-reports'] });
     } catch (error) {
-      console.error("Error generating report:", error);
+      console.error('Error generating report:', error);
       toast({
-        title: "Error",
-        description: "There was a problem generating your report.",
-        variant: "destructive",
+        title: 'Error',
+        description: 'There was a problem generating your report.',
+        variant: 'destructive',
       });
     } finally {
       setIsSubmitting(false);
@@ -175,7 +171,7 @@ export function ReportFormDialog({ open, onOpenChange }: ReportFormDialogProps) 
             <FormField
               control={form.control}
               name="title"
-              rules={{ required: "Report title is required" }}
+              rules={{ required: 'Report title is required' }}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Report Title</FormLabel>
@@ -191,25 +187,19 @@ export function ReportFormDialog({ open, onOpenChange }: ReportFormDialogProps) 
               <FormField
                 control={form.control}
                 name="type"
-                rules={{ required: "Report type is required" }}
+                rules={{ required: 'Report type is required' }}
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Report Type</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select report type" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {REPORT_TYPES.map((type) => (
-                          <SelectItem 
-                            key={type.id} 
-                            value={type.id}
-                          >
+                        {REPORT_TYPES.map(type => (
+                          <SelectItem key={type.id} value={type.id}>
                             {type.name}
                           </SelectItem>
                         ))}
@@ -223,25 +213,19 @@ export function ReportFormDialog({ open, onOpenChange }: ReportFormDialogProps) 
               <FormField
                 control={form.control}
                 name="period"
-                rules={{ required: "Report period is required" }}
+                rules={{ required: 'Report period is required' }}
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Report Period</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select period" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {REPORT_PERIODS.map((period) => (
-                          <SelectItem 
-                            key={period.id} 
-                            value={period.id}
-                          >
+                        {REPORT_PERIODS.map(period => (
+                          <SelectItem key={period.id} value={period.id}>
                             {period.name}
                           </SelectItem>
                         ))}
@@ -257,7 +241,7 @@ export function ReportFormDialog({ open, onOpenChange }: ReportFormDialogProps) 
               <FormField
                 control={form.control}
                 name="dateRange"
-                rules={{ required: "Date range is required for custom period" }}
+                rules={{ required: 'Date range is required for custom period' }}
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
                     <FormLabel>Custom Date Range</FormLabel>
@@ -265,20 +249,20 @@ export function ReportFormDialog({ open, onOpenChange }: ReportFormDialogProps) 
                       <PopoverTrigger asChild>
                         <FormControl>
                           <Button
-                            variant={"outline"}
+                            variant={'outline'}
                             className={cn(
-                              "pl-3 text-left font-normal",
-                              !field.value && "text-muted-foreground"
+                              'pl-3 text-left font-normal',
+                              !field.value && 'text-muted-foreground'
                             )}
                           >
                             {field.value?.from ? (
                               field.value.to ? (
                                 <>
-                                  {format(field.value.from, "PPP")} -{" "}
-                                  {format(field.value.to, "PPP")}
+                                  {format(field.value.from, 'PPP')} -{' '}
+                                  {format(field.value.to, 'PPP')}
                                 </>
                               ) : (
-                                format(field.value.from, "PPP")
+                                format(field.value.from, 'PPP')
                               )
                             ) : (
                               <span>Pick a date range</span>
@@ -310,10 +294,7 @@ export function ReportFormDialog({ open, onOpenChange }: ReportFormDialogProps) 
               render={({ field }) => (
                 <FormItem className="flex flex-row items-start space-x-3 space-y-0">
                   <FormControl>
-                    <Checkbox
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
+                    <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                   </FormControl>
                   <div className="space-y-1 leading-none">
                     <FormLabel>Include charts and visualizations</FormLabel>
@@ -337,7 +318,7 @@ export function ReportFormDialog({ open, onOpenChange }: ReportFormDialogProps) 
                     </p>
                   </div>
                   <div className="grid grid-cols-2 gap-2">
-                    {RECIPIENTS.map((recipient) => (
+                    {RECIPIENTS.map(recipient => (
                       <FormItem
                         key={recipient.id}
                         className="flex flex-row items-start space-x-3 space-y-0"
@@ -345,22 +326,18 @@ export function ReportFormDialog({ open, onOpenChange }: ReportFormDialogProps) 
                         <FormControl>
                           <Checkbox
                             checked={field.value?.includes(recipient.id)}
-                            onCheckedChange={(checked) => {
+                            onCheckedChange={checked => {
                               if (checked) {
                                 field.onChange([...field.value, recipient.id]);
                               } else {
                                 field.onChange(
-                                  field.value?.filter(
-                                    (value) => value !== recipient.id
-                                  )
+                                  field.value?.filter(value => value !== recipient.id)
                                 );
                               }
                             }}
                           />
                         </FormControl>
-                        <FormLabel className="font-normal">
-                          {recipient.name}
-                        </FormLabel>
+                        <FormLabel className="font-normal">{recipient.name}</FormLabel>
                       </FormItem>
                     ))}
                   </div>
@@ -372,7 +349,7 @@ export function ReportFormDialog({ open, onOpenChange }: ReportFormDialogProps) 
             <FormField
               control={form.control}
               name="format"
-              rules={{ required: "Export format is required" }}
+              rules={{ required: 'Export format is required' }}
               render={({ field }) => (
                 <FormItem className="space-y-3">
                   <FormLabel>Export Format</FormLabel>
@@ -382,14 +359,12 @@ export function ReportFormDialog({ open, onOpenChange }: ReportFormDialogProps) 
                       defaultValue={field.value}
                       className="flex space-x-4"
                     >
-                      {REPORT_FORMATS.map((format) => (
+                      {REPORT_FORMATS.map(format => (
                         <FormItem key={format.id} className="flex items-center space-x-2">
                           <FormControl>
                             <RadioGroupItem value={format.id} />
                           </FormControl>
-                          <FormLabel className="font-normal">
-                            {format.name}
-                          </FormLabel>
+                          <FormLabel className="font-normal">{format.name}</FormLabel>
                         </FormItem>
                       ))}
                     </RadioGroup>
@@ -418,16 +393,16 @@ export function ReportFormDialog({ open, onOpenChange }: ReportFormDialogProps) 
             />
 
             <DialogFooter className="pt-4">
-              <Button 
-                type="button" 
-                variant="outline" 
+              <Button
+                type="button"
+                variant="outline"
                 onClick={() => onOpenChange(false)}
                 disabled={isSubmitting}
               >
                 Cancel
               </Button>
               <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Generating..." : "Generate Report"}
+                {isSubmitting ? 'Generating...' : 'Generate Report'}
               </Button>
             </DialogFooter>
           </form>

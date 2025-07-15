@@ -57,7 +57,7 @@ const DEFAULT_COST_CONFIG = {
   leaveLoading: 0.175, // 17.5%
   studyCost: 2500, // $2,500 per year
   ppeCost: 550, // $550 per year
-  adminRate: 0.10, // 10%
+  adminRate: 0.1, // 10%
   defaultMargin: 0.15, // 15%
   adverseWeatherDays: 5, // 5 days per year
 };
@@ -84,7 +84,11 @@ const DEFAULT_BILLABLE_OPTIONS = {
 const formSchema = z.object({
   // Make apprentice and host employer optional
   apprenticeId: z.number().int().positive({ message: 'Please select an apprentice' }).optional(),
-  hostEmployerId: z.number().int().positive({ message: 'Please select a host employer' }).optional(),
+  hostEmployerId: z
+    .number()
+    .int()
+    .positive({ message: 'Please select a host employer' })
+    .optional(),
   leadId: z.number().int().positive({ message: 'Please select a lead' }).optional(),
   payRate: z.number().positive({ message: 'Pay rate must be greater than zero' }),
   rateSource: z.enum(['fairwork', 'enterprise_agreement', 'manual']).default('manual'),
@@ -114,7 +118,7 @@ export default function CreateChargeRatePage() {
   const [selectedAward, setSelectedAward] = useState<any>(null);
   const [selectedClassification, setSelectedClassification] = useState<any>(null);
   const [isCalculating, setIsCalculating] = useState(false);
-  
+
   // Define apprentice and host employer types
   interface Apprentice {
     id: number;
@@ -134,13 +138,13 @@ export default function CreateChargeRatePage() {
     queryKey: ['/api/apprentices'],
     select: (data: any) => data?.data || [],
   });
-  
+
   // Fetch host employers
   const { data: hostEmployers = [] } = useQuery({
     queryKey: ['/api/host-employers'],
     select: (data: any) => data?.data || [],
   });
-  
+
   // Set up form
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -156,17 +160,17 @@ export default function CreateChargeRatePage() {
       selectedHostEmployers: [],
     },
   });
-  
+
   // Watch form values for real-time calculation
   const watchedValues = form.watch();
-  
+
   // Mutation for saving calculation
   const saveMutation = useMutation({
     mutationFn: async (data: any) => {
       const response = await apiRequest('POST', '/api/payroll/charge-rates', data);
       return await response.json();
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       queryClient.invalidateQueries({ queryKey: ['/api/payroll/charge-rates'] });
       toast({
         title: 'Calculation Saved',
@@ -182,29 +186,29 @@ export default function CreateChargeRatePage() {
       });
     },
   });
-  
+
   // Handle award selection
   const handleAwardSelect = (award: any, classification: any) => {
     setSelectedAward(award);
     setSelectedClassification(classification);
-    
+
     form.setValue('awardId', award.id);
     form.setValue('awardName', award.name);
-    
+
     if (classification) {
       form.setValue('classificationId', classification.id);
       form.setValue('classificationName', classification.name);
     }
   };
-  
+
   // Calculate charge rate
   const calculateChargeRate = async () => {
     try {
       setIsCalculating(true);
-      
+
       // Get form values
       const values = form.getValues();
-      
+
       // Call API to calculate charge rate
       const response = await apiRequest('POST', '/api/payroll/charge-rates/calculate', {
         payRate: values.payRate,
@@ -214,10 +218,10 @@ export default function CreateChargeRatePage() {
         workConfig: DEFAULT_WORK_CONFIG,
         billableOptions: DEFAULT_BILLABLE_OPTIONS,
       });
-      
+
       const result = await response.json();
       setCalculationResult(result.data);
-      
+
       // Move to next tab
       setActiveTab('review');
     } catch (error: any) {
@@ -230,17 +234,17 @@ export default function CreateChargeRatePage() {
       setIsCalculating(false);
     }
   };
-  
+
   // Helper function for apprentice display text
   const getApprenticeDisplayText = (apprentice: Apprentice) => {
     return `${apprentice.firstName} ${apprentice.lastName} - ${apprentice.tradeType || 'Apprentice'}`;
   };
-  
+
   // Helper function for host employer display text
   const getHostEmployerDisplayText = (hostEmployer: HostEmployer) => {
     return hostEmployer.companyName || hostEmployer.businessName || 'Unknown Host';
   };
-  
+
   // Handle form submission
   const onSubmit = (data: FormValues) => {
     if (!calculationResult) {
@@ -251,13 +255,13 @@ export default function CreateChargeRatePage() {
       });
       return;
     }
-    
+
     saveMutation.mutate({
       ...data,
       ...calculationResult,
     });
   };
-  
+
   // Format currency
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('en-AU', {
@@ -265,11 +269,15 @@ export default function CreateChargeRatePage() {
       currency: 'AUD',
     }).format(value);
   };
-  
+
   // Selected apprentice and host employer
-  const selectedApprentice = apprentices?.find((a: Apprentice) => a.id === watchedValues.apprenticeId);
-  const selectedHostEmployer = hostEmployers?.find((h: HostEmployer) => h.id === watchedValues.hostEmployerId);
-  
+  const selectedApprentice = apprentices?.find(
+    (a: Apprentice) => a.id === watchedValues.apprenticeId
+  );
+  const selectedHostEmployer = hostEmployers?.find(
+    (h: HostEmployer) => h.id === watchedValues.hostEmployerId
+  );
+
   return (
     <div className="container mx-auto py-6 space-y-6">
       <div className="flex flex-col space-y-2">
@@ -281,7 +289,7 @@ export default function CreateChargeRatePage() {
             </Link>
           </Button>
         </div>
-        
+
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Create Charge Rate Calculation</h1>
           <p className="text-muted-foreground mt-1">
@@ -289,7 +297,7 @@ export default function CreateChargeRatePage() {
           </p>
         </div>
       </div>
-      
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="col-span-1 lg:col-span-2">
           <Card>
@@ -299,7 +307,7 @@ export default function CreateChargeRatePage() {
                 Enter the details needed to calculate the charge rate.
               </CardDescription>
             </CardHeader>
-            
+
             <CardContent>
               <Tabs value={activeTab} onValueChange={setActiveTab}>
                 <TabsList className="grid w-full grid-cols-3">
@@ -307,7 +315,7 @@ export default function CreateChargeRatePage() {
                   <TabsTrigger value="rate">Rate Information</TabsTrigger>
                   <TabsTrigger value="review">Review & Save</TabsTrigger>
                 </TabsList>
-                
+
                 <Form {...form}>
                   <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                     <TabsContent value="apprentice">
@@ -321,19 +329,17 @@ export default function CreateChargeRatePage() {
                                 <div className="space-y-0.5">
                                   <FormLabel>Create as Quote</FormLabel>
                                   <FormDescription>
-                                    Create this as a quote rather than assigning it to a specific apprentice or host.
+                                    Create this as a quote rather than assigning it to a specific
+                                    apprentice or host.
                                   </FormDescription>
                                 </div>
                                 <FormControl>
-                                  <Switch
-                                    checked={field.value}
-                                    onCheckedChange={field.onChange}
-                                  />
+                                  <Switch checked={field.value} onCheckedChange={field.onChange} />
                                 </FormControl>
                               </FormItem>
                             )}
                           />
-                          
+
                           <FormField
                             control={form.control}
                             name="isBulkOperation"
@@ -342,20 +348,18 @@ export default function CreateChargeRatePage() {
                                 <div className="space-y-0.5">
                                   <FormLabel>Bulk Operation</FormLabel>
                                   <FormDescription>
-                                    Apply this rate calculation to multiple apprentices or host employers.
+                                    Apply this rate calculation to multiple apprentices or host
+                                    employers.
                                   </FormDescription>
                                 </div>
                                 <FormControl>
-                                  <Switch
-                                    checked={field.value}
-                                    onCheckedChange={field.onChange}
-                                  />
+                                  <Switch checked={field.value} onCheckedChange={field.onChange} />
                                 </FormControl>
                               </FormItem>
                             )}
                           />
                         </div>
-                        
+
                         {!watchedValues.isQuote && !watchedValues.isBulkOperation ? (
                           // Regular single apprentice/host selection
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -367,7 +371,7 @@ export default function CreateChargeRatePage() {
                                   <FormLabel>Apprentice</FormLabel>
                                   <Select
                                     value={field.value?.toString()}
-                                    onValueChange={(value) => field.onChange(parseInt(value))}
+                                    onValueChange={value => field.onChange(parseInt(value))}
                                   >
                                     <FormControl>
                                       <SelectTrigger>
@@ -376,7 +380,10 @@ export default function CreateChargeRatePage() {
                                     </FormControl>
                                     <SelectContent>
                                       {apprentices?.map((apprentice: Apprentice) => (
-                                        <SelectItem key={apprentice.id} value={apprentice.id.toString()}>
+                                        <SelectItem
+                                          key={apprentice.id}
+                                          value={apprentice.id.toString()}
+                                        >
                                           {getApprenticeDisplayText(apprentice)}
                                         </SelectItem>
                                       ))}
@@ -389,7 +396,7 @@ export default function CreateChargeRatePage() {
                                 </FormItem>
                               )}
                             />
-                            
+
                             <FormField
                               control={form.control}
                               name="hostEmployerId"
@@ -398,7 +405,7 @@ export default function CreateChargeRatePage() {
                                   <FormLabel>Host Employer</FormLabel>
                                   <Select
                                     value={field.value?.toString()}
-                                    onValueChange={(value) => field.onChange(parseInt(value))}
+                                    onValueChange={value => field.onChange(parseInt(value))}
                                   >
                                     <FormControl>
                                       <SelectTrigger>
@@ -407,7 +414,10 @@ export default function CreateChargeRatePage() {
                                     </FormControl>
                                     <SelectContent>
                                       {hostEmployers?.map((hostEmployer: HostEmployer) => (
-                                        <SelectItem key={hostEmployer.id} value={hostEmployer.id.toString()}>
+                                        <SelectItem
+                                          key={hostEmployer.id}
+                                          value={hostEmployer.id.toString()}
+                                        >
                                           {getHostEmployerDisplayText(hostEmployer)}
                                         </SelectItem>
                                       ))}
@@ -432,7 +442,7 @@ export default function CreateChargeRatePage() {
                                   <FormLabel>Attach to Lead</FormLabel>
                                   <Select
                                     value={field.value?.toString()}
-                                    onValueChange={(value) => field.onChange(parseInt(value))}
+                                    onValueChange={value => field.onChange(parseInt(value))}
                                   >
                                     <FormControl>
                                       <SelectTrigger>
@@ -452,7 +462,7 @@ export default function CreateChargeRatePage() {
                                 </FormItem>
                               )}
                             />
-                            
+
                             <FormField
                               control={form.control}
                               name="isTemplate"
@@ -461,7 +471,8 @@ export default function CreateChargeRatePage() {
                                   <div className="space-y-0.5">
                                     <FormLabel>Save as Template</FormLabel>
                                     <FormDescription>
-                                      Save this as a reusable template for multiple hosts/apprentices.
+                                      Save this as a reusable template for multiple
+                                      hosts/apprentices.
                                     </FormDescription>
                                   </div>
                                   <FormControl>
@@ -473,7 +484,7 @@ export default function CreateChargeRatePage() {
                                 </FormItem>
                               )}
                             />
-                            
+
                             {watchedValues.isTemplate && (
                               <FormField
                                 control={form.control}
@@ -500,41 +511,57 @@ export default function CreateChargeRatePage() {
                               <h3 className="text-sm font-medium mb-2">Select Apprentices</h3>
                               <div className="border rounded-md p-4 h-40 overflow-y-auto">
                                 {apprentices?.map((apprentice: Apprentice) => (
-                                  <div key={apprentice.id} className="flex items-center space-x-2 mb-2">
-                                    <Checkbox 
-                                      id={`apprentice-${apprentice.id}`} 
-                                      onCheckedChange={(checked) => {
-                                        const currentVal = form.getValues('selectedApprentices') || [];
+                                  <div
+                                    key={apprentice.id}
+                                    className="flex items-center space-x-2 mb-2"
+                                  >
+                                    <Checkbox
+                                      id={`apprentice-${apprentice.id}`}
+                                      onCheckedChange={checked => {
+                                        const currentVal =
+                                          form.getValues('selectedApprentices') || [];
                                         if (checked) {
-                                          form.setValue('selectedApprentices', [...currentVal, apprentice.id]);
+                                          form.setValue('selectedApprentices', [
+                                            ...currentVal,
+                                            apprentice.id,
+                                          ]);
                                         } else {
-                                          form.setValue('selectedApprentices', 
+                                          form.setValue(
+                                            'selectedApprentices',
                                             currentVal.filter((id: number) => id !== apprentice.id)
                                           );
                                         }
                                       }}
                                     />
-                                    <label htmlFor={`apprentice-${apprentice.id}`} className="text-sm">
+                                    <label
+                                      htmlFor={`apprentice-${apprentice.id}`}
+                                      className="text-sm"
+                                    >
                                       {getApprenticeDisplayText(apprentice)}
                                     </label>
                                   </div>
                                 ))}
                               </div>
                             </div>
-                            
+
                             <div>
                               <h3 className="text-sm font-medium mb-2">Select Host Employers</h3>
                               <div className="border rounded-md p-4 h-40 overflow-y-auto">
                                 {hostEmployers?.map((host: HostEmployer) => (
                                   <div key={host.id} className="flex items-center space-x-2 mb-2">
-                                    <Checkbox 
-                                      id={`host-${host.id}`} 
-                                      onCheckedChange={(checked) => {
-                                        const currentVal = form.getValues('selectedHostEmployers') || [];
+                                    <Checkbox
+                                      id={`host-${host.id}`}
+                                      onCheckedChange={checked => {
+                                        const currentVal =
+                                          form.getValues('selectedHostEmployers') || [];
                                         if (checked) {
-                                          form.setValue('selectedHostEmployers', [...currentVal, host.id]);
+                                          form.setValue('selectedHostEmployers', [
+                                            ...currentVal,
+                                            host.id,
+                                          ]);
                                         } else {
-                                          form.setValue('selectedHostEmployers', 
+                                          form.setValue(
+                                            'selectedHostEmployers',
                                             currentVal.filter((id: number) => id !== host.id)
                                           );
                                         }
@@ -549,18 +576,15 @@ export default function CreateChargeRatePage() {
                             </div>
                           </div>
                         )}
-                        
+
                         <div className="flex justify-end">
-                          <Button 
-                            type="button" 
-                            onClick={() => setActiveTab('rate')}
-                          >
+                          <Button type="button" onClick={() => setActiveTab('rate')}>
                             Continue
                           </Button>
                         </div>
                       </div>
                     </TabsContent>
-                    
+
                     <TabsContent value="rate">
                       <div className="space-y-6 py-4">
                         <div className="space-y-4">
@@ -570,10 +594,7 @@ export default function CreateChargeRatePage() {
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel>Rate Source</FormLabel>
-                                <Select
-                                  value={field.value}
-                                  onValueChange={field.onChange}
-                                >
+                                <Select value={field.value} onValueChange={field.onChange}>
                                   <FormControl>
                                     <SelectTrigger>
                                       <SelectValue placeholder="Select rate source" />
@@ -581,7 +602,9 @@ export default function CreateChargeRatePage() {
                                   </FormControl>
                                   <SelectContent>
                                     <SelectItem value="fairwork">Fair Work Award</SelectItem>
-                                    <SelectItem value="enterprise_agreement">Enterprise Agreement</SelectItem>
+                                    <SelectItem value="enterprise_agreement">
+                                      Enterprise Agreement
+                                    </SelectItem>
                                     <SelectItem value="manual">Manual Entry</SelectItem>
                                   </SelectContent>
                                 </Select>
@@ -606,7 +629,8 @@ export default function CreateChargeRatePage() {
                                   <Info className="h-4 w-4 mr-2" />
                                   <AlertTitle>Enterprise Agreement Support</AlertTitle>
                                   <AlertDescription>
-                                    Upload and select an Enterprise Agreement to determine rates. Supported file types: PDF, DOCX.
+                                    Upload and select an Enterprise Agreement to determine rates.
+                                    Supported file types: PDF, DOCX.
                                   </AlertDescription>
                                 </Alert>
                               </div>
@@ -625,12 +649,12 @@ export default function CreateChargeRatePage() {
                                   <FormItem>
                                     <FormLabel>Pay Rate ($/hour)</FormLabel>
                                     <FormControl>
-                                      <Input 
-                                        type="number" 
-                                        step="0.01" 
+                                      <Input
+                                        type="number"
+                                        step="0.01"
                                         min="0"
                                         {...field}
-                                        onChange={(e) => field.onChange(parseFloat(e.target.value))}
+                                        onChange={e => field.onChange(parseFloat(e.target.value))}
                                       />
                                     </FormControl>
                                     <FormDescription>
@@ -643,7 +667,7 @@ export default function CreateChargeRatePage() {
                             </div>
                           )}
                         </div>
-                        
+
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                           <FormField
                             control={form.control}
@@ -651,25 +675,25 @@ export default function CreateChargeRatePage() {
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel>Margin (%)</FormLabel>
-                                  <FormControl>
-                                    <Input 
-                                      type="number" 
-                                      step="0.01" 
-                                      min="0"
-                                      max="100"
-                                      value={field.value !== undefined ? field.value * 100 : ''}
-                                      onChange={(e) => field.onChange(parseFloat(e.target.value) / 100)}
-                                    />
-                                  </FormControl>
-                                  <FormDescription>
-                                    The profit margin percentage to apply to the cost per hour.
-                                  </FormDescription>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    step="0.01"
+                                    min="0"
+                                    max="100"
+                                    value={field.value !== undefined ? field.value * 100 : ''}
+                                    onChange={e => field.onChange(parseFloat(e.target.value) / 100)}
+                                  />
+                                </FormControl>
+                                <FormDescription>
+                                  The profit margin percentage to apply to the cost per hour.
+                                </FormDescription>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
                         </div>
-                        
+
                         <FormField
                           control={form.control}
                           name="notes"
@@ -677,7 +701,7 @@ export default function CreateChargeRatePage() {
                             <FormItem>
                               <FormLabel>Notes</FormLabel>
                               <FormControl>
-                                <Textarea 
+                                <Textarea
                                   placeholder="Add any additional notes for this calculation"
                                   {...field}
                                   rows={3}
@@ -690,12 +714,12 @@ export default function CreateChargeRatePage() {
                             </FormItem>
                           )}
                         />
-                        
+
                         <Accordion type="single" collapsible className="w-full">
                           <AccordionItem value="advanced">
                             <AccordionTrigger>
                               <span className="flex items-center">
-                                <Info className="h-4 w-4 mr-2" /> 
+                                <Info className="h-4 w-4 mr-2" />
                                 Advanced Configuration
                               </span>
                             </AccordionTrigger>
@@ -704,56 +728,133 @@ export default function CreateChargeRatePage() {
                                 <div>
                                   <h4 className="text-sm font-medium mb-2">Cost Configuration</h4>
                                   <ul className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
-                                    <li><span className="text-muted-foreground">Superannuation Rate:</span> {DEFAULT_COST_CONFIG.superRate * 100}%</li>
-                                    <li><span className="text-muted-foreground">Workers Comp Rate:</span> {DEFAULT_COST_CONFIG.wcRate * 100}%</li>
-                                    <li><span className="text-muted-foreground">Payroll Tax Rate:</span> {DEFAULT_COST_CONFIG.payrollTaxRate * 100}%</li>
-                                    <li><span className="text-muted-foreground">Leave Loading:</span> {DEFAULT_COST_CONFIG.leaveLoading * 100}%</li>
-                                    <li><span className="text-muted-foreground">Annual Study Cost:</span> {formatCurrency(DEFAULT_COST_CONFIG.studyCost)}</li>
-                                    <li><span className="text-muted-foreground">Annual PPE Cost:</span> {formatCurrency(DEFAULT_COST_CONFIG.ppeCost)}</li>
-                                    <li><span className="text-muted-foreground">Admin Rate:</span> {DEFAULT_COST_CONFIG.adminRate * 100}%</li>
-                                    <li><span className="text-muted-foreground">Adverse Weather Days:</span> {DEFAULT_COST_CONFIG.adverseWeatherDays}</li>
+                                    <li>
+                                      <span className="text-muted-foreground">
+                                        Superannuation Rate:
+                                      </span>{' '}
+                                      {DEFAULT_COST_CONFIG.superRate * 100}%
+                                    </li>
+                                    <li>
+                                      <span className="text-muted-foreground">
+                                        Workers Comp Rate:
+                                      </span>{' '}
+                                      {DEFAULT_COST_CONFIG.wcRate * 100}%
+                                    </li>
+                                    <li>
+                                      <span className="text-muted-foreground">
+                                        Payroll Tax Rate:
+                                      </span>{' '}
+                                      {DEFAULT_COST_CONFIG.payrollTaxRate * 100}%
+                                    </li>
+                                    <li>
+                                      <span className="text-muted-foreground">Leave Loading:</span>{' '}
+                                      {DEFAULT_COST_CONFIG.leaveLoading * 100}%
+                                    </li>
+                                    <li>
+                                      <span className="text-muted-foreground">
+                                        Annual Study Cost:
+                                      </span>{' '}
+                                      {formatCurrency(DEFAULT_COST_CONFIG.studyCost)}
+                                    </li>
+                                    <li>
+                                      <span className="text-muted-foreground">
+                                        Annual PPE Cost:
+                                      </span>{' '}
+                                      {formatCurrency(DEFAULT_COST_CONFIG.ppeCost)}
+                                    </li>
+                                    <li>
+                                      <span className="text-muted-foreground">Admin Rate:</span>{' '}
+                                      {DEFAULT_COST_CONFIG.adminRate * 100}%
+                                    </li>
+                                    <li>
+                                      <span className="text-muted-foreground">
+                                        Adverse Weather Days:
+                                      </span>{' '}
+                                      {DEFAULT_COST_CONFIG.adverseWeatherDays}
+                                    </li>
                                   </ul>
                                 </div>
-                                
+
                                 <Separator />
-                                
+
                                 <div>
                                   <h4 className="text-sm font-medium mb-2">Work Configuration</h4>
                                   <ul className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
-                                    <li><span className="text-muted-foreground">Hours Per Day:</span> {DEFAULT_WORK_CONFIG.hoursPerDay}</li>
-                                    <li><span className="text-muted-foreground">Days Per Week:</span> {DEFAULT_WORK_CONFIG.daysPerWeek}</li>
-                                    <li><span className="text-muted-foreground">Weeks Per Year:</span> {DEFAULT_WORK_CONFIG.weeksPerYear}</li>
-                                    <li><span className="text-muted-foreground">Annual Leave Days:</span> {DEFAULT_WORK_CONFIG.annualLeaveDays}</li>
-                                    <li><span className="text-muted-foreground">Public Holidays:</span> {DEFAULT_WORK_CONFIG.publicHolidays}</li>
-                                    <li><span className="text-muted-foreground">Sick Leave Days:</span> {DEFAULT_WORK_CONFIG.sickLeaveDays}</li>
-                                    <li><span className="text-muted-foreground">Training Weeks:</span> {DEFAULT_WORK_CONFIG.trainingWeeks}</li>
+                                    <li>
+                                      <span className="text-muted-foreground">Hours Per Day:</span>{' '}
+                                      {DEFAULT_WORK_CONFIG.hoursPerDay}
+                                    </li>
+                                    <li>
+                                      <span className="text-muted-foreground">Days Per Week:</span>{' '}
+                                      {DEFAULT_WORK_CONFIG.daysPerWeek}
+                                    </li>
+                                    <li>
+                                      <span className="text-muted-foreground">Weeks Per Year:</span>{' '}
+                                      {DEFAULT_WORK_CONFIG.weeksPerYear}
+                                    </li>
+                                    <li>
+                                      <span className="text-muted-foreground">
+                                        Annual Leave Days:
+                                      </span>{' '}
+                                      {DEFAULT_WORK_CONFIG.annualLeaveDays}
+                                    </li>
+                                    <li>
+                                      <span className="text-muted-foreground">
+                                        Public Holidays:
+                                      </span>{' '}
+                                      {DEFAULT_WORK_CONFIG.publicHolidays}
+                                    </li>
+                                    <li>
+                                      <span className="text-muted-foreground">
+                                        Sick Leave Days:
+                                      </span>{' '}
+                                      {DEFAULT_WORK_CONFIG.sickLeaveDays}
+                                    </li>
+                                    <li>
+                                      <span className="text-muted-foreground">Training Weeks:</span>{' '}
+                                      {DEFAULT_WORK_CONFIG.trainingWeeks}
+                                    </li>
                                   </ul>
                                 </div>
-                                
+
                                 <Separator />
-                                
+
                                 <div>
                                   <h4 className="text-sm font-medium mb-2">Billable Options</h4>
                                   <ul className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
                                     <li>
-                                      <span className="text-muted-foreground">Include Annual Leave:</span> 
+                                      <span className="text-muted-foreground">
+                                        Include Annual Leave:
+                                      </span>
                                       {DEFAULT_BILLABLE_OPTIONS.includeAnnualLeave ? 'Yes' : 'No'}
                                     </li>
                                     <li>
-                                      <span className="text-muted-foreground">Include Public Holidays:</span> 
-                                      {DEFAULT_BILLABLE_OPTIONS.includePublicHolidays ? 'Yes' : 'No'}
+                                      <span className="text-muted-foreground">
+                                        Include Public Holidays:
+                                      </span>
+                                      {DEFAULT_BILLABLE_OPTIONS.includePublicHolidays
+                                        ? 'Yes'
+                                        : 'No'}
                                     </li>
                                     <li>
-                                      <span className="text-muted-foreground">Include Sick Leave:</span> 
+                                      <span className="text-muted-foreground">
+                                        Include Sick Leave:
+                                      </span>
                                       {DEFAULT_BILLABLE_OPTIONS.includeSickLeave ? 'Yes' : 'No'}
                                     </li>
                                     <li>
-                                      <span className="text-muted-foreground">Include Training Time:</span> 
+                                      <span className="text-muted-foreground">
+                                        Include Training Time:
+                                      </span>
                                       {DEFAULT_BILLABLE_OPTIONS.includeTrainingTime ? 'Yes' : 'No'}
                                     </li>
                                     <li>
-                                      <span className="text-muted-foreground">Include Adverse Weather:</span> 
-                                      {DEFAULT_BILLABLE_OPTIONS.includeAdverseWeather ? 'Yes' : 'No'}
+                                      <span className="text-muted-foreground">
+                                        Include Adverse Weather:
+                                      </span>
+                                      {DEFAULT_BILLABLE_OPTIONS.includeAdverseWeather
+                                        ? 'Yes'
+                                        : 'No'}
                                     </li>
                                   </ul>
                                 </div>
@@ -761,18 +862,18 @@ export default function CreateChargeRatePage() {
                             </AccordionContent>
                           </AccordionItem>
                         </Accordion>
-                        
+
                         <div className="flex flex-col md:flex-row md:justify-between space-y-4 md:space-y-0">
-                          <Button 
-                            type="button" 
-                            variant="outline" 
+                          <Button
+                            type="button"
+                            variant="outline"
                             onClick={() => setActiveTab('apprentice')}
                           >
                             Back
                           </Button>
-                          
-                          <Button 
-                            type="button" 
+
+                          <Button
+                            type="button"
                             onClick={calculateChargeRate}
                             disabled={isCalculating}
                           >
@@ -790,7 +891,7 @@ export default function CreateChargeRatePage() {
                         </div>
                       </div>
                     </TabsContent>
-                    
+
                     <TabsContent value="review">
                       <div className="space-y-6 py-4">
                         <div className="border rounded-md p-4">
@@ -802,174 +903,251 @@ export default function CreateChargeRatePage() {
                                   <ul className="space-y-2 mt-2">
                                     <li className="flex justify-between">
                                       <span className="text-muted-foreground">Pay Rate:</span>
-                                      <span className="font-medium">{formatCurrency(calculationResult.payRate)}/hr</span>
+                                      <span className="font-medium">
+                                        {formatCurrency(calculationResult.payRate)}/hr
+                                      </span>
                                     </li>
                                     <li className="flex justify-between">
-                                      <span className="text-muted-foreground">Total Annual Hours:</span>
-                                      <span className="font-medium">{calculationResult.totalHours}</span>
+                                      <span className="text-muted-foreground">
+                                        Total Annual Hours:
+                                      </span>
+                                      <span className="font-medium">
+                                        {calculationResult.totalHours}
+                                      </span>
                                     </li>
                                     <li className="flex justify-between">
                                       <span className="text-muted-foreground">Billable Hours:</span>
-                                      <span className="font-medium">{calculationResult.billableHours}</span>
+                                      <span className="font-medium">
+                                        {calculationResult.billableHours}
+                                      </span>
                                     </li>
                                     <li className="flex justify-between">
-                                      <span className="text-muted-foreground">Base Annual Wage:</span>
-                                      <span className="font-medium">{formatCurrency(calculationResult.baseWage)}</span>
+                                      <span className="text-muted-foreground">
+                                        Base Annual Wage:
+                                      </span>
+                                      <span className="font-medium">
+                                        {formatCurrency(calculationResult.baseWage)}
+                                      </span>
                                     </li>
                                     <li className="flex justify-between">
-                                      <span className="text-muted-foreground">Total Annual Cost:</span>
-                                      <span className="font-medium">{formatCurrency(calculationResult.totalCost)}</span>
+                                      <span className="text-muted-foreground">
+                                        Total Annual Cost:
+                                      </span>
+                                      <span className="font-medium">
+                                        {formatCurrency(calculationResult.totalCost)}
+                                      </span>
                                     </li>
                                     <li className="flex justify-between">
                                       <span className="text-muted-foreground">Cost Per Hour:</span>
-                                      <span className="font-medium">{formatCurrency(calculationResult.costPerHour)}/hr</span>
+                                      <span className="font-medium">
+                                        {formatCurrency(calculationResult.costPerHour)}/hr
+                                      </span>
                                     </li>
                                     <li className="flex justify-between">
                                       <span className="text-muted-foreground">Profit Margin:</span>
-                                      <span className="font-medium">{(calculationResult.customMargin || DEFAULT_COST_CONFIG.defaultMargin) * 100}%</span>
+                                      <span className="font-medium">
+                                        {(calculationResult.customMargin ||
+                                          DEFAULT_COST_CONFIG.defaultMargin) * 100}
+                                        %
+                                      </span>
                                     </li>
                                     <li className="flex justify-between font-semibold text-lg">
                                       <span>Charge Rate:</span>
-                                      <span className="text-primary">{formatCurrency(calculationResult.chargeRate)}/hr</span>
+                                      <span className="text-primary">
+                                        {formatCurrency(calculationResult.chargeRate)}/hr
+                                      </span>
                                     </li>
                                   </ul>
                                 </div>
-                                
+
                                 <div>
                                   <h3 className="text-lg font-semibold">On-costs Breakdown</h3>
                                   <ul className="space-y-2 mt-2">
                                     <li className="flex justify-between">
                                       <span className="text-muted-foreground">Superannuation:</span>
-                                      <span className="font-medium">{formatCurrency(calculationResult.oncosts.superannuation)}</span>
+                                      <span className="font-medium">
+                                        {formatCurrency(calculationResult.oncosts.superannuation)}
+                                      </span>
                                     </li>
                                     <li className="flex justify-between">
-                                      <span className="text-muted-foreground">Workers Compensation:</span>
-                                      <span className="font-medium">{formatCurrency(calculationResult.oncosts.workersComp)}</span>
+                                      <span className="text-muted-foreground">
+                                        Workers Compensation:
+                                      </span>
+                                      <span className="font-medium">
+                                        {formatCurrency(calculationResult.oncosts.workersComp)}
+                                      </span>
                                     </li>
                                     <li className="flex justify-between">
                                       <span className="text-muted-foreground">Payroll Tax:</span>
-                                      <span className="font-medium">{formatCurrency(calculationResult.oncosts.payrollTax)}</span>
+                                      <span className="font-medium">
+                                        {formatCurrency(calculationResult.oncosts.payrollTax)}
+                                      </span>
                                     </li>
                                     <li className="flex justify-between">
                                       <span className="text-muted-foreground">Leave Loading:</span>
-                                      <span className="font-medium">{formatCurrency(calculationResult.oncosts.leaveLoading)}</span>
+                                      <span className="font-medium">
+                                        {formatCurrency(calculationResult.oncosts.leaveLoading)}
+                                      </span>
                                     </li>
                                     <li className="flex justify-between">
                                       <span className="text-muted-foreground">Study Cost:</span>
-                                      <span className="font-medium">{formatCurrency(calculationResult.oncosts.studyCost)}</span>
+                                      <span className="font-medium">
+                                        {formatCurrency(calculationResult.oncosts.studyCost)}
+                                      </span>
                                     </li>
                                     <li className="flex justify-between">
                                       <span className="text-muted-foreground">PPE Cost:</span>
-                                      <span className="font-medium">{formatCurrency(calculationResult.oncosts.ppeCost)}</span>
+                                      <span className="font-medium">
+                                        {formatCurrency(calculationResult.oncosts.ppeCost)}
+                                      </span>
                                     </li>
                                     <li className="flex justify-between">
                                       <span className="text-muted-foreground">Admin Cost:</span>
-                                      <span className="font-medium">{formatCurrency(calculationResult.oncosts.adminCost)}</span>
+                                      <span className="font-medium">
+                                        {formatCurrency(calculationResult.oncosts.adminCost)}
+                                      </span>
                                     </li>
                                     <li className="flex justify-between font-semibold pt-2 border-t">
                                       <span>Total On-costs:</span>
                                       <span>
                                         {formatCurrency(
                                           calculationResult.oncosts.superannuation +
-                                          calculationResult.oncosts.workersComp +
-                                          calculationResult.oncosts.payrollTax +
-                                          calculationResult.oncosts.leaveLoading +
-                                          calculationResult.oncosts.studyCost +
-                                          calculationResult.oncosts.ppeCost +
-                                          calculationResult.oncosts.adminCost
+                                            calculationResult.oncosts.workersComp +
+                                            calculationResult.oncosts.payrollTax +
+                                            calculationResult.oncosts.leaveLoading +
+                                            calculationResult.oncosts.studyCost +
+                                            calculationResult.oncosts.ppeCost +
+                                            calculationResult.oncosts.adminCost
                                         )}
                                       </span>
                                     </li>
                                   </ul>
                                 </div>
                               </div>
-                              
+
                               <div className="mt-6">
-                                <h3 className="text-lg font-semibold">{watchedValues.isBulkOperation ? 'Bulk Application' : 'Application'}</h3>
+                                <h3 className="text-lg font-semibold">
+                                  {watchedValues.isBulkOperation
+                                    ? 'Bulk Application'
+                                    : 'Application'}
+                                </h3>
                                 {watchedValues.isBulkOperation ? (
                                   <div className="mt-2 space-y-2">
                                     <div>
                                       <p className="text-sm font-semibold">Selected Apprentices:</p>
                                       <div className="border rounded-md p-2 mt-1 text-sm">
-                                        {watchedValues.selectedApprentices?.length ? 
+                                        {watchedValues.selectedApprentices?.length ? (
                                           watchedValues.selectedApprentices.map((id: number) => {
-                                            const apprentice = apprentices?.find((a: Apprentice) => a.id === id);
+                                            const apprentice = apprentices?.find(
+                                              (a: Apprentice) => a.id === id
+                                            );
                                             return apprentice ? (
-                                              <Badge key={id} variant="outline" className="mr-1 mb-1">
+                                              <Badge
+                                                key={id}
+                                                variant="outline"
+                                                className="mr-1 mb-1"
+                                              >
                                                 {getApprenticeDisplayText(apprentice)}
                                               </Badge>
                                             ) : null;
-                                          }) : 
-                                          <span className="text-muted-foreground">No apprentices selected</span>
-                                        }
+                                          })
+                                        ) : (
+                                          <span className="text-muted-foreground">
+                                            No apprentices selected
+                                          </span>
+                                        )}
                                       </div>
                                     </div>
                                     <div>
-                                      <p className="text-sm font-semibold">Selected Host Employers:</p>
+                                      <p className="text-sm font-semibold">
+                                        Selected Host Employers:
+                                      </p>
                                       <div className="border rounded-md p-2 mt-1 text-sm">
-                                        {watchedValues.selectedHostEmployers?.length ? 
+                                        {watchedValues.selectedHostEmployers?.length ? (
                                           watchedValues.selectedHostEmployers.map((id: number) => {
-                                            const host = hostEmployers?.find((h: HostEmployer) => h.id === id);
+                                            const host = hostEmployers?.find(
+                                              (h: HostEmployer) => h.id === id
+                                            );
                                             return host ? (
-                                              <Badge key={id} variant="outline" className="mr-1 mb-1">
+                                              <Badge
+                                                key={id}
+                                                variant="outline"
+                                                className="mr-1 mb-1"
+                                              >
                                                 {getHostEmployerDisplayText(host)}
                                               </Badge>
                                             ) : null;
-                                          }) : 
-                                          <span className="text-muted-foreground">No host employers selected</span>
-                                        }
+                                          })
+                                        ) : (
+                                          <span className="text-muted-foreground">
+                                            No host employers selected
+                                          </span>
+                                        )}
                                       </div>
                                     </div>
                                   </div>
                                 ) : watchedValues.isQuote ? (
                                   <div className="mt-2">
                                     {watchedValues.leadId ? (
-                                      <p>Quote will be attached to Lead ID: {watchedValues.leadId}</p>
+                                      <p>
+                                        Quote will be attached to Lead ID: {watchedValues.leadId}
+                                      </p>
                                     ) : (
                                       <p>Quote is not attached to any lead</p>
                                     )}
                                     {watchedValues.isTemplate && (
-                                      <p className="mt-1">Will be saved as template: {watchedValues.templateName || 'Unnamed Template'}</p>
+                                      <p className="mt-1">
+                                        Will be saved as template:{' '}
+                                        {watchedValues.templateName || 'Unnamed Template'}
+                                      </p>
                                     )}
                                   </div>
                                 ) : (
                                   <div className="mt-2">
                                     <p>
-                                      <span className="font-medium">Apprentice:</span> {selectedApprentice ? 
-                                        getApprenticeDisplayText(selectedApprentice) : 'None selected'}
+                                      <span className="font-medium">Apprentice:</span>{' '}
+                                      {selectedApprentice
+                                        ? getApprenticeDisplayText(selectedApprentice)
+                                        : 'None selected'}
                                     </p>
                                     <p className="mt-1">
-                                      <span className="font-medium">Host Employer:</span> {selectedHostEmployer ? 
-                                        getHostEmployerDisplayText(selectedHostEmployer) : 'None selected'}
+                                      <span className="font-medium">Host Employer:</span>{' '}
+                                      {selectedHostEmployer
+                                        ? getHostEmployerDisplayText(selectedHostEmployer)
+                                        : 'None selected'}
                                     </p>
                                   </div>
                                 )}
                               </div>
-                              
+
                               {watchedValues.notes && (
                                 <div className="mt-4">
                                   <h3 className="text-lg font-semibold">Notes</h3>
-                                  <p className="mt-1 text-sm border rounded-md p-2">{watchedValues.notes}</p>
+                                  <p className="mt-1 text-sm border rounded-md p-2">
+                                    {watchedValues.notes}
+                                  </p>
                                 </div>
                               )}
                             </div>
                           ) : (
                             <div className="text-center p-6">
-                              <p className="text-muted-foreground">Please calculate the charge rate first</p>
+                              <p className="text-muted-foreground">
+                                Please calculate the charge rate first
+                              </p>
                             </div>
                           )}
                         </div>
-                        
+
                         <div className="flex flex-col md:flex-row md:justify-between space-y-4 md:space-y-0">
-                          <Button 
-                            type="button" 
-                            variant="outline" 
+                          <Button
+                            type="button"
+                            variant="outline"
                             onClick={() => setActiveTab('rate')}
                           >
                             Back
                           </Button>
-                          
-                          <Button 
+
+                          <Button
                             type="submit"
                             disabled={!calculationResult || saveMutation.isPending}
                           >
@@ -993,7 +1171,7 @@ export default function CreateChargeRatePage() {
             </CardContent>
           </Card>
         </div>
-        
+
         <div className="col-span-1">
           <Card>
             <CardHeader>
@@ -1004,23 +1182,31 @@ export default function CreateChargeRatePage() {
                 <div className="space-y-4">
                   <div className="flex flex-col items-center justify-center p-4 border rounded-md text-center">
                     <span className="text-muted-foreground text-sm">Calculated Rate</span>
-                    <span className="text-4xl font-bold text-primary">{formatCurrency(calculationResult.chargeRate)}</span>
+                    <span className="text-4xl font-bold text-primary">
+                      {formatCurrency(calculationResult.chargeRate)}
+                    </span>
                     <span className="text-muted-foreground text-sm">per hour</span>
                   </div>
-                  
+
                   <div className="grid grid-cols-2 gap-y-2 text-sm">
                     <span className="text-muted-foreground">Pay Rate:</span>
-                    <span className="text-right">{formatCurrency(calculationResult.payRate)}/hr</span>
-                    
+                    <span className="text-right">
+                      {formatCurrency(calculationResult.payRate)}/hr
+                    </span>
+
                     <span className="text-muted-foreground">Cost Per Hour:</span>
-                    <span className="text-right">{formatCurrency(calculationResult.costPerHour)}/hr</span>
-                    
+                    <span className="text-right">
+                      {formatCurrency(calculationResult.costPerHour)}/hr
+                    </span>
+
                     <span className="text-muted-foreground">Margin:</span>
-                    <span className="text-right">{(calculationResult.customMargin || DEFAULT_COST_CONFIG.defaultMargin) * 100}%</span>
+                    <span className="text-right">
+                      {(calculationResult.customMargin || DEFAULT_COST_CONFIG.defaultMargin) * 100}%
+                    </span>
                   </div>
-                  
+
                   <div className="pt-4 border-t">
-                    <ChargeRateVisualizer 
+                    <ChargeRateVisualizer
                       payRate={calculationResult.payRate}
                       costPerHour={calculationResult.costPerHour}
                       chargeRate={calculationResult.chargeRate}
@@ -1036,7 +1222,7 @@ export default function CreateChargeRatePage() {
               )}
             </CardContent>
           </Card>
-          
+
           {calculationResult && (
             <Card className="mt-6">
               <CardHeader>
@@ -1062,13 +1248,18 @@ export default function CreateChargeRatePage() {
                 <Separator className="my-2" />
                 <div className="flex justify-between font-medium">
                   <span>Annual Revenue:</span>
-                  <span>{formatCurrency(calculationResult.chargeRate * calculationResult.billableHours)}</span>
+                  <span>
+                    {formatCurrency(calculationResult.chargeRate * calculationResult.billableHours)}
+                  </span>
                 </div>
                 <div className="flex justify-between font-medium">
                   <span>Annual Profit:</span>
-                  <span>{formatCurrency(
-                    (calculationResult.chargeRate * calculationResult.billableHours) - calculationResult.totalCost
-                  )}</span>
+                  <span>
+                    {formatCurrency(
+                      calculationResult.chargeRate * calculationResult.billableHours -
+                        calculationResult.totalCost
+                    )}
+                  </span>
                 </div>
               </CardContent>
             </Card>

@@ -1,17 +1,13 @@
 /**
  * Fair Work Data Synchronization Service
- * 
- * This service is responsible for keeping the local database in sync with 
+ *
+ * This service is responsible for keeping the local database in sync with
  * Fair Work Commission data, including awards, classifications, and pay rates.
  */
 
 import { db } from '../../db';
 import { sql } from 'drizzle-orm';
-import { 
-  awards, 
-  awardClassifications, 
-  payRates 
-} from '@shared/schema';
+import { awards, awardClassifications, payRates } from '@shared/schema';
 import { eq, and } from 'drizzle-orm';
 import logger from '../../utils/logger';
 import { FairWorkApiClient } from './api-client';
@@ -21,10 +17,12 @@ export class FairWorkDataSync {
   private apiClient: FairWorkApiClient;
 
   constructor(apiClient?: FairWorkApiClient) {
-    this.apiClient = apiClient || new FairWorkApiClient({
-      baseUrl: process.env.FAIRWORK_API_URL || 'https://api.fairwork.gov.au',
-      apiKey: process.env.FAIRWORK_API_KEY || ''
-    });
+    this.apiClient =
+      apiClient ||
+      new FairWorkApiClient({
+        baseUrl: process.env.FAIRWORK_API_URL || 'https://api.fairwork.gov.au',
+        apiKey: process.env.FAIRWORK_API_KEY || '',
+      });
   }
 
   /**
@@ -33,17 +31,17 @@ export class FairWorkDataSync {
   async initialize(): Promise<void> {
     try {
       logger.info('Initializing Fair Work data sync service...');
-      
+
       // Run initial sync if database is empty
       const awardCount = await this.getAwardCount();
       if (awardCount === 0) {
         logger.info('No awards found in database - running initial sync...');
         await this.syncAllData();
       }
-      
+
       // Schedule regular updates
       this.scheduleUpdates();
-      
+
       logger.info('Fair Work data sync service initialized successfully');
     } catch (error) {
       logger.error('Failed to initialize Fair Work data sync service', { error });
@@ -59,7 +57,7 @@ export class FairWorkDataSync {
       logger.info('Running scheduled Fair Work data sync...');
       await this.syncAllData();
     });
-    
+
     // Schedule weekly full refresh on Sundays at 2:00 AM
     cron.schedule('0 2 * * 0', async () => {
       logger.info('Running full Fair Work data refresh...');
@@ -73,21 +71,21 @@ export class FairWorkDataSync {
   async syncAllData(forceRefresh: boolean = false): Promise<void> {
     try {
       logger.info(`Starting sync of all Fair Work data (force: ${forceRefresh})`);
-      
+
       // Sync awards first (parent records)
       await this.syncAwards(forceRefresh);
-      
+
       // Get all awards to sync their classifications and rates
       const allAwards = await db.select().from(awards);
-      
+
       for (const award of allAwards) {
         // Sync classifications for this award
         await this.syncAwardClassifications(award.code, award.id, forceRefresh);
-        
+
         // Sync pay rates for this award
         await this.syncPayRates(award.code, forceRefresh);
       }
-      
+
       logger.info('Successfully completed sync of all Fair Work data');
     } catch (error) {
       logger.error('Failed to sync Fair Work data', { error });
@@ -100,21 +98,21 @@ export class FairWorkDataSync {
   async syncAwards(forceRefresh: boolean = false): Promise<void> {
     try {
       logger.info('Syncing awards from Fair Work API...');
-      
+
       // Get all awards from Fair Work API
       const fairWorkAwards = await this.apiClient.getActiveAwards();
-      
+
       if (fairWorkAwards.length === 0) {
         logger.warn('No awards received from Fair Work API');
         return;
       }
-      
+
       logger.info(`Received ${fairWorkAwards.length} awards from Fair Work API`);
-      
+
       // For each award, insert or update in the database
       let inserted = 0;
       let updated = 0;
-      
+
       for (const fairWorkAward of fairWorkAwards) {
         try {
           // Check if this award exists
@@ -122,7 +120,7 @@ export class FairWorkDataSync {
             .select()
             .from(awards)
             .where(eq(awards.code, fairWorkAward.code));
-          
+
           if (existingAwards.length === 0) {
             // Insert new award
             await db.insert(awards).values({
@@ -133,7 +131,7 @@ export class FairWorkDataSync {
               description: fairWorkAward.description || null,
               isActive: true,
               createdAt: new Date(),
-              updatedAt: new Date()
+              updatedAt: new Date(),
             });
             inserted++;
           } else if (forceRefresh) {
@@ -145,7 +143,7 @@ export class FairWorkDataSync {
                 fairWorkReference: fairWorkAward.fair_work_reference || null,
                 fairWorkTitle: fairWorkAward.fair_work_title || null,
                 description: fairWorkAward.description || null,
-                updatedAt: new Date()
+                updatedAt: new Date(),
               })
               .where(eq(awards.code, fairWorkAward.code));
             updated++;
@@ -154,7 +152,7 @@ export class FairWorkDataSync {
           logger.error(`Error processing award ${fairWorkAward.code}`, { error: awardError });
         }
       }
-      
+
       logger.info(`Award sync completed. Inserted: ${inserted}, Updated: ${updated}`);
     } catch (error) {
       logger.error('Failed to sync awards', { error });
@@ -165,27 +163,27 @@ export class FairWorkDataSync {
    * Sync classifications for a specific award
    */
   async syncAwardClassifications(
-    awardCode: string, 
+    awardCode: string,
     awardId: number,
     forceRefresh: boolean = false
   ): Promise<void> {
     try {
       logger.info(`Syncing classifications for award ${awardCode}...`);
-      
+
       // Get classifications from Fair Work API
       const classifications = await this.apiClient.getAwardClassifications(awardCode);
-      
+
       if (classifications.length === 0) {
         logger.warn(`No classifications received from Fair Work API for award ${awardCode}`);
         return;
       }
-      
+
       logger.info(`Received ${classifications.length} classifications for award ${awardCode}`);
-      
+
       // For each classification, insert or update in the database
       let inserted = 0;
       let updated = 0;
-      
+
       for (const classification of classifications) {
         try {
           // Check if this classification exists
@@ -195,10 +193,13 @@ export class FairWorkDataSync {
             .where(
               and(
                 eq(awardClassifications.awardId, awardId),
-                eq(awardClassifications.fairWorkLevelCode, classification.fair_work_level_code || '')
+                eq(
+                  awardClassifications.fairWorkLevelCode,
+                  classification.fair_work_level_code || ''
+                )
               )
             );
-          
+
           if (existingClassifications.length === 0) {
             // Insert new classification
             await db.insert(awardClassifications).values({
@@ -209,7 +210,7 @@ export class FairWorkDataSync {
               fairWorkLevelDesc: classification.description || null,
               isActive: true,
               createdAt: new Date(),
-              updatedAt: new Date()
+              updatedAt: new Date(),
             });
             inserted++;
           } else if (forceRefresh) {
@@ -220,22 +221,29 @@ export class FairWorkDataSync {
                 name: classification.name,
                 level: classification.level || '1',
                 fairWorkLevelDesc: classification.description || null,
-                updatedAt: new Date()
+                updatedAt: new Date(),
               })
               .where(
                 and(
                   eq(awardClassifications.awardId, awardId),
-                  eq(awardClassifications.fairWorkLevelCode, classification.fair_work_level_code || '')
+                  eq(
+                    awardClassifications.fairWorkLevelCode,
+                    classification.fair_work_level_code || ''
+                  )
                 )
               );
             updated++;
           }
         } catch (classError) {
-          logger.error(`Error processing classification for award ${awardCode}`, { error: classError });
+          logger.error(`Error processing classification for award ${awardCode}`, {
+            error: classError,
+          });
         }
       }
-      
-      logger.info(`Classification sync completed for award ${awardCode}. Inserted: ${inserted}, Updated: ${updated}`);
+
+      logger.info(
+        `Classification sync completed for award ${awardCode}. Inserted: ${inserted}, Updated: ${updated}`
+      );
     } catch (error) {
       logger.error(`Failed to sync classifications for award ${awardCode}`, { error });
     }
@@ -247,41 +255,41 @@ export class FairWorkDataSync {
   async syncPayRates(awardCode: string, forceRefresh: boolean = false): Promise<void> {
     try {
       logger.info(`Syncing pay rates for award ${awardCode}...`);
-      
+
       // Get pay rates from Fair Work API
       const payRatesData = await this.apiClient.getPayRates(awardCode);
-      
+
       if (payRatesData.length === 0) {
         logger.warn(`No pay rates received from Fair Work API for award ${awardCode}`);
         return;
       }
-      
+
       logger.info(`Received ${payRatesData.length} pay rates for award ${awardCode}`);
-      
+
       // Get classifications for this award to match with pay rates
       const classifications = await db
         .select()
         .from(awardClassifications)
         .innerJoin(awards, eq(awardClassifications.awardId, awards.id))
         .where(eq(awards.code, awardCode));
-      
+
       // For each pay rate, insert if it doesn't exist
       let inserted = 0;
-      
+
       for (const rate of payRatesData) {
         try {
           // Find matching classification
           const matchingClassifications = classifications.filter(
             c => c.award_classifications.fairWorkLevelCode === rate.classification_id
           );
-          
+
           if (matchingClassifications.length === 0) {
             logger.warn(`No matching classification found for rate ${rate.id}`);
             continue;
           }
-          
+
           const classificationId = matchingClassifications[0].award_classifications.id;
-          
+
           // Check if this rate already exists
           const effectiveFrom = new Date(rate.effective_from).toISOString().split('T')[0];
           const rateQuery = sql`
@@ -290,9 +298,9 @@ export class FairWorkDataSync {
               AND effective_from = ${effectiveFrom}
               AND is_apprentice_rate = ${rate.is_apprentice_rate || false}
           `;
-          
+
           const existingRates = await db.execute(rateQuery);
-          
+
           if (existingRates.rows.length === 0 || forceRefresh) {
             // Insert new pay rate
             const insertQuery = sql`
@@ -311,7 +319,7 @@ export class FairWorkDataSync {
                 ${'Standard'}
               )
             `;
-            
+
             await db.execute(insertQuery);
             inserted++;
           }
@@ -319,7 +327,7 @@ export class FairWorkDataSync {
           logger.error(`Error processing pay rate for award ${awardCode}`, { error: rateError });
         }
       }
-      
+
       logger.info(`Pay rate sync completed for award ${awardCode}. Inserted: ${inserted}`);
     } catch (error) {
       logger.error(`Failed to sync pay rates for award ${awardCode}`, { error });

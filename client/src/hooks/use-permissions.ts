@@ -3,15 +3,15 @@ import { checkPermission, checkAnyPermission, checkAllPermissions } from '@/lib/
 
 /**
  * Custom hook for checking user permissions
- * 
+ *
  * @returns Object with permission checking functions
  */
 export function usePermissions() {
   const { user } = useAuth();
-  
+
   /**
    * Check if the current user has a specific permission
-   * 
+   *
    * @param permission The permission to check
    * @returns boolean indicating if the user has the permission
    */
@@ -22,7 +22,7 @@ export function usePermissions() {
 
   /**
    * Check if the current user has any of the specified permissions
-   * 
+   *
    * @param permissions Array of permissions to check
    * @returns boolean indicating if the user has any of the permissions
    */
@@ -33,7 +33,7 @@ export function usePermissions() {
 
   /**
    * Check if the current user has all of the specified permissions
-   * 
+   *
    * @param permissions Array of permissions to check
    * @returns boolean indicating if the user has all of the permissions
    */
@@ -44,7 +44,7 @@ export function usePermissions() {
 
   /**
    * Check if the current user cannot perform a specific action
-   * 
+   *
    * @param permission The permission to check
    * @returns boolean indicating if the user lacks the permission
    */
@@ -57,6 +57,6 @@ export function usePermissions() {
     canAny,
     canAll,
     cannot,
-    hasPermission: can // Alias for compatibility
+    hasPermission: can, // Alias for compatibility
   };
 }

@@ -1,10 +1,17 @@
-import { useQuery } from "@tanstack/react-query";
-import { Link } from "wouter";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { PageHeader } from "@/components/page-header";
-import { DashboardShell } from "@/components/dashboard-shell";
+import { useQuery } from '@tanstack/react-query';
+import { Link } from 'wouter';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
+import { PageHeader } from '@/components/page-header';
+import { DashboardShell } from '@/components/dashboard-shell';
 import {
   Briefcase,
   GraduationCap,
@@ -13,8 +20,8 @@ import {
   CheckCircle2,
   Calendar,
   ClipboardList,
-  Building2
-} from "lucide-react";
+  Building2,
+} from 'lucide-react';
 
 export default function ExternalEmployeesPage() {
   return (
@@ -32,23 +39,27 @@ export default function ExternalEmployeesPage() {
               <CardTitle className="text-xl">Apprentices & Trainees</CardTitle>
               <GraduationCap className="h-6 w-6 text-primary" />
             </div>
-            <CardDescription>
-              Manage your apprentices and trainees
-            </CardDescription>
+            <CardDescription>Manage your apprentices and trainees</CardDescription>
           </CardHeader>
           <CardContent>
             <ul className="space-y-2 text-sm">
               <li className="flex items-center">
                 <UserPlus className="h-4 w-4 mr-2 text-muted-foreground" />
-                <Link href="/apprentices/recruitment" className="hover:underline text-blue-600">Recruitment & onboarding</Link>
+                <Link href="/apprentices/recruitment" className="hover:underline text-blue-600">
+                  Recruitment & onboarding
+                </Link>
               </li>
               <li className="flex items-center">
                 <FileText className="h-4 w-4 mr-2 text-muted-foreground" />
-                <Link href="/apprentices/training" className="hover:underline text-blue-600">Training plans & progress</Link>
+                <Link href="/apprentices/training" className="hover:underline text-blue-600">
+                  Training plans & progress
+                </Link>
               </li>
               <li className="flex items-center">
                 <CheckCircle2 className="h-4 w-4 mr-2 text-muted-foreground" />
-                <Link href="/apprentices/progress" className="hover:underline text-blue-600">Competency tracking</Link>
+                <Link href="/apprentices/progress" className="hover:underline text-blue-600">
+                  Competency tracking
+                </Link>
               </li>
             </ul>
           </CardContent>
@@ -69,23 +80,27 @@ export default function ExternalEmployeesPage() {
               <CardTitle className="text-xl">Labour Hire Workers</CardTitle>
               <Briefcase className="h-6 w-6 text-primary" />
             </div>
-            <CardDescription>
-              Manage your labour hire workforce
-            </CardDescription>
+            <CardDescription>Manage your labour hire workforce</CardDescription>
           </CardHeader>
           <CardContent>
             <ul className="space-y-2 text-sm">
               <li className="flex items-center">
                 <Building2 className="h-4 w-4 mr-2 text-muted-foreground" />
-                <Link href="/labour-hire/placements" className="hover:underline text-blue-600">Placements & assignments</Link>
+                <Link href="/labour-hire/placements" className="hover:underline text-blue-600">
+                  Placements & assignments
+                </Link>
               </li>
               <li className="flex items-center">
                 <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
-                <Link href="/labour-hire/timesheets" className="hover:underline text-blue-600">Timesheets & attendance</Link>
+                <Link href="/labour-hire/timesheets" className="hover:underline text-blue-600">
+                  Timesheets & attendance
+                </Link>
               </li>
               <li className="flex items-center">
                 <ClipboardList className="h-4 w-4 mr-2 text-muted-foreground" />
-                <Link href="/labour-hire/workers" className="hover:underline text-blue-600">Skills & qualifications</Link>
+                <Link href="/labour-hire/workers" className="hover:underline text-blue-600">
+                  Skills & qualifications
+                </Link>
               </li>
             </ul>
           </CardContent>
@@ -110,32 +125,30 @@ export default function ExternalEmployeesPage() {
                 <div className="h-2 w-2 rounded-full bg-green-500"></div>
               </div>
             </div>
-            <CardDescription>
-              Track progress through each stage
-            </CardDescription>
+            <CardDescription>Track progress through each stage</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
               <div className="space-y-1">
                 <div className="text-sm font-medium">Apprentice Workflow</div>
                 <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
-                  <div className="h-full bg-primary rounded-full" style={{ width: "65%" }}></div>
+                  <div className="h-full bg-primary rounded-full" style={{ width: '65%' }}></div>
                 </div>
                 <div className="text-xs text-muted-foreground">Applicant → Worker</div>
               </div>
-              
+
               <div className="space-y-1">
                 <div className="text-sm font-medium">Training Completion</div>
                 <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
-                  <div className="h-full bg-blue-500 rounded-full" style={{ width: "42%" }}></div>
+                  <div className="h-full bg-blue-500 rounded-full" style={{ width: '42%' }}></div>
                 </div>
                 <div className="text-xs text-muted-foreground">Skill acquisition tracking</div>
               </div>
-              
+
               <div className="space-y-1">
                 <div className="text-sm font-medium">Worker Transitions</div>
                 <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
-                  <div className="h-full bg-green-500 rounded-full" style={{ width: "28%" }}></div>
+                  <div className="h-full bg-green-500 rounded-full" style={{ width: '28%' }}></div>
                 </div>
                 <div className="text-xs text-muted-foreground">Apprentice to skilled worker</div>
               </div>

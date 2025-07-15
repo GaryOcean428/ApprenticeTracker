@@ -6,12 +6,12 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Search, SlidersHorizontal, X } from "lucide-react";
+} from '@/components/ui/table';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Search, SlidersHorizontal, X } from 'lucide-react';
 
 export interface DataGridColumn<T> {
   /** Unique identifier for the column */
@@ -68,22 +68,20 @@ export function DataGrid<T>({
   hasActiveFilters = false,
   onResetFilters,
   onSearch,
-  searchValue = "",
-  emptyMessage = "No data found.",
+  searchValue = '',
+  emptyMessage = 'No data found.',
   keyExtractor = (item: any) => item.id,
-  actions
+  actions,
 }: DataGridProps<T>) {
   const [showFilters, setShowFilters] = useState(false);
-  
+
   return (
     <Card>
       <CardHeader className="flex flex-col gap-y-2 sm:flex-row sm:items-center sm:justify-between">
         <CardTitle>{title}</CardTitle>
-        <div className="flex items-center gap-2">
-          {actions}
-        </div>
+        <div className="flex items-center gap-2">{actions}</div>
       </CardHeader>
-      
+
       <CardContent>
         <div className="mb-4 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           {/* Search input */}
@@ -95,28 +93,26 @@ export function DataGrid<T>({
                 placeholder="Search..."
                 className="pl-8 dark:bg-[#1f2937] dark:border-[#374151]"
                 value={searchValue}
-                onChange={(e) => onSearch(e.target.value)}
+                onChange={e => onSearch(e.target.value)}
               />
             </div>
           )}
-          
+
           <div className="flex flex-wrap items-center gap-2">
             {/* Filter toggle button */}
             {renderFilters && (
               <Button
                 variant="outline"
                 size="sm"
-                className={hasActiveFilters ? "border-primary" : ""}
+                className={hasActiveFilters ? 'border-primary' : ''}
                 onClick={() => setShowFilters(!showFilters)}
               >
                 <SlidersHorizontal className="mr-2 h-4 w-4" />
                 Filters
-                {hasActiveFilters && (
-                  <span className="ml-1 rounded-full bg-primary w-2 h-2" />
-                )}
+                {hasActiveFilters && <span className="ml-1 rounded-full bg-primary w-2 h-2" />}
               </Button>
             )}
-            
+
             {/* Reset filters button */}
             {hasActiveFilters && onResetFilters && (
               <Button variant="ghost" size="sm" onClick={onResetFilters}>
@@ -126,14 +122,12 @@ export function DataGrid<T>({
             )}
           </div>
         </div>
-        
+
         {/* Filter panel */}
         {showFilters && renderFilters && (
-          <div className="mb-4 rounded-md border p-4">
-            {renderFilters()}
-          </div>
+          <div className="mb-4 rounded-md border p-4">{renderFilters()}</div>
         )}
-        
+
         {/* Loading state */}
         {isLoading ? (
           <div className="space-y-4">
@@ -142,22 +136,18 @@ export function DataGrid<T>({
               <Skeleton key={i} className="h-16 w-full" />
             ))}
           </div>
-        ) 
-        
-        /* Error state */
-        : error ? (
+        ) : /* Error state */
+        error ? (
           <div className="py-8 text-center">
-            <p className="text-destructive">{error.message || "An error occurred"}</p>
+            <p className="text-destructive">{error.message || 'An error occurred'}</p>
           </div>
-        ) 
-        
-        /* Data table */
-        : (
+        ) : (
+          /* Data table */
           <div className="rounded-md border dark:border-[#374151]">
             <Table>
               <TableHeader>
                 <TableRow>
-                  {columns.map((column) => (
+                  {columns.map(column => (
                     <TableHead key={column.id} className={column.className}>
                       {column.header}
                     </TableHead>
@@ -172,10 +162,13 @@ export function DataGrid<T>({
                     </TableCell>
                   </TableRow>
                 ) : (
-                  data.map((item) => (
+                  data.map(item => (
                     <TableRow key={keyExtractor(item)}>
-                      {columns.map((column) => (
-                        <TableCell key={`${keyExtractor(item)}-${column.id}`} className={column.className}>
+                      {columns.map(column => (
+                        <TableCell
+                          key={`${keyExtractor(item)}-${column.id}`}
+                          className={column.className}
+                        >
                           {column.cell(item)}
                         </TableCell>
                       ))}

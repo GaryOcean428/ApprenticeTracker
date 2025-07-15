@@ -1,8 +1,8 @@
 /**
  * Migration script for creating the unified contact and client management system
  */
-import { db } from "./db";
-import { sql } from "drizzle-orm";
+import { db } from './db';
+import { sql } from 'drizzle-orm';
 // Use console for logging in migration scripts
 const logger = {
   info: (message: string, ...args: any[]) => console.log(`[INFO] ${message}`, ...args),
@@ -12,11 +12,11 @@ const logger = {
 };
 
 export async function migrateUnifiedContactsSystem() {
-  logger.info("Starting unified contacts and clients schema migration...");
+  logger.info('Starting unified contacts and clients schema migration...');
 
   try {
     // Create Contact Tags table
-    logger.info("Creating contact_tags table...");
+    logger.info('Creating contact_tags table...');
     await db.execute(sql`
       CREATE TABLE IF NOT EXISTS contact_tags (
         id SERIAL PRIMARY KEY,
@@ -29,10 +29,10 @@ export async function migrateUnifiedContactsSystem() {
         updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
       )
     `);
-    logger.info("contact_tags table created successfully");
+    logger.info('contact_tags table created successfully');
 
     // Create Contacts table
-    logger.info("Creating contacts table...");
+    logger.info('Creating contacts table...');
     await db.execute(sql`
       CREATE TABLE IF NOT EXISTS contacts (
         id SERIAL PRIMARY KEY,
@@ -73,10 +73,10 @@ export async function migrateUnifiedContactsSystem() {
         last_contacted_at TIMESTAMP
       )
     `);
-    logger.info("contacts table created successfully");
+    logger.info('contacts table created successfully');
 
     // Create Contact Tag Assignments table
-    logger.info("Creating contact_tag_assignments table...");
+    logger.info('Creating contact_tag_assignments table...');
     await db.execute(sql`
       CREATE TABLE IF NOT EXISTS contact_tag_assignments (
         id SERIAL PRIMARY KEY,
@@ -85,10 +85,10 @@ export async function migrateUnifiedContactsSystem() {
         created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
       )
     `);
-    logger.info("contact_tag_assignments table created successfully");
+    logger.info('contact_tag_assignments table created successfully');
 
     // Create Contact Groups table
-    logger.info("Creating contact_groups table...");
+    logger.info('Creating contact_groups table...');
     await db.execute(sql`
       CREATE TABLE IF NOT EXISTS contact_groups (
         id SERIAL PRIMARY KEY,
@@ -101,10 +101,10 @@ export async function migrateUnifiedContactsSystem() {
         updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
       )
     `);
-    logger.info("contact_groups table created successfully");
+    logger.info('contact_groups table created successfully');
 
     // Create Contact Group Members table
-    logger.info("Creating contact_group_members table...");
+    logger.info('Creating contact_group_members table...');
     await db.execute(sql`
       CREATE TABLE IF NOT EXISTS contact_group_members (
         id SERIAL PRIMARY KEY,
@@ -114,10 +114,10 @@ export async function migrateUnifiedContactsSystem() {
         created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
       )
     `);
-    logger.info("contact_group_members table created successfully");
+    logger.info('contact_group_members table created successfully');
 
     // Create Contact Interactions table
-    logger.info("Creating contact_interactions table...");
+    logger.info('Creating contact_interactions table...');
     await db.execute(sql`
       CREATE TABLE IF NOT EXISTS contact_interactions (
         id SERIAL PRIMARY KEY,
@@ -132,10 +132,10 @@ export async function migrateUnifiedContactsSystem() {
         updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
       )
     `);
-    logger.info("contact_interactions table created successfully");
+    logger.info('contact_interactions table created successfully');
 
     // Create Client Types table
-    logger.info("Creating client_types table...");
+    logger.info('Creating client_types table...');
     await db.execute(sql`
       CREATE TABLE IF NOT EXISTS client_types (
         id SERIAL PRIMARY KEY,
@@ -146,10 +146,10 @@ export async function migrateUnifiedContactsSystem() {
         updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
       )
     `);
-    logger.info("client_types table created successfully");
+    logger.info('client_types table created successfully');
 
     // Create Clients table
-    logger.info("Creating clients table...");
+    logger.info('Creating clients table...');
     await db.execute(sql`
       CREATE TABLE IF NOT EXISTS clients (
         id SERIAL PRIMARY KEY,
@@ -195,10 +195,10 @@ export async function migrateUnifiedContactsSystem() {
         last_interaction_date TIMESTAMP
       )
     `);
-    logger.info("clients table created successfully");
+    logger.info('clients table created successfully');
 
     // Create Client Contacts table
-    logger.info("Creating client_contacts table...");
+    logger.info('Creating client_contacts table...');
     await db.execute(sql`
       CREATE TABLE IF NOT EXISTS client_contacts (
         id SERIAL PRIMARY KEY,
@@ -212,10 +212,10 @@ export async function migrateUnifiedContactsSystem() {
         updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
       )
     `);
-    logger.info("client_contacts table created successfully");
+    logger.info('client_contacts table created successfully');
 
     // Create Client Services table
-    logger.info("Creating client_services table...");
+    logger.info('Creating client_services table...');
     await db.execute(sql`
       CREATE TABLE IF NOT EXISTS client_services (
         id SERIAL PRIMARY KEY,
@@ -232,10 +232,10 @@ export async function migrateUnifiedContactsSystem() {
         updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
       )
     `);
-    logger.info("client_services table created successfully");
+    logger.info('client_services table created successfully');
 
     // Create Client Interactions table
-    logger.info("Creating client_interactions table...");
+    logger.info('Creating client_interactions table...');
     await db.execute(sql`
       CREATE TABLE IF NOT EXISTS client_interactions (
         id SERIAL PRIMARY KEY,
@@ -254,30 +254,44 @@ export async function migrateUnifiedContactsSystem() {
         updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
       )
     `);
-    logger.info("client_interactions table created successfully");
+    logger.info('client_interactions table created successfully');
 
     // Create indexes
-    logger.info("Creating indexes...");
-    
-    // Contact indexes
-    await db.execute(sql`CREATE INDEX IF NOT EXISTS contacts_primary_role_idx ON contacts(primary_role)`);
-    await db.execute(sql`CREATE INDEX IF NOT EXISTS contacts_organization_id_idx ON contacts(organization_id)`);
-    await db.execute(sql`CREATE INDEX IF NOT EXISTS contacts_apprentice_id_idx ON contacts(apprentice_id)`);
-    await db.execute(sql`CREATE INDEX IF NOT EXISTS contacts_worker_id_idx ON contacts(worker_id)`);
-    await db.execute(sql`CREATE INDEX IF NOT EXISTS contacts_host_employer_id_idx ON contacts(host_employer_id)`);
-    
-    // Client indexes
-    await db.execute(sql`CREATE INDEX IF NOT EXISTS clients_organization_id_idx ON clients(organization_id)`);
-    await db.execute(sql`CREATE INDEX IF NOT EXISTS clients_host_employer_id_idx ON clients(host_employer_id)`);
-    await db.execute(sql`CREATE INDEX IF NOT EXISTS clients_client_type_idx ON clients(client_type)`);
-    await db.execute(sql`CREATE INDEX IF NOT EXISTS clients_status_idx ON clients(status)`);
-    
-    logger.info("Indexes created successfully");
+    logger.info('Creating indexes...');
 
-    logger.info("Unified contacts and clients schema migration completed successfully");
+    // Contact indexes
+    await db.execute(
+      sql`CREATE INDEX IF NOT EXISTS contacts_primary_role_idx ON contacts(primary_role)`
+    );
+    await db.execute(
+      sql`CREATE INDEX IF NOT EXISTS contacts_organization_id_idx ON contacts(organization_id)`
+    );
+    await db.execute(
+      sql`CREATE INDEX IF NOT EXISTS contacts_apprentice_id_idx ON contacts(apprentice_id)`
+    );
+    await db.execute(sql`CREATE INDEX IF NOT EXISTS contacts_worker_id_idx ON contacts(worker_id)`);
+    await db.execute(
+      sql`CREATE INDEX IF NOT EXISTS contacts_host_employer_id_idx ON contacts(host_employer_id)`
+    );
+
+    // Client indexes
+    await db.execute(
+      sql`CREATE INDEX IF NOT EXISTS clients_organization_id_idx ON clients(organization_id)`
+    );
+    await db.execute(
+      sql`CREATE INDEX IF NOT EXISTS clients_host_employer_id_idx ON clients(host_employer_id)`
+    );
+    await db.execute(
+      sql`CREATE INDEX IF NOT EXISTS clients_client_type_idx ON clients(client_type)`
+    );
+    await db.execute(sql`CREATE INDEX IF NOT EXISTS clients_status_idx ON clients(status)`);
+
+    logger.info('Indexes created successfully');
+
+    logger.info('Unified contacts and clients schema migration completed successfully');
     return true;
   } catch (error) {
-    logger.error("Error in unified contacts and clients schema migration:", error);
+    logger.error('Error in unified contacts and clients schema migration:', error);
     throw error;
   }
 }
@@ -286,20 +300,20 @@ export async function migrateUnifiedContactsSystem() {
  * Seeds basic system contact tags
  */
 export async function seedContactTags() {
-  logger.info("Seeding system contact tags...");
-  
+  logger.info('Seeding system contact tags...');
+
   try {
     // Check if we already have system tags
     const existingTags = await db.execute(sql`
       SELECT COUNT(*) FROM contact_tags WHERE is_system = TRUE
     `);
-    
+
     const count = parseInt(String(existingTags.rows[0].count), 10);
     if (count > 0) {
-      logger.info("System contact tags already exist. Skipping...");
+      logger.info('System contact tags already exist. Skipping...');
       return;
     }
-    
+
     // Insert system tags
     await db.execute(sql`
       INSERT INTO contact_tags (name, description, color, is_system) VALUES
@@ -314,7 +328,7 @@ export async function seedContactTags() {
         ('Field Officer', 'Field officer responsible for site visits', '#0891B2', TRUE),
         ('Government', 'Government department or regulatory contact', '#6B7280', TRUE)
     `);
-    
+
     // Insert some example client types
     await db.execute(sql`
       INSERT INTO client_types (name, description) VALUES
@@ -325,10 +339,10 @@ export async function seedContactTags() {
         ('Industry Partner', 'Industry association or partnership'),
         ('Government', 'Government departments and agencies')
     `);
-    
-    logger.info("System contact tags and client types seeded successfully");
+
+    logger.info('System contact tags and client types seeded successfully');
   } catch (error) {
-    logger.error("Error seeding system contact tags:", error);
+    logger.error('Error seeding system contact tags:', error);
     throw error;
   }
 }

@@ -1,11 +1,11 @@
-import { useState } from "react";
-import { useLocation, useRoute } from "wouter";
-import { useMutation } from "@tanstack/react-query";
-import { z } from "zod";
-import { insertComplianceRecordSchema } from "@shared/schema";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { Button } from "@/components/ui/button";
+import { useState } from 'react';
+import { useLocation, useRoute } from 'wouter';
+import { useMutation } from '@tanstack/react-query';
+import { z } from 'zod';
+import { insertComplianceRecordSchema } from '@shared/schema';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -14,28 +14,24 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
+} from '@/components/ui/form';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar as CalendarIcon, ArrowLeft } from "lucide-react";
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
-import { format } from "date-fns";
-import { toast } from "sonner";
-import { queryClient } from "@/lib/queryClient";
+} from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Calendar as CalendarIcon, ArrowLeft } from 'lucide-react';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { cn } from '@/lib/utils';
+import { format } from 'date-fns';
+import { toast } from 'sonner';
+import { queryClient } from '@/lib/queryClient';
 // No need for Link import
 
 // Extend schema with client-side validation
@@ -49,81 +45,77 @@ type FormValues = z.infer<typeof formSchema>;
 export default function CreateComplianceRecord() {
   const [, navigate] = useLocation();
   const searchParams = new URLSearchParams(window.location.search);
-  const relatedTo = searchParams.get("relatedTo");
-  const relatedId = searchParams.get("relatedId");
-  
+  const relatedTo = searchParams.get('relatedTo');
+  const relatedId = searchParams.get('relatedId');
+
   // Create form
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      type: "",
-      status: "pending",
-      relatedTo: relatedTo || "",
+      type: '',
+      status: 'pending',
+      relatedTo: relatedTo || '',
       relatedId: relatedId ? parseInt(relatedId) : undefined,
-      notes: "",
+      notes: '',
     },
   });
-  
+
   // Create mutation for form submission
   const createComplianceMutation = useMutation({
     mutationFn: async (data: FormValues) => {
-      const res = await fetch("/api/compliance", {
-        method: "POST",
+      const res = await fetch('/api/compliance', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify(data),
       });
-      
+
       if (!res.ok) {
         const error = await res.json();
-        throw new Error(error.message || "Failed to create compliance record");
+        throw new Error(error.message || 'Failed to create compliance record');
       }
-      
+
       return res.json();
     },
     onSuccess: () => {
-      toast.success("Compliance record created successfully");
-      queryClient.invalidateQueries({ queryKey: ["/api/compliance"] });
-      
+      toast.success('Compliance record created successfully');
+      queryClient.invalidateQueries({ queryKey: ['/api/compliance'] });
+
       // If this was created in relation to another entity, invalidate that query too
       if (relatedTo && relatedId) {
-        queryClient.invalidateQueries({ 
-          queryKey: [`/api/compliance/related/${relatedTo}/${relatedId}`] 
+        queryClient.invalidateQueries({
+          queryKey: [`/api/compliance/related/${relatedTo}/${relatedId}`],
         });
       }
-      
+
       // Navigate back to the list or the related entity
       if (relatedTo && relatedId) {
         navigate(`/${relatedTo}s/${relatedId}`);
       } else {
-        navigate("/compliance");
+        navigate('/compliance');
       }
     },
-    onError: (error) => {
+    onError: error => {
       toast.error(`Error: ${error.message}`);
     },
   });
-  
+
   // Handle form submission
   const onSubmit = (data: FormValues) => {
     createComplianceMutation.mutate(data);
   };
-  
+
   return (
     <div className="container mx-auto py-8">
       <div className="flex items-center mb-6">
-        <Button 
-          variant="ghost" 
-          className="mr-4" 
-          onClick={() => navigate("/compliance")}
-        >
+        <Button variant="ghost" className="mr-4" onClick={() => navigate('/compliance')}>
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back
         </Button>
         <h1 className="text-2xl font-bold">Create Compliance Record</h1>
       </div>
-      
+
       <Card>
         <CardHeader>
           <CardTitle>Compliance Record Details</CardTitle>
@@ -156,7 +148,7 @@ export default function CreateComplianceRecord() {
                     </FormItem>
                   )}
                 />
-                
+
                 <FormField
                   control={form.control}
                   name="status"
@@ -179,7 +171,7 @@ export default function CreateComplianceRecord() {
                     </FormItem>
                   )}
                 />
-                
+
                 {!relatedTo && (
                   <FormField
                     control={form.control}
@@ -205,7 +197,7 @@ export default function CreateComplianceRecord() {
                     )}
                   />
                 )}
-                
+
                 {!relatedId && (
                   <FormField
                     control={form.control}
@@ -214,11 +206,11 @@ export default function CreateComplianceRecord() {
                       <FormItem>
                         <FormLabel>Related ID*</FormLabel>
                         <FormControl>
-                          <Input 
-                            type="number" 
-                            placeholder="Enter ID" 
-                            {...field} 
-                            onChange={(e) => field.onChange(parseInt(e.target.value) || undefined)}
+                          <Input
+                            type="number"
+                            placeholder="Enter ID"
+                            {...field}
+                            onChange={e => field.onChange(parseInt(e.target.value) || undefined)}
                           />
                         </FormControl>
                         <FormMessage />
@@ -226,7 +218,7 @@ export default function CreateComplianceRecord() {
                     )}
                   />
                 )}
-                
+
                 <FormField
                   control={form.control}
                   name="dueDate"
@@ -237,17 +229,13 @@ export default function CreateComplianceRecord() {
                         <PopoverTrigger asChild>
                           <FormControl>
                             <Button
-                              variant={"outline"}
+                              variant={'outline'}
                               className={cn(
-                                "w-full pl-3 text-left font-normal",
-                                !field.value && "text-muted-foreground"
+                                'w-full pl-3 text-left font-normal',
+                                !field.value && 'text-muted-foreground'
                               )}
                             >
-                              {field.value ? (
-                                format(field.value, "PPP")
-                              ) : (
-                                <span>Pick a date</span>
-                              )}
+                              {field.value ? format(field.value, 'PPP') : <span>Pick a date</span>}
                               <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                             </Button>
                           </FormControl>
@@ -265,7 +253,7 @@ export default function CreateComplianceRecord() {
                     </FormItem>
                   )}
                 />
-                
+
                 <FormField
                   control={form.control}
                   name="completionDate"
@@ -276,17 +264,13 @@ export default function CreateComplianceRecord() {
                         <PopoverTrigger asChild>
                           <FormControl>
                             <Button
-                              variant={"outline"}
+                              variant={'outline'}
                               className={cn(
-                                "w-full pl-3 text-left font-normal",
-                                !field.value && "text-muted-foreground"
+                                'w-full pl-3 text-left font-normal',
+                                !field.value && 'text-muted-foreground'
                               )}
                             >
-                              {field.value ? (
-                                format(field.value, "PPP")
-                              ) : (
-                                <span>Pick a date</span>
-                              )}
+                              {field.value ? format(field.value, 'PPP') : <span>Pick a date</span>}
                               <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                             </Button>
                           </FormControl>
@@ -305,7 +289,7 @@ export default function CreateComplianceRecord() {
                   )}
                 />
               </div>
-              
+
               <FormField
                 control={form.control}
                 name="notes"
@@ -313,10 +297,10 @@ export default function CreateComplianceRecord() {
                   <FormItem>
                     <FormLabel>Notes</FormLabel>
                     <FormControl>
-                      <Textarea 
-                        placeholder="Enter any additional notes or details" 
-                        className="min-h-[120px]" 
-                        value={field.value || ''} 
+                      <Textarea
+                        placeholder="Enter any additional notes or details"
+                        className="min-h-[120px]"
+                        value={field.value || ''}
                         onChange={field.onChange}
                         onBlur={field.onBlur}
                         name={field.name}
@@ -327,20 +311,13 @@ export default function CreateComplianceRecord() {
                   </FormItem>
                 )}
               />
-              
+
               <div className="flex justify-end gap-4">
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  onClick={() => navigate("/compliance")}
-                >
+                <Button type="button" variant="outline" onClick={() => navigate('/compliance')}>
                   Cancel
                 </Button>
-                <Button 
-                  type="submit" 
-                  disabled={createComplianceMutation.isPending}
-                >
-                  {createComplianceMutation.isPending ? "Creating..." : "Create Compliance Record"}
+                <Button type="submit" disabled={createComplianceMutation.isPending}>
+                  {createComplianceMutation.isPending ? 'Creating...' : 'Create Compliance Record'}
                 </Button>
               </div>
             </form>

@@ -6,17 +6,20 @@
 import { describe, it, expect, beforeAll, afterAll } from '@jest/globals';
 import { db } from '../db';
 import { storage } from '../storage';
-import { 
-  insertUserSchema, 
-  insertApprenticeSchema, 
+import {
+  insertUserSchema,
+  insertApprenticeSchema,
   insertHostEmployerSchema,
   insertTimesheetSchema,
   insertAwardSchema,
   insertPayRateSchema,
   insertEnrichmentProgramSchema,
-  insertProgressReviewTemplateSchema
+  insertProgressReviewTemplateSchema,
 } from '@shared/schema';
-import { BusinessRuleValidator, createApprenticeValidationSchema } from '../utils/validation-enhanced';
+import {
+  BusinessRuleValidator,
+  createApprenticeValidationSchema,
+} from '../utils/validation-enhanced';
 
 // Test data factories
 function createTestUser() {
@@ -26,7 +29,7 @@ function createTestUser() {
     email: `test${Date.now()}@example.com`,
     firstName: 'Test',
     lastName: 'User',
-    role: 'admin'
+    role: 'admin',
   };
 }
 
@@ -39,7 +42,7 @@ function createTestApprentice() {
     dateOfBirth: new Date('2000-01-01'),
     trade: 'Carpentry',
     status: 'active',
-    startDate: new Date('2023-01-01')
+    startDate: new Date('2023-01-01'),
   };
 }
 
@@ -52,7 +55,7 @@ function createTestHostEmployer() {
     phone: '+61398765432',
     address: '123 Test Street, Melbourne VIC 3000',
     status: 'active',
-    complianceStatus: 'compliant'
+    complianceStatus: 'compliant',
   };
 }
 
@@ -65,10 +68,10 @@ describe('CRUD Operations Test Suite', () => {
     // Set up test data
     const testUser = await storage.createUser(createTestUser());
     testUserId = testUser.id;
-    
+
     const testApprentice = await storage.createApprentice(createTestApprentice());
     testApprenticeId = testApprentice.id;
-    
+
     const testHostEmployer = await storage.createHostEmployer(createTestHostEmployer());
     testHostEmployerId = testHostEmployer.id;
   });
@@ -88,14 +91,14 @@ describe('CRUD Operations Test Suite', () => {
     it('should create a user with valid data', async () => {
       const userData = createTestUser();
       const result = insertUserSchema.safeParse(userData);
-      
+
       expect(result.success).toBe(true);
-      
+
       if (result.success) {
         const user = await storage.createUser(result.data);
         expect(user).toBeDefined();
         expect(user.email).toBe(userData.email);
-        
+
         // Clean up
         await storage.deleteUser(user.id);
       }
@@ -110,7 +113,7 @@ describe('CRUD Operations Test Suite', () => {
     it('should update user data', async () => {
       const updateData = { firstName: 'Updated', lastName: 'Name' };
       const updatedUser = await storage.updateUser(testUserId, updateData);
-      
+
       expect(updatedUser).toBeDefined();
       expect(updatedUser?.firstName).toBe('Updated');
       expect(updatedUser?.lastName).toBe('Name');
@@ -127,33 +130,35 @@ describe('CRUD Operations Test Suite', () => {
     it('should create an apprentice with valid data', async () => {
       const apprenticeData = createTestApprentice();
       const result = createApprenticeValidationSchema.safeParse(apprenticeData);
-      
+
       expect(result.success).toBe(true);
-      
+
       if (result.success) {
         const apprentice = await storage.createApprentice(apprenticeData);
         expect(apprentice).toBeDefined();
         expect(apprentice.email).toBe(apprenticeData.email);
-        
+
         // Clean up
         await storage.deleteApprentice(apprentice.id);
       }
     });
 
     it('should validate apprentice age requirements', () => {
-      const youngApprentice = { 
-        ...createTestApprentice(), 
-        dateOfBirth: new Date('2010-01-01') // Too young
+      const youngApprentice = {
+        ...createTestApprentice(),
+        dateOfBirth: new Date('2010-01-01'), // Too young
       };
-      
+
       const result = createApprenticeValidationSchema.safeParse(youngApprentice);
       expect(result.success).toBe(false);
     });
 
     it('should validate status transitions', () => {
       // Valid transition
-      expect(BusinessRuleValidator.validateApprenticeTransition('applicant', 'recruitment')).toBe(true);
-      
+      expect(BusinessRuleValidator.validateApprenticeTransition('applicant', 'recruitment')).toBe(
+        true
+      );
+
       // Invalid transition
       expect(BusinessRuleValidator.validateApprenticeTransition('completed', 'active')).toBe(false);
     });
@@ -161,7 +166,7 @@ describe('CRUD Operations Test Suite', () => {
     it('should read apprentice by email', async () => {
       const apprentice = await storage.getApprentice(testApprenticeId);
       expect(apprentice).toBeDefined();
-      
+
       if (apprentice) {
         const foundByEmail = await storage.getApprenticeByEmail(apprentice.email);
         expect(foundByEmail).toBeDefined();
@@ -174,14 +179,14 @@ describe('CRUD Operations Test Suite', () => {
     it('should create a host employer with valid data', async () => {
       const hostData = createTestHostEmployer();
       const result = insertHostEmployerSchema.safeParse(hostData);
-      
+
       expect(result.success).toBe(true);
-      
+
       if (result.success) {
         const host = await storage.createHostEmployer(result.data);
         expect(host).toBeDefined();
         expect(host.name).toBe(hostData.name);
-        
+
         // Clean up
         await storage.deleteHostEmployer(host.id);
       }
@@ -190,12 +195,15 @@ describe('CRUD Operations Test Suite', () => {
     it('should validate placement creation business rules', async () => {
       const apprentice = await storage.getApprentice(testApprenticeId);
       const hostEmployer = await storage.getHostEmployer(testHostEmployerId);
-      
+
       expect(apprentice).toBeDefined();
       expect(hostEmployer).toBeDefined();
-      
+
       if (apprentice && hostEmployer) {
-        const validation = BusinessRuleValidator.validatePlacementCreation(apprentice, hostEmployer);
+        const validation = BusinessRuleValidator.validatePlacementCreation(
+          apprentice,
+          hostEmployer
+        );
         expect(validation.valid).toBe(true);
       }
     });
@@ -208,18 +216,18 @@ describe('CRUD Operations Test Suite', () => {
         placementId: 1, // Assuming a placement exists
         weekStarting: new Date('2024-01-01'),
         totalHours: 40,
-        status: 'pending'
+        status: 'pending',
       };
-      
+
       const result = insertTimesheetSchema.safeParse(timesheetData);
       expect(result.success).toBe(true);
-      
+
       if (result.success) {
         try {
           const timesheet = await storage.createTimesheet(result.data);
           expect(timesheet).toBeDefined();
           expect(timesheet.totalHours).toBe(40);
-          
+
           // Clean up
           // Note: deleteTimesheet method would need to be implemented
         } catch (error) {
@@ -232,7 +240,7 @@ describe('CRUD Operations Test Suite', () => {
     it('should validate timesheet approval business rules', () => {
       const timesheet = { status: 'pending', totalHours: 40 };
       const user = { permissions: ['timesheet.approve'] };
-      
+
       const validation = BusinessRuleValidator.validateTimesheetApproval(timesheet, user);
       expect(validation.valid).toBe(true);
     });
@@ -249,18 +257,18 @@ describe('CRUD Operations Test Suite', () => {
         sector: 'Private',
         description: 'Test award for validation',
         effectiveDate: new Date('2024-01-01'),
-        isActive: true
+        isActive: true,
       };
-      
+
       const result = insertAwardSchema.safeParse(awardData);
       expect(result.success).toBe(true);
-      
+
       if (result.success) {
         try {
           const award = await storage.createAward(result.data);
           expect(award).toBeDefined();
           expect(award.code).toBe(awardData.code);
-          
+
           // Clean up
           await storage.deleteAward(award.id);
         } catch (error) {
@@ -272,12 +280,12 @@ describe('CRUD Operations Test Suite', () => {
     it('should validate pay rate business rules', () => {
       const payRateData = {
         classificationId: 1,
-        hourlyRate: 25.50,
+        hourlyRate: 25.5,
         effectiveFrom: new Date('2024-01-01'),
         payRateType: 'award' as const,
-        isApprenticeRate: false
+        isApprenticeRate: false,
       };
-      
+
       const result = insertPayRateSchema.safeParse(payRateData);
       expect(result.success).toBe(true);
     });
@@ -296,18 +304,18 @@ describe('CRUD Operations Test Suite', () => {
         facilitator: 'Test Facilitator',
         location: 'Test Location',
         maxParticipants: 20,
-        cost: 100.00
+        cost: 100.0,
       };
-      
+
       const result = insertEnrichmentProgramSchema.safeParse(programData);
       expect(result.success).toBe(true);
-      
+
       if (result.success) {
         try {
           const program = await storage.createEnrichmentProgram(result.data);
           expect(program).toBeDefined();
           expect(program.name).toBe(programData.name);
-          
+
           // Clean up
           await storage.deleteEnrichmentProgram(program.id);
         } catch (error) {
@@ -327,22 +335,22 @@ describe('CRUD Operations Test Suite', () => {
           sections: [
             { name: 'Performance', weight: 0.5 },
             { name: 'Goals', weight: 0.3 },
-            { name: 'Development', weight: 0.2 }
-          ]
+            { name: 'Development', weight: 0.2 },
+          ],
         },
         isActive: true,
-        createdBy: testUserId
+        createdBy: testUserId,
       };
-      
+
       const result = insertProgressReviewTemplateSchema.safeParse(templateData);
       expect(result.success).toBe(true);
-      
+
       if (result.success) {
         try {
           const template = await storage.createProgressReviewTemplate(result.data);
           expect(template).toBeDefined();
           expect(template.templateName).toBe(templateData.templateName);
-          
+
           // Clean up
           await storage.deleteProgressReviewTemplate(template.id);
         } catch (error) {
@@ -355,8 +363,12 @@ describe('CRUD Operations Test Suite', () => {
       const apprentice = { status: 'active' };
       const reviewer = { id: testUserId };
       const reviewDate = new Date('2024-12-01'); // Future date
-      
-      const validation = BusinessRuleValidator.validateProgressReviewScheduling(apprentice, reviewer, reviewDate);
+
+      const validation = BusinessRuleValidator.validateProgressReviewScheduling(
+        apprentice,
+        reviewer,
+        reviewDate
+      );
       expect(validation.valid).toBe(true);
     });
   });
@@ -365,17 +377,17 @@ describe('CRUD Operations Test Suite', () => {
     it('should enforce unique constraints', async () => {
       const userData1 = createTestUser();
       const userData2 = { ...createTestUser(), email: userData1.email }; // Same email
-      
+
       const user1 = await storage.createUser(userData1);
       expect(user1).toBeDefined();
-      
+
       try {
         await storage.createUser(userData2);
         expect(true).toBe(false); // Should not reach here
       } catch (error) {
         expect(error).toBeDefined(); // Should throw due to unique constraint
       }
-      
+
       // Clean up
       await storage.deleteUser(user1.id);
     });
@@ -388,7 +400,7 @@ describe('CRUD Operations Test Suite', () => {
           hostEmployerId: testHostEmployerId,
           startDate: new Date('2024-01-01'),
           position: 'Test Position',
-          status: 'active'
+          status: 'active',
         });
         expect(true).toBe(false); // Should not reach here
       } catch (error) {
@@ -401,7 +413,7 @@ describe('CRUD Operations Test Suite', () => {
         firstName: 'John',
         // Missing required fields
       };
-      
+
       const result = insertApprenticeSchema.safeParse(incompleteApprentice);
       expect(result.success).toBe(false);
     });
@@ -410,11 +422,11 @@ describe('CRUD Operations Test Suite', () => {
   describe('Performance and Optimization', () => {
     it('should efficiently retrieve data with filters', async () => {
       const start = Date.now();
-      
+
       // Test filtering operations
       const activeApprentices = await storage.getAllApprentices();
       const filteredApprentices = activeApprentices.filter(a => a.status === 'active');
-      
+
       const elapsed = Date.now() - start;
       expect(elapsed).toBeLessThan(1000); // Should complete within 1 second
       expect(Array.isArray(filteredApprentices)).toBe(true);
@@ -424,7 +436,7 @@ describe('CRUD Operations Test Suite', () => {
       // This would test pagination if implemented
       const allUsers = await storage.getAllUsers();
       expect(Array.isArray(allUsers)).toBe(true);
-      
+
       // If pagination was implemented:
       // const page1 = await storage.getAllUsers({ page: 1, limit: 10 });
       // expect(page1.length).toBeLessThanOrEqual(10);
@@ -435,34 +447,33 @@ describe('CRUD Operations Test Suite', () => {
 // Helper function to run specific test scenarios
 export async function validateCRUDOperations() {
   console.log('Starting CRUD validation...');
-  
+
   const testResults = {
     schemaValidation: true,
     basicCRUD: true,
     businessRules: true,
     dataIntegrity: true,
-    performance: true
+    performance: true,
   };
 
   try {
     // Test schema validation
     console.log('✓ Schema validation tests passed');
-    
+
     // Test basic CRUD operations
     console.log('✓ Basic CRUD operation tests passed');
-    
+
     // Test business rule validation
     console.log('✓ Business rule validation tests passed');
-    
+
     // Test data integrity constraints
     console.log('✓ Data integrity constraint tests passed');
-    
+
     // Test performance
     console.log('✓ Performance tests passed');
-    
+
     console.log('All CRUD validation tests completed successfully!');
     return testResults;
-    
   } catch (error) {
     console.error('CRUD validation failed:', error);
     throw error;

@@ -16,33 +16,37 @@ export default function ChargeRateDetailPage() {
   const [activeTab, setActiveTab] = useState('overview');
 
   // Fetch charge rate calculation details
-  const { data: calculation, isLoading, error } = useQuery({
+  const {
+    data: calculation,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ['/api/payroll/charge-rates', id],
-    select: (data) => data?.data,
+    select: data => data?.data,
   });
 
   // Fetch related apprentice details if available
   const { data: apprentice } = useQuery({
     queryKey: ['/api/apprentices', calculation?.apprenticeId],
     enabled: !!calculation?.apprenticeId,
-    select: (data) => data?.data,
+    select: data => data?.data,
   });
 
   // Fetch related host employer details if available
   const { data: hostEmployer } = useQuery({
     queryKey: ['/api/host-employers', calculation?.hostEmployerId],
     enabled: !!calculation?.hostEmployerId,
-    select: (data) => data?.data,
+    select: data => data?.data,
   });
 
   // Construct full names if available
-  const apprenticeName = apprentice ? 
-    `${apprentice.firstName || ''} ${apprentice.lastName || ''}`.trim() : 
-    undefined;
-  
-  const hostEmployerName = hostEmployer ? 
-    hostEmployer.companyName || hostEmployer.businessName : 
-    undefined;
+  const apprenticeName = apprentice
+    ? `${apprentice.firstName || ''} ${apprentice.lastName || ''}`.trim()
+    : undefined;
+
+  const hostEmployerName = hostEmployer
+    ? hostEmployer.companyName || hostEmployer.businessName
+    : undefined;
 
   return (
     <MainLayout>
@@ -56,15 +60,11 @@ export default function ChargeRateDetailPage() {
               </Link>
             </Button>
           </div>
-          
+
           <div className="flex flex-col md:flex-row justify-between md:items-center space-y-2 md:space-y-0">
             <div>
               <h1 className="text-3xl font-bold tracking-tight">
-                {isLoading ? (
-                  <Skeleton className="h-9 w-64" />
-                ) : (
-                  `Charge Rate Calculation ${id}`
-                )}
+                {isLoading ? <Skeleton className="h-9 w-64" /> : `Charge Rate Calculation ${id}`}
               </h1>
               <p className="text-muted-foreground mt-1">
                 {isLoading ? (
@@ -74,7 +74,7 @@ export default function ChargeRateDetailPage() {
                 )}
               </p>
             </div>
-            
+
             <div className="flex space-x-2">
               <Button variant="outline" size="sm">
                 <Printer className="h-4 w-4 mr-2" />
@@ -91,7 +91,7 @@ export default function ChargeRateDetailPage() {
             </div>
           </div>
         </div>
-        
+
         {isLoading ? (
           <div className="space-y-6">
             <Skeleton className="h-24 w-full" />
@@ -107,12 +107,9 @@ export default function ChargeRateDetailPage() {
         ) : calculation ? (
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <div className="col-span-1">
-              <RateApprovalWorkflow 
-                calculation={calculation}
-                className="sticky top-6"
-              />
+              <RateApprovalWorkflow calculation={calculation} className="sticky top-6" />
             </div>
-            
+
             <div className="col-span-1 md:col-span-3 space-y-6">
               <Tabs value={activeTab} onValueChange={setActiveTab}>
                 <TabsList className="grid w-full grid-cols-3">
@@ -120,9 +117,9 @@ export default function ChargeRateDetailPage() {
                   <TabsTrigger value="details">Calculation Details</TabsTrigger>
                   <TabsTrigger value="history">History</TabsTrigger>
                 </TabsList>
-                
+
                 <TabsContent value="overview" className="space-y-6">
-                  <ChargeRateVisualizer 
+                  <ChargeRateVisualizer
                     calculation={calculation}
                     apprenticeName={apprenticeName}
                     hostEmployerName={hostEmployerName}
@@ -134,24 +131,30 @@ export default function ChargeRateDetailPage() {
                     showExportOptions={false}
                   />
                 </TabsContent>
-                
+
                 <TabsContent value="details" className="space-y-6">
                   <div className="prose max-w-none">
                     <h2>Calculation Formula and Methodology</h2>
                     <p>
-                      This calculation uses the R8 rate calculation system to determine the appropriate
-                      charge rate for the host employer. The calculation takes into account the base pay rate,
-                      on-costs, and a profit margin.
+                      This calculation uses the R8 rate calculation system to determine the
+                      appropriate charge rate for the host employer. The calculation takes into
+                      account the base pay rate, on-costs, and a profit margin.
                     </p>
-                    
+
                     <h3>Calculation Steps</h3>
                     <ol>
                       <li>
-                        <strong>Base Wage Calculation:</strong> Pay rate × Total annual hours<br />
-                        <code>${calculation.payRate} × {calculation.totalHours} = ${calculation.baseWage}</code>
+                        <strong>Base Wage Calculation:</strong> Pay rate × Total annual hours
+                        <br />
+                        <code>
+                          ${calculation.payRate} × {calculation.totalHours} = $
+                          {calculation.baseWage}
+                        </code>
                       </li>
                       <li>
-                        <strong>On-costs Calculation:</strong> Various statutory and operational costs<br />
+                        <strong>On-costs Calculation:</strong> Various statutory and operational
+                        costs
+                        <br />
                         <ul>
                           <li>Superannuation: {calculation.oncosts.superannuation}</li>
                           <li>Workers Compensation: {calculation.oncosts.workersComp}</li>
@@ -163,39 +166,62 @@ export default function ChargeRateDetailPage() {
                         </ul>
                       </li>
                       <li>
-                        <strong>Total Cost Calculation:</strong> Base wage + Total on-costs<br />
-                        <code>${calculation.baseWage} + ${Object.values(calculation.oncosts).reduce((a, b) => a + b, 0)} = ${calculation.totalCost}</code>
+                        <strong>Total Cost Calculation:</strong> Base wage + Total on-costs
+                        <br />
+                        <code>
+                          ${calculation.baseWage} + $
+                          {Object.values(calculation.oncosts).reduce((a, b) => a + b, 0)} = $
+                          {calculation.totalCost}
+                        </code>
                       </li>
                       <li>
-                        <strong>Cost Per Hour:</strong> Total cost ÷ Billable hours<br />
-                        <code>${calculation.totalCost} ÷ {calculation.billableHours} = ${calculation.costPerHour}</code>
+                        <strong>Cost Per Hour:</strong> Total cost ÷ Billable hours
+                        <br />
+                        <code>
+                          ${calculation.totalCost} ÷ {calculation.billableHours} = $
+                          {calculation.costPerHour}
+                        </code>
                       </li>
                       <li>
-                        <strong>Charge Rate Calculation:</strong> Cost per hour × (1 + Margin)<br />
-                        <code>${calculation.costPerHour} × (1 + {((calculation.chargeRate / calculation.costPerHour) - 1).toFixed(4)}) = ${calculation.chargeRate}</code>
+                        <strong>Charge Rate Calculation:</strong> Cost per hour × (1 + Margin)
+                        <br />
+                        <code>
+                          ${calculation.costPerHour} × (1 +{' '}
+                          {(calculation.chargeRate / calculation.costPerHour - 1).toFixed(4)}) = $
+                          {calculation.chargeRate}
+                        </code>
                       </li>
                     </ol>
-                    
+
                     <h3>Modern Award Connection</h3>
                     <p>
-                      This calculation is based on the pay rates and conditions specified in the relevant modern award.
+                      This calculation is based on the pay rates and conditions specified in the
+                      relevant modern award.
                       {calculation.awardName && (
-                        <span> The applicable award is the <strong>{calculation.awardName}</strong>.</span>
+                        <span>
+                          {' '}
+                          The applicable award is the <strong>{calculation.awardName}</strong>.
+                        </span>
                       )}
                       {calculation.classificationName && (
-                        <span> The classification used is <strong>{calculation.classificationName}</strong>.</span>
+                        <span>
+                          {' '}
+                          The classification used is{' '}
+                          <strong>{calculation.classificationName}</strong>.
+                        </span>
                       )}
                     </p>
-                    
+
                     <h3>Penalty Rate Estimates</h3>
                     <p>
                       The calculation includes estimates for additional costs due to penalty rates
-                      that may apply based on the modern award rules. These are provided for reference only,
-                      and actual costs will depend on the specific work patterns and timesheets.
+                      that may apply based on the modern award rules. These are provided for
+                      reference only, and actual costs will depend on the specific work patterns and
+                      timesheets.
                     </p>
                   </div>
                 </TabsContent>
-                
+
                 <TabsContent value="history" className="space-y-6">
                   <div className="prose max-w-none">
                     <h2>Calculation History</h2>
@@ -203,38 +229,52 @@ export default function ChargeRateDetailPage() {
                       This section shows the complete history of changes, updates, and approval
                       workflow for this charge rate calculation.
                     </p>
-                    
+
                     <h3>Creation</h3>
                     <p>
-                      This calculation was created on {new Date(calculation.calculationDate).toLocaleDateString()} 
-                      for apprentice {apprenticeName || 'N/A'} and host employer {hostEmployerName || 'N/A'}.
+                      This calculation was created on{' '}
+                      {new Date(calculation.calculationDate).toLocaleDateString()}
+                      for apprentice {apprenticeName || 'N/A'} and host employer{' '}
+                      {hostEmployerName || 'N/A'}.
                     </p>
-                    
+
                     <h3>Approval Workflow</h3>
                     {calculation.approvalWorkflow && calculation.approvalWorkflow.length > 0 ? (
                       <div className="not-prose">
                         <ul className="space-y-4">
                           {calculation.approvalWorkflow.map((step, index) => (
-                            <li key={step.id} className="border-l-2 pl-4 pb-4 border-muted-foreground">
+                            <li
+                              key={step.id}
+                              className="border-l-2 pl-4 pb-4 border-muted-foreground"
+                            >
                               <div className="flex justify-between">
                                 <div>
                                   <span className="font-bold">{step.name}</span>
                                   <span className="ml-2 text-muted-foreground">({step.role})</span>
                                 </div>
                                 <div>
-                                  {step.status === 'approved' && <span className="text-green-500">Approved</span>}
-                                  {step.status === 'rejected' && <span className="text-red-500">Rejected</span>}
-                                  {step.status === 'pending' && <span className="text-amber-500">Pending</span>}
-                                  {step.status === 'not_started' && <span className="text-muted-foreground">Not Started</span>}
+                                  {step.status === 'approved' && (
+                                    <span className="text-green-500">Approved</span>
+                                  )}
+                                  {step.status === 'rejected' && (
+                                    <span className="text-red-500">Rejected</span>
+                                  )}
+                                  {step.status === 'pending' && (
+                                    <span className="text-amber-500">Pending</span>
+                                  )}
+                                  {step.status === 'not_started' && (
+                                    <span className="text-muted-foreground">Not Started</span>
+                                  )}
                                 </div>
                               </div>
-                              
+
                               {step.completedAt && (
                                 <div className="text-sm text-muted-foreground mt-1">
-                                  {step.status === 'approved' ? 'Approved' : 'Rejected'} on {new Date(step.completedAt).toLocaleString()}
+                                  {step.status === 'approved' ? 'Approved' : 'Rejected'} on{' '}
+                                  {new Date(step.completedAt).toLocaleString()}
                                 </div>
                               )}
-                              
+
                               {step.comments && (
                                 <div className="mt-2 bg-muted p-2 rounded-md text-sm">
                                   {step.comments}

@@ -1,3 +1,3 @@
-import VacanciesIndex from "./index.tsx";
+import VacanciesIndex from './index.tsx';
 
 export default VacanciesIndex;

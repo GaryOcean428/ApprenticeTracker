@@ -6,13 +6,13 @@ import { setupPolicyRoutes } from './policy-routes';
 
 export function setupWhsRoutes(app: express.Router): void {
   const whsRouter = express.Router();
-  
+
   // Setup sub-routes
   setupIncidentRoutes(whsRouter);
   setupRiskAssessmentRoutes(whsRouter);
   setupInspectionRoutes(whsRouter);
   setupPolicyRoutes(whsRouter);
-  
+
   // Register WHS router
   app.use('/whs', whsRouter);
 }

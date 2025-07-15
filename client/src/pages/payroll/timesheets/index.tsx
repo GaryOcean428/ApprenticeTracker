@@ -1,6 +1,16 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Card, CardHeader, CardTitle, CardContent, Button, Loader, Alert, AlertTitle, AlertDescription } from '@/components/common';
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  Button,
+  Loader,
+  Alert,
+  AlertTitle,
+  AlertDescription,
+} from '@/components/common';
 import { Calendar, CheckCircle, Clock, Download, Filter, Plus, Search, User } from 'lucide-react';
 
 interface Timesheet {
@@ -20,19 +30,24 @@ const TimesheetsPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
 
-  const { data: timesheets = [], isLoading, error } = useQuery<Timesheet[]>({
+  const {
+    data: timesheets = [],
+    isLoading,
+    error,
+  } = useQuery<Timesheet[]>({
     queryKey: ['/api/payroll/timesheets'],
   });
 
   // Filter timesheets based on search term and status filter
   const filteredTimesheets = timesheets.filter(timesheet => {
-    const matchesSearch = 
-      timesheet.apprenticeName.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    const matchesSearch =
+      timesheet.apprenticeName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       timesheet.weekStarting.includes(searchTerm) ||
       timesheet.status.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesStatus = statusFilter === 'all' || timesheet.status.toLowerCase() === statusFilter.toLowerCase();
-    
+
+    const matchesStatus =
+      statusFilter === 'all' || timesheet.status.toLowerCase() === statusFilter.toLowerCase();
+
     return matchesSearch && matchesStatus;
   });
 
@@ -41,9 +56,7 @@ const TimesheetsPage: React.FC = () => {
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-3xl font-bold">Timesheets</h1>
-          <p className="text-muted-foreground mt-2">
-            Manage and process apprentice timesheets
-          </p>
+          <p className="text-muted-foreground mt-2">Manage and process apprentice timesheets</p>
         </div>
         <div className="flex space-x-2">
           <Button variant="outline">
@@ -76,14 +89,14 @@ const TimesheetsPage: React.FC = () => {
                 <input
                   type="text"
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={e => setSearchTerm(e.target.value)}
                   placeholder="Search timesheets..."
                   className="pl-8 w-full h-9 rounded-md border bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                 />
               </div>
               <select
                 value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
+                onChange={e => setStatusFilter(e.target.value)}
                 className="h-9 rounded-md border bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
               >
                 <option value="all">All Statuses</option>
@@ -102,9 +115,9 @@ const TimesheetsPage: React.FC = () => {
             </div>
           ) : filteredTimesheets.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
-              {searchTerm || statusFilter !== 'all' ? 
-                'No timesheets matching your filters' : 
-                'No timesheets found. Create a new timesheet to get started.'}
+              {searchTerm || statusFilter !== 'all'
+                ? 'No timesheets matching your filters'
+                : 'No timesheets found. Create a new timesheet to get started.'}
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -135,24 +148,23 @@ const TimesheetsPage: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredTimesheets.map((timesheet) => (
+                  {filteredTimesheets.map(timesheet => (
                     <tr key={timesheet.id} className="hover:bg-muted/50">
+                      <td className="px-4 py-3 border-b">{timesheet.apprenticeName}</td>
                       <td className="px-4 py-3 border-b">
-                        {timesheet.apprenticeName}
+                        {new Date(timesheet.weekStarting).toLocaleDateString()} -{' '}
+                        {new Date(timesheet.weekEnding).toLocaleDateString()}
                       </td>
-                      <td className="px-4 py-3 border-b">
-                        {new Date(timesheet.weekStarting).toLocaleDateString()} - {new Date(timesheet.weekEnding).toLocaleDateString()}
-                      </td>
+                      <td className="px-4 py-3 border-b text-center">{timesheet.totalHours}</td>
                       <td className="px-4 py-3 border-b text-center">
-                        {timesheet.totalHours}
-                      </td>
-                      <td className="px-4 py-3 border-b text-center">
-                        <span className={`inline-flex items-center justify-center rounded-full px-2.5 py-0.5 text-xs font-medium 
+                        <span
+                          className={`inline-flex items-center justify-center rounded-full px-2.5 py-0.5 text-xs font-medium 
                           ${timesheet.status === 'approved' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : ''}
                           ${timesheet.status === 'pending' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400' : ''}
                           ${timesheet.status === 'submitted' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400' : ''}
                           ${timesheet.status === 'rejected' ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400' : ''}
-                        `}>
+                        `}
+                        >
                           {timesheet.status.charAt(0).toUpperCase() + timesheet.status.slice(1)}
                         </span>
                       </td>

@@ -1,6 +1,14 @@
 import React from 'react';
 import { Link } from 'wouter';
-import { Calendar, FileText, CheckCircle, PlusCircle, Clock, AlertCircle, FileHeart } from 'lucide-react';
+import {
+  Calendar,
+  FileText,
+  CheckCircle,
+  PlusCircle,
+  Clock,
+  AlertCircle,
+  FileHeart,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useQuery } from '@tanstack/react-query';
@@ -47,7 +55,7 @@ export default function ProgressReviewsPage() {
   const { data: reviews, isLoading: reviewsLoading } = useQuery<ProgressReview[]>({
     queryKey: ['/api/progress-reviews/reviews'],
   });
-  
+
   // Fetch templates
   const { data: templates, isLoading: templatesLoading } = useQuery<Template[]>({
     queryKey: ['/api/progress-reviews/templates'],
@@ -115,9 +123,7 @@ export default function ProgressReviewsPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{upcomingReviews?.length || 0}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Scheduled in the next 7 days
-            </p>
+            <p className="text-xs text-muted-foreground mt-1">Scheduled in the next 7 days</p>
           </CardContent>
         </Card>
         <Card>
@@ -127,9 +133,7 @@ export default function ProgressReviewsPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.inProgressReviews}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Reviews currently in progress
-            </p>
+            <p className="text-xs text-muted-foreground mt-1">Reviews currently in progress</p>
           </CardContent>
         </Card>
         <Card>
@@ -156,11 +160,11 @@ export default function ProgressReviewsPage() {
           <CardContent>
             {reviewsLoading ? (
               <div className="flex items-center justify-center p-6">
-                <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"/>
+                <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
               </div>
             ) : upcomingReviews && upcomingReviews.length > 0 ? (
               <div className="space-y-4">
-                {upcomingReviews.map((review) => (
+                {upcomingReviews.map(review => (
                   <div key={review.id} className="flex items-start p-4 border rounded-md">
                     <div className="bg-primary/10 p-2 rounded-lg mr-3">
                       <Calendar className="h-5 w-5 text-primary" />
@@ -172,7 +176,9 @@ export default function ProgressReviewsPage() {
                       </div>
                     </div>
                     <Link href={`/progress-reviews/reviews/${review.id}`}>
-                      <Button variant="outline" size="sm">View</Button>
+                      <Button variant="outline" size="sm">
+                        View
+                      </Button>
                     </Link>
                   </div>
                 ))}
@@ -200,14 +206,14 @@ export default function ProgressReviewsPage() {
           <CardContent>
             {templatesLoading ? (
               <div className="flex items-center justify-center p-6">
-                <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"/>
+                <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
               </div>
             ) : templates && templates.filter(t => t.isActive).length > 0 ? (
               <div className="space-y-4">
                 {templates
                   .filter(t => t.isActive)
                   .slice(0, 5)
-                  .map((template) => (
+                  .map(template => (
                     <div key={template.id} className="flex items-start p-4 border rounded-md">
                       <div className="bg-primary/10 p-2 rounded-lg mr-3">
                         <FileText className="h-5 w-5 text-primary" />
@@ -219,7 +225,9 @@ export default function ProgressReviewsPage() {
                         </div>
                       </div>
                       <Link href={`/progress-reviews/reviews/create?templateId=${template.id}`}>
-                        <Button variant="outline" size="sm">Use</Button>
+                        <Button variant="outline" size="sm">
+                          Use
+                        </Button>
                       </Link>
                     </div>
                   ))}
@@ -237,9 +245,7 @@ export default function ProgressReviewsPage() {
             )}
             <div className="mt-4 text-center">
               <Link href="/progress-reviews/templates">
-                <Button variant="link">
-                  View all templates
-                </Button>
+                <Button variant="link">View all templates</Button>
               </Link>
             </div>
           </CardContent>
@@ -248,14 +254,10 @@ export default function ProgressReviewsPage() {
 
       <div className="mt-8 text-center">
         <Link href="/progress-reviews/reviews">
-          <Button className="mr-2">
-            View All Reviews
-          </Button>
+          <Button className="mr-2">View All Reviews</Button>
         </Link>
         <Link href="/progress-reviews/templates">
-          <Button variant="outline">
-            Manage Templates
-          </Button>
+          <Button variant="outline">Manage Templates</Button>
         </Link>
       </div>
     </div>

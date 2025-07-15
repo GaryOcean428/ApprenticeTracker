@@ -57,15 +57,15 @@ export function generateId(length: number = 8): string {
     .substring(2, length + 2);
 }
 
-export function groupBy<T>(
-  array: T[],
-  key: keyof T
-): { [key: string]: T[] } {
-  return array.reduce((result, currentValue) => {
-    const groupKey = String(currentValue[key]);
-    (result[groupKey] = result[groupKey] || []).push(currentValue);
-    return result;
-  }, {} as { [key: string]: T[] });
+export function groupBy<T>(array: T[], key: keyof T): { [key: string]: T[] } {
+  return array.reduce(
+    (result, currentValue) => {
+      const groupKey = String(currentValue[key]);
+      (result[groupKey] = result[groupKey] || []).push(currentValue);
+      return result;
+    },
+    {} as { [key: string]: T[] }
+  );
 }
 
 export function downloadFile(url: string, filename: string): void {
@@ -80,13 +80,13 @@ export function downloadFile(url: string, filename: string): void {
 export function getInitials(name: string): string {
   return name
     .split(' ')
-    .map((n) => n[0])
+    .map(n => n[0])
     .join('')
     .toUpperCase();
 }
 
 export function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 export function retry<T>(
@@ -94,7 +94,7 @@ export function retry<T>(
   retries: number = 3,
   delay: number = 1000
 ): Promise<T> {
-  return fn().catch((error) => {
+  return fn().catch(error => {
     if (retries === 0) throw error;
     return sleep(delay).then(() => retry(fn, retries - 1, delay));
   });

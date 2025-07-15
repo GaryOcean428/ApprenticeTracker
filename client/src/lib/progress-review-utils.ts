@@ -12,35 +12,35 @@ export function getStatusColor(status: string) {
         bg: 'bg-blue-100',
         text: 'text-blue-800',
         icon: 'text-blue-600',
-        border: 'border-blue-200'
+        border: 'border-blue-200',
       };
     case 'in_progress':
       return {
         bg: 'bg-amber-100',
         text: 'text-amber-800',
         icon: 'text-amber-600',
-        border: 'border-amber-200'
+        border: 'border-amber-200',
       };
     case 'completed':
       return {
         bg: 'bg-green-100',
         text: 'text-green-800',
         icon: 'text-green-600',
-        border: 'border-green-200'
+        border: 'border-green-200',
       };
     case 'cancelled':
       return {
         bg: 'bg-red-100',
         text: 'text-red-800',
         icon: 'text-red-600',
-        border: 'border-red-200'
+        border: 'border-red-200',
       };
     default:
       return {
         bg: 'bg-gray-100',
         text: 'text-gray-800',
         icon: 'text-gray-600',
-        border: 'border-gray-200'
+        border: 'border-gray-200',
       };
   }
 }
@@ -55,28 +55,28 @@ export function getPriorityColor(priority: string) {
         bg: 'bg-red-100',
         text: 'text-red-800',
         icon: 'text-red-600',
-        border: 'border-red-200'
+        border: 'border-red-200',
       };
     case 'medium':
       return {
         bg: 'bg-amber-100',
         text: 'text-amber-800',
         icon: 'text-amber-600',
-        border: 'border-amber-200'
+        border: 'border-amber-200',
       };
     case 'low':
       return {
         bg: 'bg-green-100',
         text: 'text-green-800',
         icon: 'text-green-600',
-        border: 'border-green-200'
+        border: 'border-green-200',
       };
     default:
       return {
         bg: 'bg-gray-100',
         text: 'text-gray-800',
         icon: 'text-gray-600',
-        border: 'border-gray-200'
+        border: 'border-gray-200',
       };
   }
 }
@@ -106,7 +106,7 @@ export function getDefaultFormStructure() {
     sections: [
       {
         title: 'Apprentice Competency Assessment',
-        description: 'Evaluate the apprentice\'s competency and progress',
+        description: "Evaluate the apprentice's competency and progress",
         questions: [
           {
             id: `question_${Date.now()}`,
@@ -174,7 +174,8 @@ export function getDefaultFormStructure() {
             id: `question_${Date.now() + 8}`,
             type: 'checkbox',
             label: 'On Track for Completion',
-            description: 'Is the apprentice on track to complete their qualification within the expected timeframe?',
+            description:
+              'Is the apprentice on track to complete their qualification within the expected timeframe?',
             required: true,
           },
         ],

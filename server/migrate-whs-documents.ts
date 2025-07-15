@@ -6,7 +6,7 @@ import { db } from './db';
  */
 export async function migrateWhsDocuments() {
   console.log('[INFO] Updating WHS documents schema...');
-  
+
   try {
     // First check if the whs_documents table exists
     const tableCheckQuery = sql`
@@ -15,14 +15,14 @@ export async function migrateWhsDocuments() {
         WHERE table_name = 'whs_documents'
       );
     `;
-    
+
     const tableExists = await db.execute(tableCheckQuery);
-    
+
     if (!tableExists.rows[0]?.exists) {
       console.log('[INFO] WHS documents table does not exist yet, skipping schema update');
       return false;
     }
-    
+
     // Check if columns already exist to avoid errors on re-running
     const checkColumnsQuery = sql`
       SELECT 
@@ -36,7 +36,7 @@ export async function migrateWhsDocuments() {
 
     const existingColumns = await db.execute(checkColumnsQuery);
     const columnNames = existingColumns.rows.map(row => row.column_name);
-    
+
     // Add risk_assessment_id if it doesn't exist
     if (!columnNames.includes('risk_assessment_id')) {
       await db.execute(sql`
@@ -45,7 +45,7 @@ export async function migrateWhsDocuments() {
       `);
       console.log('[INFO] Added risk_assessment_id column to whs_documents');
     }
-    
+
     // Add inspection_id if it doesn't exist
     if (!columnNames.includes('inspection_id')) {
       await db.execute(sql`
@@ -54,7 +54,7 @@ export async function migrateWhsDocuments() {
       `);
       console.log('[INFO] Added inspection_id column to whs_documents');
     }
-    
+
     // Add policy_id if it doesn't exist
     if (!columnNames.includes('policy_id')) {
       await db.execute(sql`
@@ -63,7 +63,7 @@ export async function migrateWhsDocuments() {
       `);
       console.log('[INFO] Added policy_id column to whs_documents');
     }
-    
+
     console.log('[INFO] WHS documents schema updated successfully');
     return true;
   } catch (error) {

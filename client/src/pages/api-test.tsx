@@ -10,7 +10,7 @@ export default function ApiTestPage() {
   const testApi = async () => {
     setIsLoading(true);
     setError(null);
-    
+
     try {
       // Test parameters
       const awardCode = 'MA000025'; // Electrical Award
@@ -18,11 +18,11 @@ export default function ApiTestPage() {
       const apprenticeYear = 2;
       const isAdult = false;
       const hasCompletedYear12 = false;
-      
+
       const response = await fetch(
         `/api/fairwork-enhanced/apprentice-rates?awardCode=${awardCode}&year=${year}&apprenticeYear=${apprenticeYear}&isAdult=${isAdult}&hasCompletedYear12=${hasCompletedYear12}`
       );
-      
+
       const data = await response.json();
       setApiResponse(data);
     } catch (err) {
@@ -35,17 +35,15 @@ export default function ApiTestPage() {
   return (
     <div className="container mx-auto p-6">
       <h1 className="text-3xl font-bold mb-6">API Test Page</h1>
-      
+
       <div className="mb-6">
         <Button onClick={testApi} disabled={isLoading}>
           {isLoading ? 'Testing...' : 'Test Apprentice Rates API'}
         </Button>
       </div>
-      
-      {error && (
-        <div className="text-red-500 mb-4">{error}</div>
-      )}
-      
+
+      {error && <div className="text-red-500 mb-4">{error}</div>}
+
       {apiResponse && (
         <Card>
           <CardHeader>
@@ -62,7 +60,7 @@ export default function ApiTestPage() {
               <strong>Final Hourly Rate:</strong> ${apiResponse.data?.rates.hourly.toFixed(2)}
             </div>
             <div className="text-sm mb-4">
-              <strong>Parameters:</strong> 
+              <strong>Parameters:</strong>
               <pre className="mt-2 bg-gray-100 p-2 rounded text-xs overflow-auto">
                 {JSON.stringify(apiResponse.data?.parameters, null, 2)}
               </pre>

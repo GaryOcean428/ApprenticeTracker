@@ -41,25 +41,37 @@ export const validators = {
   // User profile and account validators
   email: z.string().email(validationMessages.email),
   password: z.string().min(8, validationMessages.minLength(8)),
-  name: z.string().min(2, validationMessages.minLength(2)).max(100, validationMessages.maxLength(100)),
-  
+  name: z
+    .string()
+    .min(2, validationMessages.minLength(2))
+    .max(100, validationMessages.maxLength(100)),
+
   // Contact information validators
   phone: z.string().regex(validationPatterns.phone, validationMessages.phone),
-  
+
   // Address validators
-  streetAddress: z.string().min(5, validationMessages.minLength(5)).max(100, validationMessages.maxLength(100)),
-  city: z.string().min(2, validationMessages.minLength(2)).max(50, validationMessages.maxLength(50)),
-  state: z.string().min(2, validationMessages.minLength(2)).max(50, validationMessages.maxLength(50)),
+  streetAddress: z
+    .string()
+    .min(5, validationMessages.minLength(5))
+    .max(100, validationMessages.maxLength(100)),
+  city: z
+    .string()
+    .min(2, validationMessages.minLength(2))
+    .max(50, validationMessages.maxLength(50)),
+  state: z
+    .string()
+    .min(2, validationMessages.minLength(2))
+    .max(50, validationMessages.maxLength(50)),
   postcode: z.string().regex(validationPatterns.postcode, validationMessages.australianPostcode),
-  
+
   // Business identifiers
   abn: z.string().regex(validationPatterns.abn, validationMessages.abn),
-  
+
   // Dates and times
-  date: z.string().refine((val) => !isNaN(Date.parse(val)), {
+  date: z.string().refine(val => !isNaN(Date.parse(val)), {
     message: validationMessages.dateFormat,
   }),
-  
+
   // Numbers
   integer: z.number().int(validationMessages.integer),
   positiveInteger: z.number().int(validationMessages.integer).positive(validationMessages.positive),
@@ -87,14 +99,17 @@ export const contactSchema = z.object({
 /**
  * Validate form data and return any errors
  */
-export function validateForm<T>(schema: z.ZodType<T>, data: unknown): { valid: boolean; errors?: Record<string, string> } {
+export function validateForm<T>(
+  schema: z.ZodType<T>,
+  data: unknown
+): { valid: boolean; errors?: Record<string, string> } {
   try {
     schema.parse(data);
     return { valid: true };
   } catch (error) {
     if (error instanceof z.ZodError) {
       const errors: Record<string, string> = {};
-      error.errors.forEach((err) => {
+      error.errors.forEach(err => {
         const path = err.path.join('.');
         errors[path] = err.message;
       });

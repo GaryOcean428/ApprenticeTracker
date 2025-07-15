@@ -1,14 +1,14 @@
-import { useState } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { useLocation } from "wouter";
-import { 
-  Card, 
-  CardHeader, 
-  CardTitle, 
-  CardDescription, 
+import { useState } from 'react';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { useLocation } from 'wouter';
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
   CardContent,
-  CardFooter
-} from "@/components/ui/card";
+  CardFooter,
+} from '@/components/ui/card';
 import {
   Table,
   TableBody,
@@ -17,8 +17,8 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { 
+} from '@/components/ui/table';
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -26,7 +26,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -37,17 +37,17 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { useToast } from "@/hooks/use-toast";
-import { 
-  FileText, 
-  Plus, 
-  Search, 
+} from '@/components/ui/alert-dialog';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { useToast } from '@/hooks/use-toast';
+import {
+  FileText,
+  Plus,
+  Search,
   Filter,
-  AlertTriangle, 
+  AlertTriangle,
   ShieldAlert,
   ShieldCheck,
   AlertCircle,
@@ -56,28 +56,28 @@ import {
   ArrowUpDown,
   Calendar,
   FileCheck,
-  Clock
-} from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Label } from "@/components/ui/label";
-import { 
+  Clock,
+} from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Label } from '@/components/ui/label';
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { queryClient } from "@/lib/queryClient";
+} from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { queryClient } from '@/lib/queryClient';
 
 export default function RiskManagement() {
   const { toast } = useToast();
   const [_, navigate] = useLocation();
-  const [activeTab, setActiveTab] = useState("risks");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [severityFilter, setSeverityFilter] = useState("all");
-  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [activeTab, setActiveTab] = useState('risks');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [severityFilter, setSeverityFilter] = useState('all');
+  const [categoryFilter, setCategoryFilter] = useState('all');
 
   // Get GTO compliance standards related to Risk Management
   const { data: standards, isLoading: standardsLoading } = useQuery({
@@ -86,7 +86,7 @@ export default function RiskManagement() {
       const res = await fetch('/api/gto-compliance/standards?category=Risk%20Management');
       if (!res.ok) throw new Error('Failed to fetch standards');
       return res.json();
-    }
+    },
   });
 
   // Fetch assessment data
@@ -96,7 +96,7 @@ export default function RiskManagement() {
       const res = await fetch('/api/gto-compliance/assessments?category=Risk%20Management');
       if (!res.ok) throw new Error('Failed to fetch assessments');
       return res.json();
-    }
+    },
   });
 
   // Fetch risk register (mock for now)
@@ -107,108 +107,113 @@ export default function RiskManagement() {
       return [
         {
           id: 1,
-          title: "Inadequate apprentice safety training",
-          description: "Risk of workplace injuries due to inadequate safety training for apprentices before placement",
-          category: "Health & Safety",
-          severity: "high",
-          likelihood: "medium",
-          impact: "high",
-          controls: "Mandatory safety induction for all apprentices, documented training records",
-          status: "active",
-          owner: "WHS Manager",
-          dueDate: "2024-07-15T00:00:00.000Z",
-          lastReview: "2024-04-01T00:00:00.000Z"
+          title: 'Inadequate apprentice safety training',
+          description:
+            'Risk of workplace injuries due to inadequate safety training for apprentices before placement',
+          category: 'Health & Safety',
+          severity: 'high',
+          likelihood: 'medium',
+          impact: 'high',
+          controls: 'Mandatory safety induction for all apprentices, documented training records',
+          status: 'active',
+          owner: 'WHS Manager',
+          dueDate: '2024-07-15T00:00:00.000Z',
+          lastReview: '2024-04-01T00:00:00.000Z',
         },
         {
           id: 2,
-          title: "Non-compliance with RTO standards",
-          description: "Risk of regulatory action due to non-compliance with training standards",
-          category: "Compliance",
-          severity: "high",
-          likelihood: "low",
-          impact: "high",
-          controls: "Regular internal audits, staff training on compliance requirements",
-          status: "active",
-          owner: "Compliance Manager",
-          dueDate: "2024-08-20T00:00:00.000Z",
-          lastReview: "2024-03-15T00:00:00.000Z"
+          title: 'Non-compliance with RTO standards',
+          description: 'Risk of regulatory action due to non-compliance with training standards',
+          category: 'Compliance',
+          severity: 'high',
+          likelihood: 'low',
+          impact: 'high',
+          controls: 'Regular internal audits, staff training on compliance requirements',
+          status: 'active',
+          owner: 'Compliance Manager',
+          dueDate: '2024-08-20T00:00:00.000Z',
+          lastReview: '2024-03-15T00:00:00.000Z',
         },
         {
           id: 3,
-          title: "Inadequate host employer screening",
-          description: "Risk of unsuitable work environments for apprentices due to inadequate screening of host employers",
-          category: "Operations",
-          severity: "medium",
-          likelihood: "medium",
-          impact: "medium",
-          controls: "Standardized host employer assessment process, regular site visits",
-          status: "active",
-          owner: "Field Operations Manager",
-          dueDate: "2024-06-30T00:00:00.000Z",
-          lastReview: "2024-02-10T00:00:00.000Z"
+          title: 'Inadequate host employer screening',
+          description:
+            'Risk of unsuitable work environments for apprentices due to inadequate screening of host employers',
+          category: 'Operations',
+          severity: 'medium',
+          likelihood: 'medium',
+          impact: 'medium',
+          controls: 'Standardized host employer assessment process, regular site visits',
+          status: 'active',
+          owner: 'Field Operations Manager',
+          dueDate: '2024-06-30T00:00:00.000Z',
+          lastReview: '2024-02-10T00:00:00.000Z',
         },
         {
           id: 4,
-          title: "Data breach of apprentice records",
-          description: "Risk of unauthorized access to sensitive apprentice data",
-          category: "Information Security",
-          severity: "high",
-          likelihood: "low",
-          impact: "high",
-          controls: "Encryption of sensitive data, access controls, regular security audits",
-          status: "active",
-          owner: "IT Manager",
-          dueDate: "2024-05-30T00:00:00.000Z",
-          lastReview: "2024-01-20T00:00:00.000Z"
+          title: 'Data breach of apprentice records',
+          description: 'Risk of unauthorized access to sensitive apprentice data',
+          category: 'Information Security',
+          severity: 'high',
+          likelihood: 'low',
+          impact: 'high',
+          controls: 'Encryption of sensitive data, access controls, regular security audits',
+          status: 'active',
+          owner: 'IT Manager',
+          dueDate: '2024-05-30T00:00:00.000Z',
+          lastReview: '2024-01-20T00:00:00.000Z',
         },
         {
           id: 5,
-          title: "Insufficient qualified trainers",
-          description: "Risk of training quality issues due to shortage of qualified trainers",
-          category: "Training Quality",
-          severity: "medium",
-          likelihood: "medium",
-          impact: "high",
-          controls: "Trainer recruitment strategy, professional development program",
-          status: "active",
-          owner: "Training Manager",
-          dueDate: "2024-09-15T00:00:00.000Z",
-          lastReview: "2024-03-20T00:00:00.000Z"
+          title: 'Insufficient qualified trainers',
+          description: 'Risk of training quality issues due to shortage of qualified trainers',
+          category: 'Training Quality',
+          severity: 'medium',
+          likelihood: 'medium',
+          impact: 'high',
+          controls: 'Trainer recruitment strategy, professional development program',
+          status: 'active',
+          owner: 'Training Manager',
+          dueDate: '2024-09-15T00:00:00.000Z',
+          lastReview: '2024-03-20T00:00:00.000Z',
         },
         {
           id: 6,
-          title: "Poor apprentice retention",
-          description: "Risk of high apprentice dropout rates affecting completion statistics and funding",
-          category: "Operational",
-          severity: "medium",
-          likelihood: "high",
-          impact: "medium",
-          controls: "Mentoring program, regular check-ins, early intervention process",
-          status: "active",
-          owner: "Apprentice Support Manager",
-          dueDate: "2024-07-01T00:00:00.000Z",
-          lastReview: "2024-02-15T00:00:00.000Z"
+          title: 'Poor apprentice retention',
+          description:
+            'Risk of high apprentice dropout rates affecting completion statistics and funding',
+          category: 'Operational',
+          severity: 'medium',
+          likelihood: 'high',
+          impact: 'medium',
+          controls: 'Mentoring program, regular check-ins, early intervention process',
+          status: 'active',
+          owner: 'Apprentice Support Manager',
+          dueDate: '2024-07-01T00:00:00.000Z',
+          lastReview: '2024-02-15T00:00:00.000Z',
         },
         {
           id: 7,
-          title: "Financial viability threats",
-          description: "Risk to financial sustainability due to funding changes or economic downturn",
-          category: "Financial",
-          severity: "high",
-          likelihood: "medium",
-          impact: "high",
-          controls: "Diversified funding sources, financial reserves policy, regular financial reviews",
-          status: "active",
-          owner: "Finance Director",
-          dueDate: "2024-06-15T00:00:00.000Z",
-          lastReview: "2024-03-01T00:00:00.000Z"
+          title: 'Financial viability threats',
+          description:
+            'Risk to financial sustainability due to funding changes or economic downturn',
+          category: 'Financial',
+          severity: 'high',
+          likelihood: 'medium',
+          impact: 'high',
+          controls:
+            'Diversified funding sources, financial reserves policy, regular financial reviews',
+          status: 'active',
+          owner: 'Finance Director',
+          dueDate: '2024-06-15T00:00:00.000Z',
+          lastReview: '2024-03-01T00:00:00.000Z',
         },
       ];
-    }
+    },
   });
 
   // Get status badge styling
-  const getSeverityBadge = (severity) => {
+  const getSeverityBadge = severity => {
     switch (severity) {
       case 'low':
         return <Badge className="bg-green-100 text-green-800">Low</Badge>;
@@ -224,32 +229,33 @@ export default function RiskManagement() {
   // Calculate risk metrics
   const calculateRiskMetrics = () => {
     if (!risks) return { high: 0, medium: 0, low: 0, total: 0 };
-    
+
     const total = risks.length;
     const high = risks.filter(r => r.severity === 'high').length;
     const medium = risks.filter(r => r.severity === 'medium').length;
     const low = risks.filter(r => r.severity === 'low').length;
-    
+
     return { high, medium, low, total };
   };
-  
+
   const metrics = calculateRiskMetrics();
 
   // Filter risks based on search and filters
   const filteredRisks = risks?.filter(risk => {
     // Apply search filter
-    const matchesSearch = searchQuery === "" || 
+    const matchesSearch =
+      searchQuery === '' ||
       risk.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       risk.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
       risk.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
       risk.owner.toLowerCase().includes(searchQuery.toLowerCase());
-    
+
     // Apply severity filter
-    const matchesSeverity = severityFilter === "all" || risk.severity === severityFilter;
-    
+    const matchesSeverity = severityFilter === 'all' || risk.severity === severityFilter;
+
     // Apply category filter
-    const matchesCategory = categoryFilter === "all" || risk.category === categoryFilter;
-    
+    const matchesCategory = categoryFilter === 'all' || risk.category === categoryFilter;
+
     return matchesSearch && matchesSeverity && matchesCategory;
   });
 
@@ -266,7 +272,7 @@ export default function RiskManagement() {
           </p>
         </div>
         <div className="flex gap-3">
-          <Button variant="outline" onClick={() => navigate("/gto-compliance/standard-assessment")}>
+          <Button variant="outline" onClick={() => navigate('/gto-compliance/standard-assessment')}>
             <FileCheck className="mr-2 h-4 w-4" /> New Assessment
           </Button>
           <Dialog>
@@ -356,7 +362,10 @@ export default function RiskManagement() {
                 </div>
                 <div className="grid gap-2">
                   <Label htmlFor="controls">Controls & Mitigation</Label>
-                  <Textarea id="controls" placeholder="Describe controls and mitigation strategies" />
+                  <Textarea
+                    id="controls"
+                    placeholder="Describe controls and mitigation strategies"
+                  />
                 </div>
                 <div className="grid gap-2">
                   <Label htmlFor="dueDate">Review Due Date</Label>
@@ -364,7 +373,14 @@ export default function RiskManagement() {
                 </div>
               </div>
               <DialogFooter>
-                <Button variant="outline" onClick={() => toast({ title: "Risk Management", description: "This feature is coming soon" })}>Add Risk</Button>
+                <Button
+                  variant="outline"
+                  onClick={() =>
+                    toast({ title: 'Risk Management', description: 'This feature is coming soon' })
+                  }
+                >
+                  Add Risk
+                </Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
@@ -386,7 +402,7 @@ export default function RiskManagement() {
                 </div>
                 <span className="font-semibold">{metrics.high}</span>
               </div>
-              
+
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="h-4 w-4 rounded-full bg-amber-500"></div>
@@ -394,7 +410,7 @@ export default function RiskManagement() {
                 </div>
                 <span className="font-semibold">{metrics.medium}</span>
               </div>
-              
+
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="h-4 w-4 rounded-full bg-green-500"></div>
@@ -402,7 +418,7 @@ export default function RiskManagement() {
                 </div>
                 <span className="font-semibold">{metrics.low}</span>
               </div>
-              
+
               <div className="pt-2 mt-2 border-t">
                 <div className="flex items-center justify-between">
                   <span className="font-medium">Total Risks</span>
@@ -412,7 +428,7 @@ export default function RiskManagement() {
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="pb-2">
             <CardTitle>Compliance Status</CardTitle>
@@ -432,7 +448,7 @@ export default function RiskManagement() {
                   <p className="text-sm text-muted-foreground">Last reviewed: April 1, 2024</p>
                 </div>
               </div>
-              
+
               <div className="flex items-center">
                 <div className="bg-green-100 dark:bg-green-900 p-2 rounded-full mr-3">
                   <Activity className="h-5 w-5 text-green-600 dark:text-green-300" />
@@ -445,7 +461,7 @@ export default function RiskManagement() {
                   <p className="text-sm text-muted-foreground">Last reviewed: March 15, 2024</p>
                 </div>
               </div>
-              
+
               <div className="flex items-center">
                 <div className="bg-amber-100 dark:bg-amber-900 p-2 rounded-full mr-3">
                   <AlertCircle className="h-5 w-5 text-amber-600 dark:text-amber-300" />
@@ -461,7 +477,7 @@ export default function RiskManagement() {
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="pb-2">
             <CardTitle>High Priority Risks</CardTitle>
@@ -476,19 +492,21 @@ export default function RiskManagement() {
                   <Skeleton className="h-6 w-full" />
                 </div>
               ) : (
-                risks?.filter(r => r.severity === 'high').map((risk) => (
-                  <div key={risk.id} className="flex items-start">
-                    <AlertTriangle className="h-5 w-5 text-red-500 mr-2 mt-0.5" />
-                    <div>
-                      <p className="font-medium">{risk.title}</p>
-                      <p className="text-sm text-muted-foreground">
-                        Review due: {new Date(risk.dueDate).toLocaleDateString()}
-                      </p>
+                risks
+                  ?.filter(r => r.severity === 'high')
+                  .map(risk => (
+                    <div key={risk.id} className="flex items-start">
+                      <AlertTriangle className="h-5 w-5 text-red-500 mr-2 mt-0.5" />
+                      <div>
+                        <p className="font-medium">{risk.title}</p>
+                        <p className="text-sm text-muted-foreground">
+                          Review due: {new Date(risk.dueDate).toLocaleDateString()}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                ))
+                  ))
               )}
-              
+
               {risks?.filter(r => r.severity === 'high').length === 0 && (
                 <div className="flex flex-col items-center justify-center text-center h-20">
                   <ShieldCheck className="h-8 w-8 text-green-500 mb-2" />
@@ -506,7 +524,7 @@ export default function RiskManagement() {
           <TabsTrigger value="standards">Compliance Standards</TabsTrigger>
           <TabsTrigger value="assessments">Assessment History</TabsTrigger>
         </TabsList>
-        
+
         <TabsContent value="risks" className="p-0 mt-6">
           <Card>
             <CardHeader>
@@ -524,15 +542,12 @@ export default function RiskManagement() {
                     placeholder="Search risks..."
                     className="pl-8"
                     value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onChange={e => setSearchQuery(e.target.value)}
                   />
                 </div>
-                
+
                 <div className="flex space-x-4">
-                  <Select
-                    value={severityFilter}
-                    onValueChange={setSeverityFilter}
-                  >
+                  <Select value={severityFilter} onValueChange={setSeverityFilter}>
                     <SelectTrigger className="w-[160px]">
                       <Filter className="h-4 w-4 mr-2" />
                       <SelectValue placeholder="Severity filter" />
@@ -544,11 +559,8 @@ export default function RiskManagement() {
                       <SelectItem value="low">Low</SelectItem>
                     </SelectContent>
                   </Select>
-                  
-                  <Select
-                    value={categoryFilter}
-                    onValueChange={setCategoryFilter}
-                  >
+
+                  <Select value={categoryFilter} onValueChange={setCategoryFilter}>
                     <SelectTrigger className="w-[160px]">
                       <Filter className="h-4 w-4 mr-2" />
                       <SelectValue placeholder="Category filter" />
@@ -564,7 +576,7 @@ export default function RiskManagement() {
                   </Select>
                 </div>
               </div>
-              
+
               {risksLoading ? (
                 <div className="space-y-4">
                   <Skeleton className="h-12 w-full" />
@@ -592,12 +604,14 @@ export default function RiskManagement() {
                           </TableCell>
                         </TableRow>
                       ) : (
-                        filteredRisks?.map((risk) => (
+                        filteredRisks?.map(risk => (
                           <TableRow key={risk.id}>
                             <TableCell>
                               <div>
                                 <p className="font-medium">{risk.title}</p>
-                                <p className="text-sm text-muted-foreground line-clamp-1">{risk.description}</p>
+                                <p className="text-sm text-muted-foreground line-clamp-1">
+                                  {risk.description}
+                                </p>
                               </div>
                             </TableCell>
                             <TableCell>{risk.category}</TableCell>
@@ -621,44 +635,60 @@ export default function RiskManagement() {
                                   <div className="space-y-4 py-4">
                                     <div>
                                       <h4 className="text-sm font-medium">Description</h4>
-                                      <p className="text-sm text-muted-foreground mt-1">{risk.description}</p>
+                                      <p className="text-sm text-muted-foreground mt-1">
+                                        {risk.description}
+                                      </p>
                                     </div>
-                                    
+
                                     <div className="grid grid-cols-3 gap-4">
                                       <div>
                                         <h4 className="text-sm font-medium">Category</h4>
-                                        <p className="text-sm text-muted-foreground mt-1">{risk.category}</p>
+                                        <p className="text-sm text-muted-foreground mt-1">
+                                          {risk.category}
+                                        </p>
                                       </div>
                                       <div>
                                         <h4 className="text-sm font-medium">Owner</h4>
-                                        <p className="text-sm text-muted-foreground mt-1">{risk.owner}</p>
+                                        <p className="text-sm text-muted-foreground mt-1">
+                                          {risk.owner}
+                                        </p>
                                       </div>
                                       <div>
                                         <h4 className="text-sm font-medium">Status</h4>
-                                        <p className="text-sm text-muted-foreground mt-1 capitalize">{risk.status}</p>
+                                        <p className="text-sm text-muted-foreground mt-1 capitalize">
+                                          {risk.status}
+                                        </p>
                                       </div>
                                     </div>
-                                    
+
                                     <div className="grid grid-cols-3 gap-4">
                                       <div>
                                         <h4 className="text-sm font-medium">Likelihood</h4>
-                                        <p className="text-sm text-muted-foreground mt-1 capitalize">{risk.likelihood}</p>
+                                        <p className="text-sm text-muted-foreground mt-1 capitalize">
+                                          {risk.likelihood}
+                                        </p>
                                       </div>
                                       <div>
                                         <h4 className="text-sm font-medium">Impact</h4>
-                                        <p className="text-sm text-muted-foreground mt-1 capitalize">{risk.impact}</p>
+                                        <p className="text-sm text-muted-foreground mt-1 capitalize">
+                                          {risk.impact}
+                                        </p>
                                       </div>
                                       <div>
                                         <h4 className="text-sm font-medium">Severity</h4>
-                                        <div className="mt-1">{getSeverityBadge(risk.severity)}</div>
+                                        <div className="mt-1">
+                                          {getSeverityBadge(risk.severity)}
+                                        </div>
                                       </div>
                                     </div>
-                                    
+
                                     <div>
                                       <h4 className="text-sm font-medium">Controls & Mitigation</h4>
-                                      <p className="text-sm text-muted-foreground mt-1">{risk.controls}</p>
+                                      <p className="text-sm text-muted-foreground mt-1">
+                                        {risk.controls}
+                                      </p>
                                     </div>
-                                    
+
                                     <div className="grid grid-cols-2 gap-4">
                                       <div>
                                         <h4 className="text-sm font-medium">Last Review</h4>
@@ -675,7 +705,15 @@ export default function RiskManagement() {
                                     </div>
                                   </div>
                                   <DialogFooter>
-                                    <Button variant="outline" onClick={() => toast({ title: "Coming soon", description: "Risk review functionality coming soon" })}>
+                                    <Button
+                                      variant="outline"
+                                      onClick={() =>
+                                        toast({
+                                          title: 'Coming soon',
+                                          description: 'Risk review functionality coming soon',
+                                        })
+                                      }
+                                    >
                                       <Clock className="mr-2 h-4 w-4" /> Record Review
                                     </Button>
                                   </DialogFooter>
@@ -725,7 +763,9 @@ export default function RiskManagement() {
                           </SelectTrigger>
                           <SelectContent>
                             {riskCategories.map(category => (
-                              <SelectItem key={category} value={category}>{category}</SelectItem>
+                              <SelectItem key={category} value={category}>
+                                {category}
+                              </SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
@@ -778,7 +818,10 @@ export default function RiskManagement() {
                     </div>
                     <div className="grid gap-2">
                       <Label htmlFor="controls2">Controls & Mitigation</Label>
-                      <Textarea id="controls2" placeholder="Describe controls and mitigation strategies" />
+                      <Textarea
+                        id="controls2"
+                        placeholder="Describe controls and mitigation strategies"
+                      />
                     </div>
                     <div className="grid gap-2">
                       <Label htmlFor="dueDate2">Review Due Date</Label>
@@ -786,21 +829,29 @@ export default function RiskManagement() {
                     </div>
                   </div>
                   <DialogFooter>
-                    <Button variant="outline" onClick={() => toast({ title: "Risk Management", description: "This feature is coming soon" })}>Add Risk</Button>
+                    <Button
+                      variant="outline"
+                      onClick={() =>
+                        toast({
+                          title: 'Risk Management',
+                          description: 'This feature is coming soon',
+                        })
+                      }
+                    >
+                      Add Risk
+                    </Button>
                   </DialogFooter>
                 </DialogContent>
               </Dialog>
             </CardFooter>
           </Card>
         </TabsContent>
-        
+
         <TabsContent value="standards" className="p-0 mt-6">
           <Card>
             <CardHeader>
               <CardTitle>Risk Management Standards</CardTitle>
-              <CardDescription>
-                Compliance standards for risk management in GTOs
-              </CardDescription>
+              <CardDescription>Compliance standards for risk management in GTOs</CardDescription>
             </CardHeader>
             <CardContent>
               {standardsLoading ? (
@@ -813,7 +864,9 @@ export default function RiskManagement() {
                 <div className="flex flex-col items-center justify-center text-center h-40">
                   <FileText className="h-16 w-16 text-muted-foreground mb-4" />
                   <p className="text-lg font-medium">No risk management standards found</p>
-                  <p className="text-muted-foreground">Standards will be displayed here once added to the system</p>
+                  <p className="text-muted-foreground">
+                    Standards will be displayed here once added to the system
+                  </p>
                 </div>
               ) : (
                 <div className="rounded-md border">
@@ -827,12 +880,14 @@ export default function RiskManagement() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {standards?.map((standard) => (
+                      {standards?.map(standard => (
                         <TableRow key={standard.id}>
                           <TableCell className="font-medium">
                             <div>
                               <p>{standard.standardName}</p>
-                              <p className="text-sm text-muted-foreground">{standard.standardNumber}</p>
+                              <p className="text-sm text-muted-foreground">
+                                {standard.standardNumber}
+                              </p>
                             </div>
                           </TableCell>
                           <TableCell className="max-w-md">
@@ -840,14 +895,20 @@ export default function RiskManagement() {
                           </TableCell>
                           <TableCell>
                             {assessments?.find(a => a.standardId === standard.id) ? (
-                              <Badge className={
-                                assessments.find(a => a.standardId === standard.id).status === 'compliant'
-                                  ? "bg-green-100 text-green-800"
-                                  : assessments.find(a => a.standardId === standard.id).status === 'at_risk'
-                                  ? "bg-amber-100 text-amber-800"
-                                  : "bg-red-100 text-red-800"
-                              }>
-                                {assessments.find(a => a.standardId === standard.id).status.replace('_', ' ')}
+                              <Badge
+                                className={
+                                  assessments.find(a => a.standardId === standard.id).status ===
+                                  'compliant'
+                                    ? 'bg-green-100 text-green-800'
+                                    : assessments.find(a => a.standardId === standard.id).status ===
+                                        'at_risk'
+                                      ? 'bg-amber-100 text-amber-800'
+                                      : 'bg-red-100 text-red-800'
+                                }
+                              >
+                                {assessments
+                                  .find(a => a.standardId === standard.id)
+                                  .status.replace('_', ' ')}
                               </Badge>
                             ) : (
                               <Badge variant="outline">Not assessed</Badge>
@@ -857,7 +918,11 @@ export default function RiskManagement() {
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => navigate(`/gto-compliance/standard-assessment?standardId=${standard.id}`)}
+                              onClick={() =>
+                                navigate(
+                                  `/gto-compliance/standard-assessment?standardId=${standard.id}`
+                                )
+                              }
                             >
                               <FileCheck className="h-4 w-4 mr-1" /> Assess
                             </Button>
@@ -871,7 +936,7 @@ export default function RiskManagement() {
             </CardContent>
           </Card>
         </TabsContent>
-        
+
         <TabsContent value="assessments" className="p-0 mt-6">
           <Card>
             <CardHeader>
@@ -891,7 +956,9 @@ export default function RiskManagement() {
                 <div className="flex flex-col items-center justify-center text-center h-40">
                   <FileCheck className="h-16 w-16 text-muted-foreground mb-4" />
                   <p className="text-lg font-medium">No assessments found</p>
-                  <p className="text-muted-foreground">Compliance assessments will be displayed here once completed</p>
+                  <p className="text-muted-foreground">
+                    Compliance assessments will be displayed here once completed
+                  </p>
                 </div>
               ) : (
                 <div className="rounded-md border">
@@ -907,36 +974,41 @@ export default function RiskManagement() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {assessments?.map((assessment) => (
+                      {assessments?.map(assessment => (
                         <TableRow key={assessment.id}>
                           <TableCell className="font-medium">
-                            {standards?.find(s => s.id === assessment.standardId)?.standardName || 'Unknown Standard'}
+                            {standards?.find(s => s.id === assessment.standardId)?.standardName ||
+                              'Unknown Standard'}
                           </TableCell>
                           <TableCell>
                             {new Date(assessment.assessmentDate).toLocaleDateString()}
                           </TableCell>
                           <TableCell>
-                            <Badge className={
-                              assessment.status === 'compliant'
-                                ? "bg-green-100 text-green-800"
-                                : assessment.status === 'at_risk'
-                                ? "bg-amber-100 text-amber-800"
-                                : "bg-red-100 text-red-800"
-                            }>
+                            <Badge
+                              className={
+                                assessment.status === 'compliant'
+                                  ? 'bg-green-100 text-green-800'
+                                  : assessment.status === 'at_risk'
+                                    ? 'bg-amber-100 text-amber-800'
+                                    : 'bg-red-100 text-red-800'
+                              }
+                            >
                               {assessment.status.replace('_', ' ')}
                             </Badge>
                           </TableCell>
+                          <TableCell>{assessment.assessedBy || 'System'}</TableCell>
                           <TableCell>
-                            {assessment.assessedBy || 'System'}
-                          </TableCell>
-                          <TableCell>
-                            {assessment.dueDate ? new Date(assessment.dueDate).toLocaleDateString() : 'Not scheduled'}
+                            {assessment.dueDate
+                              ? new Date(assessment.dueDate).toLocaleDateString()
+                              : 'Not scheduled'}
                           </TableCell>
                           <TableCell className="text-right">
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => navigate(`/gto-compliance/assessment/${assessment.id}`)}
+                              onClick={() =>
+                                navigate(`/gto-compliance/assessment/${assessment.id}`)
+                              }
                             >
                               <FileText className="h-4 w-4 mr-1" /> View
                             </Button>

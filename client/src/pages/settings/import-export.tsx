@@ -2,9 +2,25 @@ import { useState, useEffect } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue, SelectLabel, SelectSeparator } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  SelectLabel,
+  SelectSeparator,
+} from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -15,11 +31,59 @@ import { apiRequest, queryClient } from '@/lib/queryClient';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { DownloadCloud, FileInput, FilePlus, FileUp, Upload, ArrowDownToLine, FileText, FileIcon, AlertTriangle, Database, CheckCircle2, Trash2, Settings, Columns, UploadCloud, Eye, Paperclip, X, Wand2, Check, FileSearch, Edit3, Loader2 } from 'lucide-react';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
+  DownloadCloud,
+  FileInput,
+  FilePlus,
+  FileUp,
+  Upload,
+  ArrowDownToLine,
+  FileText,
+  FileIcon,
+  AlertTriangle,
+  Database,
+  CheckCircle2,
+  Trash2,
+  Settings,
+  Columns,
+  UploadCloud,
+  Eye,
+  Paperclip,
+  X,
+  Wand2,
+  Check,
+  FileSearch,
+  Edit3,
+  Loader2,
+} from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Switch } from '@/components/ui/switch';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -42,12 +106,16 @@ const importSchema = z.object({
   entityType: z.string(),
   updateExisting: z.boolean().default(false),
   skipErrors: z.boolean().default(false),
-  columnMapping: z.array(z.object({
-    sourceColumn: z.string(),
-    targetField: z.string(),
-    required: z.boolean().default(false),
-    transform: z.string().optional()
-  })).optional(),
+  columnMapping: z
+    .array(
+      z.object({
+        sourceColumn: z.string(),
+        targetField: z.string(),
+        required: z.boolean().default(false),
+        transform: z.string().optional(),
+      })
+    )
+    .optional(),
 });
 
 const exportSchema = z.object({
@@ -83,11 +151,18 @@ const entityOptions = [
 
 // Group entities by type for better organization
 const entityGroups = {
-  'People': ['apprentices', 'host_employers', 'users'],
-  'Contracts': ['training_contracts', 'placements'],
-  'Documentation': ['documents', 'compliance_records', 'tasks', 'timesheets'],
-  'Training': ['qualifications', 'units_of_competency'],
-  'Fair Work': ['awards', 'enterprise_agreements', 'pay_rates', 'classifications', 'penalties', 'allowances'],
+  People: ['apprentices', 'host_employers', 'users'],
+  Contracts: ['training_contracts', 'placements'],
+  Documentation: ['documents', 'compliance_records', 'tasks', 'timesheets'],
+  Training: ['qualifications', 'units_of_competency'],
+  'Fair Work': [
+    'awards',
+    'enterprise_agreements',
+    'pay_rates',
+    'classifications',
+    'penalties',
+    'allowances',
+  ],
 };
 
 interface ImportJob {
@@ -147,15 +222,15 @@ const ImportExportSettings = () => {
   const [columnMapping, setColumnMapping] = useState<ColumnMapping[]>([]);
   const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
   const [previewData, setPreviewData] = useState<any[]>([]);
-  const [entityFields, setEntityFields] = useState<{label: string, value: string}[]>([]);
-  
+  const [entityFields, setEntityFields] = useState<{ label: string; value: string }[]>([]);
+
   // Enterprise Agreement related states
   const [showEAUploadDialog, setShowEAUploadDialog] = useState(false);
   const [eaFile, setEAFile] = useState<File | null>(null);
   const [extractedRates, setExtractedRates] = useState<ExtractedPayRate[]>([]);
   const [isExtracting, setIsExtracting] = useState(false);
   const [showExtractedRates, setShowExtractedRates] = useState(false);
-  
+
   // Forms
   const importForm = useForm<ImportFormValues>({
     resolver: zodResolver(importSchema),
@@ -176,7 +251,7 @@ const ImportExportSettings = () => {
       filter: '',
     },
   });
-  
+
   // EA Form for Enterprise Agreement upload
   const eaForm = useForm<EnterpriseAgreementFormValues>({
     resolver: zodResolver(enterpriseAgreementSchema),
@@ -205,31 +280,31 @@ const ImportExportSettings = () => {
     mutationFn: async (data: FormData) => {
       setIsUploading(true);
       setUploadProgress(0);
-      
+
       const xhr = new XMLHttpRequest();
       xhr.open('POST', '/api/import-jobs', true);
-      
-      xhr.upload.onprogress = (event) => {
+
+      xhr.upload.onprogress = event => {
         if (event.lengthComputable) {
           const progress = Math.round((event.loaded / event.total) * 100);
           setUploadProgress(progress);
         }
       };
-      
+
       const promise = new Promise<any>((resolve, reject) => {
-        xhr.onload = function() {
+        xhr.onload = function () {
           if (xhr.status >= 200 && xhr.status < 300) {
             resolve(JSON.parse(xhr.responseText));
           } else {
             reject(new Error('Import failed: ' + xhr.statusText));
           }
         };
-        
-        xhr.onerror = function() {
+
+        xhr.onerror = function () {
           reject(new Error('Import failed'));
         };
       });
-      
+
       xhr.send(data);
       return promise;
     },
@@ -265,7 +340,8 @@ const ImportExportSettings = () => {
       queryClient.invalidateQueries({ queryKey: ['/api/export-jobs'] });
       toast({
         title: 'Success',
-        description: 'Export job created successfully. It will be available for download once completed.',
+        description:
+          'Export job created successfully. It will be available for download once completed.',
       });
     },
     onError: (error: Error) => {
@@ -290,18 +366,18 @@ const ImportExportSettings = () => {
         response.text().then(text => {
           const blob = new Blob([text], { type: getContentType(job.fileType) });
           const url = window.URL.createObjectURL(blob);
-        
+
           // Create a link and click it to trigger download
           const a = document.createElement('a');
           a.href = url;
           a.download = job.fileName || `export-${job.entityType}.${job.fileType}`;
           document.body.appendChild(a);
           a.click();
-          
+
           // Clean up
           window.URL.revokeObjectURL(url);
           document.body.removeChild(a);
-          
+
           toast({
             title: 'Success',
             description: 'Export file downloaded successfully',
@@ -359,13 +435,15 @@ const ImportExportSettings = () => {
       });
     },
   });
-  
+
   // Enterprise Agreement extraction mutation
   const extractPayRatesMutation = useMutation({
     mutationFn: async (data: FormData) => {
       setIsExtracting(true);
       setShowExtractedRates(false);
-      const response = await apiRequest('POST', '/api/enterprise-agreements/extract-rates', data, { rawFormData: true });
+      const response = await apiRequest('POST', '/api/enterprise-agreements/extract-rates', data, {
+        rawFormData: true,
+      });
       const result = await response.json();
       return result.rates;
     },
@@ -387,10 +465,13 @@ const ImportExportSettings = () => {
       });
     },
   });
-  
+
   // Save Enterprise Agreement with extracted rates
   const saveEnterpriseAgreementMutation = useMutation({
-    mutationFn: async (data: { agreement: EnterpriseAgreementFormValues, rates: ExtractedPayRate[] }) => {
+    mutationFn: async (data: {
+      agreement: EnterpriseAgreementFormValues;
+      rates: ExtractedPayRate[];
+    }) => {
       const response = await apiRequest('POST', '/api/enterprise-agreements', data);
       return await response.json();
     },
@@ -418,7 +499,7 @@ const ImportExportSettings = () => {
   // Get entity fields for mapping based on entity type
   useEffect(() => {
     const entityType = importForm.getValues('entityType');
-    
+
     // For the entity schema fields, we use a mapping based on entity type
     const getEntityFields = () => {
       switch (entityType) {
@@ -534,18 +615,18 @@ const ImportExportSettings = () => {
           return [];
       }
     };
-    
+
     setEntityFields(getEntityFields());
   }, [importForm.watch('entityType')]);
 
   // Function to read file and generate preview
   const readAndPreviewFile = (file: File) => {
     const reader = new FileReader();
-    
-    reader.onload = (e) => {
+
+    reader.onload = e => {
       const content = e.target?.result as string;
       let preview: ImportPreview | null = null;
-      
+
       try {
         // Different parsing based on file type
         if (file.name.endsWith('.csv')) {
@@ -554,64 +635,68 @@ const ImportExportSettings = () => {
           const headers = rows[0].split(',').map(h => h.trim());
           const sampleData = rows.slice(1, 6).map(row => {
             const values = row.split(',').map(v => v.trim());
-            return headers.reduce((obj, header, i) => {
-              obj[header] = values[i] || '';
-              return obj;
-            }, {} as Record<string, string>);
+            return headers.reduce(
+              (obj, header, i) => {
+                obj[header] = values[i] || '';
+                return obj;
+              },
+              {} as Record<string, string>
+            );
           });
-          
+
           preview = {
             columns: headers,
             sampleRows: sampleData,
           };
-          
+
           // Auto-generate column mapping
           const initialMapping: ColumnMapping[] = headers.map(header => {
             // Try to find matching field
-            const matchedField = entityFields.find(field => 
-              field.label.toLowerCase() === header.toLowerCase() ||
-              field.value.toLowerCase() === header.toLowerCase()
+            const matchedField = entityFields.find(
+              field =>
+                field.label.toLowerCase() === header.toLowerCase() ||
+                field.value.toLowerCase() === header.toLowerCase()
             );
-            
+
             return {
               sourceColumn: header,
               targetField: matchedField?.value || '',
               required: false,
             };
           });
-          
+
           setColumnMapping(initialMapping);
-          
         } else if (file.name.endsWith('.json')) {
           // JSON parsing
           const jsonData = JSON.parse(content);
           if (Array.isArray(jsonData) && jsonData.length > 0) {
             const sampleData = jsonData.slice(0, 5);
             const headers = Object.keys(sampleData[0]);
-            
+
             preview = {
               columns: headers,
               sampleRows: sampleData,
             };
-            
+
             // Auto-generate column mapping
             const initialMapping: ColumnMapping[] = headers.map(header => {
-              const matchedField = entityFields.find(field => 
-                field.label.toLowerCase() === header.toLowerCase() ||
-                field.value.toLowerCase() === header.toLowerCase()
+              const matchedField = entityFields.find(
+                field =>
+                  field.label.toLowerCase() === header.toLowerCase() ||
+                  field.value.toLowerCase() === header.toLowerCase()
               );
-              
+
               return {
                 sourceColumn: header,
                 targetField: matchedField?.value || '',
                 required: false,
               };
             });
-            
+
             setColumnMapping(initialMapping);
           }
         }
-        
+
         setFilePreview(preview);
         if (preview) {
           setShowMappingDialog(true);
@@ -625,7 +710,7 @@ const ImportExportSettings = () => {
         });
       }
     };
-    
+
     reader.onerror = () => {
       toast({
         title: 'Error',
@@ -633,7 +718,7 @@ const ImportExportSettings = () => {
         variant: 'destructive',
       });
     };
-    
+
     // Read the file based on type
     if (file.name.endsWith('.csv')) {
       reader.readAsText(file);
@@ -649,7 +734,7 @@ const ImportExportSettings = () => {
       });
     }
   };
-  
+
   // Handle column mapping updates
   const updateColumnMapping = (index: number, field: keyof ColumnMapping, value: any) => {
     const newMapping = [...columnMapping];
@@ -661,7 +746,7 @@ const ImportExportSettings = () => {
     const file = e.target.files?.[0];
     if (file) {
       setSelectedFile(file);
-      
+
       // Detect file type from extension
       const extension = file.name.split('.').pop()?.toLowerCase();
       if (extension === 'csv') {
@@ -687,7 +772,7 @@ const ImportExportSettings = () => {
       });
       return;
     }
-    
+
     // Check if column mapping has been applied
     if (data.columnMapping === undefined && columnMapping.length > 0) {
       setShowMappingDialog(true);
@@ -697,19 +782,19 @@ const ImportExportSettings = () => {
       });
       return;
     }
-    
+
     const formData = new FormData();
     formData.append('file', selectedFile);
     formData.append('fileType', data.fileType);
     formData.append('entityType', data.entityType);
     formData.append('updateExisting', data.updateExisting.toString());
     formData.append('skipErrors', data.skipErrors.toString());
-    
+
     // Add column mapping if available
     if (data.columnMapping) {
       formData.append('columnMapping', JSON.stringify(data.columnMapping));
     }
-    
+
     createImportJobMutation.mutate(formData);
   };
 
@@ -759,12 +844,12 @@ const ImportExportSettings = () => {
           return [];
       }
     };
-    
+
     setEntityFields(getEntityFields());
     // Set default selected columns
     setSelectedColumns(getEntityFields().map(field => field.value));
   }, [exportForm.watch('entityType')]);
-  
+
   const onExportSubmit = (data: ExportFormValues) => {
     // Add selected columns to the export data
     const exportData = {
@@ -772,18 +857,18 @@ const ImportExportSettings = () => {
       columns: selectedColumns,
     };
     createExportJobMutation.mutate(exportData);
-  }
-  
+  };
+
   // EA file change handler
   const handleEAFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       setEAFile(file);
-      
+
       // Reset extracted rates when file changes
       setShowExtractedRates(false);
       setExtractedRates([]);
-      
+
       // Show a warning if not a PDF
       if (file.type !== 'application/pdf') {
         toast({
@@ -794,16 +879,16 @@ const ImportExportSettings = () => {
       }
     }
   };
-  
+
   // Extract pay rates from EA file
   const extractPayRates = () => {
     if (!eaFile) return;
-    
+
     const formData = new FormData();
     formData.append('file', eaFile);
     extractPayRatesMutation.mutate(formData);
   };
-  
+
   // Handle EA form submission
   const onEnterpriseAgreementSubmit = (data: EnterpriseAgreementFormValues) => {
     if (!eaFile) {
@@ -814,21 +899,22 @@ const ImportExportSettings = () => {
       });
       return;
     }
-    
+
     if (extractedRates.length === 0) {
       toast({
         title: 'Warning',
-        description: 'No pay rates were extracted. You can continue but no rates will be associated with this agreement.',
+        description:
+          'No pay rates were extracted. You can continue but no rates will be associated with this agreement.',
         variant: 'default',
       });
     }
-    
+
     saveEnterpriseAgreementMutation.mutate({
       agreement: data,
-      rates: extractedRates
+      rates: extractedRates,
     });
-  };;
-  
+  };
+
   // Toggle column selection for export
   const toggleColumnSelection = (columnValue: string) => {
     setSelectedColumns(prev => {
@@ -839,14 +925,14 @@ const ImportExportSettings = () => {
       }
     });
   };
-  
+
   // Check if all columns are selected
   const areAllColumnsSelected = () => {
-    return entityFields.length > 0 && entityFields.every(field => 
-      selectedColumns.includes(field.value)
+    return (
+      entityFields.length > 0 && entityFields.every(field => selectedColumns.includes(field.value))
     );
   };
-  
+
   // Toggle all columns
   const toggleAllColumns = () => {
     if (areAllColumnsSelected()) {
@@ -896,51 +982,53 @@ const ImportExportSettings = () => {
   // Auto-map columns based on similarity between source column names and target field names
   const autoMapColumns = () => {
     const updatedMapping = [...columnMapping];
-    
+
     columnMapping.forEach((mapping, index) => {
       // Skip columns that are already mapped
       if (mapping.targetField !== '') return;
-      
+
       const sourceColumn = mapping.sourceColumn.toLowerCase();
-      
+
       // Try to find a matching field
       const matchingField = entityFields.find(field => {
         const fieldValue = field.value.toLowerCase();
         const fieldLabel = field.label.toLowerCase();
-        
+
         // Check for exact match or close match
         return (
-          sourceColumn === fieldValue || 
+          sourceColumn === fieldValue ||
           sourceColumn === fieldLabel ||
           sourceColumn.replace(/[_\s-]/g, '') === fieldValue.replace(/[_\s-]/g, '') ||
           sourceColumn.replace(/[_\s-]/g, '') === fieldLabel.replace(/[_\s-]/g, '')
         );
       });
-      
+
       if (matchingField) {
         updatedMapping[index] = {
           ...mapping,
           targetField: matchingField.value,
           // Set required to true for common required fields
-          required: ['email', 'firstName', 'lastName', 'code', 'title'].includes(matchingField.value)
+          required: ['email', 'firstName', 'lastName', 'code', 'title'].includes(
+            matchingField.value
+          ),
         };
       }
     });
-    
+
     setColumnMapping(updatedMapping);
-    
+
     const mappedCount = updatedMapping.filter(m => m.targetField !== '').length;
     toast({
       title: 'Auto-Mapping Applied',
       description: `${mappedCount} columns automatically mapped`,
     });
   };
-  
+
   // Apply column mapping and continue with import
   const applyColumnMapping = () => {
     // Filter out unmapped columns
     const validMapping = columnMapping.filter(mapping => mapping.targetField !== '');
-    
+
     if (validMapping.length === 0) {
       toast({
         title: 'Error',
@@ -949,11 +1037,11 @@ const ImportExportSettings = () => {
       });
       return;
     }
-    
+
     // Add column mapping to form data
     importForm.setValue('columnMapping', validMapping);
     setShowMappingDialog(false);
-    
+
     toast({
       title: 'Column Mapping Applied',
       description: `${validMapping.length} columns mapped successfully`,
@@ -973,11 +1061,11 @@ const ImportExportSettings = () => {
               Column Mapping
             </DialogTitle>
             <DialogDescription>
-              Map columns from your import file to the appropriate fields in the system.
-              Required fields must be mapped to proceed.
+              Map columns from your import file to the appropriate fields in the system. Required
+              fields must be mapped to proceed.
             </DialogDescription>
           </DialogHeader>
-          
+
           {filePreview && (
             <div className="flex flex-col flex-1 overflow-hidden">
               {/* Table headers preview */}
@@ -987,7 +1075,7 @@ const ImportExportSettings = () => {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        {filePreview.columns.map((column) => (
+                        {filePreview.columns.map(column => (
                           <TableHead key={column}>{column}</TableHead>
                         ))}
                       </TableRow>
@@ -995,7 +1083,7 @@ const ImportExportSettings = () => {
                     <TableBody>
                       {filePreview.sampleRows.map((row, index) => (
                         <TableRow key={index}>
-                          {filePreview.columns.map((column) => (
+                          {filePreview.columns.map(column => (
                             <TableCell key={column}>{row[column]}</TableCell>
                           ))}
                         </TableRow>
@@ -1004,7 +1092,7 @@ const ImportExportSettings = () => {
                   </Table>
                 </ScrollArea>
               </div>
-              
+
               {/* Column mapping section */}
               <div className="flex-1 overflow-auto">
                 <h3 className="text-sm font-medium mb-2">Column Mapping</h3>
@@ -1023,16 +1111,18 @@ const ImportExportSettings = () => {
                         <TableRow key={mapping.sourceColumn}>
                           <TableCell>{mapping.sourceColumn}</TableCell>
                           <TableCell>
-                            <Select 
-                              value={mapping.targetField} 
-                              onValueChange={(value) => updateColumnMapping(index, 'targetField', value)}
+                            <Select
+                              value={mapping.targetField}
+                              onValueChange={value =>
+                                updateColumnMapping(index, 'targetField', value)
+                              }
                             >
                               <SelectTrigger>
                                 <SelectValue placeholder="Select field" />
                               </SelectTrigger>
                               <SelectContent>
                                 <SelectItem value="">Skip this column</SelectItem>
-                                {entityFields.map((field) => (
+                                {entityFields.map(field => (
                                   <SelectItem key={field.value} value={field.value}>
                                     {field.label}
                                   </SelectItem>
@@ -1041,16 +1131,20 @@ const ImportExportSettings = () => {
                             </Select>
                           </TableCell>
                           <TableCell>
-                            <Switch 
-                              checked={mapping.required} 
-                              onCheckedChange={(checked) => updateColumnMapping(index, 'required', checked)} 
+                            <Switch
+                              checked={mapping.required}
+                              onCheckedChange={checked =>
+                                updateColumnMapping(index, 'required', checked)
+                              }
                             />
                           </TableCell>
                           <TableCell>
-                            <Input 
-                              value={mapping.transform || ''} 
-                              onChange={(e) => updateColumnMapping(index, 'transform', e.target.value)} 
-                              placeholder="e.g., uppercase" 
+                            <Input
+                              value={mapping.transform || ''}
+                              onChange={e =>
+                                updateColumnMapping(index, 'transform', e.target.value)
+                              }
+                              placeholder="e.g., uppercase"
                             />
                           </TableCell>
                         </TableRow>
@@ -1061,15 +1155,10 @@ const ImportExportSettings = () => {
               </div>
             </div>
           )}
-          
+
           <DialogFooter className="mt-4 flex items-center justify-between">
             <div className="flex items-center">
-              <Button 
-                variant="secondary" 
-                type="button" 
-                onClick={autoMapColumns}
-                className="mr-2"
-              >
+              <Button variant="secondary" type="button" onClick={autoMapColumns} className="mr-2">
                 <Wand2 className="mr-2 h-4 w-4" />
                 Auto-Map Columns
               </Button>
@@ -1078,9 +1167,9 @@ const ImportExportSettings = () => {
               <Button variant="outline" type="button" onClick={() => setShowMappingDialog(false)}>
                 Cancel
               </Button>
-              <Button 
-                type="button" 
-                onClick={applyColumnMapping} 
+              <Button
+                type="button"
+                onClick={applyColumnMapping}
                 disabled={!columnMapping.some(mapping => mapping.targetField !== '')}
               >
                 <Check className="mr-2 h-4 w-4" />
@@ -1090,7 +1179,7 @@ const ImportExportSettings = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      
+
       {/* Enterprise Agreement Upload Dialog */}
       <Dialog open={showEAUploadDialog} onOpenChange={setShowEAUploadDialog}>
         <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
@@ -1103,7 +1192,7 @@ const ImportExportSettings = () => {
               Upload an Enterprise Agreement document to extract pay rates. PDF documents work best.
             </DialogDescription>
           </DialogHeader>
-          
+
           <Form {...eaForm}>
             <form onSubmit={eaForm.handleSubmit(onEnterpriseAgreementSubmit)} className="space-y-6">
               <div className="grid grid-cols-2 gap-4">
@@ -1120,7 +1209,7 @@ const ImportExportSettings = () => {
                     </FormItem>
                   )}
                 />
-                
+
                 <FormField
                   control={eaForm.control}
                   name="organization"
@@ -1135,7 +1224,7 @@ const ImportExportSettings = () => {
                   )}
                 />
               </div>
-              
+
               <div className="grid grid-cols-2 gap-4">
                 <FormField
                   control={eaForm.control}
@@ -1150,7 +1239,7 @@ const ImportExportSettings = () => {
                     </FormItem>
                   )}
                 />
-                
+
                 <FormField
                   control={eaForm.control}
                   name="end_date"
@@ -1165,7 +1254,7 @@ const ImportExportSettings = () => {
                   )}
                 />
               </div>
-              
+
               <div className="grid grid-cols-2 gap-4">
                 <FormField
                   control={eaForm.control}
@@ -1180,17 +1269,14 @@ const ImportExportSettings = () => {
                     </FormItem>
                   )}
                 />
-                
+
                 <FormField
                   control={eaForm.control}
                   name="status"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Status</FormLabel>
-                      <Select
-                        value={field.value}
-                        onValueChange={field.onChange}
-                      >
+                      <Select value={field.value} onValueChange={field.onChange}>
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Select status" />
@@ -1207,9 +1293,11 @@ const ImportExportSettings = () => {
                   )}
                 />
               </div>
-              
+
               <div className="p-4 border rounded-md">
-                <Label htmlFor="ea-file" className="block mb-2">Upload Enterprise Agreement Document</Label>
+                <Label htmlFor="ea-file" className="block mb-2">
+                  Upload Enterprise Agreement Document
+                </Label>
                 <Input
                   id="ea-file"
                   type="file"
@@ -1219,11 +1307,13 @@ const ImportExportSettings = () => {
                 />
                 {eaFile && (
                   <div className="flex items-center justify-between mt-2">
-                    <p className="text-sm text-muted-foreground">{eaFile.name} ({Math.round(eaFile.size / 1024)} KB)</p>
-                    <Button 
-                      type="button" 
-                      size="sm" 
-                      variant="secondary" 
+                    <p className="text-sm text-muted-foreground">
+                      {eaFile.name} ({Math.round(eaFile.size / 1024)} KB)
+                    </p>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="secondary"
                       onClick={extractPayRates}
                       disabled={isExtracting}
                     >
@@ -1233,14 +1323,14 @@ const ImportExportSettings = () => {
                   </div>
                 )}
               </div>
-              
+
               {isExtracting && (
                 <div className="flex justify-center items-center p-4">
                   <Loader2 className="h-8 w-8 animate-spin text-primary" />
                   <span className="ml-2">Extracting pay rates...</span>
                 </div>
               )}
-              
+
               {showExtractedRates && extractedRates.length > 0 && (
                 <div className="border rounded-md p-4">
                   <h3 className="text-lg font-medium mb-2">Extracted Pay Rates</h3>
@@ -1266,9 +1356,13 @@ const ImportExportSettings = () => {
                   </Table>
                 </div>
               )}
-              
+
               <DialogFooter>
-                <Button type="button" variant="outline" onClick={() => setShowEAUploadDialog(false)}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setShowEAUploadDialog(false)}
+                >
                   Cancel
                 </Button>
                 <Button type="submit" disabled={isExtracting || !eaFile}>
@@ -1296,7 +1390,8 @@ const ImportExportSettings = () => {
             <CardHeader>
               <CardTitle>Import Data</CardTitle>
               <CardDescription>
-                Import data from CSV, JSON, or Excel files. This will create new records or update existing ones.
+                Import data from CSV, JSON, or Excel files. This will create new records or update
+                existing ones.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -1309,10 +1404,7 @@ const ImportExportSettings = () => {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Data Type</FormLabel>
-                          <Select
-                            value={field.value}
-                            onValueChange={field.onChange}
-                          >
+                          <Select value={field.value} onValueChange={field.onChange}>
                             <FormControl>
                               <SelectTrigger>
                                 <SelectValue placeholder="Select data type to import" />
@@ -1321,7 +1413,9 @@ const ImportExportSettings = () => {
                             <SelectContent>
                               {Object.entries(entityGroups).map(([groupName, groupValues]) => (
                                 <SelectGroup key={groupName}>
-                                  <SelectLabel className="text-sm font-bold text-gray-500">{groupName}</SelectLabel>
+                                  <SelectLabel className="text-sm font-bold text-gray-500">
+                                    {groupName}
+                                  </SelectLabel>
                                   {entityOptions
                                     .filter(option => groupValues.includes(option.value))
                                     .map(option => (
@@ -1334,9 +1428,7 @@ const ImportExportSettings = () => {
                               ))}
                             </SelectContent>
                           </Select>
-                          <FormDescription>
-                            The type of data you want to import
-                          </FormDescription>
+                          <FormDescription>The type of data you want to import</FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -1348,10 +1440,7 @@ const ImportExportSettings = () => {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>File Format</FormLabel>
-                          <Select
-                            value={field.value}
-                            onValueChange={field.onChange}
-                          >
+                          <Select value={field.value} onValueChange={field.onChange}>
                             <FormControl>
                               <SelectTrigger>
                                 <SelectValue placeholder="Select file format" />
@@ -1363,9 +1452,7 @@ const ImportExportSettings = () => {
                               <SelectItem value="xlsx">Excel (XLSX)</SelectItem>
                             </SelectContent>
                           </Select>
-                          <FormDescription>
-                            The format of the file you're uploading
-                          </FormDescription>
+                          <FormDescription>The format of the file you're uploading</FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -1376,15 +1463,16 @@ const ImportExportSettings = () => {
                     <div className="border rounded-md p-4">
                       <div className="font-medium mb-2">Upload File</div>
                       <div className="mb-4">
-                        <Input 
-                          id="file-upload" 
-                          type="file" 
-                          onChange={handleFileChange} 
+                        <Input
+                          id="file-upload"
+                          type="file"
+                          onChange={handleFileChange}
                           accept=".csv,.json,.xlsx,.xls"
                         />
                         {selectedFile && (
                           <p className="text-sm text-muted-foreground mt-2">
-                            Selected file: {selectedFile.name} ({Math.round(selectedFile.size / 1024)} KB)
+                            Selected file: {selectedFile.name} (
+                            {Math.round(selectedFile.size / 1024)} KB)
                           </p>
                         )}
                       </div>
@@ -1404,7 +1492,10 @@ const ImportExportSettings = () => {
                               checked={field.value}
                               onCheckedChange={field.onChange}
                             />
-                            <Label htmlFor="update-existing" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                            <Label
+                              htmlFor="update-existing"
+                              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                            >
                               Update existing records if found
                             </Label>
                           </div>
@@ -1420,7 +1511,10 @@ const ImportExportSettings = () => {
                               checked={field.value}
                               onCheckedChange={field.onChange}
                             />
-                            <Label htmlFor="skip-errors" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                            <Label
+                              htmlFor="skip-errors"
+                              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                            >
                               Continue import when errors are encountered
                             </Label>
                           </div>
@@ -1438,8 +1532,8 @@ const ImportExportSettings = () => {
                   )}
 
                   <div className="flex flex-wrap gap-2">
-                    <Button 
-                      type="submit" 
+                    <Button
+                      type="submit"
                       disabled={!selectedFile || isUploading || createImportJobMutation.isPending}
                     >
                       {isUploading || createImportJobMutation.isPending ? (
@@ -1454,19 +1548,21 @@ const ImportExportSettings = () => {
                         </>
                       )}
                     </Button>
-                    
-                    {selectedFile && columnMapping.length > 0 && !importForm.getValues('columnMapping') && (
-                      <Button 
-                        type="button" 
-                        variant="outline" 
-                        onClick={() => setShowMappingDialog(true)}
-                      >
-                        <Columns className="mr-2 h-4 w-4" />
-                        Configure Column Mapping
-                      </Button>
-                    )}
+
+                    {selectedFile &&
+                      columnMapping.length > 0 &&
+                      !importForm.getValues('columnMapping') && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => setShowMappingDialog(true)}
+                        >
+                          <Columns className="mr-2 h-4 w-4" />
+                          Configure Column Mapping
+                        </Button>
+                      )}
                   </div>
-                  
+
                   {/* Enterprise Agreement upload section */}
                   {importForm.watch('entityType') === 'enterprise_agreements' && (
                     <div className="mt-4 p-4 border rounded-md bg-muted/30">
@@ -1475,12 +1571,13 @@ const ImportExportSettings = () => {
                         Enterprise Agreement Special Upload
                       </h3>
                       <p className="text-sm text-muted-foreground mb-4">
-                        Enterprise Agreements require special handling to extract pay rates from documents.
-                        Use this tool to upload and extract data from Enterprise Agreement documents.
+                        Enterprise Agreements require special handling to extract pay rates from
+                        documents. Use this tool to upload and extract data from Enterprise
+                        Agreement documents.
                       </p>
-                      <Button 
-                        type="button" 
-                        onClick={() => setShowEAUploadDialog(true)} 
+                      <Button
+                        type="button"
+                        onClick={() => setShowEAUploadDialog(true)}
                         variant="secondary"
                       >
                         <FileUp className="mr-2 h-4 w-4" />
@@ -1494,7 +1591,7 @@ const ImportExportSettings = () => {
           </Card>
 
           <h2 className="text-xl font-semibold mb-4">Recent Import Jobs</h2>
-          
+
           {isLoadingImportJobs ? (
             <div className="text-center py-8">Loading import jobs...</div>
           ) : importJobs && importJobs.length > 0 ? (
@@ -1509,18 +1606,29 @@ const ImportExportSettings = () => {
                           <span>{job.fileName}</span>
                         </CardTitle>
                         <CardDescription>
-                          {entityOptions.find(e => e.value === job.entityType)?.label || job.entityType} ({job.totalRows} rows)
+                          {entityOptions.find(e => e.value === job.entityType)?.label ||
+                            job.entityType}{' '}
+                          ({job.totalRows} rows)
                         </CardDescription>
                       </div>
                       <Badge
-                        className={job.status === 'completed' ? 'bg-green-100 text-green-800 hover:bg-green-100' :
-                                 job.status === 'failed' ? 'bg-red-100 text-red-800 hover:bg-red-100' :
-                                 job.status === 'processing' ? 'bg-blue-100 text-blue-800 hover:bg-blue-100' :
-                                 'bg-gray-100 text-gray-800 hover:bg-gray-100'}
+                        className={
+                          job.status === 'completed'
+                            ? 'bg-green-100 text-green-800 hover:bg-green-100'
+                            : job.status === 'failed'
+                              ? 'bg-red-100 text-red-800 hover:bg-red-100'
+                              : job.status === 'processing'
+                                ? 'bg-blue-100 text-blue-800 hover:bg-blue-100'
+                                : 'bg-gray-100 text-gray-800 hover:bg-gray-100'
+                        }
                       >
-                        {job.status === 'completed' ? 'Completed' :
-                         job.status === 'failed' ? 'Failed' :
-                         job.status === 'processing' ? 'Processing' : 'Pending'}
+                        {job.status === 'completed'
+                          ? 'Completed'
+                          : job.status === 'failed'
+                            ? 'Failed'
+                            : job.status === 'processing'
+                              ? 'Processing'
+                              : 'Pending'}
                       </Badge>
                     </div>
                   </CardHeader>
@@ -1538,7 +1646,9 @@ const ImportExportSettings = () => {
                       )}
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">Progress:</span>
-                        <span>{job.processedRows} of {job.totalRows} rows</span>
+                        <span>
+                          {job.processedRows} of {job.totalRows} rows
+                        </span>
                       </div>
                       {job.errorRows > 0 && (
                         <div className="flex justify-between text-red-500">
@@ -1547,7 +1657,7 @@ const ImportExportSettings = () => {
                         </div>
                       )}
                     </div>
-                    
+
                     {job.errors && job.errors.length > 0 && (
                       <div className="mt-4">
                         <Alert variant="destructive" className="text-sm">
@@ -1568,7 +1678,12 @@ const ImportExportSettings = () => {
                     )}
                   </CardContent>
                   <CardFooter className="pt-2">
-                    <Button variant="ghost" size="sm" className="text-destructive" onClick={() => handleDeleteImportJob(job.id)}>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-destructive"
+                      onClick={() => handleDeleteImportJob(job.id)}
+                    >
                       <Trash2 className="h-4 w-4 mr-1" /> Delete Job
                     </Button>
                   </CardFooter>
@@ -1594,7 +1709,8 @@ const ImportExportSettings = () => {
             <CardHeader>
               <CardTitle>Export Data</CardTitle>
               <CardDescription>
-                Export data to CSV, JSON, or Excel files. You can filter the data and include related records.
+                Export data to CSV, JSON, or Excel files. You can filter the data and include
+                related records.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -1607,10 +1723,7 @@ const ImportExportSettings = () => {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Data Type</FormLabel>
-                          <Select
-                            value={field.value}
-                            onValueChange={field.onChange}
-                          >
+                          <Select value={field.value} onValueChange={field.onChange}>
                             <FormControl>
                               <SelectTrigger>
                                 <SelectValue placeholder="Select data type to export" />
@@ -1624,9 +1737,7 @@ const ImportExportSettings = () => {
                               ))}
                             </SelectContent>
                           </Select>
-                          <FormDescription>
-                            The type of data you want to export
-                          </FormDescription>
+                          <FormDescription>The type of data you want to export</FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -1638,10 +1749,7 @@ const ImportExportSettings = () => {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>File Format</FormLabel>
-                          <Select
-                            value={field.value}
-                            onValueChange={field.onChange}
-                          >
+                          <Select value={field.value} onValueChange={field.onChange}>
                             <FormControl>
                               <SelectTrigger>
                                 <SelectValue placeholder="Select file format" />
@@ -1653,9 +1761,7 @@ const ImportExportSettings = () => {
                               <SelectItem value="xlsx">Excel (XLSX)</SelectItem>
                             </SelectContent>
                           </Select>
-                          <FormDescription>
-                            The format of the exported file
-                          </FormDescription>
+                          <FormDescription>The format of the exported file</FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -1677,18 +1783,18 @@ const ImportExportSettings = () => {
                         </Label>
                       </div>
                     </div>
-                    
+
                     <div className="border rounded-md p-4">
                       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
-                        {entityFields.map((field) => (
+                        {entityFields.map(field => (
                           <div key={field.value} className="flex items-center space-x-2">
                             <Checkbox
                               id={`column-${field.value}`}
                               checked={selectedColumns.includes(field.value)}
                               onCheckedChange={() => toggleColumnSelection(field.value)}
                             />
-                            <Label 
-                              htmlFor={`column-${field.value}`} 
+                            <Label
+                              htmlFor={`column-${field.value}`}
                               className="text-sm font-medium truncate"
                             >
                               {field.label}
@@ -1697,7 +1803,7 @@ const ImportExportSettings = () => {
                         ))}
                       </div>
                     </div>
-                    
+
                     {selectedColumns.length === 0 && (
                       <div className="text-destructive text-sm">
                         Please select at least one column to export
@@ -1718,7 +1824,10 @@ const ImportExportSettings = () => {
                               checked={field.value}
                               onCheckedChange={field.onChange}
                             />
-                            <Label htmlFor="include-related" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                            <Label
+                              htmlFor="include-related"
+                              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                            >
                               Include related records
                             </Label>
                           </div>
@@ -1731,9 +1840,9 @@ const ImportExportSettings = () => {
                           <FormItem>
                             <FormLabel>Filter (Optional)</FormLabel>
                             <FormControl>
-                              <Input 
-                                placeholder="e.g., status=active or created_after=2024-01-01" 
-                                {...field} 
+                              <Input
+                                placeholder="e.g., status=active or created_after=2024-01-01"
+                                {...field}
                                 value={field.value || ''}
                               />
                             </FormControl>
@@ -1747,9 +1856,9 @@ const ImportExportSettings = () => {
                     </div>
                   </div>
 
-                  <Button 
-                    type="submit" 
-                    className="mt-4" 
+                  <Button
+                    type="submit"
+                    className="mt-4"
                     disabled={createExportJobMutation.isPending || selectedColumns.length === 0}
                   >
                     {createExportJobMutation.isPending ? (
@@ -1770,7 +1879,7 @@ const ImportExportSettings = () => {
           </Card>
 
           <h2 className="text-xl font-semibold mb-4">Recent Export Jobs</h2>
-          
+
           {isLoadingExportJobs ? (
             <div className="text-center py-8">Loading export jobs...</div>
           ) : exportJobs && exportJobs.length > 0 ? (
@@ -1785,18 +1894,29 @@ const ImportExportSettings = () => {
                           <span>{job.fileName || `${job.entityType}.${job.fileType}`}</span>
                         </CardTitle>
                         <CardDescription>
-                          {entityOptions.find(e => e.value === job.entityType)?.label || job.entityType} - {job.totalRows} records
+                          {entityOptions.find(e => e.value === job.entityType)?.label ||
+                            job.entityType}{' '}
+                          - {job.totalRows} records
                         </CardDescription>
                       </div>
                       <Badge
-                        className={job.status === 'completed' ? 'bg-green-100 text-green-800 hover:bg-green-100' :
-                                 job.status === 'failed' ? 'bg-red-100 text-red-800 hover:bg-red-100' :
-                                 job.status === 'processing' ? 'bg-blue-100 text-blue-800 hover:bg-blue-100' :
-                                 'bg-gray-100 text-gray-800 hover:bg-gray-100'}
+                        className={
+                          job.status === 'completed'
+                            ? 'bg-green-100 text-green-800 hover:bg-green-100'
+                            : job.status === 'failed'
+                              ? 'bg-red-100 text-red-800 hover:bg-red-100'
+                              : job.status === 'processing'
+                                ? 'bg-blue-100 text-blue-800 hover:bg-blue-100'
+                                : 'bg-gray-100 text-gray-800 hover:bg-gray-100'
+                        }
                       >
-                        {job.status === 'completed' ? 'Completed' :
-                         job.status === 'failed' ? 'Failed' :
-                         job.status === 'processing' ? 'Processing' : 'Pending'}
+                        {job.status === 'completed'
+                          ? 'Completed'
+                          : job.status === 'failed'
+                            ? 'Failed'
+                            : job.status === 'processing'
+                              ? 'Processing'
+                              : 'Pending'}
                       </Badge>
                     </div>
                   </CardHeader>
@@ -1821,7 +1941,12 @@ const ImportExportSettings = () => {
                     </div>
                   </CardContent>
                   <CardFooter className="pt-2 flex justify-between">
-                    <Button variant="ghost" size="sm" className="text-destructive" onClick={() => handleDeleteExportJob(job.id)}>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-destructive"
+                      onClick={() => handleDeleteExportJob(job.id)}
+                    >
                       <Trash2 className="h-4 w-4 mr-1" /> Delete
                     </Button>
                     {job.status === 'completed' && (

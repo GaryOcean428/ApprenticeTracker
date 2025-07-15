@@ -1,6 +1,6 @@
 /**
  * Charge Rate Calculations API
- * 
+ *
  * This module provides endpoints for managing charge rate calculations.
  */
 
@@ -8,12 +8,12 @@ import { Router } from 'express';
 import { ChargeRateCalculator } from '../../services/charge-rate-calculator';
 import { z } from 'zod';
 import { db } from '../../db';
-import { 
-  chargeRateCalculations, 
-  apprentices, 
+import {
+  chargeRateCalculations,
+  apprentices,
   hostEmployers,
   awards,
-  awardClassifications 
+  awardClassifications,
 } from '@shared/schema';
 import { eq, desc, and } from 'drizzle-orm';
 import logger from '../../utils/logger';
@@ -33,7 +33,7 @@ const calculator = new ChargeRateCalculator();
 router.get('/', authenticateUser, async (req, res) => {
   try {
     logger.info('Fetching all charge rate calculations');
-    
+
     // Get calculations and join with apprentice and host employer data
     const calculations = await db
       .select({
@@ -45,14 +45,14 @@ router.get('/', authenticateUser, async (req, res) => {
         calculationDate: chargeRateCalculations.calculationDate,
         approved: chargeRateCalculations.approved,
         rejectionReason: chargeRateCalculations.rejectionReason,
-        apprenticeName: db.raw('CONCAT(apprentices.first_name, \' \', apprentices.last_name)'),
+        apprenticeName: db.raw("CONCAT(apprentices.first_name, ' ', apprentices.last_name)"),
         hostEmployerName: hostEmployers.companyName,
       })
       .from(chargeRateCalculations)
       .leftJoin(apprentices, eq(chargeRateCalculations.apprenticeId, apprentices.id))
       .leftJoin(hostEmployers, eq(chargeRateCalculations.hostEmployerId, hostEmployers.id))
       .orderBy(desc(chargeRateCalculations.calculationDate));
-    
+
     return res.json({
       success: true,
       data: calculations,
@@ -75,28 +75,32 @@ router.get('/:id', authenticateUser, async (req, res) => {
   try {
     const { id } = req.params;
     logger.info(`Fetching charge rate calculation with ID ${id}`);
-    
+
     // Get calculation by ID
     const [calculation] = await db
       .select()
       .from(chargeRateCalculations)
       .where(eq(chargeRateCalculations.id, parseInt(id)));
-    
+
     if (!calculation) {
       return res.status(404).json({
         success: false,
         error: `Charge rate calculation with ID ${id} not found`,
       });
     }
-    
+
     // Parse JSON fields
     const parsedCalc = {
       ...calculation,
       oncosts: JSON.parse(calculation.onCosts),
-      penaltyEstimates: calculation.penaltyEstimates ? JSON.parse(calculation.penaltyEstimates) : undefined,
-      approvalWorkflow: calculation.approvalWorkflow ? JSON.parse(calculation.approvalWorkflow) : undefined,
+      penaltyEstimates: calculation.penaltyEstimates
+        ? JSON.parse(calculation.penaltyEstimates)
+        : undefined,
+      approvalWorkflow: calculation.approvalWorkflow
+        ? JSON.parse(calculation.approvalWorkflow)
+        : undefined,
     };
-    
+
     return res.json({
       success: true,
       data: parsedCalc,
@@ -118,23 +122,16 @@ router.get('/:id', authenticateUser, async (req, res) => {
 router.post('/calculate', authenticateUser, async (req, res) => {
   try {
     logger.info('Calculating charge rate');
-    
-    const { 
-      payRate, 
-      awardId, 
-      costConfig, 
-      workConfig, 
-      billableOptions,
-      customMargin 
-    } = req.body;
-    
+
+    const { payRate, awardId, costConfig, workConfig, billableOptions, customMargin } = req.body;
+
     if (!payRate) {
       return res.status(400).json({
         success: false,
         error: 'Pay rate is required',
       });
     }
-    
+
     // Use the calculator service to calculate the charge rate
     const calculation = await calculator.calculateChargeRate(
       parseFloat(payRate),
@@ -144,7 +141,7 @@ router.post('/calculate', authenticateUser, async (req, res) => {
       customMargin,
       awardId ? parseInt(awardId) : undefined
     );
-    
+
     return res.json({
       success: true,
       data: calculation,
@@ -166,11 +163,11 @@ router.post('/calculate', authenticateUser, async (req, res) => {
 router.post('/', authenticateUser, requirePermission('create', 'charge_rate'), async (req, res) => {
   try {
     logger.info('Creating new charge rate calculation');
-    
-    const { 
-      apprenticeId, 
-      hostEmployerId, 
-      payRate, 
+
+    const {
+      apprenticeId,
+      hostEmployerId,
+      payRate,
       chargeRate,
       totalHours,
       billableHours,
@@ -185,7 +182,7 @@ router.post('/', authenticateUser, requirePermission('create', 'charge_rate'), a
       notes,
       penaltyEstimates,
     } = req.body;
-    
+
     // Validate required fields
     if (!apprenticeId || !hostEmployerId || !payRate || !chargeRate) {
       return res.status(400).json({
@@ -193,7 +190,7 @@ router.post('/', authenticateUser, requirePermission('create', 'charge_rate'), a
         error: 'Apprentice ID, Host Employer ID, Pay Rate, and Charge Rate are required',
       });
     }
-    
+
     // Create the calculation record
     const [savedCalculation] = await db
       .insert(chargeRateCalculations)
@@ -209,7 +206,7 @@ router.post('/', authenticateUser, requirePermission('create', 'charge_rate'), a
         costPerHour: costPerHour.toString(),
         chargeRate: chargeRate.toString(),
         calculationDate: new Date(),
-        marginRate: ((chargeRate / costPerHour) - 1).toString(),
+        marginRate: (chargeRate / costPerHour - 1).toString(),
         approved: false, // Requires approval by default
         awardId: awardId ? parseInt(awardId) : null,
         classificationId: classificationId ? parseInt(classificationId) : null,
@@ -239,7 +236,7 @@ router.post('/', authenticateUser, requirePermission('create', 'charge_rate'), a
         ]),
       })
       .returning();
-    
+
     return res.status(201).json({
       success: true,
       data: savedCalculation,
@@ -258,161 +255,167 @@ router.post('/', authenticateUser, requirePermission('create', 'charge_rate'), a
  * @description Approve a charge rate calculation
  * @access Admin, Developer, Financial Manager
  */
-router.post('/:id/approve', authenticateUser, requirePermission('approve', 'charge_rate'), async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { comments } = req.body;
-    
-    logger.info(`Approving charge rate calculation with ID ${id}`);
-    
-    // Get the calculation
-    const [calculation] = await db
-      .select()
-      .from(chargeRateCalculations)
-      .where(eq(chargeRateCalculations.id, parseInt(id)));
-    
-    if (!calculation) {
-      return res.status(404).json({
-        success: false,
-        error: `Charge rate calculation with ID ${id} not found`,
-      });
-    }
-    
-    // Check if it's already approved
-    if (calculation.approved) {
-      return res.status(400).json({
-        success: false,
-        error: 'Calculation is already approved',
-      });
-    }
-    
-    // Update the workflow status
-    let workflow = calculation.approvalWorkflow ? 
-      JSON.parse(calculation.approvalWorkflow) : 
-      [];
-    
-    // Find the first pending step
-    const pendingStepIndex = workflow.findIndex((step: any) => step.status === 'pending');
-    
-    if (pendingStepIndex >= 0) {
-      // Mark this step as approved
-      workflow[pendingStepIndex].status = 'approved';
-      workflow[pendingStepIndex].completedBy = req.user.username;
-      workflow[pendingStepIndex].completedAt = new Date().toISOString();
-      workflow[pendingStepIndex].comments = comments;
-      
-      // If there's a next step, mark it as pending
-      if (pendingStepIndex < workflow.length - 1) {
-        workflow[pendingStepIndex + 1].status = 'pending';
+router.post(
+  '/:id/approve',
+  authenticateUser,
+  requirePermission('approve', 'charge_rate'),
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { comments } = req.body;
+
+      logger.info(`Approving charge rate calculation with ID ${id}`);
+
+      // Get the calculation
+      const [calculation] = await db
+        .select()
+        .from(chargeRateCalculations)
+        .where(eq(chargeRateCalculations.id, parseInt(id)));
+
+      if (!calculation) {
+        return res.status(404).json({
+          success: false,
+          error: `Charge rate calculation with ID ${id} not found`,
+        });
+      }
+
+      // Check if it's already approved
+      if (calculation.approved) {
+        return res.status(400).json({
+          success: false,
+          error: 'Calculation is already approved',
+        });
+      }
+
+      // Update the workflow status
+      const workflow = calculation.approvalWorkflow ? JSON.parse(calculation.approvalWorkflow) : [];
+
+      // Find the first pending step
+      const pendingStepIndex = workflow.findIndex((step: any) => step.status === 'pending');
+
+      if (pendingStepIndex >= 0) {
+        // Mark this step as approved
+        workflow[pendingStepIndex].status = 'approved';
+        workflow[pendingStepIndex].completedBy = req.user.username;
+        workflow[pendingStepIndex].completedAt = new Date().toISOString();
+        workflow[pendingStepIndex].comments = comments;
+
+        // If there's a next step, mark it as pending
+        if (pendingStepIndex < workflow.length - 1) {
+          workflow[pendingStepIndex + 1].status = 'pending';
+        } else {
+          // This was the last step, mark the calculation as approved
+          await db
+            .update(chargeRateCalculations)
+            .set({
+              approved: true,
+              approvalWorkflow: JSON.stringify(workflow),
+            })
+            .where(eq(chargeRateCalculations.id, parseInt(id)));
+        }
       } else {
-        // This was the last step, mark the calculation as approved
+        // No pending steps, directly approve the calculation
         await db
           .update(chargeRateCalculations)
           .set({
             approved: true,
-            approvalWorkflow: JSON.stringify(workflow),
           })
           .where(eq(chargeRateCalculations.id, parseInt(id)));
       }
-    } else {
-      // No pending steps, directly approve the calculation
-      await db
-        .update(chargeRateCalculations)
-        .set({
-          approved: true,
-        })
-        .where(eq(chargeRateCalculations.id, parseInt(id)));
+
+      return res.json({
+        success: true,
+        message: 'Charge rate calculation approved successfully',
+      });
+    } catch (error) {
+      logger.error(`Error approving charge rate calculation with ID ${req.params.id}`, { error });
+      return res.status(500).json({
+        success: false,
+        error: 'Failed to approve charge rate calculation',
+      });
     }
-    
-    return res.json({
-      success: true,
-      message: 'Charge rate calculation approved successfully',
-    });
-  } catch (error) {
-    logger.error(`Error approving charge rate calculation with ID ${req.params.id}`, { error });
-    return res.status(500).json({
-      success: false,
-      error: 'Failed to approve charge rate calculation',
-    });
   }
-});
+);
 
 /**
  * @route POST /api/payroll/charge-rates/:id/reject
  * @description Reject a charge rate calculation
  * @access Admin, Developer, Financial Manager
  */
-router.post('/:id/reject', authenticateUser, requirePermission('approve', 'charge_rate'), async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { rejectionReason } = req.body;
-    
-    logger.info(`Rejecting charge rate calculation with ID ${id}`);
-    
-    if (!rejectionReason) {
-      return res.status(400).json({
+router.post(
+  '/:id/reject',
+  authenticateUser,
+  requirePermission('approve', 'charge_rate'),
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { rejectionReason } = req.body;
+
+      logger.info(`Rejecting charge rate calculation with ID ${id}`);
+
+      if (!rejectionReason) {
+        return res.status(400).json({
+          success: false,
+          error: 'Rejection reason is required',
+        });
+      }
+
+      // Get the calculation
+      const [calculation] = await db
+        .select()
+        .from(chargeRateCalculations)
+        .where(eq(chargeRateCalculations.id, parseInt(id)));
+
+      if (!calculation) {
+        return res.status(404).json({
+          success: false,
+          error: `Charge rate calculation with ID ${id} not found`,
+        });
+      }
+
+      // Check if it's already approved
+      if (calculation.approved) {
+        return res.status(400).json({
+          success: false,
+          error: 'Calculation is already approved and cannot be rejected',
+        });
+      }
+
+      // Update the workflow status
+      const workflow = calculation.approvalWorkflow ? JSON.parse(calculation.approvalWorkflow) : [];
+
+      // Find the first pending step
+      const pendingStepIndex = workflow.findIndex((step: any) => step.status === 'pending');
+
+      if (pendingStepIndex >= 0) {
+        // Mark this step as rejected
+        workflow[pendingStepIndex].status = 'rejected';
+        workflow[pendingStepIndex].completedBy = req.user.username;
+        workflow[pendingStepIndex].completedAt = new Date().toISOString();
+        workflow[pendingStepIndex].comments = rejectionReason;
+      }
+
+      // Update the calculation
+      await db
+        .update(chargeRateCalculations)
+        .set({
+          rejectionReason,
+          approvalWorkflow: JSON.stringify(workflow),
+        })
+        .where(eq(chargeRateCalculations.id, parseInt(id)));
+
+      return res.json({
+        success: true,
+        message: 'Charge rate calculation rejected successfully',
+      });
+    } catch (error) {
+      logger.error(`Error rejecting charge rate calculation with ID ${req.params.id}`, { error });
+      return res.status(500).json({
         success: false,
-        error: 'Rejection reason is required',
+        error: 'Failed to reject charge rate calculation',
       });
     }
-    
-    // Get the calculation
-    const [calculation] = await db
-      .select()
-      .from(chargeRateCalculations)
-      .where(eq(chargeRateCalculations.id, parseInt(id)));
-    
-    if (!calculation) {
-      return res.status(404).json({
-        success: false,
-        error: `Charge rate calculation with ID ${id} not found`,
-      });
-    }
-    
-    // Check if it's already approved
-    if (calculation.approved) {
-      return res.status(400).json({
-        success: false,
-        error: 'Calculation is already approved and cannot be rejected',
-      });
-    }
-    
-    // Update the workflow status
-    let workflow = calculation.approvalWorkflow ? 
-      JSON.parse(calculation.approvalWorkflow) : 
-      [];
-    
-    // Find the first pending step
-    const pendingStepIndex = workflow.findIndex((step: any) => step.status === 'pending');
-    
-    if (pendingStepIndex >= 0) {
-      // Mark this step as rejected
-      workflow[pendingStepIndex].status = 'rejected';
-      workflow[pendingStepIndex].completedBy = req.user.username;
-      workflow[pendingStepIndex].completedAt = new Date().toISOString();
-      workflow[pendingStepIndex].comments = rejectionReason;
-    }
-    
-    // Update the calculation
-    await db
-      .update(chargeRateCalculations)
-      .set({
-        rejectionReason,
-        approvalWorkflow: JSON.stringify(workflow),
-      })
-      .where(eq(chargeRateCalculations.id, parseInt(id)));
-    
-    return res.json({
-      success: true,
-      message: 'Charge rate calculation rejected successfully',
-    });
-  } catch (error) {
-    logger.error(`Error rejecting charge rate calculation with ID ${req.params.id}`, { error });
-    return res.status(500).json({
-      success: false,
-      error: 'Failed to reject charge rate calculation',
-    });
   }
-});
+);
 
 export default router;

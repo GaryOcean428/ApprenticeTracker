@@ -1,10 +1,10 @@
-import { useState, useEffect } from "react";
-import { useParams, useLocation, Link } from "wouter";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+import { useState, useEffect } from 'react';
+import { useParams, useLocation, Link } from 'wouter';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { apiRequest } from '@/lib/queryClient';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import {
   Card,
   CardContent,
@@ -12,7 +12,7 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from '@/components/ui/card';
 import {
   Form,
   FormControl,
@@ -21,14 +21,14 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
+} from '@/components/ui/form';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -36,25 +36,25 @@ import {
   BreadcrumbList,
   BreadcrumbSeparator,
   BreadcrumbPage,
-} from "@/components/ui/breadcrumb";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { useToast } from "@/hooks/use-toast";
-import { AlertCircle, ArrowLeft, Loader2 } from "lucide-react";
+} from '@/components/ui/breadcrumb';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { useToast } from '@/hooks/use-toast';
+import { AlertCircle, ArrowLeft, Loader2 } from 'lucide-react';
 
 // Define form schema
 const formSchema = z.object({
-  unitCode: z.string().min(1, "Unit code is required"),
-  unitTitle: z.string().min(1, "Unit title is required"),
+  unitCode: z.string().min(1, 'Unit code is required'),
+  unitTitle: z.string().min(1, 'Unit title is required'),
   unitDescription: z.string().optional(),
   trainingPackage: z.string().optional(),
   trainingPackageRelease: z.string().optional(),
   releaseNumber: z.string().optional(),
-  nominalHours: z.coerce.number().int().min(0, "Nominal hours must be 0 or greater"),
+  nominalHours: z.coerce.number().int().min(0, 'Nominal hours must be 0 or greater'),
   isActive: z.boolean().default(true),
   isImported: z.boolean().default(false),
   assessmentRequirements: z.string().optional(),
@@ -84,16 +84,16 @@ export default function EditUnitOfCompetency() {
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      unitCode: "",
-      unitTitle: "",
-      unitDescription: "",
-      trainingPackage: "",
-      trainingPackageRelease: "",
-      releaseNumber: "",
+      unitCode: '',
+      unitTitle: '',
+      unitDescription: '',
+      trainingPackage: '',
+      trainingPackageRelease: '',
+      releaseNumber: '',
       nominalHours: 0,
       isActive: true,
       isImported: false,
-      assessmentRequirements: "",
+      assessmentRequirements: '',
     },
   });
 
@@ -103,14 +103,14 @@ export default function EditUnitOfCompetency() {
       form.reset({
         unitCode: unit.unitCode,
         unitTitle: unit.unitTitle,
-        unitDescription: unit.unitDescription || "",
-        trainingPackage: unit.trainingPackage || "",
-        trainingPackageRelease: unit.trainingPackageRelease || "",
-        releaseNumber: unit.releaseNumber || "",
+        unitDescription: unit.unitDescription || '',
+        trainingPackage: unit.trainingPackage || '',
+        trainingPackageRelease: unit.trainingPackageRelease || '',
+        releaseNumber: unit.releaseNumber || '',
         nominalHours: unit.nominalHours || 0,
         isActive: unit.isActive,
         isImported: unit.isImported || false,
-        assessmentRequirements: unit.assessmentRequirements || "",
+        assessmentRequirements: unit.assessmentRequirements || '',
       });
     }
   }, [unit, form]);
@@ -118,27 +118,23 @@ export default function EditUnitOfCompetency() {
   // Update unit mutation
   const updateMutation = useMutation({
     mutationFn: async (data: FormValues) => {
-      const res = await apiRequest(
-        "PATCH",
-        `/api/vet/units/${unitId}`,
-        data
-      );
+      const res = await apiRequest('PATCH', `/api/vet/units/${unitId}`, data);
       return await res.json();
     },
     onSuccess: () => {
       toast({
-        title: "Unit updated",
-        description: "Unit of competency has been updated successfully",
+        title: 'Unit updated',
+        description: 'Unit of competency has been updated successfully',
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/vet/units"] });
+      queryClient.invalidateQueries({ queryKey: ['/api/vet/units'] });
       queryClient.invalidateQueries({ queryKey: [`/api/vet/units/${unitId}`] });
-      navigate("/vet/units");
+      navigate('/vet/units');
     },
-    onError: (error) => {
+    onError: error => {
       toast({
-        title: "Error",
+        title: 'Error',
         description: `Failed to update unit: ${error.message}`,
-        variant: "destructive",
+        variant: 'destructive',
       });
     },
   });
@@ -146,25 +142,22 @@ export default function EditUnitOfCompetency() {
   // Delete unit mutation
   const deleteMutation = useMutation({
     mutationFn: async () => {
-      const res = await apiRequest(
-        "DELETE",
-        `/api/vet/units/${unitId}`
-      );
+      const res = await apiRequest('DELETE', `/api/vet/units/${unitId}`);
       return await res.json();
     },
     onSuccess: () => {
       toast({
-        title: "Unit deleted",
-        description: "Unit of competency has been deleted successfully",
+        title: 'Unit deleted',
+        description: 'Unit of competency has been deleted successfully',
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/vet/units"] });
-      navigate("/vet/units");
+      queryClient.invalidateQueries({ queryKey: ['/api/vet/units'] });
+      navigate('/vet/units');
     },
-    onError: (error) => {
+    onError: error => {
       toast({
-        title: "Error",
+        title: 'Error',
         description: `Failed to delete unit: ${error.message}`,
-        variant: "destructive",
+        variant: 'destructive',
       });
       setIsDeleting(false);
     },
@@ -215,10 +208,10 @@ export default function EditUnitOfCompetency() {
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>Error</AlertTitle>
           <AlertDescription>
-            {error instanceof Error ? error.message : "Failed to load unit of competency"}
+            {error instanceof Error ? error.message : 'Failed to load unit of competency'}
           </AlertDescription>
         </Alert>
-        <Button onClick={() => navigate("/vet/units")}>
+        <Button onClick={() => navigate('/vet/units')}>
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to Units
         </Button>
@@ -253,9 +246,7 @@ export default function EditUnitOfCompetency() {
             <Card>
               <CardHeader>
                 <CardTitle>Edit Unit of Competency</CardTitle>
-                <CardDescription>
-                  Update the details of this unit of competency
-                </CardDescription>
+                <CardDescription>Update the details of this unit of competency</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -309,10 +300,10 @@ export default function EditUnitOfCompetency() {
                     <FormItem>
                       <FormLabel>Description</FormLabel>
                       <FormControl>
-                        <Textarea 
-                          placeholder="This unit describes the skills and knowledge required..." 
-                          className="min-h-[100px]" 
-                          {...field} 
+                        <Textarea
+                          placeholder="This unit describes the skills and knowledge required..."
+                          className="min-h-[100px]"
+                          {...field}
                         />
                       </FormControl>
                       <FormMessage />
@@ -357,10 +348,10 @@ export default function EditUnitOfCompetency() {
                     <FormItem>
                       <FormLabel>Assessment Requirements</FormLabel>
                       <FormControl>
-                        <Textarea 
-                          placeholder="Assessment must be conducted..." 
-                          className="min-h-[100px]" 
-                          {...field} 
+                        <Textarea
+                          placeholder="Assessment must be conducted..."
+                          className="min-h-[100px]"
+                          {...field}
                         />
                       </FormControl>
                       <FormMessage />
@@ -375,10 +366,7 @@ export default function EditUnitOfCompetency() {
                     render={({ field }) => (
                       <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
                         <FormControl>
-                          <Checkbox
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
+                          <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                         </FormControl>
                         <div className="space-y-1 leading-none">
                           <FormLabel>Active</FormLabel>
@@ -396,10 +384,7 @@ export default function EditUnitOfCompetency() {
                     render={({ field }) => (
                       <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
                         <FormControl>
-                          <Checkbox
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
+                          <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                         </FormControl>
                         <div className="space-y-1 leading-none">
                           <FormLabel>Imported from TGA</FormLabel>
@@ -414,23 +399,25 @@ export default function EditUnitOfCompetency() {
               </CardContent>
               <CardFooter className="flex justify-between">
                 <div>
-                  <Button variant="outline" type="button" onClick={() => navigate(`/vet/units/${unitId}`)}>
+                  <Button
+                    variant="outline"
+                    type="button"
+                    onClick={() => navigate(`/vet/units/${unitId}`)}
+                  >
                     Cancel
                   </Button>
                 </div>
                 <div className="flex gap-2">
-                  <Button 
-                    variant="destructive" 
-                    type="button" 
+                  <Button
+                    variant="destructive"
+                    type="button"
                     onClick={() => setIsDeleting(true)}
                     disabled={deleteMutation.isPending || unit.isImported}
                   >
-                    {unit.isImported ? "Imported units cannot be deleted" : "Delete"}
+                    {unit.isImported ? 'Imported units cannot be deleted' : 'Delete'}
                   </Button>
                   <Button type="submit" disabled={updateMutation.isPending}>
-                    {updateMutation.isPending && (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    )}
+                    {updateMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     Save Changes
                   </Button>
                 </div>
@@ -445,11 +432,15 @@ export default function EditUnitOfCompetency() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-card p-6 rounded-lg shadow-lg w-full max-w-md">
             <h3 className="text-xl font-semibold mb-4">Confirm Deletion</h3>
-            <p className="mb-6">Are you sure you want to delete this unit of competency? This action cannot be undone.</p>
+            <p className="mb-6">
+              Are you sure you want to delete this unit of competency? This action cannot be undone.
+            </p>
             <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setIsDeleting(false)}>Cancel</Button>
-              <Button 
-                variant="destructive" 
+              <Button variant="outline" onClick={() => setIsDeleting(false)}>
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
                 onClick={() => deleteMutation.mutate()}
                 disabled={deleteMutation.isPending}
               >

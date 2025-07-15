@@ -41,7 +41,7 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
     // Log the error to the console
     console.error('Error caught by ErrorBoundary:', error, errorInfo);
-    
+
     // Send error to backend for logging/telemetry
     try {
       // Don't block the UI while reporting
@@ -52,20 +52,20 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
           error: {
             message: error.message,
             stack: error.stack,
-            name: error.name
+            name: error.name,
           },
           errorInfo: {
-            componentStack: errorInfo.componentStack
+            componentStack: errorInfo.componentStack,
           },
           url: window.location.href,
-          timestamp: new Date().toISOString()
-        })
+          timestamp: new Date().toISOString(),
+        }),
       }).catch(e => console.error('Failed to report error:', e));
     } catch (e) {
       // Silently fail if error reporting fails
       console.error('Error reporting failed:', e);
     }
-    
+
     // Call the onError callback if provided
     if (this.props.onError) {
       this.props.onError(error, errorInfo);
@@ -100,7 +100,8 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
           </CardHeader>
           <CardContent className="pt-6">
             <p className="mb-4">
-              An error occurred while rendering this component. Please try again or contact support if the problem persists.
+              An error occurred while rendering this component. Please try again or contact support
+              if the problem persists.
             </p>
             {error && (
               <div className="mb-4 rounded-md bg-muted p-4">
@@ -109,10 +110,7 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
             )}
           </CardContent>
           <CardFooter className="flex justify-between">
-            <Button
-              variant="outline"
-              onClick={() => window.location.reload()}
-            >
+            <Button variant="outline" onClick={() => window.location.reload()}>
               Reload Page
             </Button>
             <Button onClick={this.handleReset}>
@@ -138,14 +136,14 @@ export function withErrorBoundary<P extends object>(
   errorBoundaryProps?: Omit<ErrorBoundaryProps, 'children'>
 ): React.ComponentType<P> {
   const displayName = Component.displayName || Component.name || 'Component';
-  
+
   const WrappedComponent = (props: P) => (
     <ErrorBoundary {...errorBoundaryProps}>
       <Component {...props} />
     </ErrorBoundary>
   );
-  
+
   WrappedComponent.displayName = `withErrorBoundary(${displayName})`;
-  
+
   return WrappedComponent;
 }

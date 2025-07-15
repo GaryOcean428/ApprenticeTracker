@@ -1,58 +1,65 @@
-import { useParams, Link } from "wouter";
-import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
-import { useToast } from "@/hooks/use-toast";
-import { format } from "date-fns";
-import { 
-  CalendarDays, 
-  User, 
-  Briefcase, 
-  FileText, 
-  Award, 
-  Clock, 
-  CreditCard, 
-  MapPin, 
-  Phone, 
-  Mail, 
-  Calendar, 
-  Shield, 
-  AlertCircle, 
-  CheckCircle, 
+import { useParams, Link } from 'wouter';
+import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
+import { useToast } from '@/hooks/use-toast';
+import { format } from 'date-fns';
+import {
+  CalendarDays,
+  User,
+  Briefcase,
+  FileText,
+  Award,
+  Clock,
+  CreditCard,
+  MapPin,
+  Phone,
+  Mail,
+  Calendar,
+  Shield,
+  AlertCircle,
+  CheckCircle,
   ArrowRightCircle,
   Edit,
-  ChevronLeft
-} from "lucide-react";
+  ChevronLeft,
+} from 'lucide-react';
 
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Separator } from "@/components/ui/separator";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { DashboardShell } from "@/components/dashboard-shell";
-import { PageHeader } from "@/components/page-header";
-import { LabourHireWorker } from "@shared/schema";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Separator } from '@/components/ui/separator';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { DashboardShell } from '@/components/dashboard-shell';
+import { PageHeader } from '@/components/page-header';
+import { LabourHireWorker } from '@shared/schema';
 
 export default function WorkerDetailPage() {
   const { id } = useParams();
   const { toast } = useToast();
-  const [activeStage, setActiveStage] = useState("active"); // Default active stage
-  
+  const [activeStage, setActiveStage] = useState('active'); // Default active stage
+
   // Fetch worker data
-  const { 
+  const {
     data: worker,
     isLoading,
-    error
+    error,
   } = useQuery<LabourHireWorker>({
     queryKey: [`/api/labour-hire/workers/${id}`],
-    enabled: !!id
+    enabled: !!id,
   });
 
   if (error) {
     toast({
-      title: "Error",
-      description: "Failed to load worker details. Please try again.",
-      variant: "destructive",
+      title: 'Error',
+      description: 'Failed to load worker details. Please try again.',
+      variant: 'destructive',
     });
   }
 
@@ -88,7 +95,9 @@ export default function WorkerDetailPage() {
         <div className="flex flex-col items-center justify-center py-12">
           <AlertCircle className="h-12 w-12 text-muted-foreground mb-4" />
           <h2 className="text-2xl font-bold mb-2">Worker Not Found</h2>
-          <p className="text-muted-foreground mb-6">The worker you're looking for doesn't exist or you don't have permission to view it.</p>
+          <p className="text-muted-foreground mb-6">
+            The worker you're looking for doesn't exist or you don't have permission to view it.
+          </p>
           <Button asChild>
             <Link href="/labour-hire/workers">View All Workers</Link>
           </Button>
@@ -99,30 +108,30 @@ export default function WorkerDetailPage() {
 
   // Format date helper
   const formatDate = (dateString: string | Date | null) => {
-    if (!dateString) return "N/A";
-    return format(new Date(dateString), "dd/MM/yyyy");
+    if (!dateString) return 'N/A';
+    return format(new Date(dateString), 'dd/MM/yyyy');
   };
 
   // Generate status badge
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case "active":
+      case 'active':
         return <Badge className="bg-green-500">Active</Badge>;
-      case "inactive":
+      case 'inactive':
         return <Badge variant="outline">Inactive</Badge>;
-      case "pending":
+      case 'pending':
         return <Badge className="bg-yellow-500">Pending</Badge>;
-      case "applicant":
+      case 'applicant':
         return <Badge className="bg-blue-500">Applicant</Badge>;
-      case "shortlisted":
+      case 'shortlisted':
         return <Badge className="bg-purple-500">Shortlisted</Badge>;
-      case "interviewing":
+      case 'interviewing':
         return <Badge className="bg-indigo-500">Interviewing</Badge>;
-      case "offered":
+      case 'offered':
         return <Badge className="bg-pink-500">Offered</Badge>;
-      case "onboarding":
+      case 'onboarding':
         return <Badge className="bg-orange-500">Onboarding</Badge>;
-      case "probation":
+      case 'probation':
         return <Badge className="bg-amber-500">Probation</Badge>;
       default:
         return <Badge variant="secondary">{status}</Badge>;
@@ -136,15 +145,15 @@ export default function WorkerDetailPage() {
 
   // Workflow stages
   const stages = [
-    { id: "applicant", name: "Applicant", description: "Initial screening" },
-    { id: "shortlisted", name: "Shortlisted", description: "Selected candidate" },
-    { id: "interviewing", name: "Interviewing", description: "In assessment" },
-    { id: "offered", name: "Offer Made", description: "Job offered" },
-    { id: "onboarding", name: "Onboarding", description: "Starting position" },
-    { id: "probation", name: "Probation", description: "Under evaluation" },
-    { id: "active", name: "Active Worker", description: "Fully employed" },
-    { id: "completed", name: "Completed", description: "Contract ended" },
-    { id: "worker_pool", name: "Worker Pool", description: "Available for placement" },
+    { id: 'applicant', name: 'Applicant', description: 'Initial screening' },
+    { id: 'shortlisted', name: 'Shortlisted', description: 'Selected candidate' },
+    { id: 'interviewing', name: 'Interviewing', description: 'In assessment' },
+    { id: 'offered', name: 'Offer Made', description: 'Job offered' },
+    { id: 'onboarding', name: 'Onboarding', description: 'Starting position' },
+    { id: 'probation', name: 'Probation', description: 'Under evaluation' },
+    { id: 'active', name: 'Active Worker', description: 'Fully employed' },
+    { id: 'completed', name: 'Completed', description: 'Contract ended' },
+    { id: 'worker_pool', name: 'Worker Pool', description: 'Available for placement' },
   ];
 
   return (
@@ -172,17 +181,22 @@ export default function WorkerDetailPage() {
               <div className="flex flex-col">
                 <div className="flex items-center">
                   <Avatar className="h-12 w-12 mr-4">
-                    <AvatarImage src={worker.profileImage || ""} alt={`${worker.firstName} ${worker.lastName}`} />
-                    <AvatarFallback>{getInitials(worker.firstName, worker.lastName)}</AvatarFallback>
+                    <AvatarImage
+                      src={worker.profileImage || ''}
+                      alt={`${worker.firstName} ${worker.lastName}`}
+                    />
+                    <AvatarFallback>
+                      {getInitials(worker.firstName, worker.lastName)}
+                    </AvatarFallback>
                   </Avatar>
                   <div>
-                    <h2 className="text-xl font-bold">{worker.firstName} {worker.lastName}</h2>
+                    <h2 className="text-xl font-bold">
+                      {worker.firstName} {worker.lastName}
+                    </h2>
                     <p className="text-sm text-muted-foreground">{worker.occupation}</p>
                   </div>
                 </div>
-                <div className="mt-4 flex items-center">
-                  {getStatusBadge(worker.status)}
-                </div>
+                <div className="mt-4 flex items-center">{getStatusBadge(worker.status)}</div>
               </div>
               <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
                 <Link href={`/labour-hire/workers/${worker.id}/edit`}>
@@ -200,11 +214,13 @@ export default function WorkerDetailPage() {
                 </div>
                 <div className="flex items-center">
                   <Phone className="h-4 w-4 mr-2 text-muted-foreground" />
-                  <span className="text-sm">{worker.phone || "No phone number"}</span>
+                  <span className="text-sm">{worker.phone || 'No phone number'}</span>
                 </div>
                 <div className="flex items-center">
                   <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
-                  <span className="text-sm">Started {worker.startDate ? formatDate(worker.startDate) : "N/A"}</span>
+                  <span className="text-sm">
+                    Started {worker.startDate ? formatDate(worker.startDate) : 'N/A'}
+                  </span>
                 </div>
                 {worker.endDate && (
                   <div className="flex items-center">
@@ -213,9 +229,9 @@ export default function WorkerDetailPage() {
                   </div>
                 )}
               </div>
-              
+
               <Separator />
-              
+
               <div className="space-y-2">
                 <h3 className="text-sm font-medium">Employment Details</h3>
                 <div className="flex items-center justify-between">
@@ -223,33 +239,37 @@ export default function WorkerDetailPage() {
                     <Briefcase className="h-4 w-4 mr-2 text-muted-foreground" />
                     <span className="text-sm">Employment Type</span>
                   </div>
-                  <span className="text-sm font-medium">{worker.employmentType || "Not specified"}</span>
+                  <span className="text-sm font-medium">
+                    {worker.employmentType || 'Not specified'}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center">
                     <Clock className="h-4 w-4 mr-2 text-muted-foreground" />
                     <span className="text-sm">Max Hours</span>
                   </div>
-                  <span className="text-sm font-medium">{worker.maxHoursPerWeek || "N/A"} hrs/week</span>
+                  <span className="text-sm font-medium">
+                    {worker.maxHoursPerWeek || 'N/A'} hrs/week
+                  </span>
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center">
                     <CreditCard className="h-4 w-4 mr-2 text-muted-foreground" />
                     <span className="text-sm">Hourly Rate</span>
                   </div>
-                  <span className="text-sm font-medium">${worker.hourlyRate || "N/A"}</span>
+                  <span className="text-sm font-medium">${worker.hourlyRate || 'N/A'}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center">
                     <Award className="h-4 w-4 mr-2 text-muted-foreground" />
                     <span className="text-sm">Award</span>
                   </div>
-                  <span className="text-sm font-medium">{worker.awardClassification || "N/A"}</span>
+                  <span className="text-sm font-medium">{worker.awardClassification || 'N/A'}</span>
                 </div>
               </div>
-              
+
               <Separator />
-              
+
               <div className="space-y-2">
                 <h3 className="text-sm font-medium">Experience & Skills</h3>
                 <div className="flex items-center justify-between">
@@ -257,21 +277,23 @@ export default function WorkerDetailPage() {
                     <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
                     <span className="text-sm">Experience</span>
                   </div>
-                  <span className="text-sm font-medium">{worker.experienceYears || "0"} years</span>
+                  <span className="text-sm font-medium">{worker.experienceYears || '0'} years</span>
                 </div>
                 <div className="space-y-1">
                   <div className="flex items-start">
                     <Award className="h-4 w-4 mr-2 mt-0.5 text-muted-foreground" />
                     <div>
                       <span className="text-sm">Skills</span>
-                      <p className="text-sm text-muted-foreground">{worker.skillsDescription || "No skills listed"}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {worker.skillsDescription || 'No skills listed'}
+                      </p>
                     </div>
                   </div>
                 </div>
               </div>
-              
+
               <Separator />
-              
+
               <div className="space-y-2">
                 <h3 className="text-sm font-medium">Compliance</h3>
                 <div className="flex items-center justify-between">
@@ -279,7 +301,9 @@ export default function WorkerDetailPage() {
                     <Shield className="h-4 w-4 mr-2 text-muted-foreground" />
                     <span className="text-sm">Work Rights</span>
                   </div>
-                  <span className="text-sm font-medium">{worker.workRights ? "Verified" : "Not Verified"}</span>
+                  <span className="text-sm font-medium">
+                    {worker.workRights ? 'Verified' : 'Not Verified'}
+                  </span>
                 </div>
                 {worker.visaStatus && (
                   <div className="flex items-center justify-between">
@@ -333,19 +357,20 @@ export default function WorkerDetailPage() {
                 <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-border -translate-y-1/2" />
                 <div className="relative flex justify-between">
                   {stages.slice(0, 7).map((stage, index) => (
-                    <div 
-                      key={stage.id} 
+                    <div
+                      key={stage.id}
                       className={`flex flex-col items-center ${activeStage === stage.id ? 'z-10' : ''}`}
                       onClick={() => setActiveStage(stage.id)}
                     >
-                      <div 
+                      <div
                         className={`
                           w-8 h-8 rounded-full flex items-center justify-center 
-                          ${activeStage === stage.id 
-                            ? 'bg-primary text-primary-foreground' 
-                            : worker.status === stage.id 
-                              ? 'bg-green-500 text-white' 
-                              : 'bg-background border-2 border-border text-muted-foreground'
+                          ${
+                            activeStage === stage.id
+                              ? 'bg-primary text-primary-foreground'
+                              : worker.status === stage.id
+                                ? 'bg-green-500 text-white'
+                                : 'bg-background border-2 border-border text-muted-foreground'
                           }
                           cursor-pointer hover:border-primary/50 transition-colors
                         `}
@@ -356,15 +381,19 @@ export default function WorkerDetailPage() {
                           <span className="text-xs">{index + 1}</span>
                         )}
                       </div>
-                      <div className="mt-2 text-xs font-medium text-center max-w-[70px]">{stage.name}</div>
+                      <div className="mt-2 text-xs font-medium text-center max-w-[70px]">
+                        {stage.name}
+                      </div>
                     </div>
                   ))}
                 </div>
               </div>
-              
+
               <div className="mt-8 p-4 bg-muted rounded-md">
                 <div className="flex items-center mb-2">
-                  <h3 className="text-sm font-medium">{stages.find(s => s.id === activeStage)?.name} Stage</h3>
+                  <h3 className="text-sm font-medium">
+                    {stages.find(s => s.id === activeStage)?.name} Stage
+                  </h3>
                   {worker.status === activeStage && (
                     <Badge className="ml-2 bg-green-500">Current</Badge>
                   )}
@@ -372,20 +401,18 @@ export default function WorkerDetailPage() {
                 <p className="text-sm text-muted-foreground mb-4">
                   {stages.find(s => s.id === activeStage)?.description}
                 </p>
-                
+
                 <div className="flex space-x-2">
                   {worker.status !== activeStage ? (
-                    <Button size="sm">
-                      Update to this stage
-                    </Button>
+                    <Button size="sm">Update to this stage</Button>
                   ) : (
                     <Button size="sm" variant="outline" className="cursor-not-allowed opacity-50">
                       Current Stage
                     </Button>
                   )}
-                  
-                  {stages.findIndex(s => s.id === worker.status) < 
-                   stages.findIndex(s => s.id === stages[stages.length - 1].id) && (
+
+                  {stages.findIndex(s => s.id === worker.status) <
+                    stages.findIndex(s => s.id === stages[stages.length - 1].id) && (
                     <Button size="sm" variant="outline">
                       Advance to Next Stage
                       <ArrowRightCircle className="ml-2 h-4 w-4" />
@@ -395,7 +422,7 @@ export default function WorkerDetailPage() {
               </div>
             </CardContent>
           </Card>
-          
+
           {/* Data Tabs */}
           <Tabs defaultValue="details">
             <TabsList className="grid w-full grid-cols-4">
@@ -404,14 +431,12 @@ export default function WorkerDetailPage() {
               <TabsTrigger value="documents">Documents</TabsTrigger>
               <TabsTrigger value="notes">Notes</TabsTrigger>
             </TabsList>
-            
+
             <TabsContent value="details" className="space-y-4 pt-4">
               <Card>
                 <CardHeader>
                   <CardTitle>Worker Details</CardTitle>
-                  <CardDescription>
-                    Personal and employment information
-                  </CardDescription>
+                  <CardDescription>Personal and employment information</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
@@ -421,11 +446,15 @@ export default function WorkerDetailPage() {
                         <div className="space-y-2">
                           <div className="grid grid-cols-2 gap-2">
                             <div className="text-sm text-muted-foreground">Full Name</div>
-                            <div className="text-sm">{worker.firstName} {worker.lastName}</div>
+                            <div className="text-sm">
+                              {worker.firstName} {worker.lastName}
+                            </div>
                           </div>
                           <div className="grid grid-cols-2 gap-2">
                             <div className="text-sm text-muted-foreground">Date of Birth</div>
-                            <div className="text-sm">{worker.dateOfBirth ? formatDate(worker.dateOfBirth) : "Not provided"}</div>
+                            <div className="text-sm">
+                              {worker.dateOfBirth ? formatDate(worker.dateOfBirth) : 'Not provided'}
+                            </div>
                           </div>
                           <div className="grid grid-cols-2 gap-2">
                             <div className="text-sm text-muted-foreground">Email</div>
@@ -433,11 +462,11 @@ export default function WorkerDetailPage() {
                           </div>
                           <div className="grid grid-cols-2 gap-2">
                             <div className="text-sm text-muted-foreground">Phone</div>
-                            <div className="text-sm">{worker.phone || "Not provided"}</div>
+                            <div className="text-sm">{worker.phone || 'Not provided'}</div>
                           </div>
                         </div>
                       </div>
-                      
+
                       <div>
                         <h3 className="text-sm font-medium mb-2">Work Information</h3>
                         <div className="space-y-2">
@@ -447,7 +476,9 @@ export default function WorkerDetailPage() {
                           </div>
                           <div className="grid grid-cols-2 gap-2">
                             <div className="text-sm text-muted-foreground">Start Date</div>
-                            <div className="text-sm">{worker.startDate ? formatDate(worker.startDate) : "Not set"}</div>
+                            <div className="text-sm">
+                              {worker.startDate ? formatDate(worker.startDate) : 'Not set'}
+                            </div>
                           </div>
                           <div className="grid grid-cols-2 gap-2">
                             <div className="text-sm text-muted-foreground">Status</div>
@@ -455,32 +486,32 @@ export default function WorkerDetailPage() {
                           </div>
                           <div className="grid grid-cols-2 gap-2">
                             <div className="text-sm text-muted-foreground">Employment Type</div>
-                            <div className="text-sm">{worker.employmentType || "Not specified"}</div>
+                            <div className="text-sm">
+                              {worker.employmentType || 'Not specified'}
+                            </div>
                           </div>
                         </div>
                       </div>
                     </div>
-                    
+
                     <Separator />
-                    
+
                     <div>
                       <h3 className="text-sm font-medium mb-2">Additional Notes</h3>
                       <p className="text-sm text-muted-foreground">
-                        {worker.notes || "No additional notes available for this worker."}
+                        {worker.notes || 'No additional notes available for this worker.'}
                       </p>
                     </div>
                   </div>
                 </CardContent>
               </Card>
             </TabsContent>
-            
+
             <TabsContent value="placements" className="space-y-4 pt-4">
               <Card>
                 <CardHeader>
                   <CardTitle>Placements History</CardTitle>
-                  <CardDescription>
-                    Current and past worker placements
-                  </CardDescription>
+                  <CardDescription>Current and past worker placements</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="text-center py-8">
@@ -498,14 +529,12 @@ export default function WorkerDetailPage() {
                 </CardContent>
               </Card>
             </TabsContent>
-            
+
             <TabsContent value="documents" className="space-y-4 pt-4">
               <Card>
                 <CardHeader>
                   <CardTitle>Documents</CardTitle>
-                  <CardDescription>
-                    Worker-related documentation
-                  </CardDescription>
+                  <CardDescription>Worker-related documentation</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="text-center py-8">
@@ -514,21 +543,17 @@ export default function WorkerDetailPage() {
                     <p className="text-sm text-muted-foreground max-w-md mx-auto mb-6">
                       There are no documents uploaded for this worker yet.
                     </p>
-                    <Button>
-                      Upload Document
-                    </Button>
+                    <Button>Upload Document</Button>
                   </div>
                 </CardContent>
               </Card>
             </TabsContent>
-            
+
             <TabsContent value="notes" className="space-y-4 pt-4">
               <Card>
                 <CardHeader>
                   <CardTitle>Notes</CardTitle>
-                  <CardDescription>
-                    Worker-related notes and interactions
-                  </CardDescription>
+                  <CardDescription>Worker-related notes and interactions</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="text-center py-8">
@@ -537,9 +562,7 @@ export default function WorkerDetailPage() {
                     <p className="text-sm text-muted-foreground max-w-md mx-auto mb-6">
                       There are no notes recorded for this worker yet.
                     </p>
-                    <Button>
-                      Add Note
-                    </Button>
+                    <Button>Add Note</Button>
                   </div>
                 </CardContent>
               </Card>

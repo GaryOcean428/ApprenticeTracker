@@ -1,12 +1,32 @@
-import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
-import { Link } from "wouter";
-import { PieChart, BarChart, DollarSign, ArrowUpRight, TrendingUp, ChevronRight } from "lucide-react";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
+import { Link } from 'wouter';
+import {
+  PieChart,
+  BarChart,
+  DollarSign,
+  ArrowUpRight,
+  TrendingUp,
+  ChevronRight,
+} from 'lucide-react';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 // Interface for financial summary data
 interface FinancialSummary {
@@ -32,8 +52,8 @@ interface FinancialSummary {
 }
 
 const FinancialSummary = () => {
-  const [timeframe, setTimeframe] = useState("month");
-  const [chartType, setChartType] = useState("pie");
+  const [timeframe, setTimeframe] = useState('month');
+  const [chartType, setChartType] = useState('pie');
 
   // Fetch financial summary data
   const { data: financialData, isLoading } = useQuery({
@@ -47,14 +67,14 @@ const FinancialSummary = () => {
         // If API fails, use summarized data from our pages
         // This is a fallback to ensure we display something useful
         return {
-          totalRevenue: 527850.00,
+          totalRevenue: 527850.0,
           totalExpenses: 412635.45,
           netProfit: 115214.55,
           profitMargin: 0.218,
-          revenueYTD: 1827850.00,
+          revenueYTD: 1827850.0,
           expensesYTD: 1412635.45,
           recentExpenses: [],
-          recentInvoices: []
+          recentInvoices: [],
         } as FinancialSummary;
       }
     },
@@ -78,10 +98,7 @@ const FinancialSummary = () => {
           <CardTitle>Financial Summary</CardTitle>
           <CardDescription>Overview of your financial performance</CardDescription>
         </div>
-        <Select 
-          value={timeframe} 
-          onValueChange={setTimeframe}
-        >
+        <Select value={timeframe} onValueChange={setTimeframe}>
           <SelectTrigger className="w-[160px]">
             <SelectValue placeholder="Select timeframe" />
           </SelectTrigger>
@@ -106,7 +123,7 @@ const FinancialSummary = () => {
                 <TabsTrigger value="expenses">Expenses</TabsTrigger>
                 <TabsTrigger value="income">Income</TabsTrigger>
               </TabsList>
-              
+
               <TabsContent value="overview">
                 <div className="grid grid-cols-3 gap-4 mb-4">
                   <div className="bg-card border rounded-lg p-4 flex flex-col">
@@ -119,7 +136,7 @@ const FinancialSummary = () => {
                       <span>+8.2% from last {timeframe}</span>
                     </div>
                   </div>
-                  
+
                   <div className="bg-card border rounded-lg p-4 flex flex-col">
                     <span className="text-sm text-muted-foreground">Expenses</span>
                     <span className="text-2xl font-bold text-foreground mt-1">
@@ -130,7 +147,7 @@ const FinancialSummary = () => {
                       <span>+5.1% from last {timeframe}</span>
                     </div>
                   </div>
-                  
+
                   <div className="bg-card border rounded-lg p-4 flex flex-col">
                     <span className="text-sm text-muted-foreground">Net Profit</span>
                     <span className="text-2xl font-bold text-foreground mt-1">
@@ -141,7 +158,7 @@ const FinancialSummary = () => {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="h-64 bg-muted border border-border rounded-lg flex items-center justify-center">
                   <div className="text-center px-4">
                     {chartType === 'pie' ? (
@@ -151,15 +168,15 @@ const FinancialSummary = () => {
                     )}
                     <p className="text-muted-foreground">Financial breakdown by category</p>
                     <div className="mt-2 flex justify-center space-x-2">
-                      <Button 
-                        variant={chartType === 'pie' ? 'default' : 'outline'} 
+                      <Button
+                        variant={chartType === 'pie' ? 'default' : 'outline'}
                         size="sm"
                         onClick={() => setChartType('pie')}
                       >
                         Pie Chart
                       </Button>
-                      <Button 
-                        variant={chartType === 'bar' ? 'default' : 'outline'} 
+                      <Button
+                        variant={chartType === 'bar' ? 'default' : 'outline'}
                         size="sm"
                         onClick={() => setChartType('bar')}
                       >
@@ -169,19 +186,25 @@ const FinancialSummary = () => {
                   </div>
                 </div>
               </TabsContent>
-              
+
               <TabsContent value="expenses">
                 <div className="space-y-2">
                   <div className="flex justify-between items-center mb-2">
                     <h3 className="text-sm font-medium">Recent Expenses</h3>
-                    <Link href="/financial/expenses" className="text-xs text-primary hover:underline flex items-center">
+                    <Link
+                      href="/financial/expenses"
+                      className="text-xs text-primary hover:underline flex items-center"
+                    >
                       View All <ChevronRight className="h-3 w-3 ml-1" />
                     </Link>
                   </div>
-                  
+
                   <div className="space-y-2">
-                    {[1, 2, 3].map((i) => (
-                      <div key={i} className="flex items-center justify-between p-2 bg-muted/50 rounded-md">
+                    {[1, 2, 3].map(i => (
+                      <div
+                        key={i}
+                        className="flex items-center justify-between p-2 bg-muted/50 rounded-md"
+                      >
                         <div className="flex items-center">
                           <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center mr-3">
                             <DollarSign className="h-4 w-4 text-primary" />
@@ -197,19 +220,25 @@ const FinancialSummary = () => {
                   </div>
                 </div>
               </TabsContent>
-              
+
               <TabsContent value="income">
                 <div className="space-y-2">
                   <div className="flex justify-between items-center mb-2">
                     <h3 className="text-sm font-medium">Recent Invoices</h3>
-                    <Link href="/financial/invoicing" className="text-xs text-primary hover:underline flex items-center">
+                    <Link
+                      href="/financial/invoicing"
+                      className="text-xs text-primary hover:underline flex items-center"
+                    >
                       View All <ChevronRight className="h-3 w-3 ml-1" />
                     </Link>
                   </div>
-                  
+
                   <div className="space-y-2">
-                    {[1, 2, 3].map((i) => (
-                      <div key={i} className="flex items-center justify-between p-2 bg-muted/50 rounded-md">
+                    {[1, 2, 3].map(i => (
+                      <div
+                        key={i}
+                        className="flex items-center justify-between p-2 bg-muted/50 rounded-md"
+                      >
                         <div className="flex items-center">
                           <div className="w-8 h-8 rounded-full bg-success/20 flex items-center justify-center mr-3">
                             <DollarSign className="h-4 w-4 text-success" />
@@ -236,14 +265,10 @@ const FinancialSummary = () => {
       </CardContent>
       <CardFooter className="flex justify-between">
         <Button variant="outline" size="sm" asChild>
-          <Link href="/financial/reports">
-            View Financial Reports
-          </Link>
+          <Link href="/financial/reports">View Financial Reports</Link>
         </Button>
         <Button size="sm" asChild>
-          <Link href="/financial/budget">
-            Manage Budget
-          </Link>
+          <Link href="/financial/budget">Manage Budget</Link>
         </Button>
       </CardFooter>
     </Card>

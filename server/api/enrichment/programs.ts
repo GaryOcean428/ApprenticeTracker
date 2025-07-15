@@ -10,17 +10,18 @@ import { eq, count, and, SQL, sql } from 'drizzle-orm';
 export async function getEnrichmentPrograms(req: Request, res: Response) {
   try {
     // Join with the participants table to get the count
-    const programsData = await db.select({
-      id: enrichmentPrograms.id,
-      name: enrichmentPrograms.name,
-      description: enrichmentPrograms.description,
-      category: enrichmentPrograms.category,
-      status: enrichmentPrograms.status,
-      startDate: enrichmentPrograms.startDate,
-      endDate: enrichmentPrograms.endDate,
-      tags: enrichmentPrograms.tags,
-      participantCount: count(enrichmentParticipants.id).as('participantCount'),
-    })
+    const programsData = await db
+      .select({
+        id: enrichmentPrograms.id,
+        name: enrichmentPrograms.name,
+        description: enrichmentPrograms.description,
+        category: enrichmentPrograms.category,
+        status: enrichmentPrograms.status,
+        startDate: enrichmentPrograms.startDate,
+        endDate: enrichmentPrograms.endDate,
+        tags: enrichmentPrograms.tags,
+        participantCount: count(enrichmentParticipants.id).as('participantCount'),
+      })
       .from(enrichmentPrograms)
       .leftJoin(enrichmentParticipants, eq(enrichmentPrograms.id, enrichmentParticipants.programId))
       .groupBy(enrichmentPrograms.id);
@@ -45,7 +46,8 @@ export async function getEnrichmentProgram(req: Request, res: Response) {
 
   try {
     // Get the program details
-    const [program] = await db.select()
+    const [program] = await db
+      .select()
       .from(enrichmentPrograms)
       .where(eq(enrichmentPrograms.id, parseInt(id)));
 
@@ -54,14 +56,15 @@ export async function getEnrichmentProgram(req: Request, res: Response) {
     }
 
     // Get the program participants
-    const participants = await db.select({
-      id: enrichmentParticipants.id,
-      apprenticeId: enrichmentParticipants.apprenticeId,
-      enrollmentDate: enrichmentParticipants.enrollmentDate,
-      status: enrichmentParticipants.status,
-      completionDate: enrichmentParticipants.completionDate,
-      notes: enrichmentParticipants.notes,
-    })
+    const participants = await db
+      .select({
+        id: enrichmentParticipants.id,
+        apprenticeId: enrichmentParticipants.apprenticeId,
+        enrollmentDate: enrichmentParticipants.enrollmentDate,
+        status: enrichmentParticipants.status,
+        completionDate: enrichmentParticipants.completionDate,
+        notes: enrichmentParticipants.notes,
+      })
       .from(enrichmentParticipants)
       .where(eq(enrichmentParticipants.programId, parseInt(id)));
 
@@ -92,7 +95,8 @@ export async function createEnrichmentProgram(req: Request, res: Response) {
 
   try {
     // Create the program
-    const [newProgram] = await db.insert(enrichmentPrograms)
+    const [newProgram] = await db
+      .insert(enrichmentPrograms)
       .values({
         name,
         description,
@@ -127,7 +131,8 @@ export async function updateEnrichmentProgram(req: Request, res: Response) {
 
   try {
     // Check if the program exists
-    const [existingProgram] = await db.select({ id: enrichmentPrograms.id })
+    const [existingProgram] = await db
+      .select({ id: enrichmentPrograms.id })
       .from(enrichmentPrograms)
       .where(eq(enrichmentPrograms.id, parseInt(id)));
 
@@ -136,14 +141,15 @@ export async function updateEnrichmentProgram(req: Request, res: Response) {
     }
 
     // Update the program
-    const [updatedProgram] = await db.update(enrichmentPrograms)
+    const [updatedProgram] = await db
+      .update(enrichmentPrograms)
       .set({
         ...(name && { name }),
         ...(description && { description }),
         ...(category && { category }),
         ...(status && { status }),
         ...(startDate && { startDate }),
-        endDate: endDate === undefined ? undefined : (endDate || null),
+        endDate: endDate === undefined ? undefined : endDate || null,
         ...(tags && { tags }),
         updatedAt: new Date(),
       })
@@ -170,7 +176,8 @@ export async function deleteEnrichmentProgram(req: Request, res: Response) {
 
   try {
     // Check if the program exists
-    const [existingProgram] = await db.select({ id: enrichmentPrograms.id })
+    const [existingProgram] = await db
+      .select({ id: enrichmentPrograms.id })
       .from(enrichmentPrograms)
       .where(eq(enrichmentPrograms.id, parseInt(id)));
 
@@ -179,8 +186,7 @@ export async function deleteEnrichmentProgram(req: Request, res: Response) {
     }
 
     // Delete the program
-    await db.delete(enrichmentPrograms)
-      .where(eq(enrichmentPrograms.id, parseInt(id)));
+    await db.delete(enrichmentPrograms).where(eq(enrichmentPrograms.id, parseInt(id)));
 
     return res.status(204).end();
   } catch (error) {

@@ -1,32 +1,21 @@
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { Link } from "wouter";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle
-} from "@/components/ui/card";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger
-} from "@/components/ui/tabs";
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { Link } from 'wouter';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
-  TableRow
-} from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Input } from "@/components/ui/input";
-import { format } from "date-fns";
+  TableRow,
+} from '@/components/ui/table';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Input } from '@/components/ui/input';
+import { format } from 'date-fns';
 import {
   AlertTriangle,
   CheckCircle,
@@ -36,8 +25,8 @@ import {
   MapPin,
   Plus,
   Search,
-  Users
-} from "lucide-react";
+  Users,
+} from 'lucide-react';
 
 // Types for vacancies
 interface Vacancy {
@@ -49,7 +38,7 @@ interface Vacancy {
   trade: string;
   description: string;
   requirements: string;
-  status: "open" | "filled" | "closed";
+  status: 'open' | 'filled' | 'closed';
   postedDate: string;
   closingDate: string | null;
   applicationCount: number;
@@ -57,33 +46,33 @@ interface Vacancy {
 }
 
 const HostVacanciesPage = () => {
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState("all");
+  const [activeTab, setActiveTab] = useState('all');
 
   // Fetch vacancies
   const { data: vacancies, isLoading } = useQuery({
-    queryKey: ["/api/vacancies"],
+    queryKey: ['/api/vacancies'],
     queryFn: async () => {
-      const res = await fetch("/api/vacancies");
+      const res = await fetch('/api/vacancies');
       if (!res.ok) {
         // If the endpoint doesn't exist yet, return mock data
-        console.warn("API endpoint not available, returning empty array");
+        console.warn('API endpoint not available, returning empty array');
         return [];
       }
       return res.json() as Promise<Vacancy[]>;
-    }
+    },
   });
 
   // Format date
   const formatDate = (dateStr: string | null) => {
-    if (!dateStr) return "No date";
-    return format(new Date(dateStr), "dd MMM yyyy");
+    if (!dateStr) return 'No date';
+    return format(new Date(dateStr), 'dd MMM yyyy');
   };
 
   // Filter vacancies based on search, status, and active tab
   const filteredVacancies = vacancies
-    ? vacancies.filter((vacancy) => {
+    ? vacancies.filter(vacancy => {
         // Filter by search query (title, location, or trade)
         const matchesSearch =
           vacancy.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -96,11 +85,10 @@ const HostVacanciesPage = () => {
 
         // Filter by tab
         const matchesTab =
-          activeTab === "all" ||
-          (activeTab === "priority" && vacancy.isHighPriority) ||
-          (activeTab === "recent" &&
-            new Date(vacancy.postedDate) >
-              new Date(Date.now() - 7 * 24 * 60 * 60 * 1000));
+          activeTab === 'all' ||
+          (activeTab === 'priority' && vacancy.isHighPriority) ||
+          (activeTab === 'recent' &&
+            new Date(vacancy.postedDate) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000));
 
         return matchesSearch && matchesStatus && matchesTab;
       })
@@ -109,19 +97,19 @@ const HostVacanciesPage = () => {
   // Get status badge
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case "open":
+      case 'open':
         return (
           <Badge className="bg-green-100 text-green-800">
             <CheckCircle className="mr-1 h-3 w-3" /> Open
           </Badge>
         );
-      case "filled":
+      case 'filled':
         return (
           <Badge className="bg-blue-100 text-blue-800">
             <Users className="mr-1 h-3 w-3" /> Filled
           </Badge>
         );
-      case "closed":
+      case 'closed':
         return (
           <Badge className="bg-gray-100 text-gray-800">
             <AlertTriangle className="mr-1 h-3 w-3" /> Closed
@@ -179,35 +167,35 @@ const HostVacanciesPage = () => {
                 placeholder="Search by title, location, or trade..."
                 className="pl-8"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={e => setSearchQuery(e.target.value)}
               />
             </div>
             <div className="flex gap-2">
               <Button
-                variant={statusFilter === null ? "default" : "outline"}
+                variant={statusFilter === null ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setStatusFilter(null)}
               >
                 All
               </Button>
               <Button
-                variant={statusFilter === "open" ? "default" : "outline"}
+                variant={statusFilter === 'open' ? 'default' : 'outline'}
                 size="sm"
-                onClick={() => setStatusFilter("open")}
+                onClick={() => setStatusFilter('open')}
               >
                 Open
               </Button>
               <Button
-                variant={statusFilter === "filled" ? "default" : "outline"}
+                variant={statusFilter === 'filled' ? 'default' : 'outline'}
                 size="sm"
-                onClick={() => setStatusFilter("filled")}
+                onClick={() => setStatusFilter('filled')}
               >
                 Filled
               </Button>
               <Button
-                variant={statusFilter === "closed" ? "default" : "outline"}
+                variant={statusFilter === 'closed' ? 'default' : 'outline'}
                 size="sm"
-                onClick={() => setStatusFilter("closed")}
+                onClick={() => setStatusFilter('closed')}
               >
                 Closed
               </Button>
@@ -229,13 +217,11 @@ const HostVacanciesPage = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredVacancies.map((vacancy) => (
+                {filteredVacancies.map(vacancy => (
                   <TableRow key={vacancy.id}>
                     <TableCell className="font-medium">
                       {vacancy.isHighPriority && (
-                        <Badge className="bg-red-100 text-red-800 mr-2">
-                          Priority
-                        </Badge>
+                        <Badge className="bg-red-100 text-red-800 mr-2">Priority</Badge>
                       )}
                       {vacancy.title}
                     </TableCell>
@@ -280,9 +266,9 @@ const HostVacanciesPage = () => {
               <FilePlus className="mx-auto h-12 w-12 text-muted-foreground" />
               <h3 className="mt-4 text-lg font-medium">No vacancies found</h3>
               <p className="mt-2 text-sm text-muted-foreground">
-                {searchQuery || statusFilter || activeTab !== "all"
-                  ? "Try changing your search or filter criteria"
-                  : "Get started by creating a new vacancy"}
+                {searchQuery || statusFilter || activeTab !== 'all'
+                  ? 'Try changing your search or filter criteria'
+                  : 'Get started by creating a new vacancy'}
               </p>
               <Link href="/hosts/vacancies/new">
                 <Button className="mt-4">

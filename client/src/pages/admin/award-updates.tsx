@@ -2,13 +2,13 @@ import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardFooter, 
-  CardHeader, 
-  CardTitle 
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
 } from '@/components/ui/card';
 import {
   Table,
@@ -117,7 +117,7 @@ export default function AwardUpdatesPage() {
   });
 
   const updateAwardMutation = useMutation({
-    mutationFn: async (data: { awardCode: string, payload: any }) => {
+    mutationFn: async (data: { awardCode: string; payload: any }) => {
       return await apiRequest('PATCH', `/api/fairwork/awards/${data.awardCode}`, data.payload);
     },
     onSuccess: () => {
@@ -169,15 +169,15 @@ export default function AwardUpdatesPage() {
       [e.target.name]: e.target.value,
     });
   };
-  
+
   const handleViewDetails = (update: AwardUpdate) => {
     setViewingUpdate(update);
   };
-  
+
   const handleCloseDetails = () => {
     setViewingUpdate(null);
   };
-  
+
   const handleAnalysisComplete = () => {
     // Refetch the data to get updated analysis
     queryClient.invalidateQueries({ queryKey: ['/api/fairwork/award-updates', activeTab] });
@@ -188,12 +188,10 @@ export default function AwardUpdatesPage() {
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Award Updates Management</h1>
-          <p className="text-muted-foreground mt-1">
-            Monitor and manage Fair Work award updates
-          </p>
+          <p className="text-muted-foreground mt-1">Monitor and manage Fair Work award updates</p>
         </div>
-        
-        <Button 
+
+        <Button
           onClick={() => checkUpdatesMutation.mutate()}
           disabled={checkUpdatesMutation.isPending}
         >
@@ -205,7 +203,7 @@ export default function AwardUpdatesPage() {
           Check for Updates
         </Button>
       </div>
-      
+
       <Tabs defaultValue="notified" value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="mb-4">
           <TabsTrigger value="notified">Notified Updates</TabsTrigger>
@@ -213,7 +211,7 @@ export default function AwardUpdatesPage() {
           <TabsTrigger value="updated">Updated Awards</TabsTrigger>
           <TabsTrigger value="ignored">Ignored Updates</TabsTrigger>
         </TabsList>
-        
+
         <Card>
           <CardHeader className="pb-3">
             <CardTitle>
@@ -223,9 +221,12 @@ export default function AwardUpdatesPage() {
               {activeTab === 'ignored' && 'Ignored Award Updates'}
             </CardTitle>
             <CardDescription>
-              {activeTab === 'notified' && 'These award updates have been detected and require your review and action'}
-              {activeTab === 'pending' && 'These award updates have been detected but not yet notified'}
-              {activeTab === 'updated' && 'History of award updates that have been applied to the system'}
+              {activeTab === 'notified' &&
+                'These award updates have been detected and require your review and action'}
+              {activeTab === 'pending' &&
+                'These award updates have been detected but not yet notified'}
+              {activeTab === 'updated' &&
+                'History of award updates that have been applied to the system'}
               {activeTab === 'ignored' && 'Award updates that have been reviewed and ignored'}
             </CardDescription>
           </CardHeader>
@@ -259,7 +260,10 @@ export default function AwardUpdatesPage() {
                       <TableCell>
                         {update.latestVersion || 'Unknown'}
                         {update.currentVersion !== update.latestVersion && (
-                          <Badge variant="outline" className="ml-2 bg-amber-100 text-amber-800 border-amber-200">
+                          <Badge
+                            variant="outline"
+                            className="ml-2 bg-amber-100 text-amber-800 border-amber-200"
+                          >
                             New
                           </Badge>
                         )}
@@ -299,13 +303,9 @@ export default function AwardUpdatesPage() {
                             <BrainCircuit className="h-4 w-4 mr-1" />
                             Details
                           </Button>
-                          
+
                           {update.updateUrl && (
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              asChild
-                            >
+                            <Button size="sm" variant="ghost" asChild>
                               <a href={update.updateUrl} target="_blank" rel="noopener noreferrer">
                                 <ExternalLink className="h-4 w-4 mr-1" />
                                 View
@@ -331,18 +331,14 @@ export default function AwardUpdatesPage() {
               Apply the new award version and update your system records.
             </DialogDescription>
           </DialogHeader>
-          
+
           <form onSubmit={handleUpdateSubmit}>
             <div className="space-y-4 py-2">
               <div className="space-y-2">
                 <Label htmlFor="awardCode">Award Code</Label>
-                <Input
-                  id="awardCode"
-                  value={selectedUpdate?.awardCode || ''}
-                  disabled
-                />
+                <Input id="awardCode" value={selectedUpdate?.awardCode || ''} disabled />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="name">Award Name</Label>
                 <Input
@@ -352,7 +348,7 @@ export default function AwardUpdatesPage() {
                   onChange={handleInputChange}
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="version">Version</Label>
                 <Input
@@ -362,7 +358,7 @@ export default function AwardUpdatesPage() {
                   onChange={handleInputChange}
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="effectiveDate">Effective Date</Label>
                 <Input
@@ -373,7 +369,7 @@ export default function AwardUpdatesPage() {
                   onChange={handleInputChange}
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="url">Award URL</Label>
                 <Input
@@ -385,31 +381,22 @@ export default function AwardUpdatesPage() {
                 />
               </div>
             </div>
-            
+
             <DialogFooter className="mt-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setUpdateDialogOpen(false)}
-              >
+              <Button type="button" variant="outline" onClick={() => setUpdateDialogOpen(false)}>
                 Cancel
               </Button>
-              <Button
-                type="submit"
-                disabled={updateAwardMutation.isPending}
-              >
-                {updateAwardMutation.isPending && (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                )}
+              <Button type="submit" disabled={updateAwardMutation.isPending}>
+                {updateAwardMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Apply Update
               </Button>
             </DialogFooter>
           </form>
         </DialogContent>
       </Dialog>
-      
+
       {/* Award Details Dialog with AI Analysis */}
-      <Dialog open={!!viewingUpdate} onOpenChange={(open) => !open && handleCloseDetails()}>
+      <Dialog open={!!viewingUpdate} onOpenChange={open => !open && handleCloseDetails()}>
         <DialogContent className="max-w-3xl">
           <DialogHeader>
             <DialogTitle>Award Update Details</DialogTitle>
@@ -417,7 +404,7 @@ export default function AwardUpdatesPage() {
               View detailed information about this award update and AI analysis
             </DialogDescription>
           </DialogHeader>
-          
+
           {viewingUpdate && (
             <div className="space-y-4 py-2">
               <div className="grid grid-cols-2 gap-4">
@@ -439,14 +426,16 @@ export default function AwardUpdatesPage() {
                 </div>
                 <div>
                   <Label className="text-xs text-muted-foreground">Date Detected</Label>
-                  <p className="font-medium">{new Date(viewingUpdate.checkDate).toLocaleDateString()}</p>
+                  <p className="font-medium">
+                    {new Date(viewingUpdate.checkDate).toLocaleDateString()}
+                  </p>
                 </div>
                 <div>
                   <Label className="text-xs text-muted-foreground">Status</Label>
                   <p className="font-medium capitalize">{viewingUpdate.status}</p>
                 </div>
               </div>
-              
+
               {/* AI Analysis Panel */}
               <AwardAnalysisPanel
                 awardUpdate={viewingUpdate}
@@ -454,12 +443,9 @@ export default function AwardUpdatesPage() {
               />
             </div>
           )}
-          
+
           <DialogFooter className="mt-4">
-            <Button
-              type="button"
-              onClick={handleCloseDetails}
-            >
+            <Button type="button" onClick={handleCloseDetails}>
               Close
             </Button>
           </DialogFooter>

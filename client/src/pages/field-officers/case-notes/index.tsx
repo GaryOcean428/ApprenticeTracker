@@ -1,19 +1,37 @@
-import { useState } from "react";
-import { useLocation } from "wouter";
-import { useQuery } from "@tanstack/react-query";
-import { format, isToday, isThisWeek, isThisMonth, differenceInDays } from "date-fns";
-import { PlusCircle, Search, AlertTriangle, Calendar, Filter, User, Building2, Tag, SlidersHorizontal, Eye } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { 
+import { useState } from 'react';
+import { useLocation } from 'wouter';
+import { useQuery } from '@tanstack/react-query';
+import { format, isToday, isThisWeek, isThisMonth, differenceInDays } from 'date-fns';
+import {
+  PlusCircle,
+  Search,
+  AlertTriangle,
+  Calendar,
+  Filter,
+  User,
+  Building2,
+  Tag,
+  SlidersHorizontal,
+  Eye,
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from '@/components/ui/dropdown-menu';
 import {
   Table,
   TableBody,
@@ -21,20 +39,15 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from '@/components/ui/table';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+} from '@/components/ui/select';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import {
   Dialog,
   DialogContent,
@@ -43,11 +56,11 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/hooks/use-toast";
+} from '@/components/ui/dialog';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Textarea } from '@/components/ui/textarea';
+import { useToast } from '@/hooks/use-toast';
 
 interface CaseNote {
   id: number;
@@ -66,7 +79,7 @@ interface CaseNote {
 
 export default function CaseNotesLogs() {
   const [, navigate] = useLocation();
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState('');
   const [selectedNote, setSelectedNote] = useState<CaseNote | null>(null);
   const [filter, setFilter] = useState<{
     apprenticeId: string;
@@ -74,59 +87,68 @@ export default function CaseNotesLogs() {
     type: string;
     dateRange: string;
   }>({
-    apprenticeId: "all",
-    hostId: "all-hosts",
-    type: "all-types",
-    dateRange: "all-time",
+    apprenticeId: 'all',
+    hostId: 'all-hosts',
+    type: 'all-types',
+    dateRange: 'all-time',
   });
 
-  const { data: caseNotes, isLoading, error } = useQuery<CaseNote[]>({
-    queryKey: ["/api/field-officers/case-notes"],
+  const {
+    data: caseNotes,
+    isLoading,
+    error,
+  } = useQuery<CaseNote[]>({
+    queryKey: ['/api/field-officers/case-notes'],
   });
 
   const { toast } = useToast();
 
   if (error) {
     toast({
-      variant: "destructive",
-      title: "Error loading case notes",
-      description: "There was a problem loading the case notes data.",
+      variant: 'destructive',
+      title: 'Error loading case notes',
+      description: 'There was a problem loading the case notes data.',
     });
   }
 
-  const filteredCaseNotes = caseNotes?.filter((note) => {
+  const filteredCaseNotes = caseNotes?.filter(note => {
     const matchesSearch =
       note.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
       note.apprenticeName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       note.hostName.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchesApprentice = filter.apprenticeId === "all" || 
-      note.apprenticeId.toString() === filter.apprenticeId;
-    const matchesHost = filter.hostId === "all-hosts" || 
-      note.hostId.toString() === filter.hostId;
-    const matchesType = filter.type === "all-types" || 
-      note.type === filter.type;
+    const matchesApprentice =
+      filter.apprenticeId === 'all' || note.apprenticeId.toString() === filter.apprenticeId;
+    const matchesHost = filter.hostId === 'all-hosts' || note.hostId.toString() === filter.hostId;
+    const matchesType = filter.type === 'all-types' || note.type === filter.type;
 
     // Date filter logic
-    const matchesDateRange = filter.dateRange === "all-time" ? true : 
-      filter.dateRange === "today" ? isToday(new Date(note.timestamp)) :
-      filter.dateRange === "this-week" ? isThisWeek(new Date(note.timestamp)) :
-      filter.dateRange === "this-month" ? isThisMonth(new Date(note.timestamp)) :
-      filter.dateRange === "last-90-days" ? (
-        differenceInDays(new Date(), new Date(note.timestamp)) <= 90
-      ) : true;
+    const matchesDateRange =
+      filter.dateRange === 'all-time'
+        ? true
+        : filter.dateRange === 'today'
+          ? isToday(new Date(note.timestamp))
+          : filter.dateRange === 'this-week'
+            ? isThisWeek(new Date(note.timestamp))
+            : filter.dateRange === 'this-month'
+              ? isThisMonth(new Date(note.timestamp))
+              : filter.dateRange === 'last-90-days'
+                ? differenceInDays(new Date(), new Date(note.timestamp)) <= 90
+                : true;
 
     return matchesSearch && matchesApprentice && matchesHost && matchesType && matchesDateRange;
   });
 
   // Extract unique values for filters
   const uniqueApprentices = [
-    ...new Set((caseNotes || []).map((note) => ({ id: note.apprenticeId, name: note.apprenticeName }))),
+    ...new Set(
+      (caseNotes || []).map(note => ({ id: note.apprenticeId, name: note.apprenticeName }))
+    ),
   ];
   const uniqueHosts = [
-    ...new Set((caseNotes || []).map((note) => ({ id: note.hostId, name: note.hostName }))),
+    ...new Set((caseNotes || []).map(note => ({ id: note.hostId, name: note.hostName }))),
   ];
-  const uniqueTypes = [...new Set((caseNotes || []).map((note) => note.type))];
+  const uniqueTypes = [...new Set((caseNotes || []).map(note => note.type))];
 
   return (
     <>
@@ -137,7 +159,7 @@ export default function CaseNotesLogs() {
             Record and manage field officer case notes and follow-up actions
           </p>
         </div>
-        <Button onClick={() => navigate("/field-officers/case-notes/create")}>
+        <Button onClick={() => navigate('/field-officers/case-notes/create')}>
           <PlusCircle className="mr-2 h-4 w-4" />
           New Case Note
         </Button>
@@ -151,13 +173,13 @@ export default function CaseNotesLogs() {
             placeholder="Search case notes..."
             className="pl-8 w-full"
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={e => setSearchTerm(e.target.value)}
           />
         </div>
         <div className="flex flex-wrap gap-2">
           <Select
             value={filter.apprenticeId}
-            onValueChange={(value) => setFilter({ ...filter, apprenticeId: value })}
+            onValueChange={value => setFilter({ ...filter, apprenticeId: value })}
           >
             <SelectTrigger className="w-[180px]">
               <span className="flex items-center">
@@ -167,7 +189,7 @@ export default function CaseNotesLogs() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Apprentices</SelectItem>
-              {uniqueApprentices.map((apprentice) => (
+              {uniqueApprentices.map(apprentice => (
                 <SelectItem key={apprentice.id} value={apprentice.id.toString()}>
                   {apprentice.name}
                 </SelectItem>
@@ -177,7 +199,7 @@ export default function CaseNotesLogs() {
 
           <Select
             value={filter.hostId}
-            onValueChange={(value) => setFilter({ ...filter, hostId: value })}
+            onValueChange={value => setFilter({ ...filter, hostId: value })}
           >
             <SelectTrigger className="w-[180px]">
               <span className="flex items-center">
@@ -187,7 +209,7 @@ export default function CaseNotesLogs() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all-hosts">All Hosts</SelectItem>
-              {uniqueHosts.map((host) => (
+              {uniqueHosts.map(host => (
                 <SelectItem key={host.id} value={host.id.toString()}>
                   {host.name}
                 </SelectItem>
@@ -197,7 +219,7 @@ export default function CaseNotesLogs() {
 
           <Select
             value={filter.type}
-            onValueChange={(value) => setFilter({ ...filter, type: value })}
+            onValueChange={value => setFilter({ ...filter, type: value })}
           >
             <SelectTrigger className="w-[150px]">
               <span className="flex items-center">
@@ -207,7 +229,7 @@ export default function CaseNotesLogs() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all-types">All Types</SelectItem>
-              {uniqueTypes.map((type) => (
+              {uniqueTypes.map(type => (
                 <SelectItem key={type} value={type}>
                   {type}
                 </SelectItem>
@@ -217,7 +239,7 @@ export default function CaseNotesLogs() {
 
           <Select
             value={filter.dateRange}
-            onValueChange={(value) => setFilter({ ...filter, dateRange: value })}
+            onValueChange={value => setFilter({ ...filter, dateRange: value })}
           >
             <SelectTrigger className="w-[150px]">
               <span className="flex items-center">
@@ -240,10 +262,10 @@ export default function CaseNotesLogs() {
               variant="outline"
               onClick={() =>
                 setFilter({
-                  apprenticeId: "all",
-                  hostId: "all-hosts",
-                  type: "all-types",
-                  dateRange: "all-time",
+                  apprenticeId: 'all',
+                  hostId: 'all-hosts',
+                  type: 'all-types',
+                  dateRange: 'all-time',
                 })
               }
               className="flex gap-1 items-center"
@@ -258,9 +280,7 @@ export default function CaseNotesLogs() {
       <Card>
         <CardHeader className="p-4">
           <CardTitle className="text-md">Case Notes</CardTitle>
-          <CardDescription>
-            Total: {filteredCaseNotes?.length || 0} notes
-          </CardDescription>
+          <CardDescription>Total: {filteredCaseNotes?.length || 0} notes</CardDescription>
         </CardHeader>
         <CardContent className="p-0">
           <div className="border rounded-md">
@@ -309,11 +329,11 @@ export default function CaseNotesLogs() {
                 {!isLoading && filteredCaseNotes?.length === 0 && (
                   <TableRow>
                     <TableCell colSpan={7} className="text-center py-6 text-muted-foreground">
-                      No case notes found.{" "}
+                      No case notes found.{' '}
                       <Button
                         variant="link"
                         className="p-0"
-                        onClick={() => navigate("/field-officers/case-notes/create")}
+                        onClick={() => navigate('/field-officers/case-notes/create')}
                       >
                         Create one
                       </Button>
@@ -322,13 +342,13 @@ export default function CaseNotesLogs() {
                 )}
 
                 {!isLoading &&
-                  filteredCaseNotes?.map((note) => (
+                  filteredCaseNotes?.map(note => (
                     <TableRow key={note.id}>
                       <TableCell className="whitespace-nowrap">
-                        {format(new Date(note.timestamp), "yyyy-MM-dd HH:mm")}
+                        {format(new Date(note.timestamp), 'yyyy-MM-dd HH:mm')}
                       </TableCell>
                       <TableCell>
-                        <Badge variant={note.type === "Welfare" ? "secondary" : "outline"}>
+                        <Badge variant={note.type === 'Welfare' ? 'secondary' : 'outline'}>
                           {note.type}
                         </Badge>
                       </TableCell>
@@ -340,8 +360,8 @@ export default function CaseNotesLogs() {
                           <Badge variant="destructive" className="flex items-center gap-1">
                             <AlertTriangle className="h-3 w-3" />
                             {note.followUpDate
-                              ? format(new Date(note.followUpDate), "yyyy-MM-dd")
-                              : "Required"}
+                              ? format(new Date(note.followUpDate), 'yyyy-MM-dd')
+                              : 'Required'}
                           </Badge>
                         ) : (
                           <Badge variant="outline">None</Badge>
@@ -377,10 +397,18 @@ export default function CaseNotesLogs() {
                               <DropdownMenuItem onClick={() => setSelectedNote(note)}>
                                 View Details
                               </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => navigate(`/field-officers/case-notes/${note.id}/edit`)}>
+                              <DropdownMenuItem
+                                onClick={() =>
+                                  navigate(`/field-officers/case-notes/${note.id}/edit`)
+                                }
+                              >
                                 Edit
                               </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => navigate(`/field-officers/actions/create?noteId=${note.id}`)}>
+                              <DropdownMenuItem
+                                onClick={() =>
+                                  navigate(`/field-officers/actions/create?noteId=${note.id}`)
+                                }
+                              >
                                 Create Action Item
                               </DropdownMenuItem>
                               <DropdownMenuSeparator />
@@ -405,18 +433,18 @@ export default function CaseNotesLogs() {
       </Card>
 
       {/* Case Note Detail Dialog */}
-      <Dialog open={!!selectedNote} onOpenChange={(open) => !open && setSelectedNote(null)}>
+      <Dialog open={!!selectedNote} onOpenChange={open => !open && setSelectedNote(null)}>
         <DialogContent className="sm:max-w-2xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Badge variant={selectedNote?.type === "Welfare" ? "secondary" : "outline"}>
+              <Badge variant={selectedNote?.type === 'Welfare' ? 'secondary' : 'outline'}>
                 {selectedNote?.type}
               </Badge>
               <span>Case Note Details</span>
             </DialogTitle>
             <DialogDescription>
               Created on {selectedNote && format(new Date(selectedNote.timestamp), "PPP 'at' p")}
-              {" by "} {selectedNote?.createdBy}
+              {' by '} {selectedNote?.createdBy}
             </DialogDescription>
           </DialogHeader>
 
@@ -434,9 +462,7 @@ export default function CaseNotesLogs() {
 
             <div>
               <h4 className="text-sm font-medium mb-1">Case Note</h4>
-              <div className="p-3 bg-muted rounded-md text-sm">
-                {selectedNote?.content}
-              </div>
+              <div className="p-3 bg-muted rounded-md text-sm">{selectedNote?.content}</div>
             </div>
 
             <div className="grid grid-cols-2 gap-4 mt-2">
@@ -452,8 +478,8 @@ export default function CaseNotesLogs() {
                       <Badge variant="destructive" className="flex items-center gap-1">
                         <AlertTriangle className="h-3 w-3" />
                         {selectedNote.followUpDate
-                          ? format(new Date(selectedNote.followUpDate), "PPP")
-                          : "Required"}
+                          ? format(new Date(selectedNote.followUpDate), 'PPP')
+                          : 'Required'}
                       </Badge>
                     </>
                   ) : (
@@ -476,7 +502,9 @@ export default function CaseNotesLogs() {
                 Edit Note
               </Button>
               <Button
-                onClick={() => navigate(`/field-officers/actions/create?noteId=${selectedNote?.id}`)}
+                onClick={() =>
+                  navigate(`/field-officers/actions/create?noteId=${selectedNote?.id}`)
+                }
               >
                 Create Action Item
               </Button>

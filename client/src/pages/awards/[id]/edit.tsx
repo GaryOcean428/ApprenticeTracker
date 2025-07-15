@@ -6,12 +6,33 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Loader2, ArrowLeft, Save } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 
@@ -31,7 +52,11 @@ const EditAward = ({ params }) => {
   const [_, navigate] = useLocation();
   const { toast } = useToast();
 
-  const { data: award, isLoading, error } = useQuery({
+  const {
+    data: award,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: [`/api/awards/${id}`],
   });
 
@@ -58,13 +83,15 @@ const EditAward = ({ params }) => {
         industry: award.industry || '',
         sector: award.sector || '',
         isActive: award.isActive ?? true,
-        effectiveDate: award.effectiveDate ? new Date(award.effectiveDate).toISOString().split('T')[0] : '',
+        effectiveDate: award.effectiveDate
+          ? new Date(award.effectiveDate).toISOString().split('T')[0]
+          : '',
       });
     }
   }, [award, form]);
 
   const updateMutation = useMutation({
-    mutationFn: async (data) => {
+    mutationFn: async data => {
       const response = await apiRequest('PUT', `/api/awards/${id}`, data);
       return response.json();
     },
@@ -77,7 +104,7 @@ const EditAward = ({ params }) => {
       });
       navigate(`/awards/${id}`);
     },
-    onError: (error) => {
+    onError: error => {
       toast({
         title: 'Update Failed',
         description: `Failed to update award: ${error.message}`,
@@ -86,7 +113,7 @@ const EditAward = ({ params }) => {
     },
   });
 
-  const onSubmit = (data) => {
+  const onSubmit = data => {
     updateMutation.mutate(data);
   };
 
@@ -102,7 +129,9 @@ const EditAward = ({ params }) => {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] text-center">
         <h2 className="text-xl font-semibold mb-2">Award Not Found</h2>
-        <p className="text-muted-foreground mb-4">The requested award could not be found or there was an error loading it.</p>
+        <p className="text-muted-foreground mb-4">
+          The requested award could not be found or there was an error loading it.
+        </p>
         <Button asChild>
           <Link href="/awards">Return to Awards List</Link>
         </Button>
@@ -209,15 +238,10 @@ const EditAward = ({ params }) => {
                     <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                       <div className="space-y-0.5">
                         <FormLabel>Active Status</FormLabel>
-                        <FormDescription>
-                          Is this award currently active?
-                        </FormDescription>
+                        <FormDescription>Is this award currently active?</FormDescription>
                       </div>
                       <FormControl>
-                        <Switch
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
+                        <Switch checked={field.value} onCheckedChange={field.onChange} />
                       </FormControl>
                     </FormItem>
                   )}

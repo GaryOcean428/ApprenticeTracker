@@ -1,11 +1,11 @@
-import { useState } from "react";
-import { useLocation } from "wouter";
-import { useMutation } from "@tanstack/react-query";
-import { z } from "zod";
-import { insertAwardSchema } from "@shared/schema";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { Button } from "@/components/ui/button";
+import { useState } from 'react';
+import { useLocation } from 'wouter';
+import { useMutation } from '@tanstack/react-query';
+import { z } from 'zod';
+import { insertAwardSchema } from '@shared/schema';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -14,22 +14,18 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CalendarIcon, ArrowLeft } from "lucide-react";
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
-import { format } from "date-fns";
-import { toast } from "sonner";
-import { queryClient } from "@/lib/queryClient";
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Switch } from '@/components/ui/switch';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { CalendarIcon, ArrowLeft } from 'lucide-react';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { cn } from '@/lib/utils';
+import { format } from 'date-fns';
+import { toast } from 'sonner';
+import { queryClient } from '@/lib/queryClient';
 
 // Extend schema with client-side validation
 const formSchema = insertAwardSchema.extend({
@@ -42,69 +38,65 @@ type FormValues = z.infer<typeof formSchema>;
 
 export default function CreateAward() {
   const [, navigate] = useLocation();
-  
+
   // Create form
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "",
-      code: "",
-      fairWorkReference: "",
-      fairWorkTitle: "",
-      industry: "",
-      sector: "",
-      description: "",
+      name: '',
+      code: '',
+      fairWorkReference: '',
+      fairWorkTitle: '',
+      industry: '',
+      sector: '',
+      description: '',
       isActive: true,
     },
   });
-  
+
   // Create mutation for form submission
   const createAwardMutation = useMutation({
     mutationFn: async (data: FormValues) => {
-      const res = await fetch("/api/awards", {
-        method: "POST",
+      const res = await fetch('/api/awards', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify(data),
       });
-      
+
       if (!res.ok) {
         const error = await res.json();
-        throw new Error(error.message || "Failed to create award");
+        throw new Error(error.message || 'Failed to create award');
       }
-      
+
       return res.json();
     },
     onSuccess: () => {
-      toast.success("Award created successfully");
+      toast.success('Award created successfully');
       queryClient.invalidateQueries({ queryKey: ['/api/awards'] });
-      navigate("/awards");
+      navigate('/awards');
     },
-    onError: (error) => {
+    onError: error => {
       toast.error(`Error: ${error.message}`);
     },
   });
-  
+
   // Handle form submission
   const onSubmit = (data: FormValues) => {
     createAwardMutation.mutate(data);
   };
-  
+
   return (
     <div className="container mx-auto py-8">
       <div className="flex items-center mb-6">
-        <Button 
-          variant="ghost" 
-          className="mr-4" 
-          onClick={() => navigate("/awards")}
-        >
+        <Button variant="ghost" className="mr-4" onClick={() => navigate('/awards')}>
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back
         </Button>
         <h1 className="text-2xl font-bold">Create Fair Work Award</h1>
       </div>
-      
+
       <Card>
         <CardHeader>
           <CardTitle>Award Details</CardTitle>
@@ -122,14 +114,12 @@ export default function CreateAward() {
                       <FormControl>
                         <Input placeholder="Enter award name" {...field} />
                       </FormControl>
-                      <FormDescription>
-                        The full name of the Modern Award
-                      </FormDescription>
+                      <FormDescription>The full name of the Modern Award</FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-                
+
                 <FormField
                   control={form.control}
                   name="code"
@@ -139,14 +129,12 @@ export default function CreateAward() {
                       <FormControl>
                         <Input placeholder="e.g. MA2020" {...field} />
                       </FormControl>
-                      <FormDescription>
-                        A unique code for this award
-                      </FormDescription>
+                      <FormDescription>A unique code for this award</FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-                
+
                 <FormField
                   control={form.control}
                   name="fairWorkReference"
@@ -163,7 +151,7 @@ export default function CreateAward() {
                     </FormItem>
                   )}
                 />
-                
+
                 <FormField
                   control={form.control}
                   name="fairWorkTitle"
@@ -171,20 +159,18 @@ export default function CreateAward() {
                     <FormItem>
                       <FormLabel>Fair Work Title</FormLabel>
                       <FormControl>
-                        <Input 
-                          placeholder="e.g. Manufacturing and Associated Industries Award 2020" 
-                          {...field} 
-                          value={field.value || ''} 
+                        <Input
+                          placeholder="e.g. Manufacturing and Associated Industries Award 2020"
+                          {...field}
+                          value={field.value || ''}
                         />
                       </FormControl>
-                      <FormDescription>
-                        The official title from Fair Work Australia
-                      </FormDescription>
+                      <FormDescription>The official title from Fair Work Australia</FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-                
+
                 <FormField
                   control={form.control}
                   name="industry"
@@ -192,20 +178,18 @@ export default function CreateAward() {
                     <FormItem>
                       <FormLabel>Industry</FormLabel>
                       <FormControl>
-                        <Input 
-                          placeholder="e.g. Construction, Manufacturing, Healthcare" 
-                          {...field} 
-                          value={field.value || ''} 
+                        <Input
+                          placeholder="e.g. Construction, Manufacturing, Healthcare"
+                          {...field}
+                          value={field.value || ''}
                         />
                       </FormControl>
-                      <FormDescription>
-                        The primary industry this award covers
-                      </FormDescription>
+                      <FormDescription>The primary industry this award covers</FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-                
+
                 <FormField
                   control={form.control}
                   name="sector"
@@ -213,20 +197,18 @@ export default function CreateAward() {
                     <FormItem>
                       <FormLabel>Sector</FormLabel>
                       <FormControl>
-                        <Input 
-                          placeholder="e.g. Private, Public, Not-for-profit" 
-                          {...field} 
-                          value={field.value || ''} 
+                        <Input
+                          placeholder="e.g. Private, Public, Not-for-profit"
+                          {...field}
+                          value={field.value || ''}
                         />
                       </FormControl>
-                      <FormDescription>
-                        The economic sector this award applies to
-                      </FormDescription>
+                      <FormDescription>The economic sector this award applies to</FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-                
+
                 <FormField
                   control={form.control}
                   name="effectiveDate"
@@ -239,15 +221,11 @@ export default function CreateAward() {
                             <Button
                               variant="outline"
                               className={cn(
-                                "w-full pl-3 text-left font-normal",
-                                !field.value && "text-muted-foreground"
+                                'w-full pl-3 text-left font-normal',
+                                !field.value && 'text-muted-foreground'
                               )}
                             >
-                              {field.value ? (
-                                format(field.value, "PPP")
-                              ) : (
-                                <span>Pick a date</span>
-                              )}
+                              {field.value ? format(field.value, 'PPP') : <span>Pick a date</span>}
                               <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                             </Button>
                           </FormControl>
@@ -261,39 +239,30 @@ export default function CreateAward() {
                           />
                         </PopoverContent>
                       </Popover>
-                      <FormDescription>
-                        The date this award comes into effect
-                      </FormDescription>
+                      <FormDescription>The date this award comes into effect</FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-                
+
                 <FormField
                   control={form.control}
                   name="isActive"
                   render={({ field }) => (
                     <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                       <div className="space-y-0.5">
-                        <FormLabel className="text-base">
-                          Active Status
-                        </FormLabel>
-                        <FormDescription>
-                          Is this award currently active?
-                        </FormDescription>
+                        <FormLabel className="text-base">Active Status</FormLabel>
+                        <FormDescription>Is this award currently active?</FormDescription>
                       </div>
                       <FormControl>
-                        <Switch
-                          checked={field.value as boolean}
-                          onCheckedChange={field.onChange}
-                        />
+                        <Switch checked={field.value as boolean} onCheckedChange={field.onChange} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
               </div>
-              
+
               <FormField
                 control={form.control}
                 name="description"
@@ -301,37 +270,28 @@ export default function CreateAward() {
                   <FormItem>
                     <FormLabel>Description</FormLabel>
                     <FormControl>
-                      <Textarea 
+                      <Textarea
                         placeholder="Enter award description"
-                        className="min-h-[120px]" 
-                        value={field.value || ''} 
+                        className="min-h-[120px]"
+                        value={field.value || ''}
                         onChange={field.onChange}
                         onBlur={field.onBlur}
                         name={field.name}
                         ref={field.ref}
                       />
                     </FormControl>
-                    <FormDescription>
-                      Additional details about this award
-                    </FormDescription>
+                    <FormDescription>Additional details about this award</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              
+
               <div className="flex justify-end gap-4">
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  onClick={() => navigate("/awards")}
-                >
+                <Button type="button" variant="outline" onClick={() => navigate('/awards')}>
                   Cancel
                 </Button>
-                <Button 
-                  type="submit" 
-                  disabled={createAwardMutation.isPending}
-                >
-                  {createAwardMutation.isPending ? "Creating..." : "Create Award"}
+                <Button type="submit" disabled={createAwardMutation.isPending}>
+                  {createAwardMutation.isPending ? 'Creating...' : 'Create Award'}
                 </Button>
               </div>
             </form>

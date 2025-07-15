@@ -1,29 +1,24 @@
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { useParams, Link } from "wouter";
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { useParams, Link } from 'wouter';
 import {
   Card,
   CardContent,
   CardDescription,
   CardFooter,
   CardHeader,
-  CardTitle
-} from "@/components/ui/card";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger
-} from "@/components/ui/tabs";
+  CardTitle,
+} from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
-import { format } from "date-fns";
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
+import { format } from 'date-fns';
 import {
   BarChart,
   Bar,
@@ -35,8 +30,8 @@ import {
   ResponsiveContainer,
   PieChart,
   Pie,
-  Cell
-} from "recharts";
+  Cell,
+} from 'recharts';
 import {
   AlertTriangle,
   BarChart3,
@@ -46,8 +41,8 @@ import {
   FileDown,
   HardHat,
   PieChart as PieChartIcon,
-  Users
-} from "lucide-react";
+  Users,
+} from 'lucide-react';
 
 // Host employer performance report type
 interface HostPerformanceReport {
@@ -88,16 +83,16 @@ interface TrainingBreakdown {
 const HostReportsPage = () => {
   const params = useParams<{ id?: string }>();
   const hostId = params.id ? parseInt(params.id) : undefined;
-  const [activeTab, setActiveTab] = useState("performance");
-  const [reportPeriod, setReportPeriod] = useState("last-12-months");
+  const [activeTab, setActiveTab] = useState('performance');
+  const [reportPeriod, setReportPeriod] = useState('last-12-months');
 
   // Fetch host employer details
   const { data: host, isLoading: hostLoading } = useQuery({
-    queryKey: ["/api/hosts", hostId],
+    queryKey: ['/api/hosts', hostId],
     queryFn: async () => {
       if (!hostId) return null;
       const res = await fetch(`/api/hosts/${hostId}`);
-      if (!res.ok) throw new Error("Failed to fetch host employer");
+      if (!res.ok) throw new Error('Failed to fetch host employer');
       return res.json();
     },
     enabled: !!hostId,
@@ -105,18 +100,18 @@ const HostReportsPage = () => {
 
   // Fetch performance report
   const { data: performanceReport, isLoading: reportLoading } = useQuery({
-    queryKey: ["/api/hosts", hostId, "reports", "performance", reportPeriod],
+    queryKey: ['/api/hosts', hostId, 'reports', 'performance', reportPeriod],
     queryFn: async () => {
       if (!hostId) return null;
       try {
         const res = await fetch(`/api/hosts/${hostId}/reports/performance?period=${reportPeriod}`);
         if (!res.ok) {
-          console.warn("API endpoint not available or returned error");
+          console.warn('API endpoint not available or returned error');
           return null;
         }
         return res.json() as Promise<HostPerformanceReport>;
       } catch (error) {
-        console.warn("API endpoint not available", error);
+        console.warn('API endpoint not available', error);
         return null;
       }
     },
@@ -125,33 +120,33 @@ const HostReportsPage = () => {
 
   // Sample data for charts (when API data is not available)
   const monthlyProgressData: MonthlyProgress[] = [
-    { month: "Jan", completionRate: 72, retention: 95, satisfaction: 4.2 },
-    { month: "Feb", completionRate: 75, retention: 94, satisfaction: 4.3 },
-    { month: "Mar", completionRate: 78, retention: 96, satisfaction: 4.5 },
-    { month: "Apr", completionRate: 77, retention: 95, satisfaction: 4.4 },
-    { month: "May", completionRate: 80, retention: 97, satisfaction: 4.6 },
-    { month: "Jun", completionRate: 82, retention: 98, satisfaction: 4.7 },
-    { month: "Jul", completionRate: 85, retention: 97, satisfaction: 4.8 },
-    { month: "Aug", completionRate: 88, retention: 96, satisfaction: 4.7 },
-    { month: "Sep", completionRate: 86, retention: 95, satisfaction: 4.5 },
-    { month: "Oct", completionRate: 84, retention: 94, satisfaction: 4.3 },
-    { month: "Nov", completionRate: 86, retention: 96, satisfaction: 4.4 },
-    { month: "Dec", completionRate: 88, retention: 97, satisfaction: 4.6 },
+    { month: 'Jan', completionRate: 72, retention: 95, satisfaction: 4.2 },
+    { month: 'Feb', completionRate: 75, retention: 94, satisfaction: 4.3 },
+    { month: 'Mar', completionRate: 78, retention: 96, satisfaction: 4.5 },
+    { month: 'Apr', completionRate: 77, retention: 95, satisfaction: 4.4 },
+    { month: 'May', completionRate: 80, retention: 97, satisfaction: 4.6 },
+    { month: 'Jun', completionRate: 82, retention: 98, satisfaction: 4.7 },
+    { month: 'Jul', completionRate: 85, retention: 97, satisfaction: 4.8 },
+    { month: 'Aug', completionRate: 88, retention: 96, satisfaction: 4.7 },
+    { month: 'Sep', completionRate: 86, retention: 95, satisfaction: 4.5 },
+    { month: 'Oct', completionRate: 84, retention: 94, satisfaction: 4.3 },
+    { month: 'Nov', completionRate: 86, retention: 96, satisfaction: 4.4 },
+    { month: 'Dec', completionRate: 88, retention: 97, satisfaction: 4.6 },
   ];
 
   const trainingBreakdownData: TrainingBreakdown[] = [
-    { name: "Technical Skills", value: 45 },
-    { name: "Supervision Quality", value: 30 },
-    { name: "Documentation", value: 15 },
-    { name: "Safety Procedures", value: 10 },
+    { name: 'Technical Skills', value: 45 },
+    { name: 'Supervision Quality', value: 30 },
+    { name: 'Documentation', value: 15 },
+    { name: 'Safety Procedures', value: 10 },
   ];
 
   // Chart colors
-  const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
+  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
   // Format date for display
   const formatDate = (dateStr: string) => {
-    return format(new Date(dateStr), "dd MMM yyyy");
+    return format(new Date(dateStr), 'dd MMM yyyy');
   };
 
   // Loading state
@@ -173,7 +168,7 @@ const HostReportsPage = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">
-          {host ? `${host.name} - Performance Reports` : "Host Employer Reports"}
+          {host ? `${host.name} - Performance Reports` : 'Host Employer Reports'}
         </h1>
         <div className="flex gap-2">
           <DropdownMenu>
@@ -201,22 +196,22 @@ const HostReportsPage = () => {
             <DropdownMenuTrigger asChild>
               <Button variant="outline">
                 <CalendarCheck className="mr-2 h-4 w-4" />
-                {reportPeriod === "last-12-months"
-                  ? "Last 12 Months"
-                  : reportPeriod === "last-6-months"
-                  ? "Last 6 Months"
-                  : "Last 3 Months"}
+                {reportPeriod === 'last-12-months'
+                  ? 'Last 12 Months'
+                  : reportPeriod === 'last-6-months'
+                    ? 'Last 6 Months'
+                    : 'Last 3 Months'}
                 <ChevronDown className="ml-2 h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
-              <DropdownMenuItem onClick={() => setReportPeriod("last-3-months")}>
+              <DropdownMenuItem onClick={() => setReportPeriod('last-3-months')}>
                 Last 3 Months
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setReportPeriod("last-6-months")}>
+              <DropdownMenuItem onClick={() => setReportPeriod('last-6-months')}>
                 Last 6 Months
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setReportPeriod("last-12-months")}>
+              <DropdownMenuItem onClick={() => setReportPeriod('last-12-months')}>
                 Last 12 Months
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -231,7 +226,7 @@ const HostReportsPage = () => {
           <TabsTrigger value="training">Training Quality</TabsTrigger>
           <TabsTrigger value="compliance">Compliance</TabsTrigger>
         </TabsList>
-        
+
         <TabsContent value="performance">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             <Card>
@@ -239,16 +234,14 @@ const HostReportsPage = () => {
                 <CardTitle className="text-sm font-medium">Total Apprentices</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold">
-                  {performanceReport?.totalApprentices || 0}
-                </div>
+                <div className="text-3xl font-bold">{performanceReport?.totalApprentices || 0}</div>
                 <p className="text-xs text-muted-foreground mt-1">
-                  {performanceReport?.activeApprentices || 0} active,{" "}
+                  {performanceReport?.activeApprentices || 0} active,{' '}
                   {performanceReport?.completedApprentices || 0} completed
                 </p>
               </CardContent>
             </Card>
-            
+
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium">Completion Rate</CardTitle>
@@ -257,12 +250,10 @@ const HostReportsPage = () => {
                 <div className="text-3xl font-bold">
                   {performanceReport?.avgCompletionRate || 0}%
                 </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Industry average: 82%
-                </p>
+                <p className="text-xs text-muted-foreground mt-1">Industry average: 82%</p>
               </CardContent>
             </Card>
-            
+
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium">Apprentice Satisfaction</CardTitle>
@@ -277,7 +268,7 @@ const HostReportsPage = () => {
               </CardContent>
             </Card>
           </div>
-          
+
           <Card className="mb-6">
             <CardHeader>
               <CardTitle>Performance Highlights</CardTitle>
@@ -304,7 +295,7 @@ const HostReportsPage = () => {
                     )}
                   </ul>
                 </div>
-                
+
                 <div>
                   <h3 className="font-medium mb-2 flex items-center">
                     <AlertTriangle className="mr-2 h-4 w-4" /> Areas for Improvement
@@ -324,7 +315,7 @@ const HostReportsPage = () => {
               </div>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardHeader>
               <CardTitle>Notes & Recommendations</CardTitle>
@@ -332,19 +323,20 @@ const HostReportsPage = () => {
             <CardContent>
               <p className="text-sm">
                 {performanceReport?.notes ||
-                  "This host employer demonstrates strong commitment to apprentice development with above-average completion rates and satisfaction scores. Recommend continued investment in their mentorship program and addressing the documentation gaps identified during compliance reviews. Consider featuring this employer in the next newsletter as an example of best practices in technical skills training."}
+                  'This host employer demonstrates strong commitment to apprentice development with above-average completion rates and satisfaction scores. Recommend continued investment in their mentorship program and addressing the documentation gaps identified during compliance reviews. Consider featuring this employer in the next newsletter as an example of best practices in technical skills training.'}
               </p>
             </CardContent>
             <CardFooter className="border-t pt-4">
               <p className="text-xs text-muted-foreground">
-                Report generated: {performanceReport?.generatedAt
+                Report generated:{' '}
+                {performanceReport?.generatedAt
                   ? formatDate(performanceReport.generatedAt)
-                  : format(new Date(), "dd MMM yyyy")}
+                  : format(new Date(), 'dd MMM yyyy')}
               </p>
             </CardFooter>
           </Card>
         </TabsContent>
-        
+
         <TabsContent value="progress">
           <Card>
             <CardHeader>
@@ -352,14 +344,15 @@ const HostReportsPage = () => {
                 <BarChart3 className="mr-2 h-5 w-5" />
                 Apprentice Progress Metrics
               </CardTitle>
-              <CardDescription>
-                Monthly tracking of completion rates and retention
-              </CardDescription>
+              <CardDescription>Monthly tracking of completion rates and retention</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="h-80">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={monthlyProgressData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                  <BarChart
+                    data={monthlyProgressData}
+                    margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                  >
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="month" />
                     <YAxis />
@@ -374,7 +367,7 @@ const HostReportsPage = () => {
             </CardContent>
           </Card>
         </TabsContent>
-        
+
         <TabsContent value="training">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Card>
@@ -383,9 +376,7 @@ const HostReportsPage = () => {
                   <PieChartIcon className="mr-2 h-5 w-5" />
                   Training Quality Breakdown
                 </CardTitle>
-                <CardDescription>
-                  Distribution of training quality factors
-                </CardDescription>
+                <CardDescription>Distribution of training quality factors</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="h-72">
@@ -411,7 +402,7 @@ const HostReportsPage = () => {
                 </div>
               </CardContent>
             </Card>
-            
+
             <Card>
               <CardHeader>
                 <CardTitle>Training Quality Assessment</CardTitle>
@@ -435,7 +426,7 @@ const HostReportsPage = () => {
                       ></div>
                     </div>
                   </div>
-                  
+
                   <div>
                     <div className="flex justify-between mb-1">
                       <span className="text-sm font-medium">Technical Training</span>
@@ -446,11 +437,13 @@ const HostReportsPage = () => {
                     <div className="w-full bg-gray-200 rounded-full h-2">
                       <div
                         className="bg-green-600 h-2 rounded-full"
-                        style={{ width: `${(performanceReport?.trainingQualityScore || 4.5) * 20}%` }}
+                        style={{
+                          width: `${(performanceReport?.trainingQualityScore || 4.5) * 20}%`,
+                        }}
                       ></div>
                     </div>
                   </div>
-                  
+
                   <div>
                     <div className="flex justify-between mb-1">
                       <span className="text-sm font-medium">Documentation</span>
@@ -463,7 +456,7 @@ const HostReportsPage = () => {
                       ></div>
                     </div>
                   </div>
-                  
+
                   <div>
                     <div className="flex justify-between mb-1">
                       <span className="text-sm font-medium">Safety Training</span>
@@ -481,14 +474,12 @@ const HostReportsPage = () => {
             </Card>
           </div>
         </TabsContent>
-        
+
         <TabsContent value="compliance">
           <Card>
             <CardHeader>
               <CardTitle>Compliance Overview</CardTitle>
-              <CardDescription>
-                Regulatory compliance and safety metrics
-              </CardDescription>
+              <CardDescription>Regulatory compliance and safety metrics</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-6">
@@ -499,27 +490,31 @@ const HostReportsPage = () => {
                       {performanceReport?.complianceScore || 92}%
                     </div>
                   </div>
-                  
+
                   <div className="border rounded-lg p-4">
                     <div className="text-sm text-muted-foreground mb-1">Safety Incidents</div>
                     <div className="text-3xl font-bold">
                       {performanceReport?.safetyIncidents || 0}
                     </div>
                   </div>
-                  
+
                   <div className="border rounded-lg p-4">
                     <div className="text-sm text-muted-foreground mb-1">Last Audit</div>
                     <div className="text-xl font-medium">3 months ago</div>
                   </div>
                 </div>
-                
+
                 <div className="border rounded-lg p-4">
                   <h3 className="font-medium mb-2">Compliance Notes</h3>
                   <p className="text-sm">
-                    This host employer maintains high compliance standards with all required documentation and procedures in place. The most recent audit found only minor improvements needed in apprentice record keeping. Safety protocols exceed industry standards with regular training and zero incidents in the reporting period.
+                    This host employer maintains high compliance standards with all required
+                    documentation and procedures in place. The most recent audit found only minor
+                    improvements needed in apprentice record keeping. Safety protocols exceed
+                    industry standards with regular training and zero incidents in the reporting
+                    period.
                   </p>
                 </div>
-                
+
                 <div>
                   <h3 className="font-medium mb-3">Recent Compliance Activities</h3>
                   <div className="space-y-3">

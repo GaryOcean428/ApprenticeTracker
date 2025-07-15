@@ -3,7 +3,7 @@ import { sql } from 'drizzle-orm';
 
 /**
  * Migration script to fix schema inconsistencies and rename conflicting tables
- * 
+ *
  * Changes:
  * 1. Rename 'award_rates' table in billing schema to 'billing_award_rates' to avoid conflicts
  * 2. Add any missing indexes for performance
@@ -33,7 +33,7 @@ async function migrateSchemaFixes() {
 
     // Add missing indexes for better performance
     console.log('Adding performance indexes...');
-    
+
     // Index on apprentice email for faster lookups
     await db.execute(sql`
       CREATE INDEX IF NOT EXISTS idx_apprentices_email 
@@ -161,7 +161,6 @@ async function migrateSchemaFixes() {
     console.log('✓ Cleaned up existing data');
 
     console.log('Schema fixes migration completed successfully!');
-    
   } catch (error) {
     console.error('Error during schema fixes migration:', error);
     throw error;
@@ -175,7 +174,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       console.log('Migration completed successfully!');
       process.exit(0);
     })
-    .catch((error) => {
+    .catch(error => {
       console.error('Migration failed:', error);
       process.exit(1);
     });

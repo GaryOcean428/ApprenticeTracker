@@ -1,0 +1,17 @@
+{
+  "threshold": 1,
+  "reporters": ["html", "console"],
+  "output": "./reports/duplication",
+  "minLines": 10,
+  "minTokens": 50,
+  "format": ["typescript", "tsx", "javascript", "jsx"],
+  "gitignore": true,
+  "blame": true,
+  "ignore": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/*.d.ts",
+    "**/coverage/**"
+  ]
+}

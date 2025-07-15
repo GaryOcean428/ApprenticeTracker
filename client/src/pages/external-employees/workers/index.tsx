@@ -1,11 +1,18 @@
-import { useQuery } from "@tanstack/react-query";
-import { Link } from "wouter";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { PageHeader } from "@/components/page-header";
-import { DashboardShell } from "@/components/dashboard-shell";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useQuery } from '@tanstack/react-query';
+import { Link } from 'wouter';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
+import { PageHeader } from '@/components/page-header';
+import { DashboardShell } from '@/components/dashboard-shell';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Users,
   Briefcase,
@@ -14,10 +21,10 @@ import {
   UserPlus,
   Award,
   CheckSquare,
-  ArrowRightCircle
-} from "lucide-react";
-import { LabourHireWorker } from "@shared/schema";
-import { useToast } from "@/hooks/use-toast";
+  ArrowRightCircle,
+} from 'lucide-react';
+import { LabourHireWorker } from '@shared/schema';
+import { useToast } from '@/hooks/use-toast';
 
 // Workflow stages component
 const WorkflowStages = () => {
@@ -71,14 +78,14 @@ export default function ExternalEmployeesWorkersPage() {
     isLoading,
     error,
   } = useQuery<LabourHireWorker[]>({
-    queryKey: ["/api/labour-hire/workers"],
+    queryKey: ['/api/labour-hire/workers'],
   });
 
   if (error) {
     toast({
-      title: "Error",
-      description: "Failed to load workers data. Please try again.",
-      variant: "destructive",
+      title: 'Error',
+      description: 'Failed to load workers data. Please try again.',
+      variant: 'destructive',
     });
   }
 
@@ -87,7 +94,7 @@ export default function ExternalEmployeesWorkersPage() {
     total: workers.length,
     active: workers.filter(w => w.status === 'active').length,
     inactive: workers.filter(w => w.status === 'inactive').length,
-    pending: workers.filter(w => w.status === 'pending').length
+    pending: workers.filter(w => w.status === 'pending').length,
   };
 
   return (
@@ -111,10 +118,10 @@ export default function ExternalEmployeesWorkersPage() {
           <TabsTrigger value="timesheets">Timesheets</TabsTrigger>
           <TabsTrigger value="skills">Skills & Qualifications</TabsTrigger>
         </TabsList>
-        
+
         <TabsContent value="dashboard" className="space-y-4">
           <WorkflowStages />
-          
+
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             {/* Worker Stats Cards */}
             <Card>
@@ -124,12 +131,10 @@ export default function ExternalEmployeesWorkersPage() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{isLoading ? '...' : workerStats.total}</div>
-                <p className="text-xs text-muted-foreground">
-                  Labour hire workers in the system
-                </p>
+                <p className="text-xs text-muted-foreground">Labour hire workers in the system</p>
               </CardContent>
             </Card>
-            
+
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Active Placements</CardTitle>
@@ -137,12 +142,10 @@ export default function ExternalEmployeesWorkersPage() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{isLoading ? '...' : workerStats.active}</div>
-                <p className="text-xs text-muted-foreground">
-                  Workers currently on assignment
-                </p>
+                <p className="text-xs text-muted-foreground">Workers currently on assignment</p>
               </CardContent>
             </Card>
-            
+
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Pending Timesheets</CardTitle>
@@ -150,12 +153,10 @@ export default function ExternalEmployeesWorkersPage() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{isLoading ? '...' : '12'}</div>
-                <p className="text-xs text-muted-foreground">
-                  Timesheets awaiting approval
-                </p>
+                <p className="text-xs text-muted-foreground">Timesheets awaiting approval</p>
               </CardContent>
             </Card>
-            
+
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Available Workers</CardTitle>
@@ -163,21 +164,17 @@ export default function ExternalEmployeesWorkersPage() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{isLoading ? '...' : workerStats.inactive}</div>
-                <p className="text-xs text-muted-foreground">
-                  Workers available for placement
-                </p>
+                <p className="text-xs text-muted-foreground">Workers available for placement</p>
               </CardContent>
             </Card>
           </div>
-          
+
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {/* Worker Categories */}
             <Card className="md:col-span-1">
               <CardHeader>
                 <CardTitle>Worker Categories</CardTitle>
-                <CardDescription>
-                  Types of labour hire workers
-                </CardDescription>
+                <CardDescription>Types of labour hire workers</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
@@ -219,14 +216,12 @@ export default function ExternalEmployeesWorkersPage() {
                 </div>
               </CardContent>
             </Card>
-            
+
             {/* Recent Actions */}
             <Card className="md:col-span-2">
               <CardHeader>
                 <CardTitle>Recent Actions</CardTitle>
-                <CardDescription>
-                  Latest worker-related activity
-                </CardDescription>
+                <CardDescription>Latest worker-related activity</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
@@ -261,7 +256,7 @@ export default function ExternalEmployeesWorkersPage() {
               </CardContent>
             </Card>
           </div>
-          
+
           <div className="flex flex-col md:flex-row gap-4">
             <Button asChild variant="outline" className="md:flex-1">
               <Link href="/labour-hire/workers">
@@ -289,14 +284,12 @@ export default function ExternalEmployeesWorkersPage() {
             </Button>
           </div>
         </TabsContent>
-        
+
         <TabsContent value="placements">
           <Card>
             <CardHeader>
               <CardTitle>Placements & Assignments</CardTitle>
-              <CardDescription>
-                View and manage worker placements at host employers
-              </CardDescription>
+              <CardDescription>View and manage worker placements at host employers</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="flex items-center justify-center p-6">
@@ -304,8 +297,8 @@ export default function ExternalEmployeesWorkersPage() {
                   <Briefcase className="mx-auto h-12 w-12 text-muted-foreground" />
                   <h3 className="mt-4 text-lg font-medium">Placement Management</h3>
                   <p className="mt-2 text-sm text-muted-foreground max-w-md">
-                    Manage all aspects of worker placements, including assignment matching, 
-                    contract administration, and performance monitoring.
+                    Manage all aspects of worker placements, including assignment matching, contract
+                    administration, and performance monitoring.
                   </p>
                   <Button asChild className="mt-4">
                     <Link href="/labour-hire/placements">Go to Placements</Link>
@@ -315,14 +308,12 @@ export default function ExternalEmployeesWorkersPage() {
             </CardContent>
           </Card>
         </TabsContent>
-        
+
         <TabsContent value="timesheets">
           <Card>
             <CardHeader>
               <CardTitle>Timesheet Management</CardTitle>
-              <CardDescription>
-                Track and approve worker timesheets
-              </CardDescription>
+              <CardDescription>Track and approve worker timesheets</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="flex items-center justify-center p-6">
@@ -330,8 +321,8 @@ export default function ExternalEmployeesWorkersPage() {
                   <ClipboardList className="mx-auto h-12 w-12 text-muted-foreground" />
                   <h3 className="mt-4 text-lg font-medium">Timesheet Processing</h3>
                   <p className="mt-2 text-sm text-muted-foreground max-w-md">
-                    Submit, review, and approve timesheets for all workers. Generate 
-                    payroll reports and manage timesheet-based billing.
+                    Submit, review, and approve timesheets for all workers. Generate payroll reports
+                    and manage timesheet-based billing.
                   </p>
                   <Button asChild className="mt-4">
                     <Link href="/labour-hire/timesheets">Manage Timesheets</Link>
@@ -341,14 +332,12 @@ export default function ExternalEmployeesWorkersPage() {
             </CardContent>
           </Card>
         </TabsContent>
-        
+
         <TabsContent value="skills">
           <Card>
             <CardHeader>
               <CardTitle>Skills & Qualifications</CardTitle>
-              <CardDescription>
-                Record and verify worker skills and certifications
-              </CardDescription>
+              <CardDescription>Record and verify worker skills and certifications</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="flex items-center justify-center p-6">
@@ -356,8 +345,8 @@ export default function ExternalEmployeesWorkersPage() {
                   <Award className="mx-auto h-12 w-12 text-muted-foreground" />
                   <h3 className="mt-4 text-lg font-medium">Skills Database</h3>
                   <p className="mt-2 text-sm text-muted-foreground max-w-md">
-                    Track and validate worker qualifications, skills, and certifications.
-                    Match workers to roles based on their verified skill profiles.
+                    Track and validate worker qualifications, skills, and certifications. Match
+                    workers to roles based on their verified skill profiles.
                   </p>
                   <Button asChild className="mt-4">
                     <Link href="/labour-hire/skills">View Skills Database</Link>

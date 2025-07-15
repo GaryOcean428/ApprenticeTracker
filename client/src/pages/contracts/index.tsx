@@ -1,66 +1,65 @@
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { Link } from "wouter";
-import { TrainingContract, Apprentice } from "@shared/schema";
-import { 
-  Card, 
-  CardContent, 
-  CardHeader, 
-  CardTitle 
-} from "@/components/ui/card";
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from "@/components/ui/table";
-import { 
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { Link } from 'wouter';
+import { TrainingContract, Apprentice } from '@shared/schema';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
-import { 
-  Eye, 
-  Pencil, 
-  Trash2, 
-  MoreHorizontal, 
-  Plus, 
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import {
+  Eye,
+  Pencil,
+  Trash2,
+  MoreHorizontal,
+  Plus,
   Search,
   Filter,
   FileText,
-  Download
-} from "lucide-react";
+  Download,
+} from 'lucide-react';
 
 const ContractsList = () => {
   const [filter, setFilter] = useState({
-    search: "",
-    status: ""
+    search: '',
+    status: '',
   });
-  
+
   // Fetch all training contracts
-  const { data: contracts, isLoading: isLoadingContracts, error: contractsError } = useQuery({
+  const {
+    data: contracts,
+    isLoading: isLoadingContracts,
+    error: contractsError,
+  } = useQuery({
     queryKey: ['/api/contracts'],
     queryFn: async () => {
       const res = await fetch('/api/contracts');
       if (!res.ok) throw new Error('Failed to fetch contracts');
       return res.json() as Promise<TrainingContract[]>;
-    }
+    },
   });
-  
+
   // Fetch all apprentices (for displaying names)
   const { data: apprentices, isLoading: isLoadingApprentices } = useQuery({
     queryKey: ['/api/apprentices'],
@@ -68,49 +67,54 @@ const ContractsList = () => {
       const res = await fetch('/api/apprentices');
       if (!res.ok) throw new Error('Failed to fetch apprentices');
       return res.json() as Promise<Apprentice[]>;
-    }
+    },
   });
-  
+
   // Helper function to get apprentice name by ID
   const getApprenticeName = (apprenticeId: number) => {
     const apprentice = apprentices?.find(a => a.id === apprenticeId);
-    return apprentice ? `${apprentice.firstName} ${apprentice.lastName}` : `Apprentice #${apprenticeId}`;
+    return apprentice
+      ? `${apprentice.firstName} ${apprentice.lastName}`
+      : `Apprentice #${apprenticeId}`;
   };
-  
+
   // Filter contracts based on search and filters
   const filteredContracts = contracts?.filter(contract => {
-    const matchesSearch = 
-      filter.search === "" || 
+    const matchesSearch =
+      filter.search === '' ||
       contract.contractNumber.toLowerCase().includes(filter.search.toLowerCase()) ||
-      (apprentices && getApprenticeName(contract.apprenticeId).toLowerCase().includes(filter.search.toLowerCase()));
-    
-    const matchesStatus = filter.status === "" || contract.status === filter.status;
-    
+      (apprentices &&
+        getApprenticeName(contract.apprenticeId)
+          .toLowerCase()
+          .includes(filter.search.toLowerCase()));
+
+    const matchesStatus = filter.status === '' || contract.status === filter.status;
+
     return matchesSearch && matchesStatus;
   });
-  
+
   const getStatusBadgeClass = (status: string) => {
-    switch(status) {
-      case "active":
-        return "bg-green-100 text-success";
-      case "expired":
-        return "bg-red-100 text-destructive";
-      case "on_hold":
-        return "bg-yellow-100 text-warning";
-      case "completed":
-        return "bg-blue-100 text-info";
+    switch (status) {
+      case 'active':
+        return 'bg-green-100 text-success';
+      case 'expired':
+        return 'bg-red-100 text-destructive';
+      case 'on_hold':
+        return 'bg-yellow-100 text-warning';
+      case 'completed':
+        return 'bg-blue-100 text-info';
       default:
-        return "bg-muted text-muted-foreground";
+        return 'bg-muted text-muted-foreground';
     }
   };
-  
+
   // Format dates for display
   const formatDate = (dateString: Date | string) => {
     return new Date(dateString).toLocaleDateString();
   };
-  
+
   const isLoading = isLoadingContracts || isLoadingApprentices;
-  
+
   return (
     <>
       <div className="flex justify-between items-center mb-6">
@@ -122,7 +126,7 @@ const ContractsList = () => {
           </Link>
         </Button>
       </div>
-      
+
       <Card className="mb-8">
         <CardHeader>
           <CardTitle>Training Contracts</CardTitle>
@@ -136,13 +140,13 @@ const ContractsList = () => {
                 placeholder="Search by contract number or apprentice..."
                 className="pl-8"
                 value={filter.search}
-                onChange={(e) => setFilter({...filter, search: e.target.value})}
+                onChange={e => setFilter({ ...filter, search: e.target.value })}
               />
             </div>
             <div className="w-full md:w-48">
               <Select
                 value={filter.status}
-                onValueChange={(value) => setFilter({...filter, status: value})}
+                onValueChange={value => setFilter({ ...filter, status: value })}
               >
                 <SelectTrigger>
                   <Filter className="mr-2 h-4 w-4" />
@@ -158,7 +162,7 @@ const ContractsList = () => {
               </Select>
             </div>
           </div>
-          
+
           {isLoading ? (
             <div className="space-y-4">
               <Skeleton className="h-8 w-full" />
@@ -191,7 +195,7 @@ const ContractsList = () => {
                       </TableCell>
                     </TableRow>
                   ) : (
-                    filteredContracts?.map((contract) => (
+                    filteredContracts?.map(contract => (
                       <TableRow key={contract.id}>
                         <TableCell>
                           <div className="font-medium">{contract.contractNumber}</div>
@@ -240,7 +244,11 @@ const ContractsList = () => {
                                 </DropdownMenuItem>
                                 {contract.documentUrl && (
                                   <DropdownMenuItem asChild>
-                                    <a href={contract.documentUrl} target="_blank" rel="noopener noreferrer">
+                                    <a
+                                      href={contract.documentUrl}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                    >
                                       <Download className="mr-2 h-4 w-4" />
                                       Download Document
                                     </a>

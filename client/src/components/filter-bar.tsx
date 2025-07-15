@@ -1,11 +1,11 @@
 import React, { ReactNode } from 'react';
-import { 
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue
-} from "@/components/ui/select";
+  SelectValue,
+} from '@/components/ui/select';
 
 export interface FilterOption {
   /** Value of the option */
@@ -42,8 +42,8 @@ export function FilterGroup({
   options,
   onChange,
   icon,
-  className = "w-full md:w-48",
-  placeholder
+  className = 'w-full md:w-48',
+  placeholder,
 }: FilterGroupProps) {
   return (
     <div className={className}>
@@ -53,7 +53,7 @@ export function FilterGroup({
           <SelectValue placeholder={placeholder || title} />
         </SelectTrigger>
         <SelectContent>
-          {options.map((option) => (
+          {options.map(option => (
             <SelectItem key={option.value} value={option.value}>
               <div className="flex items-center">
                 {option.icon && <span className="mr-2">{option.icon}</span>}
@@ -77,10 +77,6 @@ export interface FilterBarProps {
 /**
  * FilterBar component for wrapping multiple filter groups
  */
-export function FilterBar({ children, className = "" }: FilterBarProps) {
-  return (
-    <div className={`flex flex-wrap md:flex-nowrap gap-4 ${className}`}>
-      {children}
-    </div>
-  );
+export function FilterBar({ children, className = '' }: FilterBarProps) {
+  return <div className={`flex flex-wrap md:flex-nowrap gap-4 ${className}`}>{children}</div>;
 }

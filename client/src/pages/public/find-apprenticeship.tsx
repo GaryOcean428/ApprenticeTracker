@@ -1,13 +1,26 @@
-import PublicLayout from "@/layouts/public-layout";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useState, useEffect } from "react";
-import { jobsApi, type JobListing } from "@/lib/api";
-import { useToast } from "@/hooks/use-toast";
+import PublicLayout from '@/layouts/public-layout';
+import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { useState, useEffect } from 'react';
+import { jobsApi, type JobListing } from '@/lib/api';
+import { useToast } from '@/hooks/use-toast';
 
 // Use API service for job listings
 function useJobs() {
@@ -15,7 +28,7 @@ function useJobs() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
-  
+
   useEffect(() => {
     async function fetchJobs() {
       try {
@@ -27,18 +40,18 @@ function useJobs() {
         console.error('Error fetching jobs:', err);
         setError('Unable to load job listings. Please try again later.');
         toast({
-          variant: "destructive",
-          title: "Error",
-          description: "Failed to load job listings.",
+          variant: 'destructive',
+          title: 'Error',
+          description: 'Failed to load job listings.',
         });
       } finally {
         setLoading(false);
       }
     }
-    
+
     fetchJobs();
   }, [toast]);
-  
+
   return { jobs, loading, error };
 }
 
@@ -47,20 +60,20 @@ export default function FindApprenticeshipPage() {
   const [selectedJob, setSelectedJob] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
   const { toast } = useToast();
-  
+
   const handleApply = (jobId: string) => {
     setSelectedJob(jobId);
     setShowForm(true);
     // Scroll to form
     setTimeout(() => {
-      document.getElementById("application-form")?.scrollIntoView({ behavior: "smooth" });
+      document.getElementById('application-form')?.scrollIntoView({ behavior: 'smooth' });
     }, 100);
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    
+
     try {
       // Connect to the CRM through our API
       const application = {
@@ -71,29 +84,29 @@ export default function FindApprenticeshipPage() {
         phone: formData.get('phone') as string,
         location: formData.get('location') as string,
         education: formData.get('education') as string,
-        experience: formData.get('experience') as string || undefined,
-        interest: formData.get('interest') as string
+        experience: (formData.get('experience') as string) || undefined,
+        interest: formData.get('interest') as string,
       };
-      
+
       const response = await jobsApi.submitApplication(application);
-      
+
       if (response.success) {
         toast({
-          title: "Application Submitted",
+          title: 'Application Submitted',
           description: response.message,
-          variant: "success",
+          variant: 'success',
         });
         setShowForm(false);
         setSelectedJob(null);
       } else {
-        throw new Error("Failed to submit application");
+        throw new Error('Failed to submit application');
       }
     } catch (err) {
-      console.error("Error submitting application:", err);
+      console.error('Error submitting application:', err);
       toast({
-        title: "Submission Error",
-        description: "There was a problem submitting your application. Please try again later.",
-        variant: "destructive",
+        title: 'Submission Error',
+        description: 'There was a problem submitting your application. Please try again later.',
+        variant: 'destructive',
       });
     }
   };
@@ -109,7 +122,8 @@ export default function FindApprenticeshipPage() {
                 Find an Apprenticeship
               </h1>
               <p className="mx-auto max-w-[700px] text-gray-500 md:text-xl">
-                Browse current apprenticeship and traineeship opportunities and start your career journey with Braden Group.
+                Browse current apprenticeship and traineeship opportunities and start your career
+                journey with Braden Group.
               </p>
             </div>
           </div>
@@ -163,10 +177,7 @@ export default function FindApprenticeshipPage() {
           ) : error ? (
             <div className="text-center py-12">
               <p className="text-red-500">{error}</p>
-              <Button 
-                onClick={() => window.location.reload()} 
-                className="mt-4"
-              >
+              <Button onClick={() => window.location.reload()} className="mt-4">
                 Try Again
               </Button>
             </div>
@@ -199,7 +210,7 @@ export default function FindApprenticeshipPage() {
                     </div>
                   </CardContent>
                   <CardFooter>
-                    <Button 
+                    <Button
                       className="w-full bg-blue-600 hover:bg-blue-700"
                       onClick={() => handleApply(job.id)}
                     >
@@ -210,7 +221,7 @@ export default function FindApprenticeshipPage() {
               ))}
             </div>
           )}
-          
+
           {/* Pagination - Static for MVP */}
           <div className="flex items-center justify-center space-x-2 mt-12">
             <Button variant="outline" size="sm" disabled>
@@ -240,7 +251,7 @@ export default function FindApprenticeshipPage() {
               <h2 className="text-3xl font-bold tracking-tighter mb-8">
                 Apply for {jobs.find((j: JobListing) => j.id === selectedJob)?.title}
               </h2>
-              
+
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid gap-6 md:grid-cols-2">
                   <div className="space-y-2">
@@ -252,7 +263,7 @@ export default function FindApprenticeshipPage() {
                     <Input id="last-name" required />
                   </div>
                 </div>
-                
+
                 <div className="grid gap-6 md:grid-cols-2">
                   <div className="space-y-2">
                     <Label htmlFor="email">Email *</Label>
@@ -263,12 +274,12 @@ export default function FindApprenticeshipPage() {
                     <Input id="phone" type="tel" required />
                   </div>
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="location">Location *</Label>
                   <Input id="location" placeholder="e.g. Perth, WA" required />
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="education">Highest Education Level *</Label>
                   <Select required>
@@ -285,21 +296,24 @@ export default function FindApprenticeshipPage() {
                     </SelectContent>
                   </Select>
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="experience">Relevant Experience</Label>
-                  <Textarea id="experience" placeholder="Describe any relevant experience or skills you have" />
+                  <Textarea
+                    id="experience"
+                    placeholder="Describe any relevant experience or skills you have"
+                  />
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="interest">Why are you interested in this apprenticeship? *</Label>
                   <Textarea id="interest" required />
                 </div>
-                
+
                 <div className="flex justify-end space-x-4">
-                  <Button 
-                    type="button" 
-                    variant="outline" 
+                  <Button
+                    type="button"
+                    variant="outline"
                     onClick={() => {
                       setShowForm(false);
                       setSelectedJob(null);
@@ -326,11 +340,12 @@ export default function FindApprenticeshipPage() {
                 Why Choose Braden Group for Your Apprenticeship
               </h2>
               <p className="mx-auto max-w-[700px] text-gray-500 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-                We offer a supportive environment for apprentices to thrive throughout their training journey.
+                We offer a supportive environment for apprentices to thrive throughout their
+                training journey.
               </p>
             </div>
           </div>
-          
+
           <div className="grid gap-6 md:grid-cols-3">
             <div className="flex flex-col items-center text-center p-6 bg-white rounded-lg shadow-sm">
               <div className="h-12 w-12 flex items-center justify-center rounded-full bg-blue-100 text-blue-600 mb-4">
@@ -351,10 +366,11 @@ export default function FindApprenticeshipPage() {
               </div>
               <h3 className="text-xl font-bold mb-2">Ongoing Support</h3>
               <p className="text-gray-500">
-                Dedicated field officers provide regular check-ins and support throughout your apprenticeship journey.
+                Dedicated field officers provide regular check-ins and support throughout your
+                apprenticeship journey.
               </p>
             </div>
-            
+
             <div className="flex flex-col items-center text-center p-6 bg-white rounded-lg shadow-sm">
               <div className="h-12 w-12 flex items-center justify-center rounded-full bg-blue-100 text-blue-600 mb-4">
                 <svg
@@ -375,10 +391,11 @@ export default function FindApprenticeshipPage() {
               </div>
               <h3 className="text-xl font-bold mb-2">Rotation Opportunities</h3>
               <p className="text-gray-500">
-                Gain diverse experience by working with different host employers throughout your apprenticeship.
+                Gain diverse experience by working with different host employers throughout your
+                apprenticeship.
               </p>
             </div>
-            
+
             <div className="flex flex-col items-center text-center p-6 bg-white rounded-lg shadow-sm">
               <div className="h-12 w-12 flex items-center justify-center rounded-full bg-blue-100 text-blue-600 mb-4">
                 <svg
@@ -401,7 +418,8 @@ export default function FindApprenticeshipPage() {
               </div>
               <h3 className="text-xl font-bold mb-2">Industry Connections</h3>
               <p className="text-gray-500">
-                Access a network of leading employers and industry professionals to build your career.
+                Access a network of leading employers and industry professionals to build your
+                career.
               </p>
             </div>
           </div>
@@ -417,7 +435,8 @@ export default function FindApprenticeshipPage() {
                 Ready to start your career?
               </h2>
               <p className="mx-auto max-w-[600px] text-gray-200 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-                Don't see the right opportunity? Register your interest and we'll notify you when new apprenticeships become available.
+                Don't see the right opportunity? Register your interest and we'll notify you when
+                new apprenticeships become available.
               </p>
             </div>
             <div className="space-x-4">

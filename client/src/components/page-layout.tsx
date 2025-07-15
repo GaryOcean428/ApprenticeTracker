@@ -46,21 +46,14 @@ export function PageHeader({
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           {showBackButton && (
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={handleBack}
-              disabled={backDisabled}
-            >
+            <Button variant="outline" size="icon" onClick={handleBack} disabled={backDisabled}>
               <ArrowLeft className="h-4 w-4" />
               <span className="sr-only">Back</span>
             </Button>
           )}
           <div>
             <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
-            {description && (
-              <p className="text-sm text-muted-foreground mt-1">{description}</p>
-            )}
+            {description && <p className="text-sm text-muted-foreground mt-1">{description}</p>}
           </div>
         </div>
         {actions && <div className="flex items-center gap-2">{actions}</div>}
@@ -149,9 +142,7 @@ export function PageLayout({
             <p className="text-muted-foreground mb-4">
               {error.message || 'An error occurred while loading the data.'}
             </p>
-            <Button onClick={() => window.location.reload()}>
-              Try Again
-            </Button>
+            <Button onClick={() => window.location.reload()}>Try Again</Button>
           </div>
         </Card>
       ) : (

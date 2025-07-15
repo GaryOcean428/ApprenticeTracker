@@ -1,21 +1,21 @@
 /**
  * Labour Hire Workers Migration
- * 
+ *
  * This migration adds support for labour hire workers (non-apprentice employees)
  * including placements, timesheets, and document management.
  */
-import { db } from "./db";
-import { sql } from "drizzle-orm";
-import logger from "./utils/logger";
+import { db } from './db';
+import { sql } from 'drizzle-orm';
+import logger from './utils/logger';
 
 export async function migrateLabourHireSchema() {
-  logger.info("Creating Labour Hire Workers tables...");
+  logger.info('Creating Labour Hire Workers tables...');
 
   try {
     // Check if labour_hire_workers table already exists
     const tablesExist = await checkIfLabourHireTablesExist();
     if (tablesExist) {
-      logger.info("Labour Hire Workers tables already exist, skipping migration.");
+      logger.info('Labour Hire Workers tables already exist, skipping migration.');
       return;
     }
 
@@ -130,21 +130,45 @@ export async function migrateLabourHireSchema() {
 
     // Add indexes for performance
     await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_lhw_email ON labour_hire_workers(email);`);
-    await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_lhw_status ON labour_hire_workers(status);`);
-    await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_lhw_organization ON labour_hire_workers(organization_id);`);
-    await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_lhp_worker ON labour_hire_placements(worker_id);`);
-    await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_lhp_host ON labour_hire_placements(host_employer_id);`);
-    await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_lhp_status ON labour_hire_placements(status);`);
-    await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_lht_worker ON labour_hire_timesheets(worker_id);`);
-    await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_lht_placement ON labour_hire_timesheets(placement_id);`);
-    await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_lht_status ON labour_hire_timesheets(status);`);
-    await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_lhts_timesheet ON labour_hire_timesheet_details(timesheet_id);`);
-    await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_lhwd_worker ON labour_hire_worker_documents(worker_id);`);
-    await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_lhwd_document ON labour_hire_worker_documents(document_id);`);
+    await db.execute(
+      sql`CREATE INDEX IF NOT EXISTS idx_lhw_status ON labour_hire_workers(status);`
+    );
+    await db.execute(
+      sql`CREATE INDEX IF NOT EXISTS idx_lhw_organization ON labour_hire_workers(organization_id);`
+    );
+    await db.execute(
+      sql`CREATE INDEX IF NOT EXISTS idx_lhp_worker ON labour_hire_placements(worker_id);`
+    );
+    await db.execute(
+      sql`CREATE INDEX IF NOT EXISTS idx_lhp_host ON labour_hire_placements(host_employer_id);`
+    );
+    await db.execute(
+      sql`CREATE INDEX IF NOT EXISTS idx_lhp_status ON labour_hire_placements(status);`
+    );
+    await db.execute(
+      sql`CREATE INDEX IF NOT EXISTS idx_lht_worker ON labour_hire_timesheets(worker_id);`
+    );
+    await db.execute(
+      sql`CREATE INDEX IF NOT EXISTS idx_lht_placement ON labour_hire_timesheets(placement_id);`
+    );
+    await db.execute(
+      sql`CREATE INDEX IF NOT EXISTS idx_lht_status ON labour_hire_timesheets(status);`
+    );
+    await db.execute(
+      sql`CREATE INDEX IF NOT EXISTS idx_lhts_timesheet ON labour_hire_timesheet_details(timesheet_id);`
+    );
+    await db.execute(
+      sql`CREATE INDEX IF NOT EXISTS idx_lhwd_worker ON labour_hire_worker_documents(worker_id);`
+    );
+    await db.execute(
+      sql`CREATE INDEX IF NOT EXISTS idx_lhwd_document ON labour_hire_worker_documents(document_id);`
+    );
 
-    logger.info("Labour Hire Workers tables created successfully");
+    logger.info('Labour Hire Workers tables created successfully');
   } catch (error) {
-    logger.error("Error creating Labour Hire Workers tables", { error: error instanceof Error ? error.message : String(error) });
+    logger.error('Error creating Labour Hire Workers tables', {
+      error: error instanceof Error ? error.message : String(error),
+    });
     throw error;
   }
 }
@@ -157,14 +181,16 @@ async function checkIfLabourHireTablesExist(): Promise<boolean> {
         WHERE table_name = 'labour_hire_workers'
       );
     `);
-    
+
     // Properly cast and handle the result
     if (result && result.rows && result.rows.length > 0) {
       return !!result.rows[0].exists;
     }
     return false;
   } catch (error) {
-    logger.error("Error checking if Labour Hire Workers tables exist", { error: error instanceof Error ? error.message : String(error) });
+    logger.error('Error checking if Labour Hire Workers tables exist', {
+      error: error instanceof Error ? error.message : String(error),
+    });
     return false;
   }
 }

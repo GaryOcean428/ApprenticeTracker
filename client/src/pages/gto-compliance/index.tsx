@@ -11,7 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 export default function GtoComplianceDashboard() {
   const { toast } = useToast();
   const [selectedGtoId, setSelectedGtoId] = useState<number | null>(1); // Default to first GTO for now
-  
+
   // Fetch GTO organizations
   const { data: gtoOrganizations, isLoading: isLoadingGtos } = useQuery({
     queryKey: ['/api/gto-organizations'],
@@ -34,14 +34,11 @@ export default function GtoComplianceDashboard() {
   });
 
   // Fetch compliance dashboard data for selected GTO
-  const { 
-    data: dashboardData, 
-    isLoading: isLoadingDashboard 
-  } = useQuery({
+  const { data: dashboardData, isLoading: isLoadingDashboard } = useQuery({
     queryKey: ['/api/gto-compliance/dashboard', selectedGtoId],
     queryFn: async () => {
       if (!selectedGtoId) return null;
-      
+
       try {
         const response = await fetch(`/api/gto-compliance/dashboard/${selectedGtoId}`);
         if (!response.ok) {
@@ -92,10 +89,10 @@ export default function GtoComplianceDashboard() {
   // Calculate compliance score
   const calculateComplianceScore = () => {
     if (!dashboardData?.complianceStatus) return 0;
-    
+
     const { compliant, total } = dashboardData.complianceStatus;
     if (total === 0) return 0;
-    
+
     return Math.round((compliant / total) * 100);
   };
 
@@ -116,29 +113,20 @@ export default function GtoComplianceDashboard() {
       <div className="flex flex-col gap-6">
         <div className="flex justify-between items-center">
           <h1 className="text-3xl font-bold tracking-tight">GTO Compliance Dashboard</h1>
-          <Button>
-            Export Compliance Report
-          </Button>
+          <Button>Export Compliance Report</Button>
         </div>
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
           {/* Compliance Score Card */}
           <Card className="col-span-1">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">
-                Overall Compliance
-              </CardTitle>
-              <CardDescription>
-                Based on assessments
-              </CardDescription>
+              <CardTitle className="text-sm font-medium">Overall Compliance</CardTitle>
+              <CardDescription>Based on assessments</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="flex flex-col items-center justify-center space-y-2">
                 <div className="text-4xl font-bold">{calculateComplianceScore()}%</div>
-                <Progress 
-                  value={calculateComplianceScore()} 
-                  className="h-2" 
-                />
+                <Progress value={calculateComplianceScore()} className="h-2" />
               </div>
             </CardContent>
           </Card>
@@ -146,12 +134,8 @@ export default function GtoComplianceDashboard() {
           {/* Compliance Status Card */}
           <Card className="col-span-1">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">
-                Compliance Status
-              </CardTitle>
-              <CardDescription>
-                Assessment distribution
-              </CardDescription>
+              <CardTitle className="text-sm font-medium">Compliance Status</CardTitle>
+              <CardDescription>Assessment distribution</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 gap-2">
@@ -178,12 +162,8 @@ export default function GtoComplianceDashboard() {
           {/* Complaints Card */}
           <Card className="col-span-1">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">
-                Complaints
-              </CardTitle>
-              <CardDescription>
-                Current status
-              </CardDescription>
+              <CardTitle className="text-sm font-medium">Complaints</CardTitle>
+              <CardDescription>Current status</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 gap-2">
@@ -206,12 +186,8 @@ export default function GtoComplianceDashboard() {
           {/* Appeals Card */}
           <Card className="col-span-1">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">
-                Appeals
-              </CardTitle>
-              <CardDescription>
-                Current status
-              </CardDescription>
+              <CardTitle className="text-sm font-medium">Appeals</CardTitle>
+              <CardDescription>Current status</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 gap-2">
@@ -236,9 +212,7 @@ export default function GtoComplianceDashboard() {
         <Card className="col-span-2">
           <CardHeader>
             <CardTitle>Compliance Standards</CardTitle>
-            <CardDescription>
-              National Standards for Group Training Organizations
-            </CardDescription>
+            <CardDescription>National Standards for Group Training Organizations</CardDescription>
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="recruitment">
@@ -247,7 +221,7 @@ export default function GtoComplianceDashboard() {
                 <TabsTrigger value="monitoring">Monitoring</TabsTrigger>
                 <TabsTrigger value="governance">Governance</TabsTrigger>
               </TabsList>
-              
+
               {Object.keys(standardsByCategory).map(category => (
                 <TabsContent key={category} value={category.toLowerCase()}>
                   <div className="space-y-4">
@@ -256,7 +230,7 @@ export default function GtoComplianceDashboard() {
                       const assessment = dashboardData?.upcomingAssessments?.find(
                         (a: any) => a.standard.id === standard.id
                       );
-                      
+
                       let statusColor = 'bg-gray-200';
                       if (assessment) {
                         switch (assessment.assessment.status) {
@@ -274,7 +248,7 @@ export default function GtoComplianceDashboard() {
                             break;
                         }
                       }
-                      
+
                       return (
                         <div key={standard.id} className="border rounded-lg p-4">
                           <div className="flex justify-between">
@@ -287,16 +261,14 @@ export default function GtoComplianceDashboard() {
                               </p>
                             </div>
                             <div>
-                              <Badge 
-                                className={statusColor}
-                              >
+                              <Badge className={statusColor}>
                                 {assessment
                                   ? assessment.assessment.status.replace('_', ' ')
                                   : 'Not Assessed'}
                               </Badge>
                             </div>
                           </div>
-                          
+
                           {standard.requiredEvidence && (
                             <div className="mt-3">
                               <h4 className="text-sm font-medium">Required Evidence:</h4>
@@ -307,18 +279,12 @@ export default function GtoComplianceDashboard() {
                               </ul>
                             </div>
                           )}
-                          
+
                           <div className="mt-4 flex justify-end">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="mr-2"
-                            >
+                            <Button variant="outline" size="sm" className="mr-2">
                               View Details
                             </Button>
-                            <Button
-                              size="sm"
-                            >
+                            <Button size="sm">
                               {assessment ? 'Update Assessment' : 'Create Assessment'}
                             </Button>
                           </div>

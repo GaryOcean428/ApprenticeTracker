@@ -39,20 +39,19 @@ export default function StatsCard({
           <p className="text-3xl font-bold">{value}</p>
           {change && (
             <div className="mt-1 flex items-center">
-              <span 
-                className={`text-xs ${change.positive !== undefined
-                  ? change.positive
-                    ? 'text-success'
-                    : 'text-destructive'
-                  : 'text-muted-foreground'
+              <span
+                className={`text-xs ${
+                  change.positive !== undefined
+                    ? change.positive
+                      ? 'text-success'
+                      : 'text-destructive'
+                    : 'text-muted-foreground'
                 }`}
               >
                 {change.value}
               </span>
               {change.text && (
-                <span className="ml-1 text-xs text-muted-foreground">
-                  {change.text}
-                </span>
+                <span className="ml-1 text-xs text-muted-foreground">{change.text}</span>
               )}
             </div>
           )}

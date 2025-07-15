@@ -15,9 +15,9 @@ router.get('/', async (req, res) => {
     res.json(standards);
   } catch (error) {
     console.error('Error fetching compliance standards:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       message: 'Error fetching compliance standards',
-      error: error instanceof Error ? error.message : String(error)
+      error: error instanceof Error ? error.message : String(error),
     });
   }
 });
@@ -34,9 +34,9 @@ router.get('/category/:category', async (req, res) => {
     res.json(standards);
   } catch (error) {
     console.error('Error fetching compliance standards by category:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       message: 'Error fetching compliance standards by category',
-      error: error instanceof Error ? error.message : String(error)
+      error: error instanceof Error ? error.message : String(error),
     });
   }
 });
@@ -53,9 +53,9 @@ router.get('/prefix/:prefix', async (req, res) => {
     res.json(standards);
   } catch (error) {
     console.error('Error fetching compliance standards by prefix:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       message: 'Error fetching compliance standards by prefix',
-      error: error instanceof Error ? error.message : String(error)
+      error: error instanceof Error ? error.message : String(error),
     });
   }
 });
@@ -69,17 +69,17 @@ router.get('/:id', async (req, res) => {
   try {
     const id = parseInt(req.params.id);
     const standard = await storage.getComplianceStandard(id);
-    
+
     if (!standard) {
       return res.status(404).json({ message: 'Compliance standard not found' });
     }
-    
+
     res.json(standard);
   } catch (error) {
     console.error('Error fetching compliance standard:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       message: 'Error fetching compliance standard',
-      error: error instanceof Error ? error.message : String(error)
+      error: error instanceof Error ? error.message : String(error),
     });
   }
 });
@@ -96,9 +96,9 @@ router.post('/', async (req, res) => {
     res.status(201).json(standard);
   } catch (error) {
     console.error('Error creating compliance standard:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       message: 'Error creating compliance standard',
-      error: error instanceof Error ? error.message : String(error)
+      error: error instanceof Error ? error.message : String(error),
     });
   }
 });
@@ -113,17 +113,17 @@ router.patch('/:id', async (req, res) => {
     const id = parseInt(req.params.id);
     const standardData = req.body;
     const standard = await storage.updateComplianceStandard(id, standardData);
-    
+
     if (!standard) {
       return res.status(404).json({ message: 'Compliance standard not found' });
     }
-    
+
     res.json(standard);
   } catch (error) {
     console.error('Error updating compliance standard:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       message: 'Error updating compliance standard',
-      error: error instanceof Error ? error.message : String(error)
+      error: error instanceof Error ? error.message : String(error),
     });
   }
 });
@@ -137,7 +137,7 @@ router.delete('/:id', async (req, res) => {
   try {
     const id = parseInt(req.params.id);
     const success = await storage.deleteComplianceStandard(id);
-    
+
     if (success) {
       res.status(204).end();
     } else {
@@ -145,9 +145,9 @@ router.delete('/:id', async (req, res) => {
     }
   } catch (error) {
     console.error('Error deleting compliance standard:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       message: 'Error deleting compliance standard',
-      error: error instanceof Error ? error.message : String(error)
+      error: error instanceof Error ? error.message : String(error),
     });
   }
 });

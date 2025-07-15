@@ -3,45 +3,45 @@
  * Provides advanced award interpretation features similar to WorkforceOne
  */
 
-import { Router, Request, Response } from "express";
-import { isAuthenticated } from "../middleware/auth";
+import { Router, Request, Response } from 'express';
+import { isAuthenticated } from '../middleware/auth';
 
 const router = Router();
 
 // Sample awards data - in production, this would come from Fair Work API
 const AWARDS = [
   {
-    id: "MA000003",
-    code: "MA000003",
-    name: "Building and Construction General On-site Award",
+    id: 'MA000003',
+    code: 'MA000003',
+    name: 'Building and Construction General On-site Award',
     publishedYear: 2025,
-    industry: "Construction",
-    sectors: ["commercial", "residential", "civil"]
+    industry: 'Construction',
+    sectors: ['commercial', 'residential', 'civil'],
   },
   {
-    id: "MA000020",
-    code: "MA000020",
-    name: "Building and Construction General Award",
+    id: 'MA000020',
+    code: 'MA000020',
+    name: 'Building and Construction General Award',
     publishedYear: 2025,
-    industry: "Construction",
-    sectors: ["commercial", "residential"]
+    industry: 'Construction',
+    sectors: ['commercial', 'residential'],
   },
   {
-    id: "MA000036",
-    code: "MA000036",
-    name: "Plumbing and Fire Sprinklers Award",
+    id: 'MA000036',
+    code: 'MA000036',
+    name: 'Plumbing and Fire Sprinklers Award',
     publishedYear: 2025,
-    industry: "Construction",
-    sectors: ["commercial", "residential"]
+    industry: 'Construction',
+    sectors: ['commercial', 'residential'],
   },
   {
-    id: "MA000025",
-    code: "MA000025",
-    name: "Electrical, Electronic and Communications Contracting Award",
+    id: 'MA000025',
+    code: 'MA000025',
+    name: 'Electrical, Electronic and Communications Contracting Award',
     publishedYear: 2025,
-    industry: "Electrical",
-    sectors: ["commercial", "residential", "industrial"]
-  }
+    industry: 'Electrical',
+    sectors: ['commercial', 'residential', 'industrial'],
+  },
 ];
 
 // Function to calculate apprentice pay rates based on various factors
@@ -54,99 +54,126 @@ function calculateApprenticeRate(params: {
   sector?: string;
 }) {
   const { awardCode, year, apprenticeYear, isAdult, hasCompletedYear12, sector } = params;
-  
+
   // Base rates depend on award and year level
   let baseHourlyRate = 0;
-  
+
   // Use the exact Fair Work rates for 2024/2025 FY
-  
+
   // Electrical Award (MA000025) - Use exact rates provided
-  if (awardCode === "MA000025") {
+  if (awardCode === 'MA000025') {
     if (isAdult) {
       // Adult apprentice exact rates
       switch (apprenticeYear) {
-        case 1: baseHourlyRate = 23.91; break; // 1st year adult apprentice
-        case 2: baseHourlyRate = 26.42; break; // 2nd year adult apprentice
-        case 3: baseHourlyRate = 26.42; break; // 3rd year adult apprentice
-        case 4: baseHourlyRate = 26.42; break; // 4th year adult apprentice
-        default: baseHourlyRate = 23.91; // Default to 1st year
+        case 1:
+          baseHourlyRate = 23.91;
+          break; // 1st year adult apprentice
+        case 2:
+          baseHourlyRate = 26.42;
+          break; // 2nd year adult apprentice
+        case 3:
+          baseHourlyRate = 26.42;
+          break; // 3rd year adult apprentice
+        case 4:
+          baseHourlyRate = 26.42;
+          break; // 4th year adult apprentice
+        default:
+          baseHourlyRate = 23.91; // Default to 1st year
       }
     } else if (hasCompletedYear12) {
       // Junior apprentice with Year 12 completion
       switch (apprenticeYear) {
-        case 1: baseHourlyRate = 16.62; break; // 1st year with Year 12
-        case 2: baseHourlyRate = 19.53; break; // 2nd year with Year 12
-        case 3: baseHourlyRate = 20.99; break; // 3rd year with Year 12
-        case 4: baseHourlyRate = 24.49; break; // 4th year with Year 12
-        default: baseHourlyRate = 16.62; // Default to 1st year
+        case 1:
+          baseHourlyRate = 16.62;
+          break; // 1st year with Year 12
+        case 2:
+          baseHourlyRate = 19.53;
+          break; // 2nd year with Year 12
+        case 3:
+          baseHourlyRate = 20.99;
+          break; // 3rd year with Year 12
+        case 4:
+          baseHourlyRate = 24.49;
+          break; // 4th year with Year 12
+        default:
+          baseHourlyRate = 16.62; // Default to 1st year
       }
     } else {
       // Junior apprentice without Year 12 completion
       switch (apprenticeYear) {
-        case 1: baseHourlyRate = 15.16; break; // 1st year without Year 12
-        case 2: baseHourlyRate = 18.08; break; // 2nd year without Year 12
-        case 3: baseHourlyRate = 20.99; break; // 3rd year without Year 12
-        case 4: baseHourlyRate = 24.49; break; // 4th year without Year 12
-        default: baseHourlyRate = 15.16; // Default to 1st year
+        case 1:
+          baseHourlyRate = 15.16;
+          break; // 1st year without Year 12
+        case 2:
+          baseHourlyRate = 18.08;
+          break; // 2nd year without Year 12
+        case 3:
+          baseHourlyRate = 20.99;
+          break; // 3rd year without Year 12
+        case 4:
+          baseHourlyRate = 24.49;
+          break; // 4th year without Year 12
+        default:
+          baseHourlyRate = 15.16; // Default to 1st year
       }
     }
   }
   // Building and Construction Award (MA000003)
-  else if (awardCode === "MA000003") {
-    baseHourlyRate = 22.50 + (apprenticeYear * 3.25);
+  else if (awardCode === 'MA000003') {
+    baseHourlyRate = 22.5 + apprenticeYear * 3.25;
   }
   // Plumbing Award (MA000036)
-  else if (awardCode === "MA000036") {
-    baseHourlyRate = 23.25 + (apprenticeYear * 3.40);
+  else if (awardCode === 'MA000036') {
+    baseHourlyRate = 23.25 + apprenticeYear * 3.4;
   }
   // Default Building Award
   else {
-    baseHourlyRate = 22.00 + (apprenticeYear * 3.00);
+    baseHourlyRate = 22.0 + apprenticeYear * 3.0;
   }
-  
+
   // Don't apply modifiers for MA000025 since we're using exact rates
   let adultBonus = 0;
   let year12Bonus = 0;
-  
+
   // Only apply modifiers for other awards
-  if (awardCode !== "MA000025") {
-    adultBonus = isAdult ? 5.50 : 0;
+  if (awardCode !== 'MA000025') {
+    adultBonus = isAdult ? 5.5 : 0;
     year12Bonus = hasCompletedYear12 ? 1.75 : 0;
   }
-  
+
   // For Electrical Award (MA000025), only apply sector modifier, not year adjustments
   // since we're using exact rates for the current financial year
   let sectorMultiplier = 1.0;
-  if (sector === "commercial") sectorMultiplier = 1.1;
-  else if (sector === "civil") sectorMultiplier = 1.2;
-  else if (sector === "industrial") sectorMultiplier = 1.15;
-  
+  if (sector === 'commercial') sectorMultiplier = 1.1;
+  else if (sector === 'civil') sectorMultiplier = 1.2;
+  else if (sector === 'industrial') sectorMultiplier = 1.15;
+
   // Year adjustments only apply to awards other than MA000025
   let yearAdjustment = 0;
-  if (awardCode !== "MA000025") {
+  if (awardCode !== 'MA000025') {
     const currentYear = new Date().getFullYear();
     yearAdjustment = (year - currentYear) * 0.03; // 3% annual increase
   }
-  
+
   // Pure base rate before any modifiers
   const pureBaseRate = baseHourlyRate;
-  
+
   // Calculate final rates with all modifiers applied
   let hourlyRate = 0;
-  
-  if (awardCode === "MA000025") {
+
+  if (awardCode === 'MA000025') {
     // For Electrical Award, only apply sector multiplier if not standard
     hourlyRate = baseHourlyRate;
-    if (sector && sector !== "standard") {
+    if (sector && sector !== 'standard') {
       hourlyRate = baseHourlyRate * sectorMultiplier;
     }
   } else {
     // For other awards, apply all modifiers
-    hourlyRate = (baseHourlyRate + adultBonus + year12Bonus) * 
-                 sectorMultiplier * (1 + yearAdjustment);
+    hourlyRate =
+      (baseHourlyRate + adultBonus + year12Bonus) * sectorMultiplier * (1 + yearAdjustment);
   }
   const weeklyRate = hourlyRate * 38; // Standard 38-hour week
-  
+
   return {
     pureBaseRate: parseFloat(pureBaseRate.toFixed(2)),
     hourlyRate: parseFloat(hourlyRate.toFixed(2)),
@@ -156,8 +183,8 @@ function calculateApprenticeRate(params: {
       adultBonus: parseFloat(adultBonus.toFixed(2)),
       year12Bonus: parseFloat(year12Bonus.toFixed(2)),
       sectorMultiplier: parseFloat(sectorMultiplier.toFixed(2)),
-      yearAdjustment: parseFloat(yearAdjustment.toFixed(3))
-    }
+      yearAdjustment: parseFloat(yearAdjustment.toFixed(3)),
+    },
   };
 }
 
@@ -170,13 +197,13 @@ router.get('/awards', isAuthenticated, (_req: Request, res: Response) => {
   try {
     res.json({
       success: true,
-      data: AWARDS
+      data: AWARDS,
     });
   } catch (error) {
     console.error('Error fetching enhanced awards:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       success: false,
-      error: 'Failed to fetch awards' 
+      error: 'Failed to fetch awards',
     });
   }
 });
@@ -194,29 +221,29 @@ router.get('/apprentice-rates', isAuthenticated, (req: Request, res: Response) =
     const isAdultStr = req.query.isAdult as string;
     const hasCompletedYear12Str = req.query.hasCompletedYear12 as string;
     const sector = req.query.sector as string;
-    
+
     if (!awardCode) {
       return res.status(400).json({
         success: false,
-        error: 'Award code is required'
+        error: 'Award code is required',
       });
     }
-    
+
     // Parse and validate parameters
     const year = yearStr ? parseInt(yearStr) : new Date().getFullYear();
     const apprenticeYear = apprenticeYearStr ? parseInt(apprenticeYearStr) : 1;
     const isAdult = isAdultStr === 'true';
     const hasCompletedYear12 = hasCompletedYear12Str === 'true';
-    
+
     // Find award
     const award = AWARDS.find(a => a.code === awardCode);
     if (!award) {
       return res.status(404).json({
         success: false,
-        error: 'Award not found'
+        error: 'Award not found',
       });
     }
-    
+
     // Calculate rates
     const rates = calculateApprenticeRate({
       awardCode,
@@ -224,37 +251,37 @@ router.get('/apprentice-rates', isAuthenticated, (req: Request, res: Response) =
       apprenticeYear,
       isAdult,
       hasCompletedYear12,
-      sector
+      sector,
     });
-    
+
     res.json({
       success: true,
       data: {
         award: {
           code: award.code,
-          name: award.name
+          name: award.name,
         },
         parameters: {
           year,
           apprenticeYear,
           isAdult,
           hasCompletedYear12,
-          sector: sector || 'standard'
+          sector: sector || 'standard',
         },
         rates: {
           baseHourly: rates.pureBaseRate,
           hourly: rates.hourlyRate,
           weekly: rates.weeklyRate,
-          annual: parseFloat((rates.weeklyRate * 52).toFixed(2))
+          annual: parseFloat((rates.weeklyRate * 52).toFixed(2)),
         },
-        calculationFactors: rates.factors
-      }
+        calculationFactors: rates.factors,
+      },
     });
   } catch (error) {
     console.error('Error calculating apprentice rates:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       success: false,
-      error: 'Failed to calculate rates' 
+      error: 'Failed to calculate rates',
     });
   }
 });
@@ -271,32 +298,32 @@ router.get('/historical-rates', isAuthenticated, (req: Request, res: Response) =
     const isAdultStr = req.query.isAdult as string;
     const hasCompletedYear12Str = req.query.hasCompletedYear12 as string;
     const sector = req.query.sector as string;
-    
+
     if (!awardCode) {
       return res.status(400).json({
         success: false,
-        error: 'Award code is required'
+        error: 'Award code is required',
       });
     }
-    
+
     // Parse parameters
     const apprenticeYear = apprenticeYearStr ? parseInt(apprenticeYearStr) : 1;
     const isAdult = isAdultStr === 'true';
     const hasCompletedYear12 = hasCompletedYear12Str === 'true';
-    
+
     // Find award
     const award = AWARDS.find(a => a.code === awardCode);
     if (!award) {
       return res.status(404).json({
         success: false,
-        error: 'Award not found'
+        error: 'Award not found',
       });
     }
-    
+
     // Generate historical data for the past 5 years
     const currentYear = new Date().getFullYear();
     const historicalData = [];
-    
+
     for (let year = currentYear - 4; year <= currentYear; year++) {
       const rates = calculateApprenticeRate({
         awardCode,
@@ -304,9 +331,9 @@ router.get('/historical-rates', isAuthenticated, (req: Request, res: Response) =
         apprenticeYear,
         isAdult,
         hasCompletedYear12,
-        sector
+        sector,
       });
-      
+
       // Calculate year-over-year percentage change
       let percentageChange = null;
       if (year > currentYear - 4) {
@@ -316,47 +343,47 @@ router.get('/historical-rates', isAuthenticated, (req: Request, res: Response) =
           apprenticeYear,
           isAdult,
           hasCompletedYear12,
-          sector
+          sector,
         });
-        
+
         percentageChange = parseFloat(
-          (((rates.hourlyRate / prevRates.hourlyRate) - 1) * 100).toFixed(1)
+          ((rates.hourlyRate / prevRates.hourlyRate - 1) * 100).toFixed(1)
         );
       }
-      
+
       historicalData.push({
         year,
         rates: {
           baseHourly: rates.pureBaseRate,
           hourly: rates.hourlyRate,
           weekly: rates.weeklyRate,
-          annual: parseFloat((rates.weeklyRate * 52).toFixed(2))
+          annual: parseFloat((rates.weeklyRate * 52).toFixed(2)),
         },
-        percentageChange
+        percentageChange,
       });
     }
-    
+
     res.json({
       success: true,
       data: {
         award: {
           code: award.code,
-          name: award.name
+          name: award.name,
         },
         parameters: {
           apprenticeYear,
           isAdult,
           hasCompletedYear12,
-          sector: sector || 'standard'
+          sector: sector || 'standard',
         },
-        historicalRates: historicalData
-      }
+        historicalRates: historicalData,
+      },
     });
   } catch (error) {
     console.error('Error fetching historical rates:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       success: false,
-      error: 'Failed to fetch historical rates' 
+      error: 'Failed to fetch historical rates',
     });
   }
 });
@@ -369,82 +396,84 @@ router.get('/historical-rates', isAuthenticated, (req: Request, res: Response) =
 router.get('/penalty-rates', isAuthenticated, (req: Request, res: Response) => {
   try {
     const awardCode = req.query.awardCode as string;
-    
+
     if (!awardCode) {
       return res.status(400).json({
         success: false,
-        error: 'Award code is required'
+        error: 'Award code is required',
       });
     }
-    
+
     // Find award
     const award = AWARDS.find(a => a.code === awardCode);
     if (!award) {
       return res.status(404).json({
         success: false,
-        error: 'Award not found'
+        error: 'Award not found',
       });
     }
-    
+
     // Generate penalty rates based on award
     // In production, these would come from the actual award data
     let penaltyRates;
-    
-    if (awardCode === "MA000025") { // Electrical Award
+
+    if (awardCode === 'MA000025') {
+      // Electrical Award
       penaltyRates = {
         overtime: {
           firstTwoHours: 1.5,
           afterTwoHours: 2.0,
           sunday: 2.0,
-          publicHoliday: 2.5
+          publicHoliday: 2.5,
         },
         weekend: {
           saturday: 1.5,
-          sunday: 2.0
+          sunday: 2.0,
         },
         publicHoliday: 2.5,
         shiftWork: {
           afternoon: 1.15,
           night: 1.2,
-          permanentNight: 1.3
-        }
+          permanentNight: 1.3,
+        },
       };
-    } else { // Default Construction Awards
+    } else {
+      // Default Construction Awards
       penaltyRates = {
         overtime: {
           firstTwoHours: 1.5,
           afterTwoHours: 2.0,
           sunday: 2.0,
-          publicHoliday: 2.5
+          publicHoliday: 2.5,
         },
         weekend: {
           saturday: 1.5,
-          sunday: 2.0
+          sunday: 2.0,
         },
         publicHoliday: 2.5,
         shiftWork: {
           earlyMorning: 1.5,
           afternoon: 1.5,
-          night: 1.5
-        }
+          night: 1.5,
+        },
       };
     }
-    
+
     res.json({
       success: true,
       data: {
         award: {
           code: award.code,
-          name: award.name
+          name: award.name,
         },
-        penaltyRates
-      }
+        penaltyRates,
+      },
     });
   } catch (error) {
     console.error('Error fetching penalty rates:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       success: false,
-      error: 'Failed to fetch penalty rates' 
+      error: 'Failed to fetch penalty rates',
     });
   }
 });
@@ -457,85 +486,133 @@ router.get('/penalty-rates', isAuthenticated, (req: Request, res: Response) => {
 router.get('/allowances', isAuthenticated, (req: Request, res: Response) => {
   try {
     const awardCode = req.query.awardCode as string;
-    
+
     if (!awardCode) {
       return res.status(400).json({
         success: false,
-        error: 'Award code is required'
+        error: 'Award code is required',
       });
     }
-    
+
     // Find award
     const award = AWARDS.find(a => a.code === awardCode);
     if (!award) {
       return res.status(404).json({
         success: false,
-        error: 'Award not found'
+        error: 'Award not found',
       });
     }
-    
+
     // Generate allowances based on award
     // In production, these would come from the actual award data
     let allowances;
-    
-    if (awardCode === "MA000003") { // Building and Construction Award
+
+    if (awardCode === 'MA000003') {
+      // Building and Construction Award
       allowances = {
         industry: [
-          { name: "Tool allowance", amount: 32.56, period: "weekly", trade: "carpentry" },
-          { name: "Tool allowance", amount: 23.37, period: "weekly", trade: "plumbing" },
-          { name: "Industry allowance", amount: 31.69, period: "weekly", description: "For construction work conditions" }
+          { name: 'Tool allowance', amount: 32.56, period: 'weekly', trade: 'carpentry' },
+          { name: 'Tool allowance', amount: 23.37, period: 'weekly', trade: 'plumbing' },
+          {
+            name: 'Industry allowance',
+            amount: 31.69,
+            period: 'weekly',
+            description: 'For construction work conditions',
+          },
         ],
         expense: [
-          { name: "Meal allowance", amount: 16.91, period: "per occasion", description: "When working overtime" },
-          { name: "Travel allowance", amount: 0.89, period: "per km", description: "For using own vehicle for work" }
+          {
+            name: 'Meal allowance',
+            amount: 16.91,
+            period: 'per occasion',
+            description: 'When working overtime',
+          },
+          {
+            name: 'Travel allowance',
+            amount: 0.89,
+            period: 'per km',
+            description: 'For using own vehicle for work',
+          },
         ],
         skill: [
-          { name: "First aid allowance", amount: 3.22, period: "per day", description: "For designated first aid officer" },
-          { name: "Leading hand allowance", amount: 47.73, period: "weekly", description: "When supervising 3-10 employees" }
-        ]
+          {
+            name: 'First aid allowance',
+            amount: 3.22,
+            period: 'per day',
+            description: 'For designated first aid officer',
+          },
+          {
+            name: 'Leading hand allowance',
+            amount: 47.73,
+            period: 'weekly',
+            description: 'When supervising 3-10 employees',
+          },
+        ],
       };
-    } else if (awardCode === "MA000025") { // Electrical Award
+    } else if (awardCode === 'MA000025') {
+      // Electrical Award
       allowances = {
         industry: [
-          { name: "Tool allowance", amount: 19.70, period: "weekly", trade: "electrical" },
-          { name: "Industry allowance", amount: 29.46, period: "weekly", description: "For electrical work conditions" }
+          { name: 'Tool allowance', amount: 19.7, period: 'weekly', trade: 'electrical' },
+          {
+            name: 'Industry allowance',
+            amount: 29.46,
+            period: 'weekly',
+            description: 'For electrical work conditions',
+          },
         ],
         expense: [
-          { name: "Meal allowance", amount: 15.91, period: "per occasion", description: "When working overtime" },
-          { name: "Vehicle allowance", amount: 0.91, period: "per km", description: "For using own vehicle for work" }
+          {
+            name: 'Meal allowance',
+            amount: 15.91,
+            period: 'per occasion',
+            description: 'When working overtime',
+          },
+          {
+            name: 'Vehicle allowance',
+            amount: 0.91,
+            period: 'per km',
+            description: 'For using own vehicle for work',
+          },
         ],
         skill: [
-          { name: "License allowance", amount: 27.65, period: "weekly", description: "For electrical license holders" }
-        ]
+          {
+            name: 'License allowance',
+            amount: 27.65,
+            period: 'weekly',
+            description: 'For electrical license holders',
+          },
+        ],
       };
-    } else { // Default
+    } else {
+      // Default
       allowances = {
         industry: [
-          { name: "Tool allowance", amount: 15.50, period: "weekly" },
-          { name: "Industry allowance", amount: 25.00, period: "weekly" }
+          { name: 'Tool allowance', amount: 15.5, period: 'weekly' },
+          { name: 'Industry allowance', amount: 25.0, period: 'weekly' },
         ],
         expense: [
-          { name: "Meal allowance", amount: 15.00, period: "per occasion" },
-          { name: "Travel allowance", amount: 0.80, period: "per km" }
-        ]
+          { name: 'Meal allowance', amount: 15.0, period: 'per occasion' },
+          { name: 'Travel allowance', amount: 0.8, period: 'per km' },
+        ],
       };
     }
-    
+
     res.json({
       success: true,
       data: {
         award: {
           code: award.code,
-          name: award.name
+          name: award.name,
         },
-        allowances
-      }
+        allowances,
+      },
     });
   } catch (error) {
     console.error('Error fetching allowances:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       success: false,
-      error: 'Failed to fetch allowances' 
+      error: 'Failed to fetch allowances',
     });
   }
 });

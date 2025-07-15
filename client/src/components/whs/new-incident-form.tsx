@@ -26,14 +26,13 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
-import { 
-  Card, 
-  CardContent,
-  CardFooter
-} from '@/components/ui/card';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
 
 const incidentFormSchema = z.object({
-  title: z.string().min(5, 'Title must be at least 5 characters').max(100, 'Title must not exceed 100 characters'),
+  title: z
+    .string()
+    .min(5, 'Title must be at least 5 characters')
+    .max(100, 'Title must not exceed 100 characters'),
   type: z.enum(['incident', 'hazard'], {
     required_error: 'Please select a type',
   }),
@@ -47,13 +46,15 @@ const incidentFormSchema = z.object({
   description: z.string().min(10, 'Description must be at least 10 characters'),
   immediate_actions: z.string().optional(),
   notifiable_incident: z.boolean().default(false),
-  witnesses: z.array(
-    z.object({
-      name: z.string().min(2, 'Witness name must be at least 2 characters'),
-      contact: z.string().optional(),
-      statement: z.string().optional(),
-    })
-  ).optional(),
+  witnesses: z
+    .array(
+      z.object({
+        name: z.string().min(2, 'Witness name must be at least 2 characters'),
+        contact: z.string().optional(),
+        statement: z.string().optional(),
+      })
+    )
+    .optional(),
 });
 
 type IncidentFormValues = z.infer<typeof incidentFormSchema>;
@@ -64,7 +65,9 @@ interface NewIncidentFormProps {
 
 export default function NewIncidentForm({ onSuccess }: NewIncidentFormProps) {
   const { toast } = useToast();
-  const [witnesses, setWitnesses] = useState<Array<{ name: string; contact: string; statement: string }>>([]);
+  const [witnesses, setWitnesses] = useState<
+    Array<{ name: string; contact: string; statement: string }>
+  >([]);
 
   const form = useForm<IncidentFormValues>({
     resolver: zodResolver(incidentFormSchema),
@@ -116,7 +119,7 @@ export default function NewIncidentForm({ onSuccess }: NewIncidentFormProps) {
     setWitnesses([...witnesses, { name: '', contact: '', statement: '' }]);
   };
 
-  const updateWitness = (index: number, field: keyof typeof witnesses[0], value: string) => {
+  const updateWitness = (index: number, field: keyof (typeof witnesses)[0], value: string) => {
     const newWitnesses = [...witnesses];
     newWitnesses[index][field] = value;
     setWitnesses(newWitnesses);
@@ -141,9 +144,7 @@ export default function NewIncidentForm({ onSuccess }: NewIncidentFormProps) {
                 <FormControl>
                   <Input placeholder="Brief title of the incident" {...field} />
                 </FormControl>
-                <FormDescription>
-                  A short, descriptive title for the incident
-                </FormDescription>
+                <FormDescription>A short, descriptive title for the incident</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -155,10 +156,7 @@ export default function NewIncidentForm({ onSuccess }: NewIncidentFormProps) {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Type</FormLabel>
-                <Select 
-                  onValueChange={field.onChange} 
-                  defaultValue={field.value}
-                >
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select a type" />
@@ -186,9 +184,7 @@ export default function NewIncidentForm({ onSuccess }: NewIncidentFormProps) {
                 <FormControl>
                   <Input placeholder="Where it happened" {...field} />
                 </FormControl>
-                <FormDescription>
-                  The specific place where the incident occurred
-                </FormDescription>
+                <FormDescription>The specific place where the incident occurred</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -203,9 +199,7 @@ export default function NewIncidentForm({ onSuccess }: NewIncidentFormProps) {
                 <FormControl>
                   <Input type="date" {...field} />
                 </FormControl>
-                <FormDescription>
-                  When the incident or hazard was first observed
-                </FormDescription>
+                <FormDescription>When the incident or hazard was first observed</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -217,10 +211,7 @@ export default function NewIncidentForm({ onSuccess }: NewIncidentFormProps) {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Severity</FormLabel>
-                <Select 
-                  onValueChange={field.onChange} 
-                  defaultValue={field.value}
-                >
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select severity" />
@@ -232,9 +223,7 @@ export default function NewIncidentForm({ onSuccess }: NewIncidentFormProps) {
                     <SelectItem value="high">High</SelectItem>
                   </SelectContent>
                 </Select>
-                <FormDescription>
-                  How serious the incident is or could be
-                </FormDescription>
+                <FormDescription>How serious the incident is or could be</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -246,10 +235,7 @@ export default function NewIncidentForm({ onSuccess }: NewIncidentFormProps) {
             render={({ field }) => (
               <FormItem className="flex flex-row items-start space-x-3 space-y-0 py-4">
                 <FormControl>
-                  <Checkbox
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
+                  <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                 </FormControl>
                 <div className="space-y-1 leading-none">
                   <FormLabel>Notifiable Incident</FormLabel>
@@ -270,10 +256,10 @@ export default function NewIncidentForm({ onSuccess }: NewIncidentFormProps) {
             <FormItem>
               <FormLabel>Description</FormLabel>
               <FormControl>
-                <Textarea 
+                <Textarea
                   placeholder="Detailed description of what happened"
                   className="min-h-[120px]"
-                  {...field} 
+                  {...field}
                 />
               </FormControl>
               <FormDescription>
@@ -291,10 +277,10 @@ export default function NewIncidentForm({ onSuccess }: NewIncidentFormProps) {
             <FormItem>
               <FormLabel>Immediate Actions Taken</FormLabel>
               <FormControl>
-                <Textarea 
+                <Textarea
                   placeholder="Actions taken immediately after the incident"
                   className="min-h-[100px]"
-                  {...field} 
+                  {...field}
                 />
               </FormControl>
               <FormDescription>
@@ -312,46 +298,42 @@ export default function NewIncidentForm({ onSuccess }: NewIncidentFormProps) {
               Add Witness
             </Button>
           </div>
-          
+
           {witnesses.map((witness, index) => (
             <Card key={index} className="mb-4">
               <CardContent className="pt-6 pb-2">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <FormLabel htmlFor={`witness-name-${index}`}>Name</FormLabel>
-                    <Input 
+                    <Input
                       id={`witness-name-${index}`}
-                      value={witness.name} 
-                      onChange={(e) => updateWitness(index, 'name', e.target.value)}
+                      value={witness.name}
+                      onChange={e => updateWitness(index, 'name', e.target.value)}
                       placeholder="Witness name"
                     />
                   </div>
                   <div className="space-y-2">
                     <FormLabel htmlFor={`witness-contact-${index}`}>Contact Information</FormLabel>
-                    <Input 
+                    <Input
                       id={`witness-contact-${index}`}
-                      value={witness.contact} 
-                      onChange={(e) => updateWitness(index, 'contact', e.target.value)}
+                      value={witness.contact}
+                      onChange={e => updateWitness(index, 'contact', e.target.value)}
                       placeholder="Phone or email"
                     />
                   </div>
                   <div className="space-y-2 md:col-span-2">
                     <FormLabel htmlFor={`witness-statement-${index}`}>Statement</FormLabel>
-                    <Textarea 
+                    <Textarea
                       id={`witness-statement-${index}`}
-                      value={witness.statement} 
-                      onChange={(e) => updateWitness(index, 'statement', e.target.value)}
+                      value={witness.statement}
+                      onChange={e => updateWitness(index, 'statement', e.target.value)}
                       placeholder="What the witness observed"
                     />
                   </div>
                 </div>
               </CardContent>
               <CardFooter className="flex justify-end pt-0">
-                <Button 
-                  type="button" 
-                  variant="destructive" 
-                  onClick={() => removeWitness(index)}
-                >
+                <Button type="button" variant="destructive" onClick={() => removeWitness(index)}>
                   Remove
                 </Button>
               </CardFooter>
@@ -360,14 +342,8 @@ export default function NewIncidentForm({ onSuccess }: NewIncidentFormProps) {
         </div>
 
         <div className="flex justify-end mt-8">
-          <Button 
-            type="submit" 
-            size="lg"
-            disabled={createIncidentMutation.isPending}
-          >
-            {createIncidentMutation.isPending && (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            )}
+          <Button type="submit" size="lg" disabled={createIncidentMutation.isPending}>
+            {createIncidentMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Report Incident
           </Button>
         </div>

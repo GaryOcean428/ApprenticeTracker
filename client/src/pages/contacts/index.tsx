@@ -2,13 +2,13 @@ import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link, useLocation } from 'wouter';
 import { formatDistanceToNow } from 'date-fns';
-import { 
-  ChevronDown, 
-  Search, 
-  PlusCircle, 
-  Filter, 
-  UserPlus, 
-  MoreHorizontal, 
+import {
+  ChevronDown,
+  Search,
+  PlusCircle,
+  Filter,
+  UserPlus,
+  MoreHorizontal,
   Tag,
   Phone,
   Mail,
@@ -19,7 +19,7 @@ import {
   Loader2,
   Users,
   UserX,
-  ChevronRight
+  ChevronRight,
 } from 'lucide-react';
 
 // UI Components
@@ -71,11 +71,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { apiRequest } from '@/lib/queryClient';
 
 // Define types based on our backend schema
@@ -136,7 +132,7 @@ export default function ContactsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [currentTab, setCurrentTab] = useState('all');
-  
+
   // New contact form state
   const [newContact, setNewContact] = useState<NewContact>({
     firstName: '',
@@ -149,35 +145,29 @@ export default function ContactsPage() {
     notes: null,
     isActive: true,
   });
-  
+
   // Form validation state
-  const [formErrors, setFormErrors] = useState<{[key: string]: string}>({});
-  
+  const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
+
   // Fetch contact tags
-  const { 
-    data: tags = [], 
-    isLoading: isTagsLoading 
-  } = useQuery<ContactTag[]>({
+  const { data: tags = [], isLoading: isTagsLoading } = useQuery<ContactTag[]>({
     queryKey: ['/api/contacts/tags'],
   });
-  
+
   // Fetch contacts
-  const { 
-    data: contacts = [], 
+  const {
+    data: contacts = [],
     isLoading: isContactsLoading,
-    error: contactsError
+    error: contactsError,
   } = useQuery<Contact[]>({
     queryKey: ['/api/contacts', { tags: selectedTags, search: searchQuery, tab: currentTab }],
   });
-  
+
   // Fetch contact groups
-  const { 
-    data: groups = [], 
-    isLoading: isGroupsLoading 
-  } = useQuery<ContactGroup[]>({
+  const { data: groups = [], isLoading: isGroupsLoading } = useQuery<ContactGroup[]>({
     queryKey: ['/api/contacts/groups'],
   });
-  
+
   // Create contact mutation
   const createContactMutation = useMutation({
     mutationFn: async (contact: NewContact) => {
@@ -199,9 +189,9 @@ export default function ContactsPage() {
         description: error.message || 'An error occurred while creating the contact.',
         variant: 'destructive',
       });
-    }
+    },
   });
-  
+
   // Delete contact mutation
   const deleteContactMutation = useMutation({
     mutationFn: async (id: number) => {
@@ -221,23 +211,21 @@ export default function ContactsPage() {
         description: error.message || 'An error occurred while deleting the contact.',
         variant: 'destructive',
       });
-    }
+    },
   });
-  
+
   // Handle tag selection
   const toggleTag = (tagName: string) => {
-    setSelectedTags(prev => 
-      prev.includes(tagName) 
-        ? prev.filter(tag => tag !== tagName)
-        : [...prev, tagName]
+    setSelectedTags(prev =>
+      prev.includes(tagName) ? prev.filter(tag => tag !== tagName) : [...prev, tagName]
     );
   };
-  
+
   // Handle tab change
   const handleTabChange = (value: string) => {
     setCurrentTab(value);
   };
-  
+
   // Reset new contact form
   const resetNewContactForm = () => {
     setNewContact({
@@ -253,98 +241,98 @@ export default function ContactsPage() {
     });
     setFormErrors({});
   };
-  
+
   // Handle form input change
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setNewContact(prev => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
-    
+
     // Clear error for this field if it exists
     if (formErrors[name]) {
       setFormErrors(prev => {
-        const errors = {...prev};
+        const errors = { ...prev };
         delete errors[name];
         return errors;
       });
     }
   };
-  
+
   // Handle select change
   const handleSelectChange = (name: string, value: string) => {
     setNewContact(prev => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
-    
+
     // Clear error for this field if it exists
     if (formErrors[name]) {
       setFormErrors(prev => {
-        const errors = {...prev};
+        const errors = { ...prev };
         delete errors[name];
         return errors;
       });
     }
   };
-  
+
   // Validate form before submission
   const validateForm = (): boolean => {
-    const errors: {[key: string]: string} = {};
-    
+    const errors: { [key: string]: string } = {};
+
     if (!newContact.firstName.trim()) {
       errors.firstName = 'First name is required';
     }
-    
+
     if (!newContact.lastName.trim()) {
       errors.lastName = 'Last name is required';
     }
-    
+
     if (!newContact.email.trim()) {
       errors.email = 'Email is required';
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newContact.email)) {
       errors.email = 'Invalid email format';
     }
-    
+
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
-  
+
   // Handle form submission
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (validateForm()) {
       createContactMutation.mutate(newContact);
     }
   };
-  
+
   // Get contact role badges
   const getContactRoleBadges = (contact: Contact) => {
     if (!contact.tags || contact.tags.length === 0) {
       return <Badge variant="outline">{contact.primaryRole}</Badge>;
     }
-    
+
     return contact.tags.map(tag => (
-      <Badge 
-        key={tag.id} 
+      <Badge
+        key={tag.id}
         className="mr-1"
-        style={{ 
+        style={{
           backgroundColor: tag.color || '#888888',
-          color: '#ffffff'
+          color: '#ffffff',
         }}
       >
         {tag.name}
       </Badge>
     ));
   };
-  
+
   // Filter contacts based on search query
   const filteredContacts = (Array.isArray(contacts) ? contacts : []).filter(contact => {
     const searchLower = searchQuery.toLowerCase();
     const fullName = `${contact.firstName} ${contact.lastName}`.toLowerCase();
-    
+
     return (
       fullName.includes(searchLower) ||
       (contact.email && contact.email.toLowerCase().includes(searchLower)) ||
@@ -353,29 +341,24 @@ export default function ContactsPage() {
       (contact.mobile && contact.mobile.includes(searchQuery))
     );
   });
-  
+
   return (
     <div className="container mx-auto py-6 space-y-6">
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Contacts</h1>
           <p className="text-muted-foreground">
-            Manage your organization's contacts including apprentices, trainees, and labour hire workers.
+            Manage your organization's contacts including apprentices, trainees, and labour hire
+            workers.
           </p>
         </div>
-        
+
         <div className="flex space-x-2">
-          <Button 
-            variant="outline" 
-            onClick={() => setLocation('/contacts/tags')}
-          >
+          <Button variant="outline" onClick={() => setLocation('/contacts/tags')}>
             <Tag className="mr-2 h-4 w-4" />
             Manage Tags
           </Button>
-          <Button 
-            variant="outline" 
-            onClick={() => setLocation('/contacts/groups')}
-          >
+          <Button variant="outline" onClick={() => setLocation('/contacts/groups')}>
             <Users className="mr-2 h-4 w-4" />
             Manage Groups
           </Button>
@@ -385,7 +368,7 @@ export default function ContactsPage() {
           </Button>
         </div>
       </div>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         {/* Sidebar */}
         <div className="md:col-span-1 space-y-6">
@@ -400,16 +383,13 @@ export default function ContactsPage() {
                 <>
                   {tags.map(tag => (
                     <div key={tag.id} className="flex items-center space-x-2">
-                      <Checkbox 
-                        id={`tag-${tag.id}`} 
+                      <Checkbox
+                        id={`tag-${tag.id}`}
                         checked={selectedTags.includes(tag.name)}
                         onCheckedChange={() => toggleTag(tag.name)}
                       />
-                      <Label 
-                        htmlFor={`tag-${tag.id}`}
-                        className="flex items-center"
-                      >
-                        <div 
+                      <Label htmlFor={`tag-${tag.id}`} className="flex items-center">
+                        <div
                           className="w-3 h-3 rounded-full mr-2"
                           style={{ backgroundColor: tag.color || '#888888' }}
                         />
@@ -419,11 +399,11 @@ export default function ContactsPage() {
                   ))}
                 </>
               )}
-              
+
               {selectedTags.length > 0 && (
-                <Button 
-                  variant="outline" 
-                  size="sm" 
+                <Button
+                  variant="outline"
+                  size="sm"
                   className="w-full mt-2"
                   onClick={() => setSelectedTags([])}
                 >
@@ -432,7 +412,7 @@ export default function ContactsPage() {
               )}
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardHeader>
               <CardTitle>Contact Groups</CardTitle>
@@ -445,8 +425,8 @@ export default function ContactsPage() {
                   {groups.map(group => (
                     <div key={group.id} className="flex justify-between items-center">
                       <span>{group.name}</span>
-                      <Button 
-                        variant="ghost" 
+                      <Button
+                        variant="ghost"
                         size="sm"
                         onClick={() => setLocation(`/contacts/groups/${group.id}`)}
                       >
@@ -456,14 +436,12 @@ export default function ContactsPage() {
                   ))}
                 </div>
               ) : (
-                <div className="text-muted-foreground text-sm">
-                  No contact groups created yet.
-                </div>
+                <div className="text-muted-foreground text-sm">No contact groups created yet.</div>
               )}
-              
-              <Button 
-                variant="outline" 
-                size="sm" 
+
+              <Button
+                variant="outline"
+                size="sm"
                 className="w-full mt-2"
                 onClick={() => setLocation('/contacts/groups/new')}
               >
@@ -473,7 +451,7 @@ export default function ContactsPage() {
             </CardContent>
           </Card>
         </div>
-        
+
         {/* Main content */}
         <div className="md:col-span-3 space-y-6">
           {/* Search and filter */}
@@ -485,10 +463,10 @@ export default function ContactsPage() {
                 placeholder="Search contacts..."
                 className="pl-8"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={e => setSearchQuery(e.target.value)}
               />
             </div>
-            
+
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline">
@@ -510,7 +488,7 @@ export default function ContactsPage() {
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
-          
+
           {/* Tabs */}
           <Tabs defaultValue="all" onValueChange={handleTabChange}>
             <TabsList>
@@ -520,50 +498,44 @@ export default function ContactsPage() {
               <TabsTrigger value="labour-hire">Labour Hire</TabsTrigger>
               <TabsTrigger value="host-employers">Host Employers</TabsTrigger>
             </TabsList>
-            
+
             <TabsContent value="all" className="mt-4">
               {renderContactsTable(filteredContacts, 'all')}
             </TabsContent>
-            
+
             <TabsContent value="apprentices" className="mt-4">
               {renderContactsTable(
-                filteredContacts.filter(c => 
-                  c.tags?.some(tag => tag.name === 'Apprentice')
-                ),
+                filteredContacts.filter(c => c.tags?.some(tag => tag.name === 'Apprentice')),
                 'apprentices'
               )}
             </TabsContent>
-            
+
             <TabsContent value="trainees" className="mt-4">
               {renderContactsTable(
-                filteredContacts.filter(c => 
-                  c.tags?.some(tag => tag.name === 'Trainee')
-                ),
+                filteredContacts.filter(c => c.tags?.some(tag => tag.name === 'Trainee')),
                 'trainees'
               )}
             </TabsContent>
-            
+
             <TabsContent value="labour-hire" className="mt-4">
               {renderContactsTable(
-                filteredContacts.filter(c => 
+                filteredContacts.filter(c =>
                   c.tags?.some(tag => tag.name === 'Labour Hire Worker')
                 ),
                 'labour-hire'
               )}
             </TabsContent>
-            
+
             <TabsContent value="host-employers" className="mt-4">
               {renderContactsTable(
-                filteredContacts.filter(c => 
-                  c.tags?.some(tag => tag.name === 'Host Employer')
-                ),
+                filteredContacts.filter(c => c.tags?.some(tag => tag.name === 'Host Employer')),
                 'host-employers'
               )}
             </TabsContent>
           </Tabs>
         </div>
       </div>
-      
+
       {/* Create Contact Dialog */}
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
         <DialogContent className="sm:max-w-[525px]">
@@ -573,7 +545,7 @@ export default function ContactsPage() {
               Add a new contact to your organization's directory.
             </DialogDescription>
           </DialogHeader>
-          
+
           <form onSubmit={handleSubmit}>
             <div className="grid gap-4 py-4">
               <div className="grid grid-cols-2 gap-4">
@@ -604,7 +576,7 @@ export default function ContactsPage() {
                   )}
                 </div>
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <Input
@@ -615,11 +587,9 @@ export default function ContactsPage() {
                   onChange={handleInputChange}
                   className={formErrors.email ? 'border-red-500' : ''}
                 />
-                {formErrors.email && (
-                  <p className="text-sm text-red-500">{formErrors.email}</p>
-                )}
+                {formErrors.email && <p className="text-sm text-red-500">{formErrors.email}</p>}
               </div>
-              
+
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="phone">Phone</Label>
@@ -640,7 +610,7 @@ export default function ContactsPage() {
                   />
                 </div>
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="position">Position/Title</Label>
                 <Input
@@ -650,12 +620,12 @@ export default function ContactsPage() {
                   onChange={handleInputChange}
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="primaryRole">Primary Role</Label>
                 <Select
                   value={newContact.primaryRole}
-                  onValueChange={(value) => handleSelectChange('primaryRole', value)}
+                  onValueChange={value => handleSelectChange('primaryRole', value)}
                 >
                   <SelectTrigger id="primaryRole">
                     <SelectValue placeholder="Select a role" />
@@ -670,7 +640,7 @@ export default function ContactsPage() {
                   </SelectContent>
                 </Select>
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="notes">Notes</Label>
                 <Textarea
@@ -681,19 +651,19 @@ export default function ContactsPage() {
                   rows={3}
                 />
               </div>
-              
+
               <div className="flex items-center space-x-2">
                 <Checkbox
                   id="isActive"
                   checked={newContact.isActive}
-                  onCheckedChange={(checked) => 
-                    setNewContact(prev => ({...prev, isActive: !!checked}))
+                  onCheckedChange={checked =>
+                    setNewContact(prev => ({ ...prev, isActive: !!checked }))
                   }
                 />
                 <Label htmlFor="isActive">Active Contact</Label>
               </div>
             </div>
-            
+
             <DialogFooter>
               <Button variant="outline" type="button" onClick={() => setIsCreateDialogOpen(false)}>
                 Cancel
@@ -707,7 +677,7 @@ export default function ContactsPage() {
       </Dialog>
     </div>
   );
-  
+
   // Helper function to render contacts table based on the current tab
   function renderContactsTable(contacts: Contact[], tabType: string) {
     if (isContactsLoading) {
@@ -720,7 +690,7 @@ export default function ContactsPage() {
         </div>
       );
     }
-    
+
     if (contactsError) {
       return (
         <div className="text-center py-8 text-red-500">
@@ -728,13 +698,13 @@ export default function ContactsPage() {
         </div>
       );
     }
-    
+
     if (contacts.length === 0) {
       // Empty state with explanatory message based on tab
       let emptyMessage = 'No contacts found.';
       let primaryAction = () => setIsCreateDialogOpen(true);
       let primaryActionText = 'Add New Contact';
-      
+
       switch (tabType) {
         case 'apprentices':
           emptyMessage = 'No apprentice contacts found.';
@@ -749,7 +719,7 @@ export default function ContactsPage() {
           emptyMessage = 'No host employer contacts found.';
           break;
       }
-      
+
       if (searchQuery || selectedTags.length > 0) {
         emptyMessage = 'No contacts match your current filters.';
         primaryAction = () => {
@@ -758,7 +728,7 @@ export default function ContactsPage() {
         };
         primaryActionText = 'Clear Filters';
       }
-      
+
       return (
         <div className="text-center py-12">
           <div className="mb-4">
@@ -766,17 +736,15 @@ export default function ContactsPage() {
           </div>
           <h3 className="text-lg font-medium">{emptyMessage}</h3>
           <p className="text-muted-foreground mt-2 mb-4">
-            {searchQuery || selectedTags.length > 0 
-              ? 'Try adjusting your search or filters to find what you\'re looking for.'
+            {searchQuery || selectedTags.length > 0
+              ? "Try adjusting your search or filters to find what you're looking for."
               : 'Start by creating a new contact to build your directory.'}
           </p>
-          <Button onClick={primaryAction}>
-            {primaryActionText}
-          </Button>
+          <Button onClick={primaryAction}>{primaryActionText}</Button>
         </div>
       );
     }
-    
+
     return (
       <div className="border rounded-md">
         <Table>
@@ -809,9 +777,7 @@ export default function ContactsPage() {
                   </div>
                 </TableCell>
                 <TableCell>
-                  <div className="flex flex-wrap gap-1">
-                    {getContactRoleBadges(contact)}
-                  </div>
+                  <div className="flex flex-wrap gap-1">{getContactRoleBadges(contact)}</div>
                 </TableCell>
                 <TableCell>
                   <div className="space-y-1">

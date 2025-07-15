@@ -11,7 +11,7 @@ interface PermissionGuardProps {
 
 /**
  * A component that conditionally renders its children based on user permissions
- * 
+ *
  * @param permission A single permission to check
  * @param permissions Multiple permissions to check
  * @param requireAll Whether all permissions are required (defaults to false)
@@ -23,24 +23,24 @@ export function PermissionGuard({
   permissions = [],
   requireAll = false,
   fallback = null,
-  children
+  children,
 }: PermissionGuardProps) {
   const { can, canAny, canAll } = usePermissions();
-  
+
   // Check if the user has the required permissions
   let hasAccess = true;
-  
+
   if (permission) {
     hasAccess = can(permission);
   } else if (permissions.length > 0) {
     hasAccess = requireAll ? canAll(permissions) : canAny(permissions);
   }
-  
+
   // If the user doesn't have access, show the fallback or nothing
   if (!hasAccess) {
     return <>{fallback}</>;
   }
-  
+
   // Otherwise, render the children
   return <>{children}</>;
 }

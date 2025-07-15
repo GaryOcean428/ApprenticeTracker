@@ -1,19 +1,37 @@
-import { useState } from "react";
-import { useLocation } from "wouter";
-import { useQuery } from "@tanstack/react-query";
-import { format, isPast, isToday } from "date-fns";
-import { PlusCircle, Search, Filter, Calendar, User, Clock, Tag, SlidersHorizontal, CheckCircle, Mail } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { 
+import { useState } from 'react';
+import { useLocation } from 'wouter';
+import { useQuery } from '@tanstack/react-query';
+import { format, isPast, isToday } from 'date-fns';
+import {
+  PlusCircle,
+  Search,
+  Filter,
+  Calendar,
+  User,
+  Clock,
+  Tag,
+  SlidersHorizontal,
+  CheckCircle,
+  Mail,
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from '@/components/ui/dropdown-menu';
 import {
   Table,
   TableBody,
@@ -21,20 +39,15 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from '@/components/ui/table';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+} from '@/components/ui/select';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import {
   Dialog,
   DialogContent,
@@ -43,10 +56,10 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
-import { useToast } from "@/hooks/use-toast";
+} from '@/components/ui/dialog';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useToast } from '@/hooks/use-toast';
 
 // Define interface for action items
 interface ActionItem {
@@ -75,94 +88,101 @@ interface ActionItem {
 // Status badge variants
 const getStatusVariant = (status: string) => {
   switch (status.toLowerCase()) {
-    case "open":
-      return "outline";
-    case "in progress":
-      return "secondary";
-    case "completed":
-      return "default";
-    case "cancelled":
-      return "destructive";
+    case 'open':
+      return 'outline';
+    case 'in progress':
+      return 'secondary';
+    case 'completed':
+      return 'default';
+    case 'cancelled':
+      return 'destructive';
     default:
-      return "outline";
+      return 'outline';
   }
 };
 
 // Priority badge variants
 const getPriorityVariant = (priority: string) => {
   switch (priority.toLowerCase()) {
-    case "high":
-      return "destructive";
-    case "medium":
-      return "warning";
-    case "low":
-      return "outline";
+    case 'high':
+      return 'destructive';
+    case 'medium':
+      return 'warning';
+    case 'low':
+      return 'outline';
     default:
-      return "secondary";
+      return 'secondary';
   }
 };
 
 // Due date badge styles
 const getDueDateStyles = (dateStr: string) => {
   const date = new Date(dateStr);
-  
+
   if (isPast(date) && !isToday(date)) {
     return {
-      variant: "destructive" as const,
+      variant: 'destructive' as const,
       icon: <Clock className="h-3 w-3 mr-1" />,
-      text: `Overdue: ${format(date, "dd MMM yyyy")}`
+      text: `Overdue: ${format(date, 'dd MMM yyyy')}`,
     };
   }
-  
+
   if (isToday(date)) {
     return {
-      variant: "warning" as const,
+      variant: 'warning' as const,
       icon: <Clock className="h-3 w-3 mr-1" />,
-      text: `Due today`
+      text: `Due today`,
     };
   }
-  
+
   return {
-    variant: "outline" as const,
+    variant: 'outline' as const,
     icon: <Calendar className="h-3 w-3 mr-1" />,
-    text: format(date, "dd MMM yyyy")
+    text: format(date, 'dd MMM yyyy'),
   };
 };
 
 export default function ActionItemsReminders() {
   const [, navigate] = useLocation();
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState('');
   const [filter, setFilter] = useState<{
     assignedTo: string;
     status: string;
     dueDate: string;
   }>({
-    assignedTo: "",
-    status: "",
-    dueDate: "",
+    assignedTo: '',
+    status: '',
+    dueDate: '',
   });
 
-  const { data: actionItems, isLoading, error } = useQuery<ActionItem[]>({
-    queryKey: ["/api/field-officers/actions"],
+  const {
+    data: actionItems,
+    isLoading,
+    error,
+  } = useQuery<ActionItem[]>({
+    queryKey: ['/api/field-officers/actions'],
   });
 
   const { toast } = useToast();
 
   if (error) {
     toast({
-      variant: "destructive",
-      title: "Error loading action items",
-      description: "There was a problem loading the action items data.",
+      variant: 'destructive',
+      title: 'Error loading action items',
+      description: 'There was a problem loading the action items data.',
     });
   }
 
-  const filteredActionItems = actionItems?.filter((item) => {
-    const matchesSearch = item.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  const filteredActionItems = actionItems?.filter(item => {
+    const matchesSearch =
+      item.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.assignedTo.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchesAssignedTo = filter.assignedTo ? item.assignedToId.toString() === filter.assignedTo : true;
+    const matchesAssignedTo = filter.assignedTo
+      ? item.assignedToId.toString() === filter.assignedTo
+      : true;
     const matchesStatus = filter.status ? item.status === filter.status : true;
-    
+
     // Due date filter logic would go here
     const matchesDueDate = true; // Placeholder
 
@@ -171,24 +191,24 @@ export default function ActionItemsReminders() {
 
   // Extract unique values for filters
   const uniqueStaff = [
-    ...new Set((actionItems || []).map((item) => ({ id: item.assignedToId, name: item.assignedTo }))),
+    ...new Set((actionItems || []).map(item => ({ id: item.assignedToId, name: item.assignedTo }))),
   ];
-  const uniqueStatuses = [...new Set((actionItems || []).map((item) => item.status))];
+  const uniqueStatuses = [...new Set((actionItems || []).map(item => item.status))];
 
   // Function to send reminder manually
   const sendReminder = (id: number) => {
     toast({
-      title: "Reminder sent",
-      description: "A reminder notification has been sent to the assignee.",
+      title: 'Reminder sent',
+      description: 'A reminder notification has been sent to the assignee.',
     });
   };
 
   // Function to mark action as complete
   const markAsComplete = (id: number) => {
     toast({
-      variant: "default",
-      title: "Action marked as complete",
-      description: "The action item has been marked as completed.",
+      variant: 'default',
+      title: 'Action marked as complete',
+      description: 'The action item has been marked as completed.',
     });
   };
 
@@ -201,7 +221,7 @@ export default function ActionItemsReminders() {
             Manage follow-up tasks, deadlines, and automated reminders
           </p>
         </div>
-        <Button onClick={() => navigate("/field-officers/actions/create")}>
+        <Button onClick={() => navigate('/field-officers/actions/create')}>
           <PlusCircle className="mr-2 h-4 w-4" />
           New Action Item
         </Button>
@@ -215,13 +235,13 @@ export default function ActionItemsReminders() {
             placeholder="Search action items..."
             className="pl-8 w-full"
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={e => setSearchTerm(e.target.value)}
           />
         </div>
         <div className="flex flex-wrap gap-2">
           <Select
             value={filter.assignedTo}
-            onValueChange={(value) => setFilter({ ...filter, assignedTo: value })}
+            onValueChange={value => setFilter({ ...filter, assignedTo: value })}
           >
             <SelectTrigger className="w-[180px]">
               <span className="flex items-center">
@@ -231,7 +251,7 @@ export default function ActionItemsReminders() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all-staff">All Staff</SelectItem>
-              {uniqueStaff.map((staff) => (
+              {uniqueStaff.map(staff => (
                 <SelectItem key={staff.id} value={staff.id.toString()}>
                   {staff.name}
                 </SelectItem>
@@ -241,7 +261,7 @@ export default function ActionItemsReminders() {
 
           <Select
             value={filter.status}
-            onValueChange={(value) => setFilter({ ...filter, status: value })}
+            onValueChange={value => setFilter({ ...filter, status: value })}
           >
             <SelectTrigger className="w-[150px]">
               <span className="flex items-center">
@@ -251,7 +271,7 @@ export default function ActionItemsReminders() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all-statuses">All Statuses</SelectItem>
-              {uniqueStatuses.map((status) => (
+              {uniqueStatuses.map(status => (
                 <SelectItem key={status} value={status}>
                   {status}
                 </SelectItem>
@@ -261,7 +281,7 @@ export default function ActionItemsReminders() {
 
           <Select
             value={filter.dueDate}
-            onValueChange={(value) => setFilter({ ...filter, dueDate: value })}
+            onValueChange={value => setFilter({ ...filter, dueDate: value })}
           >
             <SelectTrigger className="w-[150px]">
               <span className="flex items-center">
@@ -285,9 +305,9 @@ export default function ActionItemsReminders() {
               variant="outline"
               onClick={() =>
                 setFilter({
-                  assignedTo: "",
-                  status: "",
-                  dueDate: "",
+                  assignedTo: '',
+                  status: '',
+                  dueDate: '',
                 })
               }
               className="flex gap-1 items-center"
@@ -303,7 +323,8 @@ export default function ActionItemsReminders() {
         <CardHeader className="p-4">
           <CardTitle className="text-md">Action Items</CardTitle>
           <CardDescription>
-            Total: {filteredActionItems?.length || 0} action item{filteredActionItems?.length !== 1 && 's'}
+            Total: {filteredActionItems?.length || 0} action item
+            {filteredActionItems?.length !== 1 && 's'}
           </CardDescription>
         </CardHeader>
         <CardContent className="p-0">
@@ -349,11 +370,11 @@ export default function ActionItemsReminders() {
                 {!isLoading && filteredActionItems?.length === 0 && (
                   <TableRow>
                     <TableCell colSpan={6} className="text-center py-6 text-muted-foreground">
-                      No action items found.{" "}
+                      No action items found.{' '}
                       <Button
                         variant="link"
                         className="p-0"
-                        onClick={() => navigate("/field-officers/actions/create")}
+                        onClick={() => navigate('/field-officers/actions/create')}
                       >
                         Create one
                       </Button>
@@ -362,13 +383,16 @@ export default function ActionItemsReminders() {
                 )}
 
                 {!isLoading &&
-                  filteredActionItems?.map((item) => {
+                  filteredActionItems?.map(item => {
                     const dueDateStyle = getDueDateStyles(item.dueDate);
-                    
+
                     return (
                       <TableRow key={item.id}>
                         <TableCell>
-                          <Badge variant={dueDateStyle.variant} className="flex items-center whitespace-nowrap">
+                          <Badge
+                            variant={dueDateStyle.variant}
+                            className="flex items-center whitespace-nowrap"
+                          >
                             {dueDateStyle.icon}
                             {dueDateStyle.text}
                           </Badge>
@@ -377,20 +401,17 @@ export default function ActionItemsReminders() {
                           {item.description}
                           {item.linkedTo && (
                             <div className="text-xs text-muted-foreground mt-1">
-                              Linked to: {item.linkedTo.type} #{item.linkedTo.id} - {item.linkedTo.title}
+                              Linked to: {item.linkedTo.type} #{item.linkedTo.id} -{' '}
+                              {item.linkedTo.title}
                             </div>
                           )}
                         </TableCell>
                         <TableCell>{item.assignedTo}</TableCell>
                         <TableCell>
-                          <Badge variant={getStatusVariant(item.status)}>
-                            {item.status}
-                          </Badge>
+                          <Badge variant={getStatusVariant(item.status)}>{item.status}</Badge>
                         </TableCell>
                         <TableCell>
-                          <Badge variant={getPriorityVariant(item.priority)}>
-                            {item.priority}
-                          </Badge>
+                          <Badge variant={getPriorityVariant(item.priority)}>{item.priority}</Badge>
                         </TableCell>
                         <TableCell>
                           <div className="flex gap-2">
@@ -401,7 +422,9 @@ export default function ActionItemsReminders() {
                                     variant="ghost"
                                     size="icon"
                                     onClick={() => sendReminder(item.id)}
-                                    disabled={item.status === "Completed" || item.status === "Cancelled"}
+                                    disabled={
+                                      item.status === 'Completed' || item.status === 'Cancelled'
+                                    }
                                   >
                                     <Mail className="h-4 w-4" />
                                   </Button>
@@ -417,7 +440,9 @@ export default function ActionItemsReminders() {
                                     variant="ghost"
                                     size="icon"
                                     onClick={() => markAsComplete(item.id)}
-                                    disabled={item.status === "Completed" || item.status === "Cancelled"}
+                                    disabled={
+                                      item.status === 'Completed' || item.status === 'Cancelled'
+                                    }
                                   >
                                     <CheckCircle className="h-4 w-4" />
                                   </Button>
@@ -436,13 +461,17 @@ export default function ActionItemsReminders() {
                               <DropdownMenuContent align="end">
                                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
                                 <DropdownMenuSeparator />
-                                <DropdownMenuItem onClick={() => navigate(`/field-officers/actions/${item.id}/edit`)}>
+                                <DropdownMenuItem
+                                  onClick={() =>
+                                    navigate(`/field-officers/actions/${item.id}/edit`)
+                                  }
+                                >
                                   Edit
                                 </DropdownMenuItem>
                                 <DropdownMenuItem onClick={() => sendReminder(item.id)}>
                                   Send Reminder
                                 </DropdownMenuItem>
-                                {item.status !== "Completed" && (
+                                {item.status !== 'Completed' && (
                                   <DropdownMenuItem onClick={() => markAsComplete(item.id)}>
                                     Mark as Complete
                                   </DropdownMenuItem>

@@ -1,14 +1,21 @@
-import { useQuery } from "@tanstack/react-query";
-import { Link } from "wouter";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { DashboardShell } from "@/components/dashboard-shell";
-import { PageHeader } from "@/components/page-header";
+import { useQuery } from '@tanstack/react-query';
+import { Link } from 'wouter';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { DashboardShell } from '@/components/dashboard-shell';
+import { PageHeader } from '@/components/page-header';
 import {
   GraduationCap,
-  Briefcase, 
+  Briefcase,
   ClipboardList,
   FileText,
   Calendar,
@@ -17,8 +24,8 @@ import {
   ArrowRightCircle,
   UserPlus,
   Settings,
-  School
-} from "lucide-react";
+  School,
+} from 'lucide-react';
 
 export default function ExternalEmployeesApprenticePage() {
   return (
@@ -90,7 +97,7 @@ export default function ExternalEmployeesApprenticePage() {
           <TabsTrigger value="progress">Progress</TabsTrigger>
           <TabsTrigger value="completion">Completion</TabsTrigger>
         </TabsList>
-        
+
         <TabsContent value="overview" className="space-y-4 pt-4">
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             {/* Summary Cards */}
@@ -101,12 +108,10 @@ export default function ExternalEmployeesApprenticePage() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">4</div>
-                <p className="text-xs text-muted-foreground">
-                  Active apprentices in the system
-                </p>
+                <p className="text-xs text-muted-foreground">Active apprentices in the system</p>
               </CardContent>
             </Card>
-            
+
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Host Employers</CardTitle>
@@ -114,12 +119,10 @@ export default function ExternalEmployeesApprenticePage() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">3</div>
-                <p className="text-xs text-muted-foreground">
-                  Current host employers
-                </p>
+                <p className="text-xs text-muted-foreground">Current host employers</p>
               </CardContent>
             </Card>
-            
+
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Completions</CardTitle>
@@ -127,12 +130,10 @@ export default function ExternalEmployeesApprenticePage() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">0</div>
-                <p className="text-xs text-muted-foreground">
-                  This calendar year
-                </p>
+                <p className="text-xs text-muted-foreground">This calendar year</p>
               </CardContent>
             </Card>
-            
+
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Training Progress</CardTitle>
@@ -140,21 +141,17 @@ export default function ExternalEmployeesApprenticePage() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">42%</div>
-                <p className="text-xs text-muted-foreground">
-                  Average competency completion
-                </p>
+                <p className="text-xs text-muted-foreground">Average competency completion</p>
               </CardContent>
             </Card>
           </div>
-          
+
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {/* Apprentice Distribution */}
             <Card className="md:col-span-1">
               <CardHeader>
                 <CardTitle>Apprentice Status</CardTitle>
-                <CardDescription>
-                  Current distribution by stage
-                </CardDescription>
+                <CardDescription>Current distribution by stage</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
@@ -189,14 +186,12 @@ export default function ExternalEmployeesApprenticePage() {
                 </div>
               </CardContent>
             </Card>
-            
+
             {/* Recent Activity */}
             <Card className="md:col-span-2">
               <CardHeader>
                 <CardTitle>Recent Activity</CardTitle>
-                <CardDescription>
-                  Latest apprentice-related updates
-                </CardDescription>
+                <CardDescription>Latest apprentice-related updates</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
@@ -206,7 +201,9 @@ export default function ExternalEmployeesApprenticePage() {
                     </div>
                     <div>
                       <p className="font-medium">New apprentice onboarded</p>
-                      <p className="text-sm text-muted-foreground">John Smith has been registered as a new apprentice</p>
+                      <p className="text-sm text-muted-foreground">
+                        John Smith has been registered as a new apprentice
+                      </p>
                       <p className="text-xs text-muted-foreground">3 days ago</p>
                     </div>
                   </div>
@@ -216,7 +213,9 @@ export default function ExternalEmployeesApprenticePage() {
                     </div>
                     <div>
                       <p className="font-medium">New placement created</p>
-                      <p className="text-sm text-muted-foreground">Sarah Johnson placed with BuildRight Construction</p>
+                      <p className="text-sm text-muted-foreground">
+                        Sarah Johnson placed with BuildRight Construction
+                      </p>
                       <p className="text-xs text-muted-foreground">1 week ago</p>
                     </div>
                   </div>
@@ -226,7 +225,9 @@ export default function ExternalEmployeesApprenticePage() {
                     </div>
                     <div>
                       <p className="font-medium">Training progress updated</p>
-                      <p className="text-sm text-muted-foreground">Mike Chen completed 3 new units of competency</p>
+                      <p className="text-sm text-muted-foreground">
+                        Mike Chen completed 3 new units of competency
+                      </p>
                       <p className="text-xs text-muted-foreground">2 weeks ago</p>
                     </div>
                   </div>
@@ -234,7 +235,7 @@ export default function ExternalEmployeesApprenticePage() {
               </CardContent>
             </Card>
           </div>
-          
+
           <div className="flex flex-col md:flex-row gap-4">
             <Button asChild variant="outline" className="md:flex-1">
               <Link href="/apprentices">
@@ -262,14 +263,12 @@ export default function ExternalEmployeesApprenticePage() {
             </Button>
           </div>
         </TabsContent>
-        
+
         <TabsContent value="recruitment" className="pt-4">
           <Card>
             <CardHeader>
               <CardTitle>Apprentice Recruitment</CardTitle>
-              <CardDescription>
-                Manage the recruitment pipeline for new apprentices
-              </CardDescription>
+              <CardDescription>Manage the recruitment pipeline for new apprentices</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="flex items-center justify-center p-6">
@@ -277,8 +276,8 @@ export default function ExternalEmployeesApprenticePage() {
                   <UserPlus className="mx-auto h-12 w-12 text-muted-foreground" />
                   <h3 className="mt-4 text-lg font-medium">Recruitment Management</h3>
                   <p className="mt-2 text-sm text-muted-foreground max-w-md">
-                    Manage applicants, interviews, assessments, and onboarding for new 
-                    apprentices and trainees.
+                    Manage applicants, interviews, assessments, and onboarding for new apprentices
+                    and trainees.
                   </p>
                   <Button asChild className="mt-4">
                     <Link href="/apprentices/recruitment">Go to Recruitment</Link>
@@ -288,14 +287,12 @@ export default function ExternalEmployeesApprenticePage() {
             </CardContent>
           </Card>
         </TabsContent>
-        
+
         <TabsContent value="training" className="pt-4">
           <Card>
             <CardHeader>
               <CardTitle>Training Plans</CardTitle>
-              <CardDescription>
-                Manage training plans and progress tracking
-              </CardDescription>
+              <CardDescription>Manage training plans and progress tracking</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="flex items-center justify-center p-6">
@@ -303,8 +300,8 @@ export default function ExternalEmployeesApprenticePage() {
                   <BookOpen className="mx-auto h-12 w-12 text-muted-foreground" />
                   <h3 className="mt-4 text-lg font-medium">Training Management</h3>
                   <p className="mt-2 text-sm text-muted-foreground max-w-md">
-                    Create, update and monitor training plans and completion of 
-                    competency units for all apprentices.
+                    Create, update and monitor training plans and completion of competency units for
+                    all apprentices.
                   </p>
                   <Button asChild className="mt-4">
                     <Link href="/apprentices/training">Manage Training</Link>
@@ -314,14 +311,12 @@ export default function ExternalEmployeesApprenticePage() {
             </CardContent>
           </Card>
         </TabsContent>
-        
+
         <TabsContent value="placements" className="pt-4">
           <Card>
             <CardHeader>
               <CardTitle>Placements & Rotations</CardTitle>
-              <CardDescription>
-                Manage host employer placements
-              </CardDescription>
+              <CardDescription>Manage host employer placements</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="flex items-center justify-center p-6">
@@ -329,8 +324,8 @@ export default function ExternalEmployeesApprenticePage() {
                   <Briefcase className="mx-auto h-12 w-12 text-muted-foreground" />
                   <h3 className="mt-4 text-lg font-medium">Placement Management</h3>
                   <p className="mt-2 text-sm text-muted-foreground max-w-md">
-                    Assign apprentices to host employers, manage rotations, and track 
-                    placement history and performance.
+                    Assign apprentices to host employers, manage rotations, and track placement
+                    history and performance.
                   </p>
                   <Button asChild className="mt-4">
                     <Link href="/placements">View Placements</Link>
@@ -340,14 +335,12 @@ export default function ExternalEmployeesApprenticePage() {
             </CardContent>
           </Card>
         </TabsContent>
-        
+
         <TabsContent value="progress" className="pt-4">
           <Card>
             <CardHeader>
               <CardTitle>Progress Tracking</CardTitle>
-              <CardDescription>
-                Monitor apprentice progress and performance
-              </CardDescription>
+              <CardDescription>Monitor apprentice progress and performance</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="flex items-center justify-center p-6">
@@ -366,7 +359,7 @@ export default function ExternalEmployeesApprenticePage() {
             </CardContent>
           </Card>
         </TabsContent>
-        
+
         <TabsContent value="completion" className="pt-4">
           <Card>
             <CardHeader>

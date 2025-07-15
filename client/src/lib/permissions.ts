@@ -12,7 +12,7 @@ export enum UserRole {
   FIELD_OFFICER = 'field_officer',
   HOST_EMPLOYER = 'host_employer',
   APPRENTICE = 'apprentice',
-  RTO_ADMIN = 'rto_admin'
+  RTO_ADMIN = 'rto_admin',
 }
 
 /**
@@ -24,11 +24,11 @@ export enum Permission {
   MANAGE_ROLES = 'manage:roles',
   MANAGE_SYSTEM = 'manage:system',
   MANAGE_ORGANIZATIONS = 'manage:organizations',
-  
+
   // Dashboard permissions
   VIEW_DASHBOARD = 'view:dashboard',
   VIEW_ANALYTICS = 'view:analytics',
-  
+
   // Apprentice permissions
   VIEW_APPRENTICES = 'view:apprentices',
   MANAGE_APPRENTICES = 'manage:apprentices',
@@ -36,44 +36,44 @@ export enum Permission {
   EDIT_APPRENTICE = 'edit:apprentice',
   DELETE_APPRENTICE = 'delete:apprentice',
   ARCHIVE_APPRENTICE = 'archive:apprentice',
-  
+
   // Host permissions
   VIEW_HOSTS = 'view:hosts',
   MANAGE_HOSTS = 'manage:hosts',
   CREATE_HOST = 'create:host',
   EDIT_HOST = 'edit:host',
   DELETE_HOST = 'delete:host',
-  
+
   // Contract permissions
   VIEW_CONTRACTS = 'view:contracts',
   MANAGE_CONTRACTS = 'manage:contracts',
   CREATE_CONTRACT = 'create:contract',
   EDIT_CONTRACT = 'edit:contract',
   DELETE_CONTRACT = 'delete:contract',
-  
+
   // Placement permissions
   VIEW_PLACEMENTS = 'view:placements',
   MANAGE_PLACEMENTS = 'manage:placements',
   CREATE_PLACEMENT = 'create:placement',
   EDIT_PLACEMENT = 'edit:placement',
   DELETE_PLACEMENT = 'delete:placement',
-  
+
   // Timesheet permissions
   VIEW_TIMESHEETS = 'view:timesheets',
   MANAGE_TIMESHEETS = 'manage:timesheets',
   SUBMIT_TIMESHEETS = 'submit:timesheets',
   APPROVE_TIMESHEETS = 'approve:timesheets',
-  
+
   // Document permissions
   VIEW_DOCUMENTS = 'view:documents',
   MANAGE_DOCUMENTS = 'manage:documents',
   UPLOAD_DOCUMENT = 'upload:document',
   DELETE_DOCUMENT = 'delete:document',
-  
+
   // GTO Compliance permissions
   VIEW_COMPLIANCE = 'view:compliance',
   MANAGE_COMPLIANCE = 'manage:compliance',
-  
+
   // Reporting permissions
   VIEW_REPORTS = 'view:reports',
   GENERATE_REPORT = 'generate:report',
@@ -86,10 +86,10 @@ export enum Permission {
 const rolePermissions: Record<string, string[]> = {
   // Admin has all permissions
   [UserRole.ADMIN]: Object.values(Permission),
-  
+
   // Developer has all permissions (for development/testing)
   [UserRole.DEVELOPER]: Object.values(Permission),
-  
+
   // Organization Admin can manage their organization
   [UserRole.ORGANIZATION_ADMIN]: [
     Permission.VIEW_DASHBOARD,
@@ -123,7 +123,7 @@ const rolePermissions: Record<string, string[]> = {
     Permission.GENERATE_REPORT,
     Permission.EXPORT_DATA,
   ],
-  
+
   // Field Officer can perform apprentice-related activities
   [UserRole.FIELD_OFFICER]: [
     Permission.VIEW_DASHBOARD,
@@ -139,7 +139,7 @@ const rolePermissions: Record<string, string[]> = {
     Permission.VIEW_COMPLIANCE,
     Permission.VIEW_REPORTS,
   ],
-  
+
   // Host Employer can view apprentices & approve timesheets
   [UserRole.HOST_EMPLOYER]: [
     Permission.VIEW_DASHBOARD,
@@ -150,7 +150,7 @@ const rolePermissions: Record<string, string[]> = {
     Permission.VIEW_DOCUMENTS,
     Permission.UPLOAD_DOCUMENT,
   ],
-  
+
   // Apprentice can view their own data & submit timesheets
   [UserRole.APPRENTICE]: [
     Permission.VIEW_DASHBOARD,
@@ -161,7 +161,7 @@ const rolePermissions: Record<string, string[]> = {
     Permission.VIEW_DOCUMENTS,
     Permission.UPLOAD_DOCUMENT,
   ],
-  
+
   // RTO Admin can view training data and upload evidence
   [UserRole.RTO_ADMIN]: [
     Permission.VIEW_DASHBOARD,
@@ -174,7 +174,7 @@ const rolePermissions: Record<string, string[]> = {
 
 /**
  * Check if a role has a specific permission
- * 
+ *
  * @param role The user role to check
  * @param permission The permission to check for
  * @returns boolean indicating if the role has the permission
@@ -184,19 +184,19 @@ export function checkPermission(role: string, permission: string): boolean {
   if (role === UserRole.ADMIN || role === UserRole.DEVELOPER) {
     return true;
   }
-  
+
   // Check if the role exists in our mapping
   if (!rolePermissions[role]) {
     return false;
   }
-  
+
   // Check if the role has the specific permission
   return rolePermissions[role].includes(permission);
 }
 
 /**
  * Check if a role has any of the specified permissions
- * 
+ *
  * @param role The user role to check
  * @param permissions Array of permissions to check
  * @returns boolean indicating if the role has any of the permissions
@@ -206,19 +206,19 @@ export function checkAnyPermission(role: string, permissions: string[]): boolean
   if (role === UserRole.ADMIN || role === UserRole.DEVELOPER) {
     return true;
   }
-  
+
   // Check if the role exists in our mapping
   if (!rolePermissions[role]) {
     return false;
   }
-  
+
   // Check if the role has any of the specified permissions
   return permissions.some(permission => rolePermissions[role].includes(permission));
 }
 
 /**
  * Check if a role has all of the specified permissions
- * 
+ *
  * @param role The user role to check
  * @param permissions Array of permissions to check
  * @returns boolean indicating if the role has all of the permissions
@@ -228,12 +228,12 @@ export function checkAllPermissions(role: string, permissions: string[]): boolea
   if (role === UserRole.ADMIN || role === UserRole.DEVELOPER) {
     return true;
   }
-  
+
   // Check if the role exists in our mapping
   if (!rolePermissions[role]) {
     return false;
   }
-  
+
   // Check if the role has all of the specified permissions
   return permissions.every(permission => rolePermissions[role].includes(permission));
 }

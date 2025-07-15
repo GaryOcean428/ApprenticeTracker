@@ -1,28 +1,16 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@/components/ui/accordion";
-import { Badge } from "@/components/ui/badge";
-import { 
-  Clipboard, 
-  CheckCircle2, 
-  AlertCircle, 
-  FileText,
-  Info
-} from "lucide-react";
-import { Separator } from "@/components/ui/separator";
-import { Skeleton } from "@/components/ui/skeleton";
+} from '@/components/ui/accordion';
+import { Badge } from '@/components/ui/badge';
+import { Clipboard, CheckCircle2, AlertCircle, FileText, Info } from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface GtoComplianceStandard {
   id: number;
@@ -40,7 +28,11 @@ interface StandardDetailProps {
 }
 
 const StandardDetail: React.FC<StandardDetailProps> = ({ prefix }) => {
-  const { data: standards, isLoading, error } = useQuery<GtoComplianceStandard[]>({
+  const {
+    data: standards,
+    isLoading,
+    error,
+  } = useQuery<GtoComplianceStandard[]>({
     queryKey: ['/api/compliance/standards/prefix', prefix],
     queryFn: async () => {
       const response = await fetch(`/api/compliance/standards/prefix/${prefix}`);
@@ -48,7 +40,7 @@ const StandardDetail: React.FC<StandardDetailProps> = ({ prefix }) => {
         throw new Error('Failed to fetch standards');
       }
       return response.json();
-    }
+    },
   });
 
   if (isLoading) {
@@ -118,7 +110,9 @@ const StandardDetail: React.FC<StandardDetailProps> = ({ prefix }) => {
           <CardHeader>
             <div className="flex justify-between items-start">
               <div>
-                <Badge variant="outline" className="mb-2">Standard {standard.standardNumber}</Badge>
+                <Badge variant="outline" className="mb-2">
+                  Standard {standard.standardNumber}
+                </Badge>
                 <CardTitle className="text-xl">{standard.standardName}</CardTitle>
               </div>
               <Badge className={getCategoryBadgeColor(standard.category)}>
@@ -153,9 +147,13 @@ const StandardDetail: React.FC<StandardDetailProps> = ({ prefix }) => {
                 <AccordionContent>
                   <ul className="ml-6 list-disc space-y-2 text-sm">
                     <li>Maintain comprehensive documentation for all required evidence items.</li>
-                    <li>Schedule regular internal audits to assess compliance with this standard.</li>
+                    <li>
+                      Schedule regular internal audits to assess compliance with this standard.
+                    </li>
                     <li>Ensure all staff are trained on the requirements of this standard.</li>
-                    <li>Implement a consistent review process to update documentation as needed.</li>
+                    <li>
+                      Implement a consistent review process to update documentation as needed.
+                    </li>
                   </ul>
                 </AccordionContent>
               </AccordionItem>
@@ -173,8 +171,9 @@ const StandardDetail: React.FC<StandardDetailProps> = ({ prefix }) => {
         </CardHeader>
         <CardContent>
           <p className="text-sm mb-4">
-            Compliance with these standards is assessed through a formal audit process conducted by regulators.
-            Ensure you have all the required evidence prepared and organized before your scheduled audit.
+            Compliance with these standards is assessed through a formal audit process conducted by
+            regulators. Ensure you have all the required evidence prepared and organized before your
+            scheduled audit.
           </p>
           <div className="flex flex-col space-y-2">
             <div className="flex items-center">

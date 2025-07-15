@@ -74,20 +74,28 @@ export default function ReviewsListPage() {
 
   // Get apprentice name based on ID
   const getApprenticeName = (apprenticeId: number) => {
-    const apprentice = apprentices?.find((a) => a.id === apprenticeId);
-    return apprentice ? `${apprentice.firstName} ${apprentice.lastName}` : `Apprentice #${apprenticeId}`;
+    const apprentice = apprentices?.find(a => a.id === apprenticeId);
+    return apprentice
+      ? `${apprentice.firstName} ${apprentice.lastName}`
+      : `Apprentice #${apprenticeId}`;
   };
 
   // Filter reviews based on search query and status filter
-  const filteredReviews = reviews?.filter((review) => {
-    const matchesSearch = searchQuery === '' || (
-      apprentices?.find((a) => a.id === review.apprenticeId)?.firstName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      apprentices?.find((a) => a.id === review.apprenticeId)?.lastName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      review.id.toString().includes(searchQuery)
-    );
-    
+  const filteredReviews = reviews?.filter(review => {
+    const matchesSearch =
+      searchQuery === '' ||
+      apprentices
+        ?.find(a => a.id === review.apprenticeId)
+        ?.firstName.toLowerCase()
+        .includes(searchQuery.toLowerCase()) ||
+      apprentices
+        ?.find(a => a.id === review.apprenticeId)
+        ?.lastName.toLowerCase()
+        .includes(searchQuery.toLowerCase()) ||
+      review.id.toString().includes(searchQuery);
+
     const matchesStatus = statusFilter === 'all' || review.status === statusFilter;
-    
+
     return matchesSearch && matchesStatus;
   });
 
@@ -111,7 +119,7 @@ export default function ReviewsListPage() {
           <Input
             placeholder="Search apprentice or review ID..."
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={e => setSearchQuery(e.target.value)}
             className="pl-8"
           />
         </div>
@@ -142,20 +150,28 @@ export default function ReviewsListPage() {
         </div>
       ) : filteredReviews && filteredReviews.length > 0 ? (
         <div className="space-y-4">
-          {filteredReviews.map((review) => {
+          {filteredReviews.map(review => {
             const statusColors = getStatusColor(review.status);
             const reviewDate = review.reviewDate || review.scheduledDate;
-            
+
             return (
               <Card key={review.id}>
                 <CardContent className="p-6">
                   <div className="flex items-start lg:items-center justify-between flex-col lg:flex-row gap-4">
                     <div className="flex items-start space-x-4">
                       <div className={`bg-${statusColors.bg} p-2 rounded-lg`}>
-                        {review.status === 'scheduled' && <Clock className={`h-6 w-6 ${statusColors.icon}`} />}
-                        {review.status === 'in_progress' && <AlignLeft className={`h-6 w-6 ${statusColors.icon}`} />}
-                        {review.status === 'completed' && <CheckCircle2 className={`h-6 w-6 ${statusColors.icon}`} />}
-                        {review.status === 'cancelled' && <FileText className={`h-6 w-6 ${statusColors.icon}`} />}
+                        {review.status === 'scheduled' && (
+                          <Clock className={`h-6 w-6 ${statusColors.icon}`} />
+                        )}
+                        {review.status === 'in_progress' && (
+                          <AlignLeft className={`h-6 w-6 ${statusColors.icon}`} />
+                        )}
+                        {review.status === 'completed' && (
+                          <CheckCircle2 className={`h-6 w-6 ${statusColors.icon}`} />
+                        )}
+                        {review.status === 'cancelled' && (
+                          <FileText className={`h-6 w-6 ${statusColors.icon}`} />
+                        )}
                       </div>
                       <div>
                         <div className="font-semibold text-lg flex flex-wrap items-center gap-2">
@@ -165,23 +181,27 @@ export default function ReviewsListPage() {
                           </Badge>
                         </div>
                         <div className="text-muted-foreground">
-                          Apprentice: <span className="font-medium">{getApprenticeName(review.apprenticeId)}</span>
+                          Apprentice:{' '}
+                          <span className="font-medium">
+                            {getApprenticeName(review.apprenticeId)}
+                          </span>
                         </div>
                         <div className="flex flex-wrap gap-4 mt-1 text-sm text-muted-foreground">
                           <div>
-                            {review.status === 'scheduled' ? 'Scheduled for:' : 'Conducted on:'} {formatDate(reviewDate)}
+                            {review.status === 'scheduled' ? 'Scheduled for:' : 'Conducted on:'}{' '}
+                            {formatDate(reviewDate)}
                           </div>
                           {review.reviewSummary && (
-                            <div className="hidden md:block">Summary: {review.reviewSummary.slice(0, 80)}...</div>
+                            <div className="hidden md:block">
+                              Summary: {review.reviewSummary.slice(0, 80)}...
+                            </div>
                           )}
                         </div>
                       </div>
                     </div>
                     <div className="flex items-center space-x-2 w-full lg:w-auto justify-end">
                       <Link href={`/progress-reviews/reviews/${review.id}`}>
-                        <Button variant="outline">
-                          View Details
-                        </Button>
+                        <Button variant="outline">View Details</Button>
                       </Link>
                       <Link href={`/progress-reviews/reviews/${review.id}/edit`}>
                         <Button>
@@ -201,8 +221,8 @@ export default function ReviewsListPage() {
             <FileText className="h-12 w-12 text-muted-foreground mb-4" />
             <h3 className="text-lg font-medium mb-2">No reviews found</h3>
             <p className="text-muted-foreground text-center mb-6 max-w-md">
-              {searchQuery || statusFilter !== 'all' 
-                ? 'No reviews match your search criteria.' 
+              {searchQuery || statusFilter !== 'all'
+                ? 'No reviews match your search criteria.'
                 : 'There are no progress reviews created yet.'}
             </p>
             <Link href="/progress-reviews/reviews/create">

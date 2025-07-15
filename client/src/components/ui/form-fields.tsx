@@ -1,9 +1,28 @@
 import React from 'react';
-import { Controller, useFormContext, ControllerProps, FieldPath, FieldValues } from 'react-hook-form';
-import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import {
+  Controller,
+  useFormContext,
+  ControllerProps,
+  FieldPath,
+  FieldValues,
+} from 'react-hook-form';
+import {
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Switch } from '@/components/ui/switch';
@@ -109,7 +128,7 @@ export function TextField({
   className,
 }: TextFieldProps) {
   const form = useFormContext();
-  
+
   return (
     <FormField
       control={form.control}
@@ -155,7 +174,7 @@ export function TextareaField({
   className,
 }: TextareaFieldProps) {
   const form = useFormContext();
-  
+
   return (
     <FormField
       control={form.control}
@@ -170,12 +189,7 @@ export function TextareaField({
             </FormLabel>
           )}
           <FormControl>
-            <Textarea
-              {...field}
-              placeholder={placeholder}
-              disabled={disabled}
-              rows={rows}
-            />
+            <Textarea {...field} placeholder={placeholder} disabled={disabled} rows={rows} />
           </FormControl>
           {description && <FormDescription>{description}</FormDescription>}
           <FormMessage />
@@ -200,7 +214,7 @@ export function SelectField({
   className,
 }: SelectFieldProps) {
   const form = useFormContext();
-  
+
   return (
     <FormField
       control={form.control}
@@ -214,18 +228,14 @@ export function SelectField({
               {required && <span className="text-destructive"> *</span>}
             </FormLabel>
           )}
-          <Select
-            onValueChange={field.onChange}
-            defaultValue={field.value}
-            disabled={disabled}
-          >
+          <Select onValueChange={field.onChange} defaultValue={field.value} disabled={disabled}>
             <FormControl>
               <SelectTrigger>
                 <SelectValue placeholder={placeholder} />
               </SelectTrigger>
             </FormControl>
             <SelectContent>
-              {options.map((option) => (
+              {options.map(option => (
                 <SelectItem key={option.value} value={option.value}>
                   {option.label}
                 </SelectItem>
@@ -255,7 +265,7 @@ export function RadioField({
   className,
 }: RadioFieldProps) {
   const form = useFormContext();
-  
+
   return (
     <FormField
       control={form.control}
@@ -276,7 +286,7 @@ export function RadioField({
               disabled={disabled}
               className={inline ? 'flex items-center space-x-4' : 'space-y-2'}
             >
-              {options.map((option) => (
+              {options.map(option => (
                 <div key={option.value} className="flex items-center space-x-2">
                   <RadioGroupItem value={option.value} id={`${name}-${option.value}`} />
                   <label htmlFor={`${name}-${option.value}`} className="text-sm font-medium">
@@ -307,7 +317,7 @@ export function CheckboxField({
   className,
 }: CheckboxFieldProps) {
   const form = useFormContext();
-  
+
   return (
     <FormField
       control={form.control}
@@ -316,11 +326,7 @@ export function CheckboxField({
       render={({ field }) => (
         <FormItem className={cn('flex flex-row items-start space-x-3 space-y-0', className)}>
           <FormControl>
-            <Checkbox
-              checked={field.value}
-              onCheckedChange={field.onChange}
-              disabled={disabled}
-            />
+            <Checkbox checked={field.value} onCheckedChange={field.onChange} disabled={disabled} />
           </FormControl>
           <div className="space-y-1 leading-none">
             {label && (
@@ -351,7 +357,7 @@ export function SwitchField({
   className,
 }: SwitchFieldProps) {
   const form = useFormContext();
-  
+
   return (
     <FormField
       control={form.control}
@@ -369,11 +375,7 @@ export function SwitchField({
             {description && <FormDescription>{description}</FormDescription>}
           </div>
           <FormControl>
-            <Switch
-              checked={field.value}
-              onCheckedChange={field.onChange}
-              disabled={disabled}
-            />
+            <Switch checked={field.value} onCheckedChange={field.onChange} disabled={disabled} />
           </FormControl>
           <FormMessage />
         </FormItem>
@@ -391,12 +393,12 @@ export function DatePickerField({
   description,
   required = false,
   disabled = false,
-  placeholder = "Select a date",
+  placeholder = 'Select a date',
   defaultValue,
   className,
 }: DatePickerFieldProps) {
   const form = useFormContext();
-  
+
   return (
     <FormField
       control={form.control}
@@ -416,16 +418,12 @@ export function DatePickerField({
                 <Button
                   variant="outline"
                   className={cn(
-                    "w-full pl-3 text-left font-normal",
-                    !field.value && "text-muted-foreground"
+                    'w-full pl-3 text-left font-normal',
+                    !field.value && 'text-muted-foreground'
                   )}
                   disabled={disabled}
                 >
-                  {field.value ? (
-                    format(new Date(field.value), "PPP")
-                  ) : (
-                    <span>{placeholder}</span>
-                  )}
+                  {field.value ? format(new Date(field.value), 'PPP') : <span>{placeholder}</span>}
                   <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                 </Button>
               </FormControl>
@@ -452,7 +450,7 @@ export function DatePickerField({
  */
 export function CustomField<
   TFieldValues extends FieldValues = FieldValues,
-  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>
+  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
 >({
   name,
   label,
@@ -469,7 +467,7 @@ export function CustomField<
   className?: string;
 }) {
   const form = useFormContext<TFieldValues>();
-  
+
   return (
     <FormItem className={className}>
       {label && (
@@ -478,11 +476,7 @@ export function CustomField<
           {required && <span className="text-destructive"> *</span>}
         </FormLabel>
       )}
-      <Controller
-        control={form.control}
-        name={name}
-        render={children}
-      />
+      <Controller control={form.control} name={name} render={children} />
       {description && <FormDescription>{description}</FormDescription>}
       <FormMessage />
     </FormItem>

@@ -1,4 +1,4 @@
-import PublicLayout from "@/layouts/public-layout";
+import PublicLayout from '@/layouts/public-layout';
 
 export default function AboutPage() {
   return (
@@ -12,7 +12,8 @@ export default function AboutPage() {
                 About Braden Group
               </h1>
               <p className="mx-auto max-w-[700px] text-gray-500 md:text-xl">
-                Building the future workforce of Western Australia through quality apprenticeships and traineeships.
+                Building the future workforce of Western Australia through quality apprenticeships
+                and traineeships.
               </p>
             </div>
           </div>
@@ -31,14 +32,14 @@ export default function AboutPage() {
                 Creating pathways to success
               </h2>
               <p className="text-gray-500 md:text-xl/relaxed">
-                Braden Group is committed to bridging the skills gap in Western Australia by connecting apprentices 
-                with quality host employers. We believe in creating meaningful careers while helping businesses 
-                access the talent they need to thrive.
+                Braden Group is committed to bridging the skills gap in Western Australia by
+                connecting apprentices with quality host employers. We believe in creating
+                meaningful careers while helping businesses access the talent they need to thrive.
               </p>
               <p className="text-gray-500 md:text-xl/relaxed">
-                As a Group Training Organisation (GTO), we take on the administrative burden of managing 
-                apprenticeships and traineeships, allowing both apprentices and host employers to focus on what 
-                matters most - developing skills and building businesses.
+                As a Group Training Organisation (GTO), we take on the administrative burden of
+                managing apprenticeships and traineeships, allowing both apprentices and host
+                employers to focus on what matters most - developing skills and building businesses.
               </p>
             </div>
             <div className="flex items-center justify-center">
@@ -65,7 +66,9 @@ export default function AboutPage() {
                       </div>
                       <div>
                         <h3 className="font-bold">Excellence</h3>
-                        <p className="text-gray-500">We strive for excellence in all aspects of apprentice management.</p>
+                        <p className="text-gray-500">
+                          We strive for excellence in all aspects of apprentice management.
+                        </p>
                       </div>
                     </li>
                     <li className="flex items-start">
@@ -87,7 +90,9 @@ export default function AboutPage() {
                       </div>
                       <div>
                         <h3 className="font-bold">Integrity</h3>
-                        <p className="text-gray-500">We operate with transparency and honesty in all our dealings.</p>
+                        <p className="text-gray-500">
+                          We operate with transparency and honesty in all our dealings.
+                        </p>
                       </div>
                     </li>
                     <li className="flex items-start">
@@ -109,7 +114,9 @@ export default function AboutPage() {
                       </div>
                       <div>
                         <h3 className="font-bold">Innovation</h3>
-                        <p className="text-gray-500">We embrace technology and new approaches to improve outcomes.</p>
+                        <p className="text-gray-500">
+                          We embrace technology and new approaches to improve outcomes.
+                        </p>
                       </div>
                     </li>
                     <li className="flex items-start">
@@ -131,7 +138,9 @@ export default function AboutPage() {
                       </div>
                       <div>
                         <h3 className="font-bold">Support</h3>
-                        <p className="text-gray-500">We provide continuous support to both apprentices and host employers.</p>
+                        <p className="text-gray-500">
+                          We provide continuous support to both apprentices and host employers.
+                        </p>
                       </div>
                     </li>
                   </ul>
@@ -151,7 +160,8 @@ export default function AboutPage() {
                 Our Role as a Group Training Organisation
               </h2>
               <p className="mx-auto max-w-[700px] text-gray-500 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-                As a GTO, we serve as the legal employer of apprentices and trainees, while partnering with host employers to provide on-the-job training.
+                As a GTO, we serve as the legal employer of apprentices and trainees, while
+                partnering with host employers to provide on-the-job training.
               </p>
             </div>
           </div>
@@ -179,7 +189,8 @@ export default function AboutPage() {
               </div>
               <h3 className="text-xl font-bold">Recruitment & Selection</h3>
               <p className="text-gray-500">
-                We recruit, screen, and place qualified apprentices with suitable host employers, ensuring the right fit for both parties.
+                We recruit, screen, and place qualified apprentices with suitable host employers,
+                ensuring the right fit for both parties.
               </p>
             </div>
             <div className="flex flex-col justify-center space-y-4">
@@ -202,7 +213,8 @@ export default function AboutPage() {
               </div>
               <h3 className="text-xl font-bold">Administration & Compliance</h3>
               <p className="text-gray-500">
-                We manage payroll, insurance, and all paperwork associated with apprenticeships, ensuring full compliance with regulations.
+                We manage payroll, insurance, and all paperwork associated with apprenticeships,
+                ensuring full compliance with regulations.
               </p>
             </div>
             <div className="flex flex-col justify-center space-y-4">
@@ -225,7 +237,8 @@ export default function AboutPage() {
               </div>
               <h3 className="text-xl font-bold">Support & Mentoring</h3>
               <p className="text-gray-500">
-                We provide ongoing support to both apprentices and host employers throughout the apprenticeship journey.
+                We provide ongoing support to both apprentices and host employers throughout the
+                apprenticeship journey.
               </p>
             </div>
           </div>
@@ -241,7 +254,8 @@ export default function AboutPage() {
                 Industry Partnerships & Compliance
               </h2>
               <p className="mx-auto max-w-[700px] text-gray-500 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-                We work closely with industry partners and regulatory bodies to ensure the highest standards in apprenticeship management.
+                We work closely with industry partners and regulatory bodies to ensure the highest
+                standards in apprenticeship management.
               </p>
             </div>
 
