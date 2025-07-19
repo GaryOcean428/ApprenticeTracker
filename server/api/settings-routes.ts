@@ -8,8 +8,14 @@ import fs from 'fs';
 import multer from 'multer';
 
 // Set up multer for file uploads
+const uploadDir = process.env.UPLOAD_DIR || 'uploads/';
+// Ensure upload directory exists
+if (!fs.existsSync(uploadDir.replace(/\/$/, ''))) {
+  fs.mkdirSync(uploadDir.replace(/\/$/, ''), { recursive: true });
+}
+
 const upload = multer({
-  dest: 'uploads/',
+  dest: uploadDir,
   limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
 });
 
