@@ -20,7 +20,8 @@ export const fairWorkRouter = Router();
 // Configure multer for file uploads
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    const uploadDir = path.join(process.cwd(), 'uploads');
+    // Use environment variable for upload directory, fallback to local uploads
+    const uploadDir = process.env.UPLOAD_DIR || path.join(process.cwd(), 'uploads');
     // Create directory if it doesn't exist
     if (!fs.existsSync(uploadDir)) {
       fs.mkdirSync(uploadDir, { recursive: true });
