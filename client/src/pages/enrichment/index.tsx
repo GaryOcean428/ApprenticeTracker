@@ -6,7 +6,7 @@ import { BookOpen, CalendarClock, FileEdit, GraduationCap, User, Users } from 'l
 
 const EnrichmentPage: React.FC = () => {
   const { hasPermission } = usePermissions();
-  
+
   const enrichmentFeatures = [
     {
       id: 'programs',
@@ -70,23 +70,24 @@ const EnrichmentPage: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {enrichmentFeatures.map((feature) => (
-          hasPermission(feature.permission) && (
-            <Link key={feature.id} href={feature.path}>
-              <Card className="h-full cursor-pointer hover:shadow-md transition-shadow">
-                <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                  <CardTitle className="text-xl font-bold">{feature.title}</CardTitle>
-                  {feature.icon}
-                </CardHeader>
-                <CardContent>
-                  <CardDescription className="text-md mt-2">
-                    {feature.description}
-                  </CardDescription>
-                </CardContent>
-              </Card>
-            </Link>
-          )
-        ))}
+        {enrichmentFeatures.map(
+          feature =>
+            hasPermission(feature.permission) && (
+              <Link key={feature.id} href={feature.path}>
+                <Card className="h-full cursor-pointer hover:shadow-md transition-shadow">
+                  <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+                    <CardTitle className="text-xl font-bold">{feature.title}</CardTitle>
+                    {feature.icon}
+                  </CardHeader>
+                  <CardContent>
+                    <CardDescription className="text-md mt-2">
+                      {feature.description}
+                    </CardDescription>
+                  </CardContent>
+                </Card>
+              </Link>
+            )
+        )}
       </div>
     </div>
   );

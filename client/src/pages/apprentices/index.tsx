@@ -1,101 +1,91 @@
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { Link } from "wouter";
-import { Apprentice } from "@shared/schema";
-import { 
-  Card, 
-  CardContent, 
-  CardHeader, 
-  CardTitle 
-} from "@/components/ui/card";
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from "@/components/ui/table";
-import { 
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { Link } from 'wouter';
+import { Apprentice } from '@shared/schema';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from "@/components/ui/select";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Progress } from "@/components/ui/progress";
-import { Skeleton } from "@/components/ui/skeleton";
-import { 
-  Eye, 
-  Pencil, 
-  Trash2, 
-  MoreHorizontal, 
-  FileText, 
-  Plus, 
-  Search,
-  Filter
-} from "lucide-react";
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Progress } from '@/components/ui/progress';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Eye, Pencil, Trash2, MoreHorizontal, FileText, Plus, Search, Filter } from 'lucide-react';
 
 const ApprenticesList = () => {
   const [filter, setFilter] = useState({
-    search: "",
-    status: "",
-    trade: ""
+    search: '',
+    status: '',
+    trade: '',
   });
-  
-  const { data: apprentices, isLoading, error } = useQuery({
+
+  const {
+    data: apprentices,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ['/api/apprentices'],
     queryFn: async () => {
       const res = await fetch('/api/apprentices');
       if (!res.ok) throw new Error('Failed to fetch apprentices');
       return res.json() as Promise<Apprentice[]>;
-    }
+    },
   });
-  
+
   // Filter apprentices based on search and filters
   const filteredApprentices = apprentices?.filter(apprentice => {
-    const matchesSearch = 
-      filter.search === "" || 
+    const matchesSearch =
+      filter.search === '' ||
       apprentice.firstName.toLowerCase().includes(filter.search.toLowerCase()) ||
       apprentice.lastName.toLowerCase().includes(filter.search.toLowerCase()) ||
       apprentice.email.toLowerCase().includes(filter.search.toLowerCase()) ||
       apprentice.trade.toLowerCase().includes(filter.search.toLowerCase());
-    
-    const matchesStatus = filter.status === "all_statuses" || apprentice.status === filter.status;
-    const matchesTrade = filter.trade === "all_trades" || apprentice.trade === filter.trade;
-    
+
+    const matchesStatus = filter.status === 'all_statuses' || apprentice.status === filter.status;
+    const matchesTrade = filter.trade === 'all_trades' || apprentice.trade === filter.trade;
+
     return matchesSearch && matchesStatus && matchesTrade;
   });
-  
+
   // Extract unique trades for filter dropdown
-  const trades = apprentices 
+  const trades = apprentices
     ? apprentices
         .map(apprentice => apprentice.trade)
         .filter((trade, index, self) => self.indexOf(trade) === index)
     : [];
-  
+
   const getStatusBadgeClass = (status: string) => {
-    switch(status) {
-      case "active":
-        return "bg-green-100 text-success";
-      case "on_hold":
-        return "bg-red-100 text-destructive";
-      case "completed":
-        return "bg-blue-100 text-info";
+    switch (status) {
+      case 'active':
+        return 'bg-green-100 text-success';
+      case 'on_hold':
+        return 'bg-red-100 text-destructive';
+      case 'completed':
+        return 'bg-blue-100 text-info';
       default:
-        return "bg-muted text-muted-foreground";
+        return 'bg-muted text-muted-foreground';
     }
   };
-  
+
   return (
     <>
       <div className="flex justify-between items-center mb-6">
@@ -107,7 +97,7 @@ const ApprenticesList = () => {
           </Link>
         </Button>
       </div>
-      
+
       <Card className="mb-8">
         <CardHeader>
           <CardTitle>Apprentices</CardTitle>
@@ -121,14 +111,14 @@ const ApprenticesList = () => {
                 placeholder="Search apprentices..."
                 className="pl-8"
                 value={filter.search}
-                onChange={(e) => setFilter({...filter, search: e.target.value})}
+                onChange={e => setFilter({ ...filter, search: e.target.value })}
               />
             </div>
             <div className="flex gap-4">
               <div className="w-full md:w-48">
                 <Select
                   value={filter.status}
-                  onValueChange={(value) => setFilter({...filter, status: value})}
+                  onValueChange={value => setFilter({ ...filter, status: value })}
                 >
                   <SelectTrigger>
                     <Filter className="mr-2 h-4 w-4" />
@@ -145,7 +135,7 @@ const ApprenticesList = () => {
               <div className="w-full md:w-48">
                 <Select
                   value={filter.trade}
-                  onValueChange={(value) => setFilter({...filter, trade: value})}
+                  onValueChange={value => setFilter({ ...filter, trade: value })}
                 >
                   <SelectTrigger>
                     <Filter className="mr-2 h-4 w-4" />
@@ -153,15 +143,17 @@ const ApprenticesList = () => {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all_trades">All Trades</SelectItem>
-                    {trades.map((trade) => (
-                      <SelectItem key={trade} value={trade}>{trade}</SelectItem>
+                    {trades.map(trade => (
+                      <SelectItem key={trade} value={trade}>
+                        {trade}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
             </div>
           </div>
-          
+
           {isLoading ? (
             <div className="space-y-4">
               <Skeleton className="h-8 w-full" />
@@ -194,22 +186,26 @@ const ApprenticesList = () => {
                       </TableCell>
                     </TableRow>
                   ) : (
-                    filteredApprentices?.map((apprentice) => (
+                    filteredApprentices?.map(apprentice => (
                       <TableRow key={apprentice.id}>
                         <TableCell>
                           <div className="flex items-center gap-3">
                             <Avatar>
-                              <AvatarImage 
-                                src={apprentice.profileImage || ""} 
-                                alt={`${apprentice.firstName} ${apprentice.lastName}`} 
+                              <AvatarImage
+                                src={apprentice.profileImage || ''}
+                                alt={`${apprentice.firstName} ${apprentice.lastName}`}
                               />
                               <AvatarFallback>
                                 {apprentice.firstName.charAt(0) + apprentice.lastName.charAt(0)}
                               </AvatarFallback>
                             </Avatar>
                             <div>
-                              <div className="font-medium">{apprentice.firstName} {apprentice.lastName}</div>
-                              <div className="text-sm text-muted-foreground">{apprentice.email}</div>
+                              <div className="font-medium">
+                                {apprentice.firstName} {apprentice.lastName}
+                              </div>
+                              <div className="text-sm text-muted-foreground">
+                                {apprentice.email}
+                              </div>
                             </div>
                           </div>
                         </TableCell>
@@ -223,10 +219,14 @@ const ApprenticesList = () => {
                           </div>
                         </TableCell>
                         <TableCell>
-                          {apprentice.startDate ? new Date(apprentice.startDate).toLocaleDateString() : "N/A"}
+                          {apprentice.startDate
+                            ? new Date(apprentice.startDate).toLocaleDateString()
+                            : 'N/A'}
                         </TableCell>
                         <TableCell>
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusBadgeClass(apprentice.status)} capitalize`}>
+                          <span
+                            className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusBadgeClass(apprentice.status)} capitalize`}
+                          >
                             {apprentice.status.replace('_', ' ')}
                           </span>
                         </TableCell>
@@ -291,6 +291,6 @@ const ApprenticesList = () => {
   );
 };
 
-import { Building2, Clock } from "lucide-react";
+import { Building2, Clock } from 'lucide-react';
 
 export default ApprenticesList;

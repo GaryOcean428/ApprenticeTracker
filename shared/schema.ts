@@ -17,11 +17,11 @@ export const roles = pgTable("roles", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
-export const insertRoleSchema = createInsertSchema(roles).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-} as const);
+export const insertRoleSchema = z.object({
+  name: z.string(),
+  description: z.string().optional(),
+  isSystem: z.boolean().optional(),
+});
 
 // Permissions
 export const permissions = pgTable("permissions", {
@@ -35,11 +35,13 @@ export const permissions = pgTable("permissions", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
-export const insertPermissionSchema = createInsertSchema(permissions).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-} as const);
+export const insertPermissionSchema = z.object({
+  name: z.string(),
+  description: z.string().optional(),
+  category: z.string().optional(),
+  action: z.string(),
+  resource: z.string(),
+});
 
 // Role Permissions (many-to-many)
 export const rolePermissions = pgTable("role_permissions", {
@@ -49,10 +51,10 @@ export const rolePermissions = pgTable("role_permissions", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
-export const insertRolePermissionSchema = createInsertSchema(rolePermissions).omit({
-  id: true,
-  createdAt: true,
-} as const);
+export const insertRolePermissionSchema = z.object({
+  roleId: z.number(),
+  permissionId: z.number(),
+});
 
 // Subscription Plans (for future Stripe integration)
 export const subscriptionPlans = pgTable("subscription_plans", {
@@ -68,11 +70,14 @@ export const subscriptionPlans = pgTable("subscription_plans", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
-export const insertSubscriptionPlanSchema = createInsertSchema(subscriptionPlans).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-} as const);
+export const insertSubscriptionPlanSchema = z.object({
+  name: z.string(),
+  description: z.string().optional(),
+  price: z.number(),
+  billingCycle: z.string(),
+  features: z.string().optional(),
+  stripePriceId: z.string().optional(),
+});
 
 // Users
 export const users = pgTable("users", {
@@ -98,23 +103,23 @@ export const users = pgTable("users", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
-export const insertUserSchema = createInsertSchema(users).pick({
-  username: true,
-  password: true,
-  email: true,
-  firstName: true,
-  lastName: true,
-  role: true,
-  roleId: true,
-  organizationId: true,
-  profileImage: true,
-  isActive: true,
-  subscriptionPlanId: true,
-  subscriptionStatus: true,
-  subscriptionEndsAt: true,
-  stripeCustomerId: true,
-  stripeSubscriptionId: true
-} as const);
+export const insertUserSchema = z.object({
+  username: z.string(),
+  password: z.string(),
+  email: z.string().email(),
+  firstName: z.string(),
+  lastName: z.string(),
+  role: z.string().optional(),
+  roleId: z.number().optional(),
+  organizationId: z.number().optional(),
+  profileImage: z.string().optional(),
+  isActive: z.boolean().optional(),
+  subscriptionPlanId: z.number().optional(),
+  subscriptionStatus: z.string().optional(),
+  subscriptionEndsAt: z.date().optional(),
+  stripeCustomerId: z.string().optional(),
+  stripeSubscriptionId: z.string().optional(),
+});
 
 // Apprentices
 export const apprentices = pgTable("apprentices", {
@@ -139,9 +144,21 @@ export const apprentices = pgTable("apprentices", {
   gtoId: integer("gto_id"),                                      // Reference to GTO organization
 });
 
-export const insertApprenticeSchema = createInsertSchema(apprentices).omit({
-  id: true,
-} as const);
+export const insertApprenticeSchema = z.object({
+  firstName: z.string(),
+  lastName: z.string(),
+  dateOfBirth: z.date().optional(),
+  email: z.string().email().optional(),
+  phone: z.string().optional(),
+  address: z.string().optional(),
+  emergencyContactName: z.string().optional(),
+  emergencyContactPhone: z.string().optional(),
+  qualificationId: z.number().optional(),
+  startDate: z.date().optional(),
+  apprenticeshipYear: z.number().optional(),
+  gtoEnrolled: z.boolean().optional(),
+  gtoId: z.number().optional(),
+});
 
 // Host Employers
 export const hostEmployers = pgTable("host_employers", {
@@ -180,9 +197,7 @@ export const hostEmployers = pgTable("host_employers", {
   agreementExpiry: date("agreement_expiry")                     // When the charge rate agreement expires
 });
 
-export const insertHostEmployerSchema = createInsertSchema(hostEmployers).omit({
-  id: true,
-} as const);
+export const insertHostEmployerSchema = createInsertSchema(hostEmployers);
 
 // Define host employer relationships
 export const hostEmployerRelations = relations(hostEmployers, ({ one, many }) => ({
@@ -212,9 +227,7 @@ export const trainingContracts = pgTable("training_contracts", {
   rtoCode: text("rto_code"),                   // e.g., provider's RTO code
 });
 
-export const insertTrainingContractSchema = createInsertSchema(trainingContracts).omit({
-  id: true,
-} as const);
+export const insertTrainingContractSchema = createInsertSchema(trainingContracts);
 
 // Placements
 export const placements = pgTable("placements", {
@@ -240,9 +253,7 @@ export const placements = pgTable("placements", {
   quoteId: integer("quote_id").references(() => quotes.id),            // Link to the original quote if applicable
 });
 
-export const insertPlacementSchema = createInsertSchema(placements).omit({
-  id: true,
-} as const);
+export const insertPlacementSchema = createInsertSchema(placements);
 
 // Define placement relationships
 export const placementsRelations = relations(placements, ({ one }) => ({
@@ -281,7 +292,7 @@ export const documents = pgTable("documents", {
 export const insertDocumentSchema = createInsertSchema(documents).omit({
   id: true,
   uploadDate: true,
-} as const);
+});
 
 // Compliance Records
 export const complianceRecords = pgTable("compliance_records", {
@@ -297,7 +308,7 @@ export const complianceRecords = pgTable("compliance_records", {
 
 export const insertComplianceRecordSchema = createInsertSchema(complianceRecords).omit({
   id: true,
-} as const);
+});
 
 // Timesheets
 export const timesheets = pgTable("timesheets", {
@@ -317,7 +328,7 @@ export const insertTimesheetSchema = createInsertSchema(timesheets).omit({
   id: true,
   submittedDate: true,
   approvalDate: true,
-} as const);
+});
 
 // Timesheet Details
 export const timesheetDetails = pgTable("timesheet_details", {
@@ -341,7 +352,7 @@ export const timesheetDetails = pgTable("timesheet_details", {
 
 export const insertTimesheetDetailSchema = createInsertSchema(timesheetDetails).omit({
   id: true,
-} as const);
+});
 
 // Define timesheet detail relationships
 export const timesheetDetailsRelations = relations(timesheetDetails, ({ one }) => ({
@@ -380,7 +391,7 @@ export const insertTimesheetCalculationSchema = createInsertSchema(timesheetCalc
   id: true,
   calculatedAt: true,
   payrollProcessedDate: true,
-} as const);
+});
 
 // Define timesheet calculation relationships
 export const timesheetCalculationsRelations = relations(timesheetCalculations, ({ one }) => ({
@@ -404,7 +415,7 @@ export const activityLogs = pgTable("activity_logs", {
 export const insertActivityLogSchema = createInsertSchema(activityLogs).omit({
   id: true,
   timestamp: true,
-} as const);
+});
 
 // Tasks
 export const tasks = pgTable("tasks", {
@@ -426,7 +437,7 @@ export const insertTaskSchema = createInsertSchema(tasks).omit({
   id: true,
   createdAt: true,
   completedAt: true,
-} as const);
+});
 
 // Fair Work Awards
 export const awards = pgTable("awards", {
@@ -448,7 +459,7 @@ export const insertAwardSchema = createInsertSchema(awards).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
-} as const);
+});
 
 // Award Classifications
 export const awardClassifications = pgTable("award_classifications", {
@@ -469,7 +480,7 @@ export const insertAwardClassificationSchema = createInsertSchema(awardClassific
   id: true,
   createdAt: true,
   updatedAt: true,
-} as const);
+});
 
 // Pay Rates
 export const payRates = pgTable("pay_rates", {
@@ -490,7 +501,7 @@ export const insertPayRateSchema = createInsertSchema(payRates).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
-} as const);
+});
 
 // Penalty Rules
 export const penaltyRules = pgTable("penalty_rules", {
@@ -512,7 +523,7 @@ export const insertPenaltyRuleSchema = createInsertSchema(penaltyRules).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
-} as const);
+});
 
 // Allowance Rules
 export const allowanceRules = pgTable("allowance_rules", {
@@ -531,7 +542,7 @@ export const insertAllowanceRuleSchema = createInsertSchema(allowanceRules).omit
   id: true,
   createdAt: true,
   updatedAt: true,
-} as const);
+});
 
 // Public Holidays
 export const publicHolidays = pgTable("public_holidays", {
@@ -548,7 +559,7 @@ export const insertPublicHolidaySchema = createInsertSchema(publicHolidays).omit
   id: true,
   createdAt: true,
   updatedAt: true,
-} as const);
+});
 
 // Charge Rate Calculations
 export const chargeRateCalculations = pgTable("charge_rate_calculations", {
@@ -576,7 +587,7 @@ export const insertChargeRateCalculationSchema = createInsertSchema(chargeRateCa
   id: true,
   calculationDate: true,
   approvedDate: true,
-} as const);
+});
 
 // Define charge rate calculation relationships
 export const chargeRateCalculationsRelations = relations(chargeRateCalculations, ({ one }) => ({
@@ -618,7 +629,7 @@ export const insertQuoteSchema = createInsertSchema(quotes).omit({
   quoteDate: true,
   createdAt: true,
   updatedAt: true,
-} as const);
+});
 
 // Define quote relationships
 export const quotesRelations = relations(quotes, ({ one, many }) => ({
@@ -652,7 +663,7 @@ export const quoteLineItems = pgTable("quote_line_items", {
 
 export const insertQuoteLineItemSchema = createInsertSchema(quoteLineItems).omit({
   id: true,
-} as const);
+});
 
 // Define quote line item relationships
 export const quoteLineItemsRelations = relations(quoteLineItems, ({ one }) => ({
@@ -689,7 +700,7 @@ export const fairworkComplianceLogs = pgTable("fairwork_compliance_logs", {
 export const insertFairworkComplianceLogSchema = createInsertSchema(fairworkComplianceLogs).omit({
   id: true,
   createdAt: true,
-} as const);
+});
 
 // Define Fair Work compliance log relationships
 export const fairworkComplianceLogsRelations = relations(fairworkComplianceLogs, ({ one }) => ({
@@ -725,7 +736,7 @@ export const insertEnterpriseAgreementSchema = createInsertSchema(enterpriseAgre
   id: true,
   createdAt: true,
   updatedAt: true,
-} as const);
+});
 
 // GTO Organizations
 export const gtoOrganizations = pgTable("gto_organizations", {
@@ -755,7 +766,7 @@ export const insertGtoOrganizationSchema = createInsertSchema(gtoOrganizations).
   id: true,
   createdAt: true,
   updatedAt: true,
-} as const);
+});
 
 // External Portals Configuration
 export const externalPortals = pgTable("external_portals", {
@@ -775,7 +786,7 @@ export const insertExternalPortalSchema = createInsertSchema(externalPortals).om
   id: true,
   createdAt: true,
   updatedAt: true,
-} as const);
+});
 
 // Extend existing tables
 
@@ -803,89 +814,91 @@ export const extendedTrainingContracts = {
 
 // Export types
 export type Role = typeof roles.$inferSelect;
-export type InsertRole = z.infer<typeof insertRoleSchema>;
+// TEMP: export type InsertRole = z.infer<typeof insertRoleSchema>;
 
 export type Permission = typeof permissions.$inferSelect;
-export type InsertPermission = z.infer<typeof insertPermissionSchema>;
+// TEMP: export type InsertPermission = z.infer<typeof insertPermissionSchema>;
 
 export type RolePermission = typeof rolePermissions.$inferSelect;
-export type InsertRolePermission = z.infer<typeof insertRolePermissionSchema>;
+// TEMP: export type InsertRolePermission = z.infer<typeof insertRolePermissionSchema>;
 
 export type SubscriptionPlan = typeof subscriptionPlans.$inferSelect;
-export type InsertSubscriptionPlan = z.infer<typeof insertSubscriptionPlanSchema>;
+// TEMP: export type InsertSubscriptionPlan = z.infer<typeof insertSubscriptionPlanSchema>;
 
 export type User = typeof users.$inferSelect;
-export type InsertUser = z.infer<typeof insertUserSchema>;
+// TEMP: export type InsertUser = z.infer<typeof insertUserSchema>;
 
 export type Apprentice = typeof apprentices.$inferSelect;
-export type InsertApprentice = z.infer<typeof insertApprenticeSchema>;
+// TEMP: export type InsertApprentice = z.infer<typeof insertApprenticeSchema>;
 
 export type HostEmployer = typeof hostEmployers.$inferSelect;
-export type InsertHostEmployer = z.infer<typeof insertHostEmployerSchema>;
+// NOTE: Temporarily disabling complex schema inference due to drizzle-zod compatibility issues
+// These can be re-enabled once compatibility is resolved
+// export type InsertHostEmployer = z.infer<typeof insertHostEmployerSchema>;
 
 export type TrainingContract = typeof trainingContracts.$inferSelect;
-export type InsertTrainingContract = z.infer<typeof insertTrainingContractSchema>;
+// TEMP: export type InsertTrainingContract = z.infer<typeof insertTrainingContractSchema>;
 
 export type Placement = typeof placements.$inferSelect;
-export type InsertPlacement = z.infer<typeof insertPlacementSchema>;
+// TEMP: export type InsertPlacement = z.infer<typeof insertPlacementSchema>;
 
 export type Document = typeof documents.$inferSelect;
-export type InsertDocument = z.infer<typeof insertDocumentSchema>;
+// TEMP: export type InsertDocument = z.infer<typeof insertDocumentSchema>;
 
 export type ComplianceRecord = typeof complianceRecords.$inferSelect;
-export type InsertComplianceRecord = z.infer<typeof insertComplianceRecordSchema>;
+// TEMP: export type InsertComplianceRecord = z.infer<typeof insertComplianceRecordSchema>;
 
 export type Timesheet = typeof timesheets.$inferSelect;
-export type InsertTimesheet = z.infer<typeof insertTimesheetSchema>;
+// TEMP: export type InsertTimesheet = z.infer<typeof insertTimesheetSchema>;
 
 export type TimesheetDetail = typeof timesheetDetails.$inferSelect;
-export type InsertTimesheetDetail = z.infer<typeof insertTimesheetDetailSchema>;
+// TEMP: export type InsertTimesheetDetail = z.infer<typeof insertTimesheetDetailSchema>;
 
 export type ActivityLog = typeof activityLogs.$inferSelect;
-export type InsertActivityLog = z.infer<typeof insertActivityLogSchema>;
+// TEMP: export type InsertActivityLog = z.infer<typeof insertActivityLogSchema>;
 
 export type Task = typeof tasks.$inferSelect;
-export type InsertTask = z.infer<typeof insertTaskSchema>;
+// TEMP: export type InsertTask = z.infer<typeof insertTaskSchema>;
 
 // Export new Australian-specific types
 export type Award = typeof awards.$inferSelect;
-export type InsertAward = z.infer<typeof insertAwardSchema>;
+// TEMP: export type InsertAward = z.infer<typeof insertAwardSchema>;
 
 export type AwardClassification = typeof awardClassifications.$inferSelect;
-export type InsertAwardClassification = z.infer<typeof insertAwardClassificationSchema>;
+// TEMP: export type InsertAwardClassification = z.infer<typeof insertAwardClassificationSchema>;
 
 export type PayRate = typeof payRates.$inferSelect;
-export type InsertPayRate = z.infer<typeof insertPayRateSchema>;
+// TEMP: export type InsertPayRate = z.infer<typeof insertPayRateSchema>;
 
 export type PenaltyRule = typeof penaltyRules.$inferSelect;
-export type InsertPenaltyRule = z.infer<typeof insertPenaltyRuleSchema>;
+// TEMP: export type InsertPenaltyRule = z.infer<typeof insertPenaltyRuleSchema>;
 
 export type AllowanceRule = typeof allowanceRules.$inferSelect;
-export type InsertAllowanceRule = z.infer<typeof insertAllowanceRuleSchema>;
+// TEMP: export type InsertAllowanceRule = z.infer<typeof insertAllowanceRuleSchema>;
 
 export type PublicHoliday = typeof publicHolidays.$inferSelect;
-export type InsertPublicHoliday = z.infer<typeof insertPublicHolidaySchema>;
+// TEMP: export type InsertPublicHoliday = z.infer<typeof insertPublicHolidaySchema>;
 
 export type ChargeRateCalculation = typeof chargeRateCalculations.$inferSelect;
-export type InsertChargeRateCalculation = z.infer<typeof insertChargeRateCalculationSchema>;
+// TEMP: export type InsertChargeRateCalculation = z.infer<typeof insertChargeRateCalculationSchema>;
 
 export type Quote = typeof quotes.$inferSelect;
-export type InsertQuote = z.infer<typeof insertQuoteSchema>;
+// TEMP: export type InsertQuote = z.infer<typeof insertQuoteSchema>;
 
 export type QuoteLineItem = typeof quoteLineItems.$inferSelect;
-export type InsertQuoteLineItem = z.infer<typeof insertQuoteLineItemSchema>;
+// TEMP: export type InsertQuoteLineItem = z.infer<typeof insertQuoteLineItemSchema>;
 
 export type FairworkComplianceLog = typeof fairworkComplianceLogs.$inferSelect;
-export type InsertFairworkComplianceLog = z.infer<typeof insertFairworkComplianceLogSchema>;
+// TEMP: export type InsertFairworkComplianceLog = z.infer<typeof insertFairworkComplianceLogSchema>;
 
 export type EnterpriseAgreement = typeof enterpriseAgreements.$inferSelect;
-export type InsertEnterpriseAgreement = z.infer<typeof insertEnterpriseAgreementSchema>;
+// TEMP: export type InsertEnterpriseAgreement = z.infer<typeof insertEnterpriseAgreementSchema>;
 
 export type GtoOrganization = typeof gtoOrganizations.$inferSelect;
-export type InsertGtoOrganization = z.infer<typeof insertGtoOrganizationSchema>;
+// TEMP: export type InsertGtoOrganization = z.infer<typeof insertGtoOrganizationSchema>;
 
 export type ExternalPortal = typeof externalPortals.$inferSelect;
-export type InsertExternalPortal = z.infer<typeof insertExternalPortalSchema>;
+// TEMP: export type InsertExternalPortal = z.infer<typeof insertExternalPortalSchema>;
 
 // GTO Compliance Module
 export const gtoComplianceStandards = pgTable("gto_compliance_standards", {
@@ -903,7 +916,7 @@ export const insertGtoComplianceStandardSchema = createInsertSchema(gtoComplianc
   id: true,
   createdAt: true,
   updatedAt: true,
-} as const);
+});
 
 export const complianceAssessments = pgTable("compliance_assessments", {
   id: serial("id").primaryKey(),
@@ -923,7 +936,7 @@ export const insertComplianceAssessmentSchema = createInsertSchema(complianceAss
   id: true,
   createdAt: true,
   updatedAt: true,
-} as const);
+});
 
 export const apprenticeRecruitment = pgTable("apprentice_recruitment", {
   id: serial("id").primaryKey(),
@@ -952,7 +965,7 @@ export const insertApprenticeRecruitmentSchema = createInsertSchema(apprenticeRe
   id: true,
   createdAt: true,
   updatedAt: true,
-} as const);
+});
 
 export const hostEmployerAgreements = pgTable("host_employer_agreements", {
   id: serial("id").primaryKey(),
@@ -977,7 +990,7 @@ export const insertHostEmployerAgreementSchema = createInsertSchema(hostEmployer
   id: true,
   createdAt: true,
   updatedAt: true,
-} as const);
+});
 
 export const apprenticeInduction = pgTable("apprentice_induction", {
   id: serial("id").primaryKey(),
@@ -999,7 +1012,7 @@ export const insertApprenticeInductionSchema = createInsertSchema(apprenticeIndu
   id: true,
   createdAt: true,
   updatedAt: true,
-} as const);
+});
 
 export const complaints = pgTable("complaints", {
   id: serial("id").primaryKey(),
@@ -1020,7 +1033,7 @@ export const insertComplaintSchema = createInsertSchema(complaints).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
-} as const);
+});
 
 export const appeals = pgTable("appeals", {
   id: serial("id").primaryKey(),
@@ -1043,28 +1056,28 @@ export const insertAppealSchema = createInsertSchema(appeals).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
-} as const);
+});
 
 export type GtoComplianceStandard = typeof gtoComplianceStandards.$inferSelect;
-export type InsertGtoComplianceStandard = z.infer<typeof insertGtoComplianceStandardSchema>;
+// TEMP: export type InsertGtoComplianceStandard = z.infer<typeof insertGtoComplianceStandardSchema>;
 
 export type ComplianceAssessment = typeof complianceAssessments.$inferSelect;
-export type InsertComplianceAssessment = z.infer<typeof insertComplianceAssessmentSchema>;
+// TEMP: export type InsertComplianceAssessment = z.infer<typeof insertComplianceAssessmentSchema>;
 
 export type ApprenticeRecruitment = typeof apprenticeRecruitment.$inferSelect;
-export type InsertApprenticeRecruitment = z.infer<typeof insertApprenticeRecruitmentSchema>;
+// TEMP: export type InsertApprenticeRecruitment = z.infer<typeof insertApprenticeRecruitmentSchema>;
 
 export type HostEmployerAgreement = typeof hostEmployerAgreements.$inferSelect;
-export type InsertHostEmployerAgreement = z.infer<typeof insertHostEmployerAgreementSchema>;
+// TEMP: export type InsertHostEmployerAgreement = z.infer<typeof insertHostEmployerAgreementSchema>;
 
 export type ApprenticeInduction = typeof apprenticeInduction.$inferSelect;
-export type InsertApprenticeInduction = z.infer<typeof insertApprenticeInductionSchema>;
+// TEMP: export type InsertApprenticeInduction = z.infer<typeof insertApprenticeInductionSchema>;
 
 export type Complaint = typeof complaints.$inferSelect;
-export type InsertComplaint = z.infer<typeof insertComplaintSchema>;
+// TEMP: export type InsertComplaint = z.infer<typeof insertComplaintSchema>;
 
 export type Appeal = typeof appeals.$inferSelect;
-export type InsertAppeal = z.infer<typeof insertAppealSchema>;
+// TEMP: export type InsertAppeal = z.infer<typeof insertAppealSchema>;
 
 // Units of Competency and Qualifications for Australian VET System
 
@@ -1092,7 +1105,7 @@ export const insertUnitOfCompetencySchema = createInsertSchema(unitsOfCompetency
   id: true,
   createdAt: true,
   updatedAt: true,
-} as const);
+});
 
 // Qualifications - made up of multiple Units of Competency
 export const qualifications = pgTable("qualifications", {
@@ -1120,7 +1133,7 @@ export const insertQualificationSchema = createInsertSchema(qualifications).omit
   id: true,
   createdAt: true,
   updatedAt: true,
-} as const);
+});
 
 // Qualification Structure - connects Qualifications to Units of Competency
 export const qualificationStructure = pgTable("qualification_structure", {
@@ -1138,7 +1151,7 @@ export const insertQualificationStructureSchema = createInsertSchema(qualificati
   id: true,
   createdAt: true,
   updatedAt: true,
-} as const);
+});
 
 // Apprentice Unit Progress - tracks individual unit progression for apprentices
 export const apprenticeUnitProgress = pgTable("apprentice_unit_progress", {
@@ -1161,7 +1174,7 @@ export const insertApprenticeUnitProgressSchema = createInsertSchema(apprenticeU
   id: true,
   createdAt: true,
   updatedAt: true,
-} as const);
+});
 
 // Apprentice Qualification Enrollment - tracks which qualifications an apprentice is enrolled in
 export const apprenticeQualifications = pgTable("apprentice_qualifications", {
@@ -1188,22 +1201,22 @@ export const insertApprenticeQualificationSchema = createInsertSchema(apprentice
   id: true,
   createdAt: true,
   updatedAt: true,
-} as const);
+});
 
 export type UnitOfCompetency = typeof unitsOfCompetency.$inferSelect;
-export type InsertUnitOfCompetency = z.infer<typeof insertUnitOfCompetencySchema>;
+// TEMP: export type InsertUnitOfCompetency = z.infer<typeof insertUnitOfCompetencySchema>;
 
 export type Qualification = typeof qualifications.$inferSelect;
-export type InsertQualification = z.infer<typeof insertQualificationSchema>;
+// TEMP: export type InsertQualification = z.infer<typeof insertQualificationSchema>;
 
 export type QualificationStructure = typeof qualificationStructure.$inferSelect;
-export type InsertQualificationStructure = z.infer<typeof insertQualificationStructureSchema>;
+// TEMP: export type InsertQualificationStructure = z.infer<typeof insertQualificationStructureSchema>;
 
 export type ApprenticeUnitProgress = typeof apprenticeUnitProgress.$inferSelect;
-export type InsertApprenticeUnitProgress = z.infer<typeof insertApprenticeUnitProgressSchema>;
+// TEMP: export type InsertApprenticeUnitProgress = z.infer<typeof insertApprenticeUnitProgressSchema>;
 
 export type ApprenticeQualification = typeof apprenticeQualifications.$inferSelect;
-export type InsertApprenticeQualification = z.infer<typeof insertApprenticeQualificationSchema>;
+// TEMP: export type InsertApprenticeQualification = z.infer<typeof insertApprenticeQualificationSchema>;
 
 // Host Employer Preferred Qualifications
 export const hostEmployerPreferredQualifications = pgTable("host_employer_preferred_qualifications", {
@@ -1221,10 +1234,10 @@ export const insertHostEmployerPreferredQualificationSchema = createInsertSchema
   id: true,
   createdAt: true,
   updatedAt: true,
-} as const);
+});
 
 export type HostEmployerPreferredQualification = typeof hostEmployerPreferredQualifications.$inferSelect;
-export type InsertHostEmployerPreferredQualification = z.infer<typeof insertHostEmployerPreferredQualificationSchema>;
+// TEMP: export type InsertHostEmployerPreferredQualification = z.infer<typeof insertHostEmployerPreferredQualificationSchema>;
 
 // Enrichment Programs
 export const enrichmentPrograms = pgTable("enrichment_programs", {
@@ -1249,7 +1262,7 @@ export const insertEnrichmentProgramSchema = createInsertSchema(enrichmentProgra
   id: true,
   createdAt: true,
   updatedAt: true,
-} as const);
+});
 
 // Enrichment Program Participants
 export const enrichmentParticipants = pgTable("enrichment_participants", {
@@ -1270,7 +1283,7 @@ export const insertEnrichmentParticipantSchema = createInsertSchema(enrichmentPa
   id: true,
   createdAt: true,
   updatedAt: true,
-} as const);
+});
 
 // Enrichment Workshops/Events
 export const enrichmentWorkshops = pgTable("enrichment_workshops", {
@@ -1293,7 +1306,7 @@ export const insertEnrichmentWorkshopSchema = createInsertSchema(enrichmentWorks
   id: true,
   createdAt: true,
   updatedAt: true,
-} as const);
+});
 
 // Workshop Attendees
 export const workshopAttendees = pgTable("workshop_attendees", {
@@ -1312,20 +1325,20 @@ export const insertWorkshopAttendeeSchema = createInsertSchema(workshopAttendees
   id: true,
   createdAt: true,
   updatedAt: true,
-} as const);
+});
 
 // Types export
 export type EnrichmentProgram = typeof enrichmentPrograms.$inferSelect;
-export type InsertEnrichmentProgram = z.infer<typeof insertEnrichmentProgramSchema>;
+// TEMP: export type InsertEnrichmentProgram = z.infer<typeof insertEnrichmentProgramSchema>;
 
 export type EnrichmentParticipant = typeof enrichmentParticipants.$inferSelect;
-export type InsertEnrichmentParticipant = z.infer<typeof insertEnrichmentParticipantSchema>;
+// TEMP: export type InsertEnrichmentParticipant = z.infer<typeof insertEnrichmentParticipantSchema>;
 
 export type EnrichmentWorkshop = typeof enrichmentWorkshops.$inferSelect;
-export type InsertEnrichmentWorkshop = z.infer<typeof insertEnrichmentWorkshopSchema>;
+// TEMP: export type InsertEnrichmentWorkshop = z.infer<typeof insertEnrichmentWorkshopSchema>;
 
 export type WorkshopAttendee = typeof workshopAttendees.$inferSelect;
-export type InsertWorkshopAttendee = z.infer<typeof insertWorkshopAttendeeSchema>;
+// TEMP: export type InsertWorkshopAttendee = z.infer<typeof insertWorkshopAttendeeSchema>;
 
 // Progress Review Templates
 export const progressReviewTemplates = pgTable("progress_review_templates", {
@@ -1344,7 +1357,7 @@ export const insertProgressReviewTemplateSchema = createInsertSchema(progressRev
   id: true,
   createdAt: true,
   updatedAt: true,
-} as const);
+});
 
 // Progress Reviews
 export const progressReviews = pgTable("progress_reviews", {
@@ -1376,7 +1389,7 @@ export const insertProgressReviewSchema = createInsertSchema(progressReviews).om
   id: true,
   createdAt: true,
   updatedAt: true,
-} as const);
+});
 
 // Progress Review Participants
 export const progressReviewParticipants = pgTable("progress_review_participants", {
@@ -1392,7 +1405,7 @@ export const progressReviewParticipants = pgTable("progress_review_participants"
 export const insertProgressReviewParticipantSchema = createInsertSchema(progressReviewParticipants).omit({
   id: true,
   createdAt: true,
-} as const);
+});
 
 // Progress Review Action Items
 export const progressReviewActionItems = pgTable("progress_review_action_items", {
@@ -1414,7 +1427,7 @@ export const insertProgressReviewActionItemSchema = createInsertSchema(progressR
   id: true,
   createdAt: true,
   updatedAt: true,
-} as const);
+});
 
 // Progress Review Documents
 export const progressReviewDocuments = pgTable("progress_review_documents", {
@@ -1428,23 +1441,23 @@ export const progressReviewDocuments = pgTable("progress_review_documents", {
 export const insertProgressReviewDocumentSchema = createInsertSchema(progressReviewDocuments).omit({
   id: true,
   createdAt: true,
-} as const);
+});
 
 // Types for Progress Reviews
 export type ProgressReviewTemplate = typeof progressReviewTemplates.$inferSelect;
-export type InsertProgressReviewTemplate = z.infer<typeof insertProgressReviewTemplateSchema>;
+// TEMP: export type InsertProgressReviewTemplate = z.infer<typeof insertProgressReviewTemplateSchema>;
 
 export type ProgressReview = typeof progressReviews.$inferSelect;
-export type InsertProgressReview = z.infer<typeof insertProgressReviewSchema>;
+// TEMP: export type InsertProgressReview = z.infer<typeof insertProgressReviewSchema>;
 
 export type ProgressReviewParticipant = typeof progressReviewParticipants.$inferSelect;
-export type InsertProgressReviewParticipant = z.infer<typeof insertProgressReviewParticipantSchema>;
+// TEMP: export type InsertProgressReviewParticipant = z.infer<typeof insertProgressReviewParticipantSchema>;
 
 export type ProgressReviewActionItem = typeof progressReviewActionItems.$inferSelect;
-export type InsertProgressReviewActionItem = z.infer<typeof insertProgressReviewActionItemSchema>;
+// TEMP: export type InsertProgressReviewActionItem = z.infer<typeof insertProgressReviewActionItemSchema>;
 
 export type ProgressReviewDocument = typeof progressReviewDocuments.$inferSelect;
-export type InsertProgressReviewDocument = z.infer<typeof insertProgressReviewDocumentSchema>;
+// TEMP: export type InsertProgressReviewDocument = z.infer<typeof insertProgressReviewDocumentSchema>;
 
 // Export module schemas
 export * from './schema/awards';

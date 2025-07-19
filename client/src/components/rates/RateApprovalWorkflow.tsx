@@ -86,10 +86,10 @@ export function RateApprovalWorkflow({
   const [isApproveDialogOpen, setIsApproveDialogOpen] = useState(false);
   const [isRejectDialogOpen, setIsRejectDialogOpen] = useState(false);
   const [isHistoryDialogOpen, setIsHistoryDialogOpen] = useState(false);
-  
+
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  
+
   // Setup forms for approval and rejection
   const approveForm = useForm<z.infer<typeof approveFormSchema>>({
     resolver: zodResolver(approveFormSchema),
@@ -97,18 +97,22 @@ export function RateApprovalWorkflow({
       comments: '',
     },
   });
-  
+
   const rejectForm = useForm<z.infer<typeof rejectFormSchema>>({
     resolver: zodResolver(rejectFormSchema),
     defaultValues: {
       rejectionReason: '',
     },
   });
-  
+
   // Mutations for API interactions
   const approveMutation = useMutation({
     mutationFn: async (data: z.infer<typeof approveFormSchema>) => {
-      const response = await apiRequest('POST', `/api/payroll/charge-rates/${calculation.id}/approve`, data);
+      const response = await apiRequest(
+        'POST',
+        `/api/payroll/charge-rates/${calculation.id}/approve`,
+        data
+      );
       return response.json();
     },
     onSuccess: () => {
@@ -121,7 +125,7 @@ export function RateApprovalWorkflow({
       setIsApproveDialogOpen(false);
       if (onApprovalComplete) onApprovalComplete();
     },
-    onError: (error) => {
+    onError: error => {
       toast({
         title: 'Approval Failed',
         description: error.message || 'Failed to approve the calculation',
@@ -129,10 +133,14 @@ export function RateApprovalWorkflow({
       });
     },
   });
-  
+
   const rejectMutation = useMutation({
     mutationFn: async (data: z.infer<typeof rejectFormSchema>) => {
-      const response = await apiRequest('POST', `/api/payroll/charge-rates/${calculation.id}/reject`, data);
+      const response = await apiRequest(
+        'POST',
+        `/api/payroll/charge-rates/${calculation.id}/reject`,
+        data
+      );
       return response.json();
     },
     onSuccess: () => {
@@ -145,7 +153,7 @@ export function RateApprovalWorkflow({
       setIsRejectDialogOpen(false);
       if (onApprovalComplete) onApprovalComplete();
     },
-    onError: (error) => {
+    onError: error => {
       toast({
         title: 'Rejection Failed',
         description: error.message || 'Failed to reject the calculation',
@@ -153,63 +161,83 @@ export function RateApprovalWorkflow({
       });
     },
   });
-  
+
   // Handle form submissions
   const onApproveSubmit = (data: z.infer<typeof approveFormSchema>) => {
     approveMutation.mutate(data);
   };
-  
+
   const onRejectSubmit = (data: z.infer<typeof rejectFormSchema>) => {
     rejectMutation.mutate(data);
   };
 
   // Determine if workflow is in the system
   const hasWorkflow = calculation.approvalWorkflow && calculation.approvalWorkflow.length > 0;
-  
+
   // Get current step if workflow exists
   const getCurrentStep = () => {
     if (!hasWorkflow) return null;
-    
+
     const pendingSteps = calculation.approvalWorkflow!.filter(step => step.status === 'pending');
     return pendingSteps.length > 0 ? pendingSteps[0] : null;
   };
-  
+
   const currentStep = getCurrentStep();
-  
+
   // Helper function to get status badge
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'approved':
-        return <Badge className="bg-green-500"><Check className="h-3 w-3 mr-1" /> Approved</Badge>;
+        return (
+          <Badge className="bg-green-500">
+            <Check className="h-3 w-3 mr-1" /> Approved
+          </Badge>
+        );
       case 'rejected':
-        return <Badge variant="destructive"><X className="h-3 w-3 mr-1" /> Rejected</Badge>;
+        return (
+          <Badge variant="destructive">
+            <X className="h-3 w-3 mr-1" /> Rejected
+          </Badge>
+        );
       case 'pending':
-        return <Badge variant="outline" className="border-amber-500 text-amber-500"><Clock className="h-3 w-3 mr-1" /> Pending</Badge>;
+        return (
+          <Badge variant="outline" className="border-amber-500 text-amber-500">
+            <Clock className="h-3 w-3 mr-1" /> Pending
+          </Badge>
+        );
       default:
         return <Badge variant="outline">Not Started</Badge>;
     }
   };
-  
+
   return (
     <Card className={className}>
       <CardHeader className="pb-3">
         <div className="flex justify-between items-center">
           <CardTitle>Approval Status</CardTitle>
           {calculation.approved ? (
-            <Badge className="bg-green-500"><Check className="h-3 w-3 mr-1" /> Approved</Badge>
+            <Badge className="bg-green-500">
+              <Check className="h-3 w-3 mr-1" /> Approved
+            </Badge>
           ) : calculation.rejectionReason ? (
-            <Badge variant="destructive"><X className="h-3 w-3 mr-1" /> Rejected</Badge>
+            <Badge variant="destructive">
+              <X className="h-3 w-3 mr-1" /> Rejected
+            </Badge>
           ) : (
-            <Badge variant="outline" className="border-amber-500 text-amber-500"><Clock className="h-3 w-3 mr-1" /> Pending Approval</Badge>
+            <Badge variant="outline" className="border-amber-500 text-amber-500">
+              <Clock className="h-3 w-3 mr-1" /> Pending Approval
+            </Badge>
           )}
         </div>
         <CardDescription>
-          {calculation.approved ? 'This charge rate has been approved and is ready for use.' :
-           calculation.rejectionReason ? 'This charge rate has been rejected.' :
-           'This charge rate is pending approval.'}
+          {calculation.approved
+            ? 'This charge rate has been approved and is ready for use.'
+            : calculation.rejectionReason
+              ? 'This charge rate has been rejected.'
+              : 'This charge rate is pending approval.'}
         </CardDescription>
       </CardHeader>
-      
+
       <CardContent>
         {/* Show workflow status if available */}
         {hasWorkflow && (
@@ -229,10 +257,10 @@ export function RateApprovalWorkflow({
                 </div>
               ))}
             </div>
-            
-            <Button 
-              variant="outline" 
-              size="sm" 
+
+            <Button
+              variant="outline"
+              size="sm"
               className="mt-2"
               onClick={() => setIsHistoryDialogOpen(true)}
             >
@@ -241,7 +269,7 @@ export function RateApprovalWorkflow({
             </Button>
           </div>
         )}
-        
+
         {/* Show rejection reason if rejected */}
         {calculation.rejectionReason && (
           <div className="bg-destructive/10 p-3 rounded-md mb-4">
@@ -254,16 +282,18 @@ export function RateApprovalWorkflow({
             </div>
           </div>
         )}
-        
+
         {/* Current pending step info */}
         {currentStep && (
           <div className="bg-primary/5 p-3 rounded-md">
             <h4 className="text-sm font-medium">Current Approver</h4>
-            <p className="text-sm mt-1">{currentStep.name} ({currentStep.role})</p>
+            <p className="text-sm mt-1">
+              {currentStep.name} ({currentStep.role})
+            </p>
           </div>
         )}
       </CardContent>
-      
+
       <CardFooter className="flex justify-end space-x-2">
         {!calculation.approved && !calculation.rejectionReason && (
           <>
@@ -277,10 +307,11 @@ export function RateApprovalWorkflow({
                 <DialogHeader>
                   <DialogTitle>Reject Calculation</DialogTitle>
                   <DialogDescription>
-                    Please provide a reason for rejecting this calculation. This will be visible to all stakeholders.
+                    Please provide a reason for rejecting this calculation. This will be visible to
+                    all stakeholders.
                   </DialogDescription>
                 </DialogHeader>
-                
+
                 <Form {...rejectForm}>
                   <form onSubmit={rejectForm.handleSubmit(onRejectSubmit)} className="space-y-4">
                     <FormField
@@ -290,7 +321,7 @@ export function RateApprovalWorkflow({
                         <FormItem>
                           <FormLabel>Rejection Reason</FormLabel>
                           <FormControl>
-                            <Textarea 
+                            <Textarea
                               placeholder="Please explain why this calculation is being rejected"
                               {...field}
                               rows={4}
@@ -300,17 +331,17 @@ export function RateApprovalWorkflow({
                         </FormItem>
                       )}
                     />
-                    
+
                     <DialogFooter>
-                      <Button 
-                        type="button" 
-                        variant="outline" 
+                      <Button
+                        type="button"
+                        variant="outline"
                         onClick={() => setIsRejectDialogOpen(false)}
                       >
                         Cancel
                       </Button>
-                      <Button 
-                        type="submit" 
+                      <Button
+                        type="submit"
                         variant="destructive"
                         disabled={rejectMutation.isPending}
                       >
@@ -321,7 +352,7 @@ export function RateApprovalWorkflow({
                 </Form>
               </DialogContent>
             </Dialog>
-            
+
             <Dialog open={isApproveDialogOpen} onOpenChange={setIsApproveDialogOpen}>
               <DialogTrigger asChild>
                 <Button>
@@ -335,7 +366,7 @@ export function RateApprovalWorkflow({
                     Are you sure you want to approve this charge rate calculation?
                   </DialogDescription>
                 </DialogHeader>
-                
+
                 <Form {...approveForm}>
                   <form onSubmit={approveForm.handleSubmit(onApproveSubmit)} className="space-y-4">
                     <FormField
@@ -345,7 +376,7 @@ export function RateApprovalWorkflow({
                         <FormItem>
                           <FormLabel>Comments (Optional)</FormLabel>
                           <FormControl>
-                            <Textarea 
+                            <Textarea
                               placeholder="Add any comments about this approval"
                               {...field}
                               rows={3}
@@ -357,19 +388,16 @@ export function RateApprovalWorkflow({
                         </FormItem>
                       )}
                     />
-                    
+
                     <DialogFooter>
-                      <Button 
-                        type="button" 
-                        variant="outline" 
+                      <Button
+                        type="button"
+                        variant="outline"
                         onClick={() => setIsApproveDialogOpen(false)}
                       >
                         Cancel
                       </Button>
-                      <Button 
-                        type="submit"
-                        disabled={approveMutation.isPending}
-                      >
+                      <Button type="submit" disabled={approveMutation.isPending}>
                         {approveMutation.isPending ? 'Approving...' : 'Confirm Approval'}
                       </Button>
                     </DialogFooter>
@@ -380,7 +408,7 @@ export function RateApprovalWorkflow({
           </>
         )}
       </CardFooter>
-      
+
       {/* History dialog */}
       <Dialog open={isHistoryDialogOpen} onOpenChange={setIsHistoryDialogOpen}>
         <DialogContent>
@@ -390,37 +418,37 @@ export function RateApprovalWorkflow({
               Complete history of the approval workflow for this charge rate calculation.
             </DialogDescription>
           </DialogHeader>
-          
+
           <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
-            {hasWorkflow && calculation.approvalWorkflow!.map(step => {
-              if (step.status === 'not_started') return null;
-              
-              return (
-                <div key={step.id} className="border-b pb-3">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h4 className="text-sm font-medium">{step.name}</h4>
-                      <p className="text-xs text-muted-foreground">{step.role}</p>
+            {hasWorkflow &&
+              calculation.approvalWorkflow!.map(step => {
+                if (step.status === 'not_started') return null;
+
+                return (
+                  <div key={step.id} className="border-b pb-3">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h4 className="text-sm font-medium">{step.name}</h4>
+                        <p className="text-xs text-muted-foreground">{step.role}</p>
+                      </div>
+                      {getStatusBadge(step.status)}
                     </div>
-                    {getStatusBadge(step.status)}
+
+                    {step.completedBy && step.completedAt && (
+                      <div className="mt-2 text-xs text-muted-foreground">
+                        {step.status === 'approved' ? 'Approved' : 'Rejected'} by {step.completedBy}{' '}
+                        on {new Date(step.completedAt).toLocaleString()}
+                      </div>
+                    )}
+
+                    {step.comments && (
+                      <div className="mt-2 bg-muted/30 p-2 rounded text-sm">{step.comments}</div>
+                    )}
                   </div>
-                  
-                  {step.completedBy && step.completedAt && (
-                    <div className="mt-2 text-xs text-muted-foreground">
-                      {step.status === 'approved' ? 'Approved' : 'Rejected'} by {step.completedBy} on {new Date(step.completedAt).toLocaleString()}
-                    </div>
-                  )}
-                  
-                  {step.comments && (
-                    <div className="mt-2 bg-muted/30 p-2 rounded text-sm">
-                      {step.comments}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
+                );
+              })}
           </div>
-          
+
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsHistoryDialogOpen(false)}>
               Close

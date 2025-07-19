@@ -1,12 +1,12 @@
 import { db } from './db';
-import { 
-  gtoComplianceStandards, 
-  complianceAssessments, 
+import {
+  gtoComplianceStandards,
+  complianceAssessments,
   apprenticeRecruitment,
   hostEmployerAgreements,
   apprenticeInduction,
   complaints,
-  appeals
+  appeals,
 } from '@shared/schema';
 import { sql } from 'drizzle-orm';
 
@@ -211,6 +211,6 @@ export async function migrateGtoComplianceSchema() {
     console.error('Error creating Appeals table:', error);
     throw error;
   }
-  
+
   console.log('GTO Compliance schema migration completed successfully');
 }

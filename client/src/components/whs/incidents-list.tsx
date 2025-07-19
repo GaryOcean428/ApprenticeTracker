@@ -1,12 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { 
-  Card, 
-  CardContent, 
-  CardHeader, 
-  CardTitle,
-  CardDescription
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import {
   Table,
   TableBody,
@@ -34,15 +28,15 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { 
-  AlertTriangle, 
-  FileWarning, 
-  Search, 
-  Plus, 
+import {
+  AlertTriangle,
+  FileWarning,
+  Search,
+  Plus,
   RefreshCw,
   Eye,
   Pencil,
-  Trash
+  Trash,
 } from 'lucide-react';
 import NewIncidentForm from './new-incident-form';
 import IncidentDetailsView from './incident-details-view';
@@ -123,7 +117,9 @@ export default function IncidentsList() {
           <div className="flex justify-between items-center">
             <div>
               <CardTitle>Incidents & Hazards</CardTitle>
-              <CardDescription>Manage and track all reported safety incidents and hazards</CardDescription>
+              <CardDescription>
+                Manage and track all reported safety incidents and hazards
+              </CardDescription>
             </div>
             <Dialog open={showNewIncidentForm} onOpenChange={setShowNewIncidentForm}>
               <DialogTrigger asChild>
@@ -139,10 +135,12 @@ export default function IncidentsList() {
                     Fill out the details of the incident or hazard that occurred.
                   </DialogDescription>
                 </DialogHeader>
-                <NewIncidentForm onSuccess={() => {
-                  setShowNewIncidentForm(false);
-                  refetch();
-                }} />
+                <NewIncidentForm
+                  onSuccess={() => {
+                    setShowNewIncidentForm(false);
+                    refetch();
+                  }}
+                />
               </DialogContent>
             </Dialog>
           </div>
@@ -156,13 +154,13 @@ export default function IncidentsList() {
                   placeholder="Search incidents..."
                   className="pl-8"
                   value={search}
-                  onChange={(e) => setSearch(e.target.value)}
+                  onChange={e => setSearch(e.target.value)}
                 />
               </div>
               <Button type="submit">Search</Button>
             </form>
             <div className="flex flex-wrap sm:flex-nowrap gap-2">
-              <Select value={type || ''} onValueChange={(value) => setType(value || null)}>
+              <Select value={type || ''} onValueChange={value => setType(value || null)}>
                 <SelectTrigger className="w-[130px]">
                   <SelectValue placeholder="Type" />
                 </SelectTrigger>
@@ -172,7 +170,7 @@ export default function IncidentsList() {
                   <SelectItem value="hazard">Hazard</SelectItem>
                 </SelectContent>
               </Select>
-              <Select value={severity || ''} onValueChange={(value) => setSeverity(value || null)}>
+              <Select value={severity || ''} onValueChange={value => setSeverity(value || null)}>
                 <SelectTrigger className="w-[130px]">
                   <SelectValue placeholder="Severity" />
                 </SelectTrigger>
@@ -183,7 +181,7 @@ export default function IncidentsList() {
                   <SelectItem value="low">Low</SelectItem>
                 </SelectContent>
               </Select>
-              <Select value={status || ''} onValueChange={(value) => setStatus(value || null)}>
+              <Select value={status || ''} onValueChange={value => setStatus(value || null)}>
                 <SelectTrigger className="w-[130px]">
                   <SelectValue placeholder="Status" />
                 </SelectTrigger>
@@ -245,8 +243,8 @@ export default function IncidentsList() {
                           <div className="flex justify-end gap-2">
                             <Dialog>
                               <DialogTrigger asChild>
-                                <Button 
-                                  variant="ghost" 
+                                <Button
+                                  variant="ghost"
                                   size="sm"
                                   onClick={() => setSelectedIncidentId(incident.id)}
                                 >
@@ -285,9 +283,11 @@ export default function IncidentsList() {
 
               <div className="flex justify-between items-center mt-4">
                 <div className="text-sm text-muted-foreground">
-                  Showing {data?.pagination?.total ? 
-                    `${(page - 1) * limit + 1}-${Math.min(page * limit, data.pagination.total)} of ${data.pagination.total}` : 
-                    '0'} incidents
+                  Showing{' '}
+                  {data?.pagination?.total
+                    ? `${(page - 1) * limit + 1}-${Math.min(page * limit, data.pagination.total)} of ${data.pagination.total}`
+                    : '0'}{' '}
+                  incidents
                 </div>
                 <div className="flex gap-2">
                   <Button

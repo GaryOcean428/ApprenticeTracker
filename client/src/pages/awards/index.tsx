@@ -1,15 +1,9 @@
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { Search, Filter, Plus, Edit, Trash2, CalendarClock } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { Search, Filter, Plus, Edit, Trash2, CalendarClock } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Table,
   TableBody,
@@ -17,14 +11,14 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from '@/components/ui/table';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -35,11 +29,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { Badge } from "@/components/ui/badge";
-import { toast } from "sonner";
-import { Link } from "wouter";
-import { queryClient } from "@/lib/queryClient";
+} from '@/components/ui/alert-dialog';
+import { Badge } from '@/components/ui/badge';
+import { toast } from 'sonner';
+import { Link } from 'wouter';
+import { queryClient } from '@/lib/queryClient';
 
 // Define Award interface
 interface Award {
@@ -57,59 +51,64 @@ interface Award {
 
 const AwardsList = () => {
   const [filter, setFilter] = useState({
-    search: "",
-    status: "all_statuses",
+    search: '',
+    status: 'all_statuses',
   });
-  
+
   // Fetch awards
-  const { data: awards, isLoading, error } = useQuery<Award[]>({
+  const {
+    data: awards,
+    isLoading,
+    error,
+  } = useQuery<Award[]>({
     queryKey: ['/api/awards'],
     queryFn: async () => {
       const res = await fetch('/api/awards');
       if (!res.ok) throw new Error('Failed to fetch awards');
       return res.json();
-    }
+    },
   });
-  
+
   // Filter awards based on search and filters
   const filteredAwards = awards?.filter((award: Award) => {
-    const matchesSearch = 
-      filter.search === "" || 
+    const matchesSearch =
+      filter.search === '' ||
       award.name?.toLowerCase().includes(filter.search.toLowerCase()) ||
       award.code?.toLowerCase().includes(filter.search.toLowerCase()) ||
       award.fairWorkTitle?.toLowerCase().includes(filter.search.toLowerCase());
-    
-    const matchesStatus = filter.status === "all_statuses" || 
-      (filter.status === "active" && award.isActive) ||
-      (filter.status === "inactive" && !award.isActive);
-    
+
+    const matchesStatus =
+      filter.status === 'all_statuses' ||
+      (filter.status === 'active' && award.isActive) ||
+      (filter.status === 'inactive' && !award.isActive);
+
     return matchesSearch && matchesStatus;
   });
-  
+
   // Format dates for display
   const formatDate = (dateString?: Date | string | null) => {
-    if (!dateString) return "N/A";
+    if (!dateString) return 'N/A';
     return new Date(dateString).toLocaleDateString();
   };
-  
+
   // Handle award deletion
   const deleteAward = async (id: number) => {
     try {
       const res = await fetch(`/api/awards/${id}`, {
         method: 'DELETE',
       });
-      
+
       if (!res.ok) {
         throw new Error('Failed to delete award');
       }
-      
+
       toast.success('Award deleted successfully');
       queryClient.invalidateQueries({ queryKey: ['/api/awards'] });
     } catch (error) {
       toast.error(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
-  
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -120,7 +119,7 @@ const AwardsList = () => {
       </div>
     );
   }
-  
+
   if (error) {
     return (
       <Card>
@@ -129,10 +128,10 @@ const AwardsList = () => {
         </CardHeader>
         <CardContent>
           <p className="text-destructive">
-            {error instanceof Error ? error.message : "Failed to load awards"}
+            {error instanceof Error ? error.message : 'Failed to load awards'}
           </p>
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             onClick={() => queryClient.invalidateQueries({ queryKey: ['/api/awards'] })}
             className="mt-4"
           >
@@ -142,7 +141,7 @@ const AwardsList = () => {
       </Card>
     );
   }
-  
+
   return (
     <>
       <div className="flex justify-between items-center mb-6">
@@ -154,7 +153,7 @@ const AwardsList = () => {
           </Link>
         </Button>
       </div>
-      
+
       <Card className="mb-8">
         <CardHeader>
           <CardTitle>Modern Awards Management</CardTitle>
@@ -171,12 +170,12 @@ const AwardsList = () => {
                 placeholder="Search awards..."
                 className="pl-8"
                 value={filter.search}
-                onChange={(e) => setFilter({...filter, search: e.target.value})}
+                onChange={e => setFilter({ ...filter, search: e.target.value })}
               />
             </div>
             <Select
               value={filter.status}
-              onValueChange={(value) => setFilter({...filter, status: value})}
+              onValueChange={value => setFilter({ ...filter, status: value })}
             >
               <SelectTrigger className="w-full md:w-48">
                 <Filter className="mr-2 h-4 w-4" />
@@ -189,7 +188,7 @@ const AwardsList = () => {
               </SelectContent>
             </Select>
           </div>
-          
+
           {filteredAwards && filteredAwards.length > 0 ? (
             <div className="rounded-md border">
               <Table>
@@ -208,13 +207,21 @@ const AwardsList = () => {
                     <TableRow key={award.id}>
                       <TableCell className="font-medium">{award.code}</TableCell>
                       <TableCell>{award.name}</TableCell>
-                      <TableCell className="hidden md:table-cell">{award.fairWorkReference || 'N/A'}</TableCell>
-                      <TableCell className="hidden md:table-cell">{formatDate(award.effectiveDate)}</TableCell>
+                      <TableCell className="hidden md:table-cell">
+                        {award.fairWorkReference || 'N/A'}
+                      </TableCell>
+                      <TableCell className="hidden md:table-cell">
+                        {formatDate(award.effectiveDate)}
+                      </TableCell>
                       <TableCell>
                         {award.isActive ? (
-                          <Badge variant="default" className="bg-green-100 text-success">Active</Badge>
+                          <Badge variant="default" className="bg-green-100 text-success">
+                            Active
+                          </Badge>
                         ) : (
-                          <Badge variant="outline" className="bg-muted text-muted-foreground">Inactive</Badge>
+                          <Badge variant="outline" className="bg-muted text-muted-foreground">
+                            Inactive
+                          </Badge>
                         )}
                       </TableCell>
                       <TableCell className="text-right">
@@ -242,12 +249,14 @@ const AwardsList = () => {
                               <AlertDialogHeader>
                                 <AlertDialogTitle>Delete Award</AlertDialogTitle>
                                 <AlertDialogDescription>
-                                  Are you sure you want to delete the award "{award.name}"? This action cannot be undone and may affect apprentices, host employers, and payroll data.
+                                  Are you sure you want to delete the award "{award.name}"? This
+                                  action cannot be undone and may affect apprentices, host
+                                  employers, and payroll data.
                                 </AlertDialogDescription>
                               </AlertDialogHeader>
                               <AlertDialogFooter>
                                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction 
+                                <AlertDialogAction
                                   onClick={() => deleteAward(award.id)}
                                   className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                                 >

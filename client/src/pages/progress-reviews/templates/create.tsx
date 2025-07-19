@@ -16,7 +16,12 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { Separator } from '@/components/ui/separator';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
 import { Switch } from '@/components/ui/switch';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { getDefaultFormStructure } from '@/lib/progress-review-utils';
@@ -42,12 +47,12 @@ interface FormStructure {
 export default function CreateTemplatePage() {
   const [_, navigate] = useLocation();
   const { toast } = useToast();
-  
+
   const [templateName, setTemplateName] = useState('');
   const [templateVersion, setTemplateVersion] = useState('1.0');
   const [description, setDescription] = useState('');
   const [formStructure, setFormStructure] = useState<FormStructure>(getDefaultFormStructure());
-  
+
   const createTemplateMutation = useMutation({
     mutationFn: async (data: any) => {
       const response = await apiRequest('POST', '/api/progress-reviews/templates', data);
@@ -119,7 +124,12 @@ export default function CreateTemplatePage() {
     setFormStructure({ ...formStructure, sections: updatedSections });
   };
 
-  const updateQuestion = (sectionIndex: number, questionIndex: number, field: string, value: any) => {
+  const updateQuestion = (
+    sectionIndex: number,
+    questionIndex: number,
+    field: string,
+    value: any
+  ) => {
     const updatedSections = [...formStructure.sections];
     updatedSections[sectionIndex].questions[questionIndex] = {
       ...updatedSections[sectionIndex].questions[questionIndex],
@@ -188,10 +198,7 @@ export default function CreateTemplatePage() {
           <h1 className="text-3xl font-bold">Create Review Template</h1>
           <p className="text-muted-foreground mt-1">Design a new template for progress reviews</p>
         </div>
-        <Button 
-          onClick={handleSubmit} 
-          disabled={createTemplateMutation.isPending}
-        >
+        <Button onClick={handleSubmit} disabled={createTemplateMutation.isPending}>
           <Save className="mr-2 h-4 w-4" />
           {createTemplateMutation.isPending ? 'Saving...' : 'Save Template'}
         </Button>
@@ -211,7 +218,7 @@ export default function CreateTemplatePage() {
                 <Input
                   id="templateName"
                   value={templateName}
-                  onChange={(e) => setTemplateName(e.target.value)}
+                  onChange={e => setTemplateName(e.target.value)}
                   placeholder="e.g., Monthly Apprentice Review"
                 />
               </div>
@@ -220,7 +227,7 @@ export default function CreateTemplatePage() {
                 <Input
                   id="templateVersion"
                   value={templateVersion}
-                  onChange={(e) => setTemplateVersion(e.target.value)}
+                  onChange={e => setTemplateVersion(e.target.value)}
                   placeholder="e.g., 1.0"
                 />
               </div>
@@ -229,7 +236,7 @@ export default function CreateTemplatePage() {
                 <Textarea
                   id="description"
                   value={description}
-                  onChange={(e) => setDescription(e.target.value)}
+                  onChange={e => setDescription(e.target.value)}
                   placeholder="Describe the purpose and use case of this template"
                   rows={4}
                 />
@@ -246,7 +253,10 @@ export default function CreateTemplatePage() {
               <CardDescription>Define the sections and questions for this template</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              <Accordion type="multiple" defaultValue={formStructure.sections.map((_, i) => `section-${i}`)}>
+              <Accordion
+                type="multiple"
+                defaultValue={formStructure.sections.map((_, i) => `section-${i}`)}
+              >
                 {formStructure.sections.map((section, sectionIndex) => (
                   <AccordionItem key={sectionIndex} value={`section-${sectionIndex}`}>
                     <AccordionTrigger>
@@ -262,7 +272,7 @@ export default function CreateTemplatePage() {
                             <Input
                               id={`section-${sectionIndex}-title`}
                               value={section.title}
-                              onChange={(e) => updateSection(sectionIndex, 'title', e.target.value)}
+                              onChange={e => updateSection(sectionIndex, 'title', e.target.value)}
                               placeholder="Enter section title"
                             />
                           </div>
@@ -276,11 +286,15 @@ export default function CreateTemplatePage() {
                           </Button>
                         </div>
                         <div className="space-y-2">
-                          <Label htmlFor={`section-${sectionIndex}-description`}>Section Description</Label>
+                          <Label htmlFor={`section-${sectionIndex}-description`}>
+                            Section Description
+                          </Label>
                           <Textarea
                             id={`section-${sectionIndex}-description`}
                             value={section.description}
-                            onChange={(e) => updateSection(sectionIndex, 'description', e.target.value)}
+                            onChange={e =>
+                              updateSection(sectionIndex, 'description', e.target.value)
+                            }
                             placeholder="Describe this section"
                             rows={2}
                           />
@@ -304,14 +318,21 @@ export default function CreateTemplatePage() {
                             <div key={questionIndex} className="p-4 border rounded-md space-y-3">
                               <div className="flex justify-between items-start">
                                 <div className="space-y-2 flex-1">
-                                  <Label htmlFor={`question-${sectionIndex}-${questionIndex}-label`}>
+                                  <Label
+                                    htmlFor={`question-${sectionIndex}-${questionIndex}-label`}
+                                  >
                                     Question Label
                                   </Label>
                                   <Input
                                     id={`question-${sectionIndex}-${questionIndex}-label`}
                                     value={question.label}
-                                    onChange={(e) =>
-                                      updateQuestion(sectionIndex, questionIndex, 'label', e.target.value)
+                                    onChange={e =>
+                                      updateQuestion(
+                                        sectionIndex,
+                                        questionIndex,
+                                        'label',
+                                        e.target.value
+                                      )
                                     }
                                     placeholder="Enter question label"
                                   />
@@ -327,14 +348,21 @@ export default function CreateTemplatePage() {
                               </div>
 
                               <div className="space-y-2">
-                                <Label htmlFor={`question-${sectionIndex}-${questionIndex}-description`}>
+                                <Label
+                                  htmlFor={`question-${sectionIndex}-${questionIndex}-description`}
+                                >
                                   Question Description
                                 </Label>
                                 <Textarea
                                   id={`question-${sectionIndex}-${questionIndex}-description`}
                                   value={question.description}
-                                  onChange={(e) =>
-                                    updateQuestion(sectionIndex, questionIndex, 'description', e.target.value)
+                                  onChange={e =>
+                                    updateQuestion(
+                                      sectionIndex,
+                                      questionIndex,
+                                      'description',
+                                      e.target.value
+                                    )
                                   }
                                   placeholder="Describe this question"
                                   rows={2}
@@ -349,8 +377,13 @@ export default function CreateTemplatePage() {
                                   <select
                                     id={`question-${sectionIndex}-${questionIndex}-type`}
                                     value={question.type}
-                                    onChange={(e) =>
-                                      updateQuestion(sectionIndex, questionIndex, 'type', e.target.value)
+                                    onChange={e =>
+                                      updateQuestion(
+                                        sectionIndex,
+                                        questionIndex,
+                                        'type',
+                                        e.target.value
+                                      )
                                     }
                                     className="w-full border p-2 rounded-md"
                                   >
@@ -361,18 +394,27 @@ export default function CreateTemplatePage() {
                                   </select>
                                 </div>
                                 <div className="space-y-2">
-                                  <Label htmlFor={`question-${sectionIndex}-${questionIndex}-required`}>
+                                  <Label
+                                    htmlFor={`question-${sectionIndex}-${questionIndex}-required`}
+                                  >
                                     Required
                                   </Label>
                                   <div className="flex items-center space-x-2 pt-2">
                                     <Switch
                                       id={`question-${sectionIndex}-${questionIndex}-required`}
                                       checked={question.required}
-                                      onCheckedChange={(checked) =>
-                                        updateQuestion(sectionIndex, questionIndex, 'required', checked)
+                                      onCheckedChange={checked =>
+                                        updateQuestion(
+                                          sectionIndex,
+                                          questionIndex,
+                                          'required',
+                                          checked
+                                        )
                                       }
                                     />
-                                    <Label htmlFor={`question-${sectionIndex}-${questionIndex}-required`}>
+                                    <Label
+                                      htmlFor={`question-${sectionIndex}-${questionIndex}-required`}
+                                    >
                                       {question.required ? 'Required' : 'Optional'}
                                     </Label>
                                   </div>
@@ -406,7 +448,9 @@ export default function CreateTemplatePage() {
                 <div className="text-center p-10 border border-dashed rounded-md text-muted-foreground">
                   <FileText className="h-12 w-12 mx-auto mb-3 opacity-50" />
                   <p className="mb-2">No sections added yet</p>
-                  <p className="text-sm mb-4">A template must have at least one section with questions</p>
+                  <p className="text-sm mb-4">
+                    A template must have at least one section with questions
+                  </p>
                   <Button onClick={addSection}>
                     <Plus className="h-4 w-4 mr-1" /> Add First Section
                   </Button>
@@ -420,10 +464,7 @@ export default function CreateTemplatePage() {
               )}
             </CardContent>
             <CardFooter className="flex justify-end">
-              <Button
-                onClick={handleSubmit}
-                disabled={createTemplateMutation.isPending}
-              >
+              <Button onClick={handleSubmit} disabled={createTemplateMutation.isPending}>
                 <Save className="mr-2 h-4 w-4" />
                 {createTemplateMutation.isPending ? 'Saving...' : 'Save Template'}
               </Button>

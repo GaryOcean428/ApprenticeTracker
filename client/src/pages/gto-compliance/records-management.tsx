@@ -1,14 +1,14 @@
-import { useState } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { useLocation } from "wouter";
-import { 
-  Card, 
-  CardHeader, 
-  CardTitle, 
-  CardDescription, 
+import { useState } from 'react';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { useLocation } from 'wouter';
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
   CardContent,
-  CardFooter
-} from "@/components/ui/card";
+  CardFooter,
+} from '@/components/ui/card';
 import {
   Table,
   TableBody,
@@ -17,8 +17,8 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { 
+} from '@/components/ui/table';
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -26,15 +26,15 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { useToast } from "@/hooks/use-toast";
-import { 
-  FileText, 
-  Plus, 
-  FileCheck, 
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { useToast } from '@/hooks/use-toast';
+import {
+  FileText,
+  Plus,
+  FileCheck,
   Calendar,
   Search,
   Clock,
@@ -46,28 +46,28 @@ import {
   AlarmClock,
   FileArchive,
   Archive,
-  Folder
-} from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Label } from "@/components/ui/label";
-import { Progress } from "@/components/ui/progress";
-import { queryClient } from "@/lib/queryClient";
-import { 
+  Folder,
+} from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Label } from '@/components/ui/label';
+import { Progress } from '@/components/ui/progress';
+import { queryClient } from '@/lib/queryClient';
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 
 export default function RecordsManagement() {
   const { toast } = useToast();
   const [_, navigate] = useLocation();
-  const [activeTab, setActiveTab] = useState("records");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [typeFilter, setTypeFilter] = useState("all");
+  const [activeTab, setActiveTab] = useState('records');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [typeFilter, setTypeFilter] = useState('all');
 
   // Get GTO compliance standards related to Records Management
   const { data: standards, isLoading: standardsLoading } = useQuery({
@@ -76,7 +76,7 @@ export default function RecordsManagement() {
       const res = await fetch('/api/gto-compliance/standards?category=Records%20Management');
       if (!res.ok) throw new Error('Failed to fetch standards');
       return res.json();
-    }
+    },
   });
 
   // Fetch assessment data
@@ -86,7 +86,7 @@ export default function RecordsManagement() {
       const res = await fetch('/api/gto-compliance/assessments?category=Records%20Management');
       if (!res.ok) throw new Error('Failed to fetch assessments');
       return res.json();
-    }
+    },
   });
 
   // Fetch documents/records data (mock for now)
@@ -97,101 +97,113 @@ export default function RecordsManagement() {
       return [
         {
           id: 1,
-          title: "Records Management Policy",
-          type: "policy",
-          createdAt: "2024-04-01T00:00:00.000Z",
-          updatedAt: "2024-04-01T00:00:00.000Z",
-          expiryDate: "2025-04-01T00:00:00.000Z",
-          status: "current",
-          owner: "Compliance Officer",
-          location: "Digital/Policies/Records",
-          retentionPeriod: "7 years"
+          title: 'Records Management Policy',
+          type: 'policy',
+          createdAt: '2024-04-01T00:00:00.000Z',
+          updatedAt: '2024-04-01T00:00:00.000Z',
+          expiryDate: '2025-04-01T00:00:00.000Z',
+          status: 'current',
+          owner: 'Compliance Officer',
+          location: 'Digital/Policies/Records',
+          retentionPeriod: '7 years',
         },
         {
           id: 2,
-          title: "Document Control Procedure",
-          type: "procedure",
-          createdAt: "2024-03-15T00:00:00.000Z",
-          updatedAt: "2024-03-15T00:00:00.000Z",
-          expiryDate: "2025-03-15T00:00:00.000Z",
-          status: "current",
-          owner: "Quality Manager",
-          location: "Digital/Procedures/Records",
-          retentionPeriod: "7 years"
+          title: 'Document Control Procedure',
+          type: 'procedure',
+          createdAt: '2024-03-15T00:00:00.000Z',
+          updatedAt: '2024-03-15T00:00:00.000Z',
+          expiryDate: '2025-03-15T00:00:00.000Z',
+          status: 'current',
+          owner: 'Quality Manager',
+          location: 'Digital/Procedures/Records',
+          retentionPeriod: '7 years',
         },
         {
           id: 3,
-          title: "Records Storage Guidelines",
-          type: "guideline",
-          createdAt: "2024-02-10T00:00:00.000Z",
-          updatedAt: "2024-02-10T00:00:00.000Z",
-          expiryDate: "2025-02-10T00:00:00.000Z",
-          status: "current",
-          owner: "Compliance Officer",
-          location: "Digital/Guidelines/Records",
-          retentionPeriod: "7 years"
+          title: 'Records Storage Guidelines',
+          type: 'guideline',
+          createdAt: '2024-02-10T00:00:00.000Z',
+          updatedAt: '2024-02-10T00:00:00.000Z',
+          expiryDate: '2025-02-10T00:00:00.000Z',
+          status: 'current',
+          owner: 'Compliance Officer',
+          location: 'Digital/Guidelines/Records',
+          retentionPeriod: '7 years',
         },
         {
           id: 4,
-          title: "Apprentice Records Archiving Process",
-          type: "process",
-          createdAt: "2023-11-01T00:00:00.000Z",
-          updatedAt: "2024-01-20T00:00:00.000Z",
-          expiryDate: "2025-01-20T00:00:00.000Z",
-          status: "current",
-          owner: "Records Manager",
-          location: "Digital/Processes/Archiving",
-          retentionPeriod: "10 years"
+          title: 'Apprentice Records Archiving Process',
+          type: 'process',
+          createdAt: '2023-11-01T00:00:00.000Z',
+          updatedAt: '2024-01-20T00:00:00.000Z',
+          expiryDate: '2025-01-20T00:00:00.000Z',
+          status: 'current',
+          owner: 'Records Manager',
+          location: 'Digital/Processes/Archiving',
+          retentionPeriod: '10 years',
         },
         {
           id: 5,
-          title: "Annual Records Audit Template",
-          type: "template",
-          createdAt: "2023-09-15T00:00:00.000Z",
-          updatedAt: "2023-09-15T00:00:00.000Z",
-          expiryDate: "2024-09-15T00:00:00.000Z",
-          status: "review_due",
-          owner: "Compliance Officer",
-          location: "Digital/Templates/Audit",
-          retentionPeriod: "3 years"
+          title: 'Annual Records Audit Template',
+          type: 'template',
+          createdAt: '2023-09-15T00:00:00.000Z',
+          updatedAt: '2023-09-15T00:00:00.000Z',
+          expiryDate: '2024-09-15T00:00:00.000Z',
+          status: 'review_due',
+          owner: 'Compliance Officer',
+          location: 'Digital/Templates/Audit',
+          retentionPeriod: '3 years',
         },
         {
           id: 6,
-          title: "Digital Records Security Protocol",
-          type: "protocol",
-          createdAt: "2023-06-20T00:00:00.000Z",
-          updatedAt: "2023-06-20T00:00:00.000Z",
-          expiryDate: "2024-06-20T00:00:00.000Z",
-          status: "review_due",
-          owner: "IT Security Manager",
-          location: "Digital/Protocols/Security",
-          retentionPeriod: "5 years"
+          title: 'Digital Records Security Protocol',
+          type: 'protocol',
+          createdAt: '2023-06-20T00:00:00.000Z',
+          updatedAt: '2023-06-20T00:00:00.000Z',
+          expiryDate: '2024-06-20T00:00:00.000Z',
+          status: 'review_due',
+          owner: 'IT Security Manager',
+          location: 'Digital/Protocols/Security',
+          retentionPeriod: '5 years',
         },
         {
           id: 7,
-          title: "Historical Records Access Request Form",
-          type: "form",
-          createdAt: "2023-03-10T00:00:00.000Z",
-          updatedAt: "2023-03-10T00:00:00.000Z",
-          expiryDate: "2024-05-10T00:00:00.000Z",
-          status: "expired",
-          owner: "Administrative Officer",
-          location: "Digital/Forms/Records",
-          retentionPeriod: "2 years"
-        }
+          title: 'Historical Records Access Request Form',
+          type: 'form',
+          createdAt: '2023-03-10T00:00:00.000Z',
+          updatedAt: '2023-03-10T00:00:00.000Z',
+          expiryDate: '2024-05-10T00:00:00.000Z',
+          status: 'expired',
+          owner: 'Administrative Officer',
+          location: 'Digital/Forms/Records',
+          retentionPeriod: '2 years',
+        },
       ];
-    }
+    },
   });
 
   // Get status badge styling
-  const getStatusBadge = (status) => {
+  const getStatusBadge = status => {
     switch (status) {
       case 'current':
-        return <Badge className="bg-green-100 text-green-800"><CheckCircle className="h-3 w-3 mr-1" /> Current</Badge>;
+        return (
+          <Badge className="bg-green-100 text-green-800">
+            <CheckCircle className="h-3 w-3 mr-1" /> Current
+          </Badge>
+        );
       case 'review_due':
-        return <Badge className="bg-amber-100 text-amber-800"><Clock className="h-3 w-3 mr-1" /> Review Due</Badge>;
+        return (
+          <Badge className="bg-amber-100 text-amber-800">
+            <Clock className="h-3 w-3 mr-1" /> Review Due
+          </Badge>
+        );
       case 'expired':
-        return <Badge className="bg-red-100 text-red-800"><FileX className="h-3 w-3 mr-1" /> Expired</Badge>;
+        return (
+          <Badge className="bg-red-100 text-red-800">
+            <FileX className="h-3 w-3 mr-1" /> Expired
+          </Badge>
+        );
       default:
         return <Badge variant="outline">Unknown</Badge>;
     }
@@ -200,31 +212,32 @@ export default function RecordsManagement() {
   // Calculate retention metrics
   const calculateRetentionMetrics = () => {
     if (!records) return { current: 0, reviewDue: 0, expired: 0, total: 0 };
-    
+
     const total = records.length;
     const current = records.filter(r => r.status === 'current').length;
     const reviewDue = records.filter(r => r.status === 'review_due').length;
     const expired = records.filter(r => r.status === 'expired').length;
-    
+
     return { current, reviewDue, expired, total };
   };
-  
+
   const metrics = calculateRetentionMetrics();
 
   // Filter records based on search and filters
   const filteredRecords = records?.filter(record => {
     // Apply search filter
-    const matchesSearch = searchQuery === "" || 
+    const matchesSearch =
+      searchQuery === '' ||
       record.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       record.type.toLowerCase().includes(searchQuery.toLowerCase()) ||
       record.owner.toLowerCase().includes(searchQuery.toLowerCase());
-    
+
     // Apply status filter
-    const matchesStatus = statusFilter === "all" || record.status === statusFilter;
-    
+    const matchesStatus = statusFilter === 'all' || record.status === statusFilter;
+
     // Apply type filter
-    const matchesType = typeFilter === "all" || record.type === typeFilter;
-    
+    const matchesType = typeFilter === 'all' || record.type === typeFilter;
+
     return matchesSearch && matchesStatus && matchesType;
   });
 
@@ -240,7 +253,7 @@ export default function RecordsManagement() {
             Manage compliance with records management standards for GTO operations
           </p>
         </div>
-        <Button onClick={() => navigate("/gto-compliance/standard-assessment")}>
+        <Button onClick={() => navigate('/gto-compliance/standard-assessment')}>
           <Plus className="mr-2 h-4 w-4" /> New Assessment
         </Button>
       </div>
@@ -256,30 +269,36 @@ export default function RecordsManagement() {
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
                   <span>Current</span>
-                  <span className="font-medium">{metrics.current}/{metrics.total}</span>
+                  <span className="font-medium">
+                    {metrics.current}/{metrics.total}
+                  </span>
                 </div>
                 <Progress value={(metrics.current / metrics.total) * 100} className="h-2" />
               </div>
-              
+
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
                   <span>Review Due</span>
-                  <span className="font-medium">{metrics.reviewDue}/{metrics.total}</span>
+                  <span className="font-medium">
+                    {metrics.reviewDue}/{metrics.total}
+                  </span>
                 </div>
                 <Progress value={(metrics.reviewDue / metrics.total) * 100} className="h-2" />
               </div>
-              
+
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
                   <span>Expired</span>
-                  <span className="font-medium">{metrics.expired}/{metrics.total}</span>
+                  <span className="font-medium">
+                    {metrics.expired}/{metrics.total}
+                  </span>
                 </div>
                 <Progress value={(metrics.expired / metrics.total) * 100} className="h-2" />
               </div>
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="pb-2">
             <CardTitle>Records Due for Review</CardTitle>
@@ -294,19 +313,21 @@ export default function RecordsManagement() {
                   <Skeleton className="h-6 w-full" />
                 </div>
               ) : (
-                records?.filter(r => r.status === 'review_due').map((record) => (
-                  <div key={record.id} className="flex items-start">
-                    <AlarmClock className="h-5 w-5 text-amber-500 mr-2 mt-0.5" />
-                    <div>
-                      <p className="font-medium">{record.title}</p>
-                      <p className="text-sm text-muted-foreground">
-                        Due: {new Date(record.expiryDate).toLocaleDateString()}
-                      </p>
+                records
+                  ?.filter(r => r.status === 'review_due')
+                  .map(record => (
+                    <div key={record.id} className="flex items-start">
+                      <AlarmClock className="h-5 w-5 text-amber-500 mr-2 mt-0.5" />
+                      <div>
+                        <p className="font-medium">{record.title}</p>
+                        <p className="text-sm text-muted-foreground">
+                          Due: {new Date(record.expiryDate).toLocaleDateString()}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                ))
+                  ))
               )}
-              
+
               {records?.filter(r => r.status === 'review_due').length === 0 && (
                 <div className="flex flex-col items-center justify-center text-center h-20">
                   <CheckCircle className="h-8 w-8 text-green-500 mb-2" />
@@ -316,7 +337,7 @@ export default function RecordsManagement() {
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="pb-2">
             <CardTitle>Storage Compliance</CardTitle>
@@ -338,7 +359,7 @@ export default function RecordsManagement() {
                   <CheckCircle className="h-3 w-3 mr-1" /> Compliant
                 </Badge>
               </div>
-              
+
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
                   <div className="bg-indigo-100 dark:bg-indigo-900 p-2 rounded-full mr-3">
@@ -353,7 +374,7 @@ export default function RecordsManagement() {
                   <Clock className="h-3 w-3 mr-1" /> Review Due
                 </Badge>
               </div>
-              
+
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
                   <div className="bg-purple-100 dark:bg-purple-900 p-2 rounded-full mr-3">
@@ -379,7 +400,7 @@ export default function RecordsManagement() {
           <TabsTrigger value="standards">Compliance Standards</TabsTrigger>
           <TabsTrigger value="assessments">Assessment History</TabsTrigger>
         </TabsList>
-        
+
         <TabsContent value="records" className="p-0 mt-6">
           <Card>
             <CardHeader>
@@ -397,15 +418,12 @@ export default function RecordsManagement() {
                     placeholder="Search by title, type, or owner..."
                     className="pl-8"
                     value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onChange={e => setSearchQuery(e.target.value)}
                   />
                 </div>
-                
+
                 <div className="flex space-x-4">
-                  <Select
-                    value={statusFilter}
-                    onValueChange={setStatusFilter}
-                  >
+                  <Select value={statusFilter} onValueChange={setStatusFilter}>
                     <SelectTrigger className="w-[160px]">
                       <Filter className="h-4 w-4 mr-2" />
                       <SelectValue placeholder="Status filter" />
@@ -417,11 +435,8 @@ export default function RecordsManagement() {
                       <SelectItem value="expired">Expired</SelectItem>
                     </SelectContent>
                   </Select>
-                  
-                  <Select
-                    value={typeFilter}
-                    onValueChange={setTypeFilter}
-                  >
+
+                  <Select value={typeFilter} onValueChange={setTypeFilter}>
                     <SelectTrigger className="w-[160px]">
                       <Filter className="h-4 w-4 mr-2" />
                       <SelectValue placeholder="Type filter" />
@@ -437,7 +452,7 @@ export default function RecordsManagement() {
                   </Select>
                 </div>
               </div>
-              
+
               {recordsLoading ? (
                 <div className="space-y-4">
                   <Skeleton className="h-12 w-full" />
@@ -466,19 +481,21 @@ export default function RecordsManagement() {
                           </TableCell>
                         </TableRow>
                       ) : (
-                        filteredRecords?.map((record) => (
+                        filteredRecords?.map(record => (
                           <TableRow key={record.id}>
                             <TableCell className="font-medium">{record.title}</TableCell>
                             <TableCell className="capitalize">{record.type}</TableCell>
                             <TableCell>{new Date(record.updatedAt).toLocaleDateString()}</TableCell>
-                            <TableCell>{new Date(record.expiryDate).toLocaleDateString()}</TableCell>
+                            <TableCell>
+                              {new Date(record.expiryDate).toLocaleDateString()}
+                            </TableCell>
                             <TableCell>{getStatusBadge(record.status)}</TableCell>
                             <TableCell>{record.owner}</TableCell>
                             <TableCell className="text-right">
-                              <Button 
-                                variant="ghost" 
-                                size="sm" 
-                                className="h-8 w-8 p-0" 
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-8 w-8 p-0"
                                 onClick={() => navigate(`/gto-compliance/documents/${record.id}`)}
                               >
                                 <FileText className="h-4 w-4" />
@@ -561,21 +578,29 @@ export default function RecordsManagement() {
                     </div>
                   </div>
                   <DialogFooter>
-                    <Button variant="outline" onClick={() => toast({ title: "Coming soon", description: "Document upload feature coming soon" })}>Upload</Button>
+                    <Button
+                      variant="outline"
+                      onClick={() =>
+                        toast({
+                          title: 'Coming soon',
+                          description: 'Document upload feature coming soon',
+                        })
+                      }
+                    >
+                      Upload
+                    </Button>
                   </DialogFooter>
                 </DialogContent>
               </Dialog>
             </CardFooter>
           </Card>
         </TabsContent>
-        
+
         <TabsContent value="standards" className="p-0 mt-6">
           <Card>
             <CardHeader>
               <CardTitle>Records Management Standards</CardTitle>
-              <CardDescription>
-                Compliance standards for records management in GTOs
-              </CardDescription>
+              <CardDescription>Compliance standards for records management in GTOs</CardDescription>
             </CardHeader>
             <CardContent>
               {standardsLoading ? (
@@ -588,7 +613,9 @@ export default function RecordsManagement() {
                 <div className="flex flex-col items-center justify-center text-center h-40">
                   <FileText className="h-16 w-16 text-muted-foreground mb-4" />
                   <p className="text-lg font-medium">No records management standards found</p>
-                  <p className="text-muted-foreground">Standards will be displayed here once added to the system</p>
+                  <p className="text-muted-foreground">
+                    Standards will be displayed here once added to the system
+                  </p>
                 </div>
               ) : (
                 <div className="rounded-md border">
@@ -602,12 +629,14 @@ export default function RecordsManagement() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {standards?.map((standard) => (
+                      {standards?.map(standard => (
                         <TableRow key={standard.id}>
                           <TableCell className="font-medium">
                             <div>
                               <p>{standard.standardName}</p>
-                              <p className="text-sm text-muted-foreground">{standard.standardNumber}</p>
+                              <p className="text-sm text-muted-foreground">
+                                {standard.standardNumber}
+                              </p>
                             </div>
                           </TableCell>
                           <TableCell className="max-w-md">
@@ -615,14 +644,20 @@ export default function RecordsManagement() {
                           </TableCell>
                           <TableCell>
                             {assessments?.find(a => a.standardId === standard.id) ? (
-                              <Badge className={
-                                assessments.find(a => a.standardId === standard.id).status === 'compliant'
-                                  ? "bg-green-100 text-green-800"
-                                  : assessments.find(a => a.standardId === standard.id).status === 'at_risk'
-                                  ? "bg-amber-100 text-amber-800"
-                                  : "bg-red-100 text-red-800"
-                              }>
-                                {assessments.find(a => a.standardId === standard.id).status.replace('_', ' ')}
+                              <Badge
+                                className={
+                                  assessments.find(a => a.standardId === standard.id).status ===
+                                  'compliant'
+                                    ? 'bg-green-100 text-green-800'
+                                    : assessments.find(a => a.standardId === standard.id).status ===
+                                        'at_risk'
+                                      ? 'bg-amber-100 text-amber-800'
+                                      : 'bg-red-100 text-red-800'
+                                }
+                              >
+                                {assessments
+                                  .find(a => a.standardId === standard.id)
+                                  .status.replace('_', ' ')}
                               </Badge>
                             ) : (
                               <Badge variant="outline">Not assessed</Badge>
@@ -632,7 +667,11 @@ export default function RecordsManagement() {
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => navigate(`/gto-compliance/standard-assessment?standardId=${standard.id}`)}
+                              onClick={() =>
+                                navigate(
+                                  `/gto-compliance/standard-assessment?standardId=${standard.id}`
+                                )
+                              }
                             >
                               <FileCheck className="h-4 w-4 mr-1" /> Assess
                             </Button>
@@ -646,7 +685,7 @@ export default function RecordsManagement() {
             </CardContent>
           </Card>
         </TabsContent>
-        
+
         <TabsContent value="assessments" className="p-0 mt-6">
           <Card>
             <CardHeader>
@@ -666,7 +705,9 @@ export default function RecordsManagement() {
                 <div className="flex flex-col items-center justify-center text-center h-40">
                   <FileCheck className="h-16 w-16 text-muted-foreground mb-4" />
                   <p className="text-lg font-medium">No assessments found</p>
-                  <p className="text-muted-foreground">Compliance assessments will be displayed here once completed</p>
+                  <p className="text-muted-foreground">
+                    Compliance assessments will be displayed here once completed
+                  </p>
                 </div>
               ) : (
                 <div className="rounded-md border">
@@ -682,36 +723,41 @@ export default function RecordsManagement() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {assessments?.map((assessment) => (
+                      {assessments?.map(assessment => (
                         <TableRow key={assessment.id}>
                           <TableCell className="font-medium">
-                            {standards?.find(s => s.id === assessment.standardId)?.standardName || 'Unknown Standard'}
+                            {standards?.find(s => s.id === assessment.standardId)?.standardName ||
+                              'Unknown Standard'}
                           </TableCell>
                           <TableCell>
                             {new Date(assessment.assessmentDate).toLocaleDateString()}
                           </TableCell>
                           <TableCell>
-                            <Badge className={
-                              assessment.status === 'compliant'
-                                ? "bg-green-100 text-green-800"
-                                : assessment.status === 'at_risk'
-                                ? "bg-amber-100 text-amber-800"
-                                : "bg-red-100 text-red-800"
-                            }>
+                            <Badge
+                              className={
+                                assessment.status === 'compliant'
+                                  ? 'bg-green-100 text-green-800'
+                                  : assessment.status === 'at_risk'
+                                    ? 'bg-amber-100 text-amber-800'
+                                    : 'bg-red-100 text-red-800'
+                              }
+                            >
                               {assessment.status.replace('_', ' ')}
                             </Badge>
                           </TableCell>
+                          <TableCell>{assessment.assessedBy || 'System'}</TableCell>
                           <TableCell>
-                            {assessment.assessedBy || 'System'}
-                          </TableCell>
-                          <TableCell>
-                            {assessment.dueDate ? new Date(assessment.dueDate).toLocaleDateString() : 'Not scheduled'}
+                            {assessment.dueDate
+                              ? new Date(assessment.dueDate).toLocaleDateString()
+                              : 'Not scheduled'}
                           </TableCell>
                           <TableCell className="text-right">
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => navigate(`/gto-compliance/assessment/${assessment.id}`)}
+                              onClick={() =>
+                                navigate(`/gto-compliance/assessment/${assessment.id}`)
+                              }
                             >
                               <FileText className="h-4 w-4 mr-1" /> View
                             </Button>

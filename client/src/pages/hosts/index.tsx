@@ -1,111 +1,112 @@
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { Link } from "wouter";
-import { HostEmployer } from "@shared/schema";
-import { 
-  Card, 
-  CardContent, 
-  CardHeader, 
-  CardTitle 
-} from "@/components/ui/card";
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from "@/components/ui/table";
-import { 
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { Link } from 'wouter';
+import { HostEmployer } from '@shared/schema';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
-import { 
-  Eye, 
-  Pencil, 
-  Trash2, 
-  MoreHorizontal, 
-  Plus, 
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import {
+  Eye,
+  Pencil,
+  Trash2,
+  MoreHorizontal,
+  Plus,
   Search,
   Filter,
   Users,
-  FileText
-} from "lucide-react";
+  FileText,
+} from 'lucide-react';
 
 const HostsList = () => {
   const [filter, setFilter] = useState({
-    search: "",
-    status: "",
-    industry: ""
+    search: '',
+    status: '',
+    industry: '',
   });
-  
-  const { data: hosts, isLoading, error } = useQuery({
+
+  const {
+    data: hosts,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ['/api/hosts'],
     queryFn: async () => {
       const res = await fetch('/api/hosts');
       if (!res.ok) throw new Error('Failed to fetch hosts');
       return res.json() as Promise<HostEmployer[]>;
-    }
+    },
   });
-  
+
   // Filter hosts based on search and filters
   const filteredHosts = hosts?.filter(host => {
-    const matchesSearch = 
-      filter.search === "" || 
+    const matchesSearch =
+      filter.search === '' ||
       host.name.toLowerCase().includes(filter.search.toLowerCase()) ||
       host.contactPerson.toLowerCase().includes(filter.search.toLowerCase()) ||
       host.email.toLowerCase().includes(filter.search.toLowerCase()) ||
       host.industry.toLowerCase().includes(filter.search.toLowerCase());
-    
-    const matchesStatus = filter.status === "all_statuses" || host.status === filter.status;
-    const matchesIndustry = filter.industry === "all_industries" || host.industry === filter.industry;
-    
+
+    const matchesStatus = filter.status === 'all_statuses' || host.status === filter.status;
+    const matchesIndustry =
+      filter.industry === 'all_industries' || host.industry === filter.industry;
+
     return matchesSearch && matchesStatus && matchesIndustry;
   });
-  
+
   // Extract unique industries for filter dropdown
-  const industries = hosts 
-    ? hosts.map(host => host.industry)
-      .filter((industry, index, self) => self.indexOf(industry) === index)
+  const industries = hosts
+    ? hosts
+        .map(host => host.industry)
+        .filter((industry, index, self) => self.indexOf(industry) === index)
     : [];
-  
+
   const getStatusBadgeClass = (status: string) => {
-    switch(status) {
-      case "active":
-        return "bg-green-100 text-success";
-      case "inactive":
-        return "bg-red-100 text-destructive";
+    switch (status) {
+      case 'active':
+        return 'bg-green-100 text-success';
+      case 'inactive':
+        return 'bg-red-100 text-destructive';
       default:
-        return "bg-muted text-muted-foreground";
+        return 'bg-muted text-muted-foreground';
     }
   };
-  
+
   const getComplianceBadgeClass = (status: string) => {
-    switch(status) {
-      case "compliant":
-        return "bg-green-100 text-success";
-      case "non-compliant":
-        return "bg-red-100 text-destructive";
-      case "pending":
-        return "bg-yellow-100 text-warning";
+    switch (status) {
+      case 'compliant':
+        return 'bg-green-100 text-success';
+      case 'non-compliant':
+        return 'bg-red-100 text-destructive';
+      case 'pending':
+        return 'bg-yellow-100 text-warning';
       default:
-        return "bg-muted text-muted-foreground";
+        return 'bg-muted text-muted-foreground';
     }
   };
-  
+
   return (
     <>
       <div className="flex justify-between items-center mb-6">
@@ -117,7 +118,7 @@ const HostsList = () => {
           </Link>
         </Button>
       </div>
-      
+
       <Card className="mb-8">
         <CardHeader>
           <CardTitle>Host Employers</CardTitle>
@@ -131,14 +132,14 @@ const HostsList = () => {
                 placeholder="Search hosts..."
                 className="pl-8"
                 value={filter.search}
-                onChange={(e) => setFilter({...filter, search: e.target.value})}
+                onChange={e => setFilter({ ...filter, search: e.target.value })}
               />
             </div>
             <div className="flex gap-4">
               <div className="w-full md:w-48">
                 <Select
                   value={filter.status}
-                  onValueChange={(value) => setFilter({...filter, status: value})}
+                  onValueChange={value => setFilter({ ...filter, status: value })}
                 >
                   <SelectTrigger>
                     <Filter className="mr-2 h-4 w-4" />
@@ -154,7 +155,7 @@ const HostsList = () => {
               <div className="w-full md:w-48">
                 <Select
                   value={filter.industry}
-                  onValueChange={(value) => setFilter({...filter, industry: value})}
+                  onValueChange={value => setFilter({ ...filter, industry: value })}
                 >
                   <SelectTrigger>
                     <Filter className="mr-2 h-4 w-4" />
@@ -162,15 +163,17 @@ const HostsList = () => {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all_industries">All Industries</SelectItem>
-                    {industries.map((industry) => (
-                      <SelectItem key={industry} value={industry}>{industry}</SelectItem>
+                    {industries.map(industry => (
+                      <SelectItem key={industry} value={industry}>
+                        {industry}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
             </div>
           </div>
-          
+
           {isLoading ? (
             <div className="space-y-4">
               <Skeleton className="h-8 w-full" />
@@ -204,12 +207,12 @@ const HostsList = () => {
                       </TableCell>
                     </TableRow>
                   ) : (
-                    filteredHosts?.map((host) => (
+                    filteredHosts?.map(host => (
                       <TableRow key={host.id}>
                         <TableCell>
                           <div className="font-medium">{host.name}</div>
                           <div className="text-sm text-muted-foreground">
-                            {host.address || "No address provided"}
+                            {host.address || 'No address provided'}
                           </div>
                         </TableCell>
                         <TableCell>{host.industry}</TableCell>
@@ -228,9 +231,9 @@ const HostsList = () => {
                               <svg
                                 key={i}
                                 className={`w-4 h-4 ${
-                                  i < (host.safetyRating || 0) / 2 
-                                    ? "text-yellow-400" 
-                                    : "text-gray-300"
+                                  i < (host.safetyRating || 0) / 2
+                                    ? 'text-yellow-400'
+                                    : 'text-gray-300'
                                 }`}
                                 aria-hidden="true"
                                 xmlns="http://www.w3.org/2000/svg"
@@ -244,9 +247,7 @@ const HostsList = () => {
                           </div>
                         </TableCell>
                         <TableCell>
-                          <Badge className={getStatusBadgeClass(host.status)}>
-                            {host.status}
-                          </Badge>
+                          <Badge className={getStatusBadgeClass(host.status)}>{host.status}</Badge>
                         </TableCell>
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-2">

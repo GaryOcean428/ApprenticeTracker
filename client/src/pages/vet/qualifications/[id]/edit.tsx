@@ -1,10 +1,10 @@
-import { useState, useEffect } from "react";
-import { useParams, useLocation } from "wouter";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { queryClient, apiRequest } from "@/lib/queryClient";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+import { useState, useEffect } from 'react';
+import { useParams, useLocation } from 'wouter';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { queryClient, apiRequest } from '@/lib/queryClient';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import {
   Card,
   CardContent,
@@ -12,7 +12,7 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from '@/components/ui/card';
 import {
   Form,
   FormControl,
@@ -21,14 +21,14 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
+} from '@/components/ui/form';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -36,15 +36,15 @@ import {
   BreadcrumbList,
   BreadcrumbSeparator,
   BreadcrumbPage,
-} from "@/components/ui/breadcrumb";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Separator } from "@/components/ui/separator";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+} from '@/components/ui/breadcrumb';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Separator } from '@/components/ui/separator';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Table,
   TableBody,
@@ -54,8 +54,8 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
+} from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
 import {
   Dialog,
   DialogContent,
@@ -64,24 +64,37 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { useToast } from "@/hooks/use-toast";
-import { AlertCircle, ArrowLeft, CheckCircle, ChevronRight, CircleAlert, FileText, Loader2, Pencil, Plus, Search, Trash, X } from "lucide-react";
+} from '@/components/ui/dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { useToast } from '@/hooks/use-toast';
+import {
+  AlertCircle,
+  ArrowLeft,
+  CheckCircle,
+  ChevronRight,
+  CircleAlert,
+  FileText,
+  Loader2,
+  Pencil,
+  Plus,
+  Search,
+  Trash,
+  X,
+} from 'lucide-react';
 
 // Define form schema
 const formSchema = z.object({
-  qualificationCode: z.string().min(1, "Qualification code is required"),
-  qualificationTitle: z.string().min(1, "Qualification title is required"),
+  qualificationCode: z.string().min(1, 'Qualification code is required'),
+  qualificationTitle: z.string().min(1, 'Qualification title is required'),
   qualificationDescription: z.string().optional(),
-  aqfLevel: z.string().min(1, "AQF level is required"),
+  aqfLevel: z.string().min(1, 'AQF level is required'),
   aqfLevelNumber: z.coerce.number().int().min(1).max(10),
-  trainingPackage: z.string().min(1, "Training package is required"),
-  trainingPackageRelease: z.string().min(1, "Training package release is required"),
-  totalUnits: z.coerce.number().int().min(1, "Total units is required"),
-  coreUnits: z.coerce.number().int().min(0, "Core units must be 0 or greater"),
-  electiveUnits: z.coerce.number().int().min(0, "Elective units must be 0 or greater"),
-  nominalHours: z.coerce.number().int().min(0, "Nominal hours must be 0 or greater"),
+  trainingPackage: z.string().min(1, 'Training package is required'),
+  trainingPackageRelease: z.string().min(1, 'Training package release is required'),
+  totalUnits: z.coerce.number().int().min(1, 'Total units is required'),
+  coreUnits: z.coerce.number().int().min(0, 'Core units must be 0 or greater'),
+  electiveUnits: z.coerce.number().int().min(0, 'Elective units must be 0 or greater'),
+  nominalHours: z.coerce.number().int().min(0, 'Nominal hours must be 0 or greater'),
   isActive: z.boolean().default(true),
   isApprenticeshipQualification: z.boolean().default(false),
   isFundedQualification: z.boolean().default(false),
@@ -146,33 +159,37 @@ export default function EditQualification() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
   const [isDeleting, setIsDeleting] = useState(false);
-  const [activeTab, setActiveTab] = useState("details");
+  const [activeTab, setActiveTab] = useState('details');
   const [isAddUnitDialogOpen, setIsAddUnitDialogOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState('');
   const [selectedUnitGroup, setSelectedUnitGroup] = useState<string | null>(null);
-  
+
   // Fetch qualification data
-  const { data: qualificationData, isLoading, error } = useQuery<{ qualification: Qualification }>({
-    queryKey: ["/api/vet/qualifications", params.id],
+  const {
+    data: qualificationData,
+    isLoading,
+    error,
+  } = useQuery<{ qualification: Qualification }>({
+    queryKey: ['/api/vet/qualifications', params.id],
     enabled: !!params.id,
   });
 
   // Fetch units data
   const { data: unitsData, isLoading: isLoadingUnits } = useQuery<{ units: Unit[] }>({
-    queryKey: ["/api/vet/units"],
+    queryKey: ['/api/vet/units'],
   });
 
   // Form setup
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      qualificationCode: "",
-      qualificationTitle: "",
-      qualificationDescription: "",
-      aqfLevel: "",
+      qualificationCode: '',
+      qualificationTitle: '',
+      qualificationDescription: '',
+      aqfLevel: '',
       aqfLevelNumber: 1,
-      trainingPackage: "",
-      trainingPackageRelease: "",
+      trainingPackage: '',
+      trainingPackageRelease: '',
       totalUnits: 0,
       coreUnits: 0,
       electiveUnits: 0,
@@ -195,13 +212,13 @@ export default function EditQualification() {
       const qualification = qualificationData.qualification;
       console.log('Setting form data with:', qualification);
       form.reset({
-        qualificationCode: qualification.qualificationCode || "",
-        qualificationTitle: qualification.qualificationTitle || "",
-        qualificationDescription: qualification.qualificationDescription || "",
-        aqfLevel: qualification.aqfLevel || "",
+        qualificationCode: qualification.qualificationCode || '',
+        qualificationTitle: qualification.qualificationTitle || '',
+        qualificationDescription: qualification.qualificationDescription || '',
+        aqfLevel: qualification.aqfLevel || '',
         aqfLevelNumber: qualification.aqfLevelNumber || 1,
-        trainingPackage: qualification.trainingPackage || "",
-        trainingPackageRelease: qualification.trainingPackageRelease || "",
+        trainingPackage: qualification.trainingPackage || '',
+        trainingPackageRelease: qualification.trainingPackageRelease || '',
         totalUnits: qualification.totalUnits || 0,
         coreUnits: qualification.coreUnits || 0,
         electiveUnits: qualification.electiveUnits || 0,
@@ -217,26 +234,22 @@ export default function EditQualification() {
   // Update qualification mutation
   const updateMutation = useMutation({
     mutationFn: async (data: FormValues) => {
-      const res = await apiRequest(
-        "PATCH",
-        `/api/vet/qualifications/${params.id}`,
-        data
-      );
+      const res = await apiRequest('PATCH', `/api/vet/qualifications/${params.id}`, data);
       return await res.json();
     },
     onSuccess: () => {
       toast({
-        title: "Qualification updated",
-        description: "Qualification has been updated successfully",
+        title: 'Qualification updated',
+        description: 'Qualification has been updated successfully',
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/vet/qualifications"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/vet/qualifications", params.id] });
+      queryClient.invalidateQueries({ queryKey: ['/api/vet/qualifications'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/vet/qualifications', params.id] });
     },
-    onError: (error) => {
+    onError: error => {
       toast({
-        title: "Error",
+        title: 'Error',
         description: `Failed to update qualification: ${error.message}`,
-        variant: "destructive",
+        variant: 'destructive',
       });
     },
   });
@@ -244,25 +257,22 @@ export default function EditQualification() {
   // Delete qualification mutation
   const deleteMutation = useMutation({
     mutationFn: async () => {
-      const res = await apiRequest(
-        "DELETE",
-        `/api/vet/qualifications/${params.id}`
-      );
+      const res = await apiRequest('DELETE', `/api/vet/qualifications/${params.id}`);
       return await res.json();
     },
     onSuccess: () => {
       toast({
-        title: "Qualification deleted",
-        description: "Qualification has been deleted successfully",
+        title: 'Qualification deleted',
+        description: 'Qualification has been deleted successfully',
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/vet/qualifications"] });
-      navigate("/vet/qualifications");
+      queryClient.invalidateQueries({ queryKey: ['/api/vet/qualifications'] });
+      navigate('/vet/qualifications');
     },
-    onError: (error) => {
+    onError: error => {
       toast({
-        title: "Error",
+        title: 'Error',
         description: `Failed to delete qualification: ${error.message}`,
-        variant: "destructive",
+        variant: 'destructive',
       });
       setIsDeleting(false);
     },
@@ -270,27 +280,35 @@ export default function EditQualification() {
 
   // Add unit to qualification mutation
   const addUnitMutation = useMutation({
-    mutationFn: async ({ unitId, isCore, unitGroup }: { unitId: number; isCore: boolean; unitGroup: string | null }) => {
-      const res = await apiRequest(
-        "POST",
-        `/api/vet/qualifications/${params.id}/units`,
-        { unitId, isCore, unitGroup }
-      );
+    mutationFn: async ({
+      unitId,
+      isCore,
+      unitGroup,
+    }: {
+      unitId: number;
+      isCore: boolean;
+      unitGroup: string | null;
+    }) => {
+      const res = await apiRequest('POST', `/api/vet/qualifications/${params.id}/units`, {
+        unitId,
+        isCore,
+        unitGroup,
+      });
       return await res.json();
     },
     onSuccess: () => {
       toast({
-        title: "Unit added",
-        description: "Unit has been added to the qualification",
+        title: 'Unit added',
+        description: 'Unit has been added to the qualification',
       });
       setIsAddUnitDialogOpen(false);
-      queryClient.invalidateQueries({ queryKey: ["/api/vet/qualifications", params.id] });
+      queryClient.invalidateQueries({ queryKey: ['/api/vet/qualifications', params.id] });
     },
-    onError: (error) => {
+    onError: error => {
       toast({
-        title: "Error",
+        title: 'Error',
         description: `Failed to add unit: ${error.message}`,
-        variant: "destructive",
+        variant: 'destructive',
       });
     },
   });
@@ -299,32 +317,38 @@ export default function EditQualification() {
   const removeUnitMutation = useMutation({
     mutationFn: async (structureId: number) => {
       const res = await apiRequest(
-        "DELETE",
+        'DELETE',
         `/api/vet/qualifications/${params.id}/units/${structureId}`
       );
       return await res.json();
     },
     onSuccess: () => {
       toast({
-        title: "Unit removed",
-        description: "Unit has been removed from the qualification",
+        title: 'Unit removed',
+        description: 'Unit has been removed from the qualification',
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/vet/qualifications", params.id] });
+      queryClient.invalidateQueries({ queryKey: ['/api/vet/qualifications', params.id] });
     },
-    onError: (error) => {
+    onError: error => {
       toast({
-        title: "Error",
+        title: 'Error',
         description: `Failed to remove unit: ${error.message}`,
-        variant: "destructive",
+        variant: 'destructive',
       });
     },
   });
 
   // Update unit group mutation
   const updateUnitGroupMutation = useMutation({
-    mutationFn: async ({ structureId, unitGroup }: { structureId: number; unitGroup: string | null }) => {
+    mutationFn: async ({
+      structureId,
+      unitGroup,
+    }: {
+      structureId: number;
+      unitGroup: string | null;
+    }) => {
       const res = await apiRequest(
-        "PATCH",
+        'PATCH',
         `/api/vet/qualifications/${params.id}/units/${structureId}`,
         { unitGroup }
       );
@@ -332,16 +356,16 @@ export default function EditQualification() {
     },
     onSuccess: () => {
       toast({
-        title: "Unit group updated",
-        description: "Unit group has been updated",
+        title: 'Unit group updated',
+        description: 'Unit group has been updated',
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/vet/qualifications", params.id] });
+      queryClient.invalidateQueries({ queryKey: ['/api/vet/qualifications', params.id] });
     },
-    onError: (error) => {
+    onError: error => {
       toast({
-        title: "Error",
+        title: 'Error',
         description: `Failed to update unit group: ${error.message}`,
-        variant: "destructive",
+        variant: 'destructive',
       });
     },
   });
@@ -352,41 +376,44 @@ export default function EditQualification() {
   }
 
   // Filter units based on search term
-  const filteredUnits = unitsData && unitsData.units ? unitsData.units.filter(unit => {
-    const searchTermLower = searchTerm.toLowerCase();
-    return (
-      unit.unitCode.toLowerCase().includes(searchTermLower) ||
-      unit.unitTitle.toLowerCase().includes(searchTermLower) ||
-      (unit.unitDescription?.toLowerCase() || '').includes(searchTermLower)
-    );
-  }) : [];
+  const filteredUnits =
+    unitsData && unitsData.units
+      ? unitsData.units.filter(unit => {
+          const searchTermLower = searchTerm.toLowerCase();
+          return (
+            unit.unitCode.toLowerCase().includes(searchTermLower) ||
+            unit.unitTitle.toLowerCase().includes(searchTermLower) ||
+            (unit.unitDescription?.toLowerCase() || '').includes(searchTermLower)
+          );
+        })
+      : [];
 
   // Get unique unit groups
-  const unitGroups = qualificationData?.qualification?.structure ? 
-    qualificationData.qualification.structure.reduce((groups: UnitGroups, structure) => {
-      const groupName = structure.unitGroup || 'Ungrouped';
-      if (!groups[groupName]) {
-        groups[groupName] = [];
-      }
-      groups[groupName].push(structure);
-      return groups;
-    }, {}) : {};
+  const unitGroups = qualificationData?.qualification?.structure
+    ? qualificationData.qualification.structure.reduce((groups: UnitGroups, structure) => {
+        const groupName = structure.unitGroup || 'Ungrouped';
+        if (!groups[groupName]) {
+          groups[groupName] = [];
+        }
+        groups[groupName].push(structure);
+        return groups;
+      }, {})
+    : {};
 
   // Check if unit is already in the qualification
   const isUnitInQualification = (unitId: number) => {
-    return qualificationData?.qualification?.structure ? 
-      qualificationData.qualification.structure.some(
-        (structure) => structure.unitId === unitId
-      ) : false;
+    return qualificationData?.qualification?.structure
+      ? qualificationData.qualification.structure.some(structure => structure.unitId === unitId)
+      : false;
   };
 
   // Function to handle adding unit to qualification
   const handleAddUnit = (unitId: number) => {
     if (isUnitInQualification(unitId)) {
       toast({
-        title: "Unit already added",
-        description: "This unit is already part of the qualification",
-        variant: "destructive",
+        title: 'Unit already added',
+        description: 'This unit is already part of the qualification',
+        variant: 'destructive',
       });
       return;
     }
@@ -438,10 +465,10 @@ export default function EditQualification() {
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>Error</AlertTitle>
           <AlertDescription>
-            {error instanceof Error ? error.message : "Failed to load qualification"}
+            {error instanceof Error ? error.message : 'Failed to load qualification'}
           </AlertDescription>
         </Alert>
-        <Button onClick={() => navigate("/vet/qualifications")}>
+        <Button onClick={() => navigate('/vet/qualifications')}>
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to Qualifications
         </Button>
@@ -461,20 +488,21 @@ export default function EditQualification() {
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbPage>{qualificationData?.qualification?.qualificationCode || 'Qualification'}</BreadcrumbPage>
+                <BreadcrumbPage>
+                  {qualificationData?.qualification?.qualificationCode || 'Qualification'}
+                </BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold tracking-tight">
-              Edit Qualification
-            </h1>
-            <Badge variant={qualificationData?.qualification?.isActive ? "default" : "secondary"}>
-              {qualificationData?.qualification?.isActive ? "Active" : "Inactive"}
+            <h1 className="text-2xl font-bold tracking-tight">Edit Qualification</h1>
+            <Badge variant={qualificationData?.qualification?.isActive ? 'default' : 'secondary'}>
+              {qualificationData?.qualification?.isActive ? 'Active' : 'Inactive'}
             </Badge>
           </div>
           <p className="text-muted-foreground">
-            {qualificationData?.qualification?.qualificationCode || 'No Code'} - {qualificationData?.qualification?.qualificationTitle || 'No Title'}
+            {qualificationData?.qualification?.qualificationCode || 'No Code'} -{' '}
+            {qualificationData?.qualification?.qualificationTitle || 'No Title'}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -501,9 +529,7 @@ export default function EditQualification() {
               <Card>
                 <CardHeader>
                   <CardTitle>Qualification Details</CardTitle>
-                  <CardDescription>
-                    Update qualification details and properties
-                  </CardDescription>
+                  <CardDescription>Update qualification details and properties</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -544,7 +570,7 @@ export default function EditQualification() {
                         <FormControl>
                           <Textarea
                             {...field}
-                            value={field.value || ""}
+                            value={field.value || ''}
                             className="min-h-[120px]"
                           />
                         </FormControl>
@@ -577,7 +603,9 @@ export default function EditQualification() {
                               <SelectItem value="Certificate IV">Certificate IV</SelectItem>
                               <SelectItem value="Diploma">Diploma</SelectItem>
                               <SelectItem value="Advanced Diploma">Advanced Diploma</SelectItem>
-                              <SelectItem value="Graduate Certificate">Graduate Certificate</SelectItem>
+                              <SelectItem value="Graduate Certificate">
+                                Graduate Certificate
+                              </SelectItem>
                               <SelectItem value="Graduate Diploma">Graduate Diploma</SelectItem>
                               <SelectItem value="Bachelor Degree">Bachelor Degree</SelectItem>
                               <SelectItem value="Masters Degree">Masters Degree</SelectItem>
@@ -594,7 +622,7 @@ export default function EditQualification() {
                         <FormItem>
                           <FormLabel>AQF Level Number</FormLabel>
                           <Select
-                            onValueChange={(value) => field.onChange(parseInt(value))}
+                            onValueChange={value => field.onChange(parseInt(value))}
                             defaultValue={field.value.toString()}
                             value={field.value.toString()}
                           >
@@ -656,7 +684,7 @@ export default function EditQualification() {
                             <Input
                               type="number"
                               {...field}
-                              onChange={(e) => field.onChange(parseInt(e.target.value))}
+                              onChange={e => field.onChange(parseInt(e.target.value))}
                             />
                           </FormControl>
                           <FormMessage />
@@ -673,7 +701,7 @@ export default function EditQualification() {
                             <Input
                               type="number"
                               {...field}
-                              onChange={(e) => field.onChange(parseInt(e.target.value))}
+                              onChange={e => field.onChange(parseInt(e.target.value))}
                             />
                           </FormControl>
                           <FormMessage />
@@ -690,7 +718,7 @@ export default function EditQualification() {
                             <Input
                               type="number"
                               {...field}
-                              onChange={(e) => field.onChange(parseInt(e.target.value))}
+                              onChange={e => field.onChange(parseInt(e.target.value))}
                             />
                           </FormControl>
                           <FormMessage />
@@ -707,7 +735,7 @@ export default function EditQualification() {
                             <Input
                               type="number"
                               {...field}
-                              onChange={(e) => field.onChange(parseInt(e.target.value))}
+                              onChange={e => field.onChange(parseInt(e.target.value))}
                             />
                           </FormControl>
                           <FormMessage />
@@ -723,18 +751,11 @@ export default function EditQualification() {
                       render={({ field }) => (
                         <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
                           <FormControl>
-                            <Checkbox
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
+                            <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                           </FormControl>
                           <div className="space-y-1 leading-none">
-                            <FormLabel>
-                              Active Qualification
-                            </FormLabel>
-                            <FormDescription>
-                              Available for enrollment
-                            </FormDescription>
+                            <FormLabel>Active Qualification</FormLabel>
+                            <FormDescription>Available for enrollment</FormDescription>
                           </div>
                         </FormItem>
                       )}
@@ -746,18 +767,11 @@ export default function EditQualification() {
                       render={({ field }) => (
                         <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
                           <FormControl>
-                            <Checkbox
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
+                            <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                           </FormControl>
                           <div className="space-y-1 leading-none">
-                            <FormLabel>
-                              Apprenticeship Qualification
-                            </FormLabel>
-                            <FormDescription>
-                              Eligible for apprenticeships
-                            </FormDescription>
+                            <FormLabel>Apprenticeship Qualification</FormLabel>
+                            <FormDescription>Eligible for apprenticeships</FormDescription>
                           </div>
                         </FormItem>
                       )}
@@ -769,18 +783,11 @@ export default function EditQualification() {
                       render={({ field }) => (
                         <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
                           <FormControl>
-                            <Checkbox
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
+                            <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                           </FormControl>
                           <div className="space-y-1 leading-none">
-                            <FormLabel>
-                              Funded Qualification
-                            </FormLabel>
-                            <FormDescription>
-                              Eligible for government funding
-                            </FormDescription>
+                            <FormLabel>Funded Qualification</FormLabel>
+                            <FormDescription>Eligible for government funding</FormDescription>
                           </div>
                         </FormItem>
                       )}
@@ -796,10 +803,10 @@ export default function EditQualification() {
                         <FormControl>
                           <Textarea
                             {...field}
-                            value={field.value || ""}
+                            value={field.value || ''}
                             className="min-h-[100px]"
                             placeholder="Enter funding details if this is a funded qualification"
-                            disabled={!form.watch("isFundedQualification")}
+                            disabled={!form.watch('isFundedQualification')}
                           />
                         </FormControl>
                         <FormMessage />
@@ -808,13 +815,15 @@ export default function EditQualification() {
                   />
                 </CardContent>
                 <CardFooter className="flex justify-between">
-                  <Button variant="outline" type="button" onClick={() => navigate(`/vet/qualifications/${params.id}`)}>
+                  <Button
+                    variant="outline"
+                    type="button"
+                    onClick={() => navigate(`/vet/qualifications/${params.id}`)}
+                  >
                     Cancel
                   </Button>
                   <Button type="submit" disabled={updateMutation.isPending}>
-                    {updateMutation.isPending && (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    )}
+                    {updateMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     Save Changes
                   </Button>
                 </CardFooter>
@@ -828,9 +837,7 @@ export default function EditQualification() {
             <CardHeader className="flex flex-row items-center justify-between">
               <div>
                 <CardTitle>Units of Competency</CardTitle>
-                <CardDescription>
-                  Manage units associated with this qualification
-                </CardDescription>
+                <CardDescription>Manage units associated with this qualification</CardDescription>
               </div>
               <div className="flex gap-2">
                 <Dialog open={isAddUnitDialogOpen} onOpenChange={setIsAddUnitDialogOpen}>
@@ -855,20 +862,22 @@ export default function EditQualification() {
                             type="search"
                             placeholder="Search by code or title..."
                             value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
+                            onChange={e => setSearchTerm(e.target.value)}
                             className="w-full"
                           />
                         </div>
                         <Select
-                          value={selectedUnitGroup || "no-group"}
-                          onValueChange={(value) => setSelectedUnitGroup(value === "no-group" ? null : value)}
+                          value={selectedUnitGroup || 'no-group'}
+                          onValueChange={value =>
+                            setSelectedUnitGroup(value === 'no-group' ? null : value)
+                          }
                         >
                           <SelectTrigger className="w-[180px]">
                             <SelectValue placeholder="Unit Group" />
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="no-group">No Group</SelectItem>
-                            {Object.keys(unitGroups).map((group) => (
+                            {Object.keys(unitGroups).map(group => (
                               <SelectItem key={group} value={group}>
                                 {group}
                               </SelectItem>
@@ -878,11 +887,11 @@ export default function EditQualification() {
                         </Select>
                       </div>
 
-                      {selectedUnitGroup === "New Group" && (
+                      {selectedUnitGroup === 'New Group' && (
                         <Input
                           placeholder="Enter new group name"
-                          value={selectedUnitGroup === "New Group" ? "" : selectedUnitGroup || ""}
-                          onChange={(e) => setSelectedUnitGroup(e.target.value)}
+                          value={selectedUnitGroup === 'New Group' ? '' : selectedUnitGroup || ''}
+                          onChange={e => setSelectedUnitGroup(e.target.value)}
                         />
                       )}
 
@@ -897,20 +906,24 @@ export default function EditQualification() {
                           </div>
                         ) : (
                           <div className="p-4 space-y-2">
-                            {filteredUnits.map((unit) => (
+                            {filteredUnits.map(unit => (
                               <div
                                 key={unit.id}
                                 className="flex items-center justify-between p-2 rounded-md hover:bg-muted"
                               >
                                 <div>
                                   <div className="font-medium">{unit.unitCode}</div>
-                                  <div className="text-sm text-muted-foreground">{unit.unitTitle}</div>
+                                  <div className="text-sm text-muted-foreground">
+                                    {unit.unitTitle}
+                                  </div>
                                 </div>
                                 <Button
                                   variant="ghost"
                                   size="sm"
                                   onClick={() => handleAddUnit(unit.id)}
-                                  disabled={isUnitInQualification(unit.id) || addUnitMutation.isPending}
+                                  disabled={
+                                    isUnitInQualification(unit.id) || addUnitMutation.isPending
+                                  }
                                 >
                                   {isUnitInQualification(unit.id) ? (
                                     <CheckCircle className="h-4 w-4 text-green-500" />
@@ -943,10 +956,7 @@ export default function EditQualification() {
                     <p className="text-muted-foreground mb-4">
                       This qualification doesn't have any units of competency yet.
                     </p>
-                    <Button
-                      onClick={() => setIsAddUnitDialogOpen(true)}
-                      variant="secondary"
-                    >
+                    <Button onClick={() => setIsAddUnitDialogOpen(true)} variant="secondary">
                       <Plus className="mr-2 h-4 w-4" />
                       Add First Unit
                     </Button>
@@ -958,7 +968,7 @@ export default function EditQualification() {
                         <CardTitle className="text-base">
                           {groupName}
                           <Badge variant="outline" className="ml-2">
-                            {structures.length} {structures.length === 1 ? "unit" : "units"}
+                            {structures.length} {structures.length === 1 ? 'unit' : 'units'}
                           </Badge>
                         </CardTitle>
                       </CardHeader>
@@ -975,15 +985,15 @@ export default function EditQualification() {
                               </TableRow>
                             </TableHeader>
                             <TableBody>
-                              {structures.map((structure) => (
+                              {structures.map(structure => (
                                 <TableRow key={structure.id}>
                                   <TableCell className="font-medium">
                                     {structure.unit.unitCode}
                                   </TableCell>
                                   <TableCell>{structure.unit.unitTitle}</TableCell>
                                   <TableCell className="text-center">
-                                    <Badge variant={structure.isCore ? "default" : "secondary"}>
-                                      {structure.isCore ? "Core" : "Elective"}
+                                    <Badge variant={structure.isCore ? 'default' : 'secondary'}>
+                                      {structure.isCore ? 'Core' : 'Elective'}
                                     </Badge>
                                   </TableCell>
                                   <TableCell className="text-center">
@@ -994,10 +1004,12 @@ export default function EditQualification() {
                                       <Button
                                         size="icon"
                                         variant="ghost"
-                                        onClick={() => updateUnitGroupMutation.mutate({
-                                          structureId: structure.id,
-                                          unitGroup: null, // Set to null to remove from group
-                                        })}
+                                        onClick={() =>
+                                          updateUnitGroupMutation.mutate({
+                                            structureId: structure.id,
+                                            unitGroup: null, // Set to null to remove from group
+                                          })
+                                        }
                                       >
                                         <Pencil className="h-4 w-4" />
                                       </Button>
@@ -1024,7 +1036,7 @@ export default function EditQualification() {
           </Card>
         </TabsContent>
       </Tabs>
-          
+
       {isDeleting && (
         <Alert variant="destructive" className="mt-4">
           <AlertCircle className="h-4 w-4" />
@@ -1032,15 +1044,11 @@ export default function EditQualification() {
           <AlertDescription className="flex items-center gap-4 mt-2">
             <span>This action cannot be undone.</span>
             <div className="flex gap-2">
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => setIsDeleting(false)}
-              >
+              <Button variant="outline" size="sm" onClick={() => setIsDeleting(false)}>
                 Cancel
               </Button>
-              <Button 
-                variant="destructive" 
+              <Button
+                variant="destructive"
                 size="sm"
                 onClick={() => deleteMutation.mutate()}
                 disabled={deleteMutation.isPending}

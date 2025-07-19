@@ -1,9 +1,9 @@
-import { useState, useEffect } from "react";
-import { useParams, useLocation } from "wouter";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { ArrowLeft, ExternalLink, Save, Plus, Trash2, MoveUp, MoveDown } from "lucide-react";
+import { useState, useEffect } from 'react';
+import { useParams, useLocation } from 'wouter';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { ArrowLeft, ExternalLink, Save, Plus, Trash2, MoveUp, MoveDown } from 'lucide-react';
 
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
@@ -11,13 +11,8 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
+} from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Table,
   TableBody,
@@ -26,14 +21,14 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from '@/components/ui/table';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 import {
   Dialog,
   DialogContent,
@@ -42,17 +37,12 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Badge } from "@/components/ui/badge";
+} from '@/components/ui/dialog';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Badge } from '@/components/ui/badge';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -63,10 +53,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { useToast } from "@/hooks/use-toast";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+} from '@/components/ui/alert-dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { useToast } from '@/hooks/use-toast';
+import { apiRequest, queryClient } from '@/lib/queryClient';
 
 interface Unit {
   id: number;
@@ -106,61 +96,69 @@ export default function QualificationStructure() {
   const qualificationId = parseInt(params.id);
   const [, navigate] = useLocation();
   const { toast } = useToast();
-  
+
   const [selectedUnitIds, setSelectedUnitIds] = useState<Set<number>>(new Set());
-  const [unitAssignments, setUnitAssignments] = useState<{[key: number]: {isCore: boolean, groupName: string | null, isMandatory: boolean}}>({});
+  const [unitAssignments, setUnitAssignments] = useState<{
+    [key: number]: { isCore: boolean; groupName: string | null; isMandatory: boolean };
+  }>({});
   const [addUnitDialogOpen, setAddUnitDialogOpen] = useState(false);
-  const [unitSearchTerm, setUnitSearchTerm] = useState("");
-  const [activeTab, setActiveTab] = useState("core");
+  const [unitSearchTerm, setUnitSearchTerm] = useState('');
+  const [activeTab, setActiveTab] = useState('core');
   const [structureChanged, setStructureChanged] = useState(false);
-  
+
   // Fetch qualification details
-  const { data: qualificationData, isLoading: isLoadingQualification } = useQuery<{qualification: Qualification, units: {core: QualificationUnit[], elective: QualificationUnit[]}}>({ 
+  const { data: qualificationData, isLoading: isLoadingQualification } = useQuery<{
+    qualification: Qualification;
+    units: { core: QualificationUnit[]; elective: QualificationUnit[] };
+  }>({
     queryKey: [`/api/vet/qualifications/${qualificationId}`],
   });
-  
+
   // Fetch all units for adding to structure
-  const { data: availableUnits, isLoading: isLoadingUnits } = useQuery<Unit[]>({ 
-    queryKey: ["/api/vet/units"],
+  const { data: availableUnits, isLoading: isLoadingUnits } = useQuery<Unit[]>({
+    queryKey: ['/api/vet/units'],
   });
-  
+
   // Filter units by search term
-  const filteredUnits = unitSearchTerm.length > 0 
-    ? availableUnits?.filter(unit => {
-        const searchLower = unitSearchTerm.toLowerCase();
-        return unit.unitCode.toLowerCase().includes(searchLower) || 
-               unit.unitTitle.toLowerCase().includes(searchLower);
-      })
-    : availableUnits;
-    
+  const filteredUnits =
+    unitSearchTerm.length > 0
+      ? availableUnits?.filter(unit => {
+          const searchLower = unitSearchTerm.toLowerCase();
+          return (
+            unit.unitCode.toLowerCase().includes(searchLower) ||
+            unit.unitTitle.toLowerCase().includes(searchLower)
+          );
+        })
+      : availableUnits;
+
   // Create structure based on core and elective tabs
   const coreUnits = qualificationData?.units?.core || [];
   const electiveUnits = qualificationData?.units?.elective || [];
-  
+
   // Group electives by group name
   const groupedElectives: Record<string, QualificationUnit[]> = {};
-  
+
   electiveUnits.forEach(unit => {
-    const groupName = unit.groupName || "General Electives";
+    const groupName = unit.groupName || 'General Electives';
     if (!groupedElectives[groupName]) {
       groupedElectives[groupName] = [];
     }
     groupedElectives[groupName].push(unit);
   });
-  
+
   // Check if unit is already in structure
   const isUnitInStructure = (unitId: number): boolean => {
     const inCore = coreUnits.some(u => u.unitId === unitId);
     const inElective = electiveUnits.some(u => u.unitId === unitId);
     return inCore || inElective;
   };
-  
+
   // Handle unit selection for adding to structure
   const toggleUnitSelection = (unitId: number) => {
     const newSelectedUnits = new Set(selectedUnitIds);
     if (newSelectedUnits.has(unitId)) {
       newSelectedUnits.delete(unitId);
-      const newAssignments = {...unitAssignments};
+      const newAssignments = { ...unitAssignments };
       delete newAssignments[unitId];
       setUnitAssignments(newAssignments);
     } else {
@@ -169,26 +167,26 @@ export default function QualificationStructure() {
       setUnitAssignments({
         ...unitAssignments,
         [unitId]: {
-          isCore: activeTab === "core",
+          isCore: activeTab === 'core',
           groupName: null,
-          isMandatory: false
-        }
+          isMandatory: false,
+        },
       });
     }
     setSelectedUnitIds(newSelectedUnits);
   };
-  
+
   // Update unit assignment properties
   const updateUnitAssignment = (unitId: number, field: string, value: any) => {
     setUnitAssignments({
       ...unitAssignments,
       [unitId]: {
         ...unitAssignments[unitId],
-        [field]: value
-      }
+        [field]: value,
+      },
     });
   };
-  
+
   // Add selected units to structure
   const addUnitsToStructure = useMutation({
     mutationFn: async () => {
@@ -196,73 +194,85 @@ export default function QualificationStructure() {
         unitId,
         isCore: unitAssignments[unitId].isCore,
         groupName: unitAssignments[unitId].groupName,
-        isMandatoryElective: unitAssignments[unitId].isMandatory
+        isMandatoryElective: unitAssignments[unitId].isMandatory,
       }));
-      
-      const response = await apiRequest("POST", `/api/vet/qualifications/${qualificationId}/units`, { units });
+
+      const response = await apiRequest(
+        'POST',
+        `/api/vet/qualifications/${qualificationId}/units`,
+        { units }
+      );
       return await response.json();
     },
     onSuccess: () => {
       toast({
-        title: "Units added successfully",
+        title: 'Units added successfully',
         description: `${selectedUnitIds.size} unit(s) have been added to the qualification structure`,
-        variant: "default",
+        variant: 'default',
       });
       setSelectedUnitIds(new Set());
       setUnitAssignments({});
       setAddUnitDialogOpen(false);
       queryClient.invalidateQueries({ queryKey: [`/api/vet/qualifications/${qualificationId}`] });
     },
-    onError: (error) => {
+    onError: error => {
       toast({
-        title: "Failed to add units",
-        description: error.message || "There was an error adding units to the qualification structure",
-        variant: "destructive",
+        title: 'Failed to add units',
+        description:
+          error.message || 'There was an error adding units to the qualification structure',
+        variant: 'destructive',
       });
-    }
+    },
   });
-  
+
   // Remove a unit from structure
   const removeUnit = useMutation({
     mutationFn: async (unitId: number) => {
-      const response = await apiRequest("DELETE", `/api/vet/qualifications/${qualificationId}/units/${unitId}`);
+      const response = await apiRequest(
+        'DELETE',
+        `/api/vet/qualifications/${qualificationId}/units/${unitId}`
+      );
       return await response.json();
     },
     onSuccess: () => {
       toast({
-        title: "Unit removed",
-        description: "The unit has been removed from the qualification structure",
-        variant: "default",
+        title: 'Unit removed',
+        description: 'The unit has been removed from the qualification structure',
+        variant: 'default',
       });
       queryClient.invalidateQueries({ queryKey: [`/api/vet/qualifications/${qualificationId}`] });
     },
-    onError: (error) => {
+    onError: error => {
       toast({
-        title: "Failed to remove unit",
-        description: error.message || "There was an error removing the unit",
-        variant: "destructive",
+        title: 'Failed to remove unit',
+        description: error.message || 'There was an error removing the unit',
+        variant: 'destructive',
       });
-    }
+    },
   });
-  
+
   // Move unit up or down in order
   const moveUnit = useMutation({
-    mutationFn: async ({ unitId, direction }: { unitId: number, direction: 'up' | 'down' }) => {
-      const response = await apiRequest("PATCH", `/api/vet/qualifications/${qualificationId}/units/${unitId}/order`, { direction });
+    mutationFn: async ({ unitId, direction }: { unitId: number; direction: 'up' | 'down' }) => {
+      const response = await apiRequest(
+        'PATCH',
+        `/api/vet/qualifications/${qualificationId}/units/${unitId}/order`,
+        { direction }
+      );
       return await response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/vet/qualifications/${qualificationId}`] });
     },
-    onError: (error) => {
+    onError: error => {
       toast({
-        title: "Failed to reorder unit",
-        description: error.message || "There was an error updating the unit order",
-        variant: "destructive",
+        title: 'Failed to reorder unit',
+        description: error.message || 'There was an error updating the unit order',
+        variant: 'destructive',
       });
-    }
+    },
   });
-  
+
   if (isLoadingQualification) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -270,32 +280,38 @@ export default function QualificationStructure() {
       </div>
     );
   }
-  
+
   const qualification = qualificationData?.qualification;
-  
+
   if (!qualification) {
     return (
       <div className="space-y-4">
-        <Button variant="outline" onClick={() => navigate("/vet/qualifications")}>
+        <Button variant="outline" onClick={() => navigate('/vet/qualifications')}>
           <ArrowLeft className="mr-2 h-4 w-4" /> Back to Qualifications
         </Button>
         <Card>
           <CardContent className="pt-6">
             <div className="text-center py-8">
               <h2 className="text-xl font-semibold">Qualification Not Found</h2>
-              <p className="text-muted-foreground mt-2">The qualification you are looking for does not exist or has been removed.</p>
+              <p className="text-muted-foreground mt-2">
+                The qualification you are looking for does not exist or has been removed.
+              </p>
             </div>
           </CardContent>
         </Card>
       </div>
     );
   }
-  
+
   return (
     <div className="space-y-6">
       {/* Header with back button and title */}
       <div className="flex items-center gap-2 mb-6">
-        <Button variant="outline" size="icon" onClick={() => navigate(`/vet/qualifications/${qualification.id}`)}>
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => navigate(`/vet/qualifications/${qualification.id}`)}
+        >
           <ArrowLeft className="h-4 w-4" />
         </Button>
         <div>
@@ -305,7 +321,7 @@ export default function QualificationStructure() {
           </p>
         </div>
       </div>
-      
+
       {/* Main content */}
       <Card>
         <CardHeader>
@@ -330,15 +346,15 @@ export default function QualificationStructure() {
                     Search and select units to add to this qualification structure
                   </DialogDescription>
                 </DialogHeader>
-                
+
                 <div className="space-y-4 my-4">
                   <Input
                     placeholder="Search by unit code or title..."
                     value={unitSearchTerm}
-                    onChange={(e) => setUnitSearchTerm(e.target.value)}
+                    onChange={e => setUnitSearchTerm(e.target.value)}
                     className="mb-4"
                   />
-                  
+
                   <ScrollArea className="h-[300px] rounded-md border p-2">
                     <Table>
                       <TableHeader>
@@ -351,54 +367,61 @@ export default function QualificationStructure() {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {filteredUnits?.length ? filteredUnits.map((unit) => {
-                          const isSelected = selectedUnitIds.has(unit.id);
-                          const isAlreadyInStructure = isUnitInStructure(unit.id);
-                          return (
-                            <TableRow key={unit.id} className={isAlreadyInStructure ? "opacity-50" : ""}>
-                              <TableCell>
-                                <Checkbox
-                                  checked={isSelected}
-                                  onCheckedChange={() => toggleUnitSelection(unit.id)}
-                                  disabled={isAlreadyInStructure}
-                                />
-                              </TableCell>
-                              <TableCell className="font-medium">{unit.unitCode}</TableCell>
-                              <TableCell>{unit.unitTitle}</TableCell>
-                              <TableCell>
-                                {isSelected && (
-                                  <Select
-                                    value={unitAssignments[unit.id]?.isCore ? "core" : "elective"}
-                                    onValueChange={(value) => updateUnitAssignment(unit.id, "isCore", value === "core")}
-                                  >
-                                    <SelectTrigger className="w-32">
-                                      <SelectValue/>
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      <SelectItem value="core">Core</SelectItem>
-                                      <SelectItem value="elective">Elective</SelectItem>
-                                    </SelectContent>
-                                  </Select>
-                                )}
-                                {isAlreadyInStructure && (
-                                  <Badge variant="outline">
-                                    Already Added
-                                  </Badge>
-                                )}
-                              </TableCell>
-                              <TableCell>
-                                {isSelected && !unitAssignments[unit.id]?.isCore && (
-                                  <Input
-                                    placeholder="Group name (optional)"
-                                    value={unitAssignments[unit.id]?.groupName || ""}
-                                    onChange={(e) => updateUnitAssignment(unit.id, "groupName", e.target.value)}
-                                    className="w-40"
+                        {filteredUnits?.length ? (
+                          filteredUnits.map(unit => {
+                            const isSelected = selectedUnitIds.has(unit.id);
+                            const isAlreadyInStructure = isUnitInStructure(unit.id);
+                            return (
+                              <TableRow
+                                key={unit.id}
+                                className={isAlreadyInStructure ? 'opacity-50' : ''}
+                              >
+                                <TableCell>
+                                  <Checkbox
+                                    checked={isSelected}
+                                    onCheckedChange={() => toggleUnitSelection(unit.id)}
+                                    disabled={isAlreadyInStructure}
                                   />
-                                )}
-                              </TableCell>
-                            </TableRow>
-                          );
-                        }) : (
+                                </TableCell>
+                                <TableCell className="font-medium">{unit.unitCode}</TableCell>
+                                <TableCell>{unit.unitTitle}</TableCell>
+                                <TableCell>
+                                  {isSelected && (
+                                    <Select
+                                      value={unitAssignments[unit.id]?.isCore ? 'core' : 'elective'}
+                                      onValueChange={value =>
+                                        updateUnitAssignment(unit.id, 'isCore', value === 'core')
+                                      }
+                                    >
+                                      <SelectTrigger className="w-32">
+                                        <SelectValue />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        <SelectItem value="core">Core</SelectItem>
+                                        <SelectItem value="elective">Elective</SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                  )}
+                                  {isAlreadyInStructure && (
+                                    <Badge variant="outline">Already Added</Badge>
+                                  )}
+                                </TableCell>
+                                <TableCell>
+                                  {isSelected && !unitAssignments[unit.id]?.isCore && (
+                                    <Input
+                                      placeholder="Group name (optional)"
+                                      value={unitAssignments[unit.id]?.groupName || ''}
+                                      onChange={e =>
+                                        updateUnitAssignment(unit.id, 'groupName', e.target.value)
+                                      }
+                                      className="w-40"
+                                    />
+                                  )}
+                                </TableCell>
+                              </TableRow>
+                            );
+                          })
+                        ) : (
                           <TableRow>
                             <TableCell colSpan={5} className="h-24 text-center">
                               {isLoadingUnits ? (
@@ -407,7 +430,7 @@ export default function QualificationStructure() {
                                   Loading units...
                                 </div>
                               ) : (
-                                "No units found. Try a different search term."
+                                'No units found. Try a different search term.'
                               )}
                             </TableCell>
                           </TableRow>
@@ -416,24 +439,28 @@ export default function QualificationStructure() {
                     </Table>
                   </ScrollArea>
                 </div>
-                
+
                 <DialogFooter>
                   <div className="flex justify-between w-full items-center">
                     <div className="text-sm text-muted-foreground">
                       {selectedUnitIds.size} unit(s) selected
                     </div>
                     <div className="space-x-2">
-                      <Button variant="outline" onClick={() => {
-                        setSelectedUnitIds(new Set());
-                        setUnitAssignments({});
-                      }} disabled={selectedUnitIds.size === 0}>
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          setSelectedUnitIds(new Set());
+                          setUnitAssignments({});
+                        }}
+                        disabled={selectedUnitIds.size === 0}
+                      >
                         Clear Selection
                       </Button>
-                      <Button 
-                        onClick={() => addUnitsToStructure.mutate()} 
+                      <Button
+                        onClick={() => addUnitsToStructure.mutate()}
                         disabled={selectedUnitIds.size === 0 || addUnitsToStructure.isPending}
                       >
-                        {addUnitsToStructure.isPending ? "Adding..." : "Add Selected Units"}
+                        {addUnitsToStructure.isPending ? 'Adding...' : 'Add Selected Units'}
                       </Button>
                     </div>
                   </div>
@@ -442,25 +469,31 @@ export default function QualificationStructure() {
             </Dialog>
           </div>
         </CardHeader>
-        
+
         <CardContent>
           <Tabs defaultValue="core" value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="mb-4">
               <TabsTrigger value="core">
-                Core Units 
-                <Badge variant="outline" className="ml-2">{coreUnits.length}</Badge>
+                Core Units
+                <Badge variant="outline" className="ml-2">
+                  {coreUnits.length}
+                </Badge>
               </TabsTrigger>
               <TabsTrigger value="elective">
                 Elective Units
-                <Badge variant="outline" className="ml-2">{electiveUnits.length}</Badge>
+                <Badge variant="outline" className="ml-2">
+                  {electiveUnits.length}
+                </Badge>
               </TabsTrigger>
             </TabsList>
-            
+
             <TabsContent value="core" className="space-y-4">
               {coreUnits.length === 0 ? (
                 <div className="text-center py-12 border rounded-md">
                   <h3 className="text-lg font-medium">No Core Units</h3>
-                  <p className="text-muted-foreground mt-1">This qualification has no core units. Add some using the button above.</p>
+                  <p className="text-muted-foreground mt-1">
+                    This qualification has no core units. Add some using the button above.
+                  </p>
                 </div>
               ) : (
                 <Table>
@@ -477,30 +510,42 @@ export default function QualificationStructure() {
                       <TableRow key={item.id}>
                         <TableCell className="font-medium">{item.unit?.unitCode}</TableCell>
                         <TableCell>{item.unit?.unitTitle}</TableCell>
-                        <TableCell>{item.unit?.hoursOfDelivery || "-"}</TableCell>
+                        <TableCell>{item.unit?.hoursOfDelivery || '-'}</TableCell>
                         <TableCell className="text-right">
                           <TooltipProvider>
                             <div className="flex justify-end space-x-1">
                               <Tooltip>
                                 <TooltipTrigger asChild>
-                                  <Button variant="ghost" size="icon" disabled={index === 0}
-                                    onClick={() => moveUnit.mutate({ unitId: item.id, direction: 'up' })}>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    disabled={index === 0}
+                                    onClick={() =>
+                                      moveUnit.mutate({ unitId: item.id, direction: 'up' })
+                                    }
+                                  >
                                     <MoveUp className="h-4 w-4" />
                                   </Button>
                                 </TooltipTrigger>
                                 <TooltipContent>Move Up</TooltipContent>
                               </Tooltip>
-                              
+
                               <Tooltip>
                                 <TooltipTrigger asChild>
-                                  <Button variant="ghost" size="icon" disabled={index === coreUnits.length - 1}
-                                    onClick={() => moveUnit.mutate({ unitId: item.id, direction: 'down' })}>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    disabled={index === coreUnits.length - 1}
+                                    onClick={() =>
+                                      moveUnit.mutate({ unitId: item.id, direction: 'down' })
+                                    }
+                                  >
                                     <MoveDown className="h-4 w-4" />
                                   </Button>
                                 </TooltipTrigger>
                                 <TooltipContent>Move Down</TooltipContent>
                               </Tooltip>
-                              
+
                               <AlertDialog>
                                 <AlertDialogTrigger asChild>
                                   <Button variant="ghost" size="icon">
@@ -511,12 +556,16 @@ export default function QualificationStructure() {
                                   <AlertDialogHeader>
                                     <AlertDialogTitle>Remove Core Unit</AlertDialogTitle>
                                     <AlertDialogDescription>
-                                      Are you sure you want to remove {item.unit?.unitCode} from this qualification's core units?
+                                      Are you sure you want to remove {item.unit?.unitCode} from
+                                      this qualification's core units?
                                     </AlertDialogDescription>
                                   </AlertDialogHeader>
                                   <AlertDialogFooter>
                                     <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                    <AlertDialogAction onClick={() => removeUnit.mutate(item.id)} className="bg-destructive">
+                                    <AlertDialogAction
+                                      onClick={() => removeUnit.mutate(item.id)}
+                                      className="bg-destructive"
+                                    >
                                       Remove
                                     </AlertDialogAction>
                                   </AlertDialogFooter>
@@ -531,12 +580,14 @@ export default function QualificationStructure() {
                 </Table>
               )}
             </TabsContent>
-            
+
             <TabsContent value="elective" className="space-y-8">
               {Object.keys(groupedElectives).length === 0 ? (
                 <div className="text-center py-12 border rounded-md">
                   <h3 className="text-lg font-medium">No Elective Units</h3>
-                  <p className="text-muted-foreground mt-1">This qualification has no elective units. Add some using the button above.</p>
+                  <p className="text-muted-foreground mt-1">
+                    This qualification has no elective units. Add some using the button above.
+                  </p>
                 </div>
               ) : (
                 Object.entries(groupedElectives).map(([groupName, units]) => (
@@ -556,30 +607,42 @@ export default function QualificationStructure() {
                           <TableRow key={item.id}>
                             <TableCell className="font-medium">{item.unit?.unitCode}</TableCell>
                             <TableCell>{item.unit?.unitTitle}</TableCell>
-                            <TableCell>{item.unit?.hoursOfDelivery || "-"}</TableCell>
+                            <TableCell>{item.unit?.hoursOfDelivery || '-'}</TableCell>
                             <TableCell className="text-right">
                               <TooltipProvider>
                                 <div className="flex justify-end space-x-1">
                                   <Tooltip>
                                     <TooltipTrigger asChild>
-                                      <Button variant="ghost" size="icon" disabled={index === 0 || units.length === 1}
-                                        onClick={() => moveUnit.mutate({ unitId: item.id, direction: 'up' })}>
+                                      <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        disabled={index === 0 || units.length === 1}
+                                        onClick={() =>
+                                          moveUnit.mutate({ unitId: item.id, direction: 'up' })
+                                        }
+                                      >
                                         <MoveUp className="h-4 w-4" />
                                       </Button>
                                     </TooltipTrigger>
                                     <TooltipContent>Move Up</TooltipContent>
                                   </Tooltip>
-                                  
+
                                   <Tooltip>
                                     <TooltipTrigger asChild>
-                                      <Button variant="ghost" size="icon" disabled={index === units.length - 1 || units.length === 1}
-                                        onClick={() => moveUnit.mutate({ unitId: item.id, direction: 'down' })}>
+                                      <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        disabled={index === units.length - 1 || units.length === 1}
+                                        onClick={() =>
+                                          moveUnit.mutate({ unitId: item.id, direction: 'down' })
+                                        }
+                                      >
                                         <MoveDown className="h-4 w-4" />
                                       </Button>
                                     </TooltipTrigger>
                                     <TooltipContent>Move Down</TooltipContent>
                                   </Tooltip>
-                                  
+
                                   <AlertDialog>
                                     <AlertDialogTrigger asChild>
                                       <Button variant="ghost" size="icon">
@@ -590,12 +653,16 @@ export default function QualificationStructure() {
                                       <AlertDialogHeader>
                                         <AlertDialogTitle>Remove Elective Unit</AlertDialogTitle>
                                         <AlertDialogDescription>
-                                          Are you sure you want to remove {item.unit?.unitCode} from this qualification's elective units?
+                                          Are you sure you want to remove {item.unit?.unitCode} from
+                                          this qualification's elective units?
                                         </AlertDialogDescription>
                                       </AlertDialogHeader>
                                       <AlertDialogFooter>
                                         <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                        <AlertDialogAction onClick={() => removeUnit.mutate(item.id)} className="bg-destructive">
+                                        <AlertDialogAction
+                                          onClick={() => removeUnit.mutate(item.id)}
+                                          className="bg-destructive"
+                                        >
                                           Remove
                                         </AlertDialogAction>
                                       </AlertDialogFooter>
@@ -614,11 +681,11 @@ export default function QualificationStructure() {
             </TabsContent>
           </Tabs>
         </CardContent>
-        
+
         <CardFooter className="flex justify-between border-t pt-6">
           <div className="flex items-center gap-2">
-            <a 
-              href={`https://training.gov.au/Training/Details/${qualification.code}`} 
+            <a
+              href={`https://training.gov.au/Training/Details/${qualification.code}`}
               target="_blank"
               rel="noopener noreferrer"
               className="text-sm text-primary flex items-center"
@@ -626,7 +693,10 @@ export default function QualificationStructure() {
               View on Training.gov.au <ExternalLink className="ml-1 h-3 w-3" />
             </a>
           </div>
-          <Button onClick={() => navigate(`/vet/qualifications/${qualification.id}`)} variant="outline">
+          <Button
+            onClick={() => navigate(`/vet/qualifications/${qualification.id}`)}
+            variant="outline"
+          >
             Back to Qualification
           </Button>
         </CardFooter>

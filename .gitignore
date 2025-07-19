@@ -4,3 +4,15 @@ dist
 server/public
 vite.config.ts.*
 *.tar.gz
+
+# Reports and analysis output
+reports/
+coverage/
+bundle-analysis.html
+
+# Environment files
+.env
+.env.local
+
+# Temporary files
+temp/

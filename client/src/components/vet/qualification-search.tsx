@@ -1,13 +1,13 @@
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Loader2, Search, Download, AlertCircle } from "lucide-react";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { apiRequest } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Loader2, Search, Download, AlertCircle } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { apiRequest } from '@/lib/queryClient';
+import { useToast } from '@/hooks/use-toast';
 
 interface Qualification {
   code: string;
@@ -27,17 +27,17 @@ interface QualificationSearchProps {
 }
 
 export function QualificationSearch({ onImport, isImporting = false }: QualificationSearchProps) {
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const { toast } = useToast();
 
   const { data, isLoading, error, refetch } = useQuery<Qualification[]>({
-    queryKey: ["/api/tga/search"],
+    queryKey: ['/api/tga/search'],
     queryFn: async () => {
       if (searchTerm.length < 3) {
-        throw new Error("Search term must be at least 3 characters");
+        throw new Error('Search term must be at least 3 characters');
       }
-      const res = await apiRequest("GET", `/api/tga/search?q=${encodeURIComponent(searchTerm)}`);
+      const res = await apiRequest('GET', `/api/tga/search?q=${encodeURIComponent(searchTerm)}`);
       return res.json();
     },
     enabled: false,
@@ -46,9 +46,9 @@ export function QualificationSearch({ onImport, isImporting = false }: Qualifica
   const handleSearch = async () => {
     if (searchTerm.length < 3) {
       toast({
-        title: "Search term too short",
-        description: "Please enter at least 3 characters",
-        variant: "destructive",
+        title: 'Search term too short',
+        description: 'Please enter at least 3 characters',
+        variant: 'destructive',
       });
       return;
     }
@@ -71,18 +71,12 @@ export function QualificationSearch({ onImport, isImporting = false }: Qualifica
         <Input
           placeholder="Search qualifications (e.g., BSB20120, Certificate II)"
           value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+          onChange={e => setSearchTerm(e.target.value)}
+          onKeyDown={e => e.key === 'Enter' && handleSearch()}
           className="flex-1"
         />
-        <Button
-          onClick={handleSearch}
-          disabled={isLoading || isSearching}
-          type="button"
-        >
-          {(isLoading || isSearching) && (
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          )}
+        <Button onClick={handleSearch} disabled={isLoading || isSearching} type="button">
+          {(isLoading || isSearching) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           <Search className="h-4 w-4 mr-2" />
           Search
         </Button>
@@ -93,9 +87,7 @@ export function QualificationSearch({ onImport, isImporting = false }: Qualifica
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>Error</AlertTitle>
           <AlertDescription>
-            {error instanceof Error
-              ? error.message
-              : "Failed to search qualifications"}
+            {error instanceof Error ? error.message : 'Failed to search qualifications'}
           </AlertDescription>
         </Alert>
       )}
@@ -105,8 +97,7 @@ export function QualificationSearch({ onImport, isImporting = false }: Qualifica
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>No results</AlertTitle>
           <AlertDescription>
-            No qualifications found matching your search term. Try a different
-            search.
+            No qualifications found matching your search term. Try a different search.
           </AlertDescription>
         </Alert>
       )}
@@ -117,26 +108,25 @@ export function QualificationSearch({ onImport, isImporting = false }: Qualifica
             Found {data.length} qualifications matching your search term.
           </p>
           <div className="grid gap-4">
-            {data.map((qualification) => (
+            {data.map(qualification => (
               <Card key={qualification.code}>
                 <CardContent className="pt-6 flex justify-between items-start">
                   <div>
                     <div className="flex items-center gap-2 mb-1">
                       <span className="font-semibold">{qualification.code}</span>
-                      <Badge
-                        variant={
-                          qualification.status === "Current"
-                            ? "default"
-                            : "secondary"
-                        }
-                      >
+                      <Badge variant={qualification.status === 'Current' ? 'default' : 'secondary'}>
                         {qualification.status}
                       </Badge>
                     </div>
                     <h4 className="font-medium">{qualification.title}</h4>
                     <div className="mt-2 text-sm text-muted-foreground">
-                      <p>Training Package: {qualification.trainingPackage.code} - {qualification.trainingPackage.title}</p>
-                      <p>Release Date: {new Date(qualification.releaseDate).toLocaleDateString()}</p>
+                      <p>
+                        Training Package: {qualification.trainingPackage.code} -{' '}
+                        {qualification.trainingPackage.title}
+                      </p>
+                      <p>
+                        Release Date: {new Date(qualification.releaseDate).toLocaleDateString()}
+                      </p>
                     </div>
                   </div>
                   <Button
@@ -145,9 +135,7 @@ export function QualificationSearch({ onImport, isImporting = false }: Qualifica
                     onClick={() => handleImport(qualification)}
                     disabled={isImporting}
                   >
-                    {isImporting && (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    )}
+                    {isImporting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     <Download className="h-4 w-4 mr-2" />
                     Import
                   </Button>

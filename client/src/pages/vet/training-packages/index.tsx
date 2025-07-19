@@ -1,14 +1,14 @@
-import { useState } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { useLocation } from "wouter";
-import { 
-  Card, 
-  CardHeader, 
-  CardTitle, 
-  CardDescription, 
+import { useState } from 'react';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { useLocation } from 'wouter';
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
   CardContent,
-  CardFooter
-} from "@/components/ui/card";
+  CardFooter,
+} from '@/components/ui/card';
 import {
   Table,
   TableBody,
@@ -16,8 +16,8 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { 
+} from '@/components/ui/table';
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -25,7 +25,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -36,49 +36,49 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/hooks/use-toast";
-import { 
-  FileText, 
-  Plus, 
-  Pencil, 
-  Trash2, 
-  MoreHorizontal, 
-  Package, 
+} from '@/components/ui/alert-dialog';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { useToast } from '@/hooks/use-toast';
+import {
+  FileText,
+  Plus,
+  Pencil,
+  Trash2,
+  MoreHorizontal,
+  Package,
   Search,
   Filter,
   Eye,
   CheckCircle,
-  XCircle
-} from "lucide-react";
-import { 
+  XCircle,
+} from 'lucide-react';
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { 
+} from '@/components/ui/dropdown-menu';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import {
   Form,
   FormControl,
   FormDescription,
   FormField,
   FormItem,
   FormLabel,
-  FormMessage
-} from "@/components/ui/form";
-import { queryClient, apiRequest } from "@/lib/queryClient";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+  FormMessage,
+} from '@/components/ui/form';
+import { queryClient, apiRequest } from '@/lib/queryClient';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
 
 // Define Training Package interface
 interface TrainingPackage {
@@ -98,46 +98,46 @@ interface TrainingPackage {
 
 // Define Training Package creation schema
 const trainingPackageSchema = z.object({
-  code: z.string().min(2, { message: "Code must be at least 2 characters." }),
-  title: z.string().min(3, { message: "Title must be at least 3 characters." }),
+  code: z.string().min(2, { message: 'Code must be at least 2 characters.' }),
+  title: z.string().min(3, { message: 'Title must be at least 3 characters.' }),
   description: z.string().optional(),
-  releaseNumber: z.string().min(1, { message: "Release number is required." }),
+  releaseNumber: z.string().min(1, { message: 'Release number is required.' }),
   releaseDate: z.string().optional(),
   isActive: z.boolean().default(true),
   isSuperseded: z.boolean().default(false),
   industryArea: z.string().optional(),
-  website: z.string().url({ message: "Please enter a valid URL." }).optional().or(z.literal('')),
+  website: z.string().url({ message: 'Please enter a valid URL.' }).optional().or(z.literal('')),
 });
 
 export default function TrainingPackagesList() {
   const { toast } = useToast();
   const [_, navigate] = useLocation();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   // Form for creating new training package
   const form = useForm<z.infer<typeof trainingPackageSchema>>({
     resolver: zodResolver(trainingPackageSchema),
     defaultValues: {
-      code: "",
-      title: "",
-      description: "",
-      releaseNumber: "",
-      releaseDate: "",
+      code: '',
+      title: '',
+      description: '',
+      releaseNumber: '',
+      releaseDate: '',
       isActive: true,
       isSuperseded: false,
-      industryArea: "",
-      website: "",
+      industryArea: '',
+      website: '',
     },
   });
 
   // Fetch training packages
-  const { 
-    data: trainingPackages, 
+  const {
+    data: trainingPackages,
     isLoading,
     error,
-    refetch
+    refetch,
   } = useQuery<TrainingPackage[]>({
     queryKey: ['/api/vet/training-packages'],
     queryFn: async () => {
@@ -146,104 +146,111 @@ export default function TrainingPackagesList() {
       return [
         {
           id: 1,
-          code: "BSB",
-          title: "Business Services Training Package",
-          description: "The Business Services Training Package provides a framework for vocational education and training for the business services industry.",
-          releaseNumber: "8.0",
-          releaseDate: "2023-05-15",
+          code: 'BSB',
+          title: 'Business Services Training Package',
+          description:
+            'The Business Services Training Package provides a framework for vocational education and training for the business services industry.',
+          releaseNumber: '8.0',
+          releaseDate: '2023-05-15',
           isActive: true,
           isSuperseded: false,
-          industryArea: "Business Services",
-          website: "https://training.gov.au/Training/Details/BSB",
-          createdAt: "2024-01-10T00:00:00.000Z",
-          updatedAt: "2024-01-10T00:00:00.000Z"
+          industryArea: 'Business Services',
+          website: 'https://training.gov.au/Training/Details/BSB',
+          createdAt: '2024-01-10T00:00:00.000Z',
+          updatedAt: '2024-01-10T00:00:00.000Z',
         },
         {
           id: 2,
-          code: "UEE",
-          title: "Electrotechnology Training Package",
-          description: "The Electrotechnology Training Package covers occupations and job roles in electrical, electronics, refrigeration, renewable energy, and telecommunications.",
-          releaseNumber: "4.0",
-          releaseDate: "2023-06-20",
+          code: 'UEE',
+          title: 'Electrotechnology Training Package',
+          description:
+            'The Electrotechnology Training Package covers occupations and job roles in electrical, electronics, refrigeration, renewable energy, and telecommunications.',
+          releaseNumber: '4.0',
+          releaseDate: '2023-06-20',
           isActive: true,
           isSuperseded: false,
-          industryArea: "Electrotechnology",
-          website: "https://training.gov.au/Training/Details/UEE",
-          createdAt: "2024-01-15T00:00:00.000Z",
-          updatedAt: "2024-01-15T00:00:00.000Z"
+          industryArea: 'Electrotechnology',
+          website: 'https://training.gov.au/Training/Details/UEE',
+          createdAt: '2024-01-15T00:00:00.000Z',
+          updatedAt: '2024-01-15T00:00:00.000Z',
         },
         {
           id: 3,
-          code: "AUR",
-          title: "Automotive Retail, Service and Repair Training Package",
-          description: "The Automotive Retail, Service and Repair Training Package provides skills and knowledge for careers in automotive retail, service and repair.",
-          releaseNumber: "6.0",
-          releaseDate: "2022-11-10",
+          code: 'AUR',
+          title: 'Automotive Retail, Service and Repair Training Package',
+          description:
+            'The Automotive Retail, Service and Repair Training Package provides skills and knowledge for careers in automotive retail, service and repair.',
+          releaseNumber: '6.0',
+          releaseDate: '2022-11-10',
           isActive: true,
           isSuperseded: false,
-          industryArea: "Automotive",
-          website: "https://training.gov.au/Training/Details/AUR",
-          createdAt: "2024-01-20T00:00:00.000Z",
-          updatedAt: "2024-01-20T00:00:00.000Z"
+          industryArea: 'Automotive',
+          website: 'https://training.gov.au/Training/Details/AUR',
+          createdAt: '2024-01-20T00:00:00.000Z',
+          updatedAt: '2024-01-20T00:00:00.000Z',
         },
         {
           id: 4,
-          code: "CPC",
-          title: "Construction, Plumbing and Services Training Package",
-          description: "The Construction, Plumbing and Services Training Package provides skills and knowledge for careers in construction, plumbing and services.",
-          releaseNumber: "5.0",
-          releaseDate: "2022-09-18",
+          code: 'CPC',
+          title: 'Construction, Plumbing and Services Training Package',
+          description:
+            'The Construction, Plumbing and Services Training Package provides skills and knowledge for careers in construction, plumbing and services.',
+          releaseNumber: '5.0',
+          releaseDate: '2022-09-18',
           isActive: true,
           isSuperseded: false,
-          industryArea: "Construction",
-          website: "https://training.gov.au/Training/Details/CPC",
-          createdAt: "2024-01-25T00:00:00.000Z",
-          updatedAt: "2024-01-25T00:00:00.000Z"
+          industryArea: 'Construction',
+          website: 'https://training.gov.au/Training/Details/CPC',
+          createdAt: '2024-01-25T00:00:00.000Z',
+          updatedAt: '2024-01-25T00:00:00.000Z',
         },
         {
           id: 5,
-          code: "TAE",
-          title: "Training and Education Training Package",
-          description: "The Training and Education Training Package provides the skills and knowledge for careers in vocational education and training.",
-          releaseNumber: "3.0",
-          releaseDate: "2021-07-12",
+          code: 'TAE',
+          title: 'Training and Education Training Package',
+          description:
+            'The Training and Education Training Package provides the skills and knowledge for careers in vocational education and training.',
+          releaseNumber: '3.0',
+          releaseDate: '2021-07-12',
           isActive: false,
           isSuperseded: true,
-          industryArea: "Education and Training",
-          website: "https://training.gov.au/Training/Details/TAE",
-          createdAt: "2024-02-01T00:00:00.000Z",
-          updatedAt: "2024-02-01T00:00:00.000Z"
+          industryArea: 'Education and Training',
+          website: 'https://training.gov.au/Training/Details/TAE',
+          createdAt: '2024-02-01T00:00:00.000Z',
+          updatedAt: '2024-02-01T00:00:00.000Z',
         },
         {
           id: 6,
-          code: "ICT",
-          title: "Information and Communications Technology Training Package",
-          description: "The Information and Communications Technology Training Package provides skills and knowledge for careers in IT and telecommunications.",
-          releaseNumber: "7.0",
-          releaseDate: "2023-02-28",
+          code: 'ICT',
+          title: 'Information and Communications Technology Training Package',
+          description:
+            'The Information and Communications Technology Training Package provides skills and knowledge for careers in IT and telecommunications.',
+          releaseNumber: '7.0',
+          releaseDate: '2023-02-28',
           isActive: true,
           isSuperseded: false,
-          industryArea: "Information Technology",
-          website: "https://training.gov.au/Training/Details/ICT",
-          createdAt: "2024-02-05T00:00:00.000Z",
-          updatedAt: "2024-02-05T00:00:00.000Z"
+          industryArea: 'Information Technology',
+          website: 'https://training.gov.au/Training/Details/ICT',
+          createdAt: '2024-02-05T00:00:00.000Z',
+          updatedAt: '2024-02-05T00:00:00.000Z',
         },
         {
           id: 7,
-          code: "SIT",
-          title: "Tourism, Travel and Hospitality Training Package",
-          description: "The Tourism, Travel and Hospitality Training Package provides skills and knowledge for careers in tourism, travel and hospitality.",
-          releaseNumber: "2.0",
-          releaseDate: "2022-04-15",
+          code: 'SIT',
+          title: 'Tourism, Travel and Hospitality Training Package',
+          description:
+            'The Tourism, Travel and Hospitality Training Package provides skills and knowledge for careers in tourism, travel and hospitality.',
+          releaseNumber: '2.0',
+          releaseDate: '2022-04-15',
           isActive: true,
           isSuperseded: false,
-          industryArea: "Hospitality and Tourism",
-          website: "https://training.gov.au/Training/Details/SIT",
-          createdAt: "2024-02-10T00:00:00.000Z",
-          updatedAt: "2024-02-10T00:00:00.000Z"
-        }
+          industryArea: 'Hospitality and Tourism',
+          website: 'https://training.gov.au/Training/Details/SIT',
+          createdAt: '2024-02-10T00:00:00.000Z',
+          updatedAt: '2024-02-10T00:00:00.000Z',
+        },
       ];
-    }
+    },
   });
 
   // Create training package mutation
@@ -258,7 +265,7 @@ export default function TrainingPackagesList() {
     },
     onSuccess: () => {
       toast({
-        title: "Training Package created",
+        title: 'Training Package created',
         description: `Successfully created ${form.getValues().code} - ${form.getValues().title}`,
       });
       setIsDialogOpen(false);
@@ -267,11 +274,11 @@ export default function TrainingPackagesList() {
     },
     onError: (error: Error) => {
       toast({
-        title: "Error creating Training Package",
+        title: 'Error creating Training Package',
         description: error.message,
-        variant: "destructive",
+        variant: 'destructive',
       });
-    }
+    },
   });
 
   // Handle form submission
@@ -282,18 +289,20 @@ export default function TrainingPackagesList() {
   // Filter training packages based on search and filter
   const filteredTrainingPackages = trainingPackages?.filter(pkg => {
     // Apply search filter
-    const matchesSearch = searchQuery === "" || 
+    const matchesSearch =
+      searchQuery === '' ||
       pkg.code.toLowerCase().includes(searchQuery.toLowerCase()) ||
       pkg.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       pkg.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       pkg.industryArea?.toLowerCase().includes(searchQuery.toLowerCase());
-    
+
     // Apply status filter
-    const matchesStatus = statusFilter === "all" || 
-      (statusFilter === "active" && pkg.isActive) ||
-      (statusFilter === "inactive" && !pkg.isActive) ||
-      (statusFilter === "superseded" && pkg.isSuperseded);
-    
+    const matchesStatus =
+      statusFilter === 'all' ||
+      (statusFilter === 'active' && pkg.isActive) ||
+      (statusFilter === 'inactive' && !pkg.isActive) ||
+      (statusFilter === 'superseded' && pkg.isSuperseded);
+
     return matchesSearch && matchesStatus;
   });
 
@@ -315,9 +324,7 @@ export default function TrainingPackagesList() {
           <DialogContent className="sm:max-w-[600px]">
             <DialogHeader>
               <DialogTitle>Create Training Package</DialogTitle>
-              <DialogDescription>
-                Add a new Training Package to the system
-              </DialogDescription>
+              <DialogDescription>Add a new Training Package to the system</DialogDescription>
             </DialogHeader>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -364,9 +371,7 @@ export default function TrainingPackagesList() {
                       <FormControl>
                         <Input placeholder="e.g. Business Services Training Package" {...field} />
                       </FormControl>
-                      <FormDescription>
-                        The official title of this Training Package
-                      </FormDescription>
+                      <FormDescription>The official title of this Training Package</FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -382,7 +387,7 @@ export default function TrainingPackagesList() {
                           placeholder="Enter a description of the Training Package"
                           className="min-h-24"
                           {...field}
-                          value={field.value || ""}
+                          value={field.value || ''}
                         />
                       </FormControl>
                       <FormDescription>
@@ -400,7 +405,11 @@ export default function TrainingPackagesList() {
                       <FormItem>
                         <FormLabel>Industry Area</FormLabel>
                         <FormControl>
-                          <Input placeholder="e.g. Business Services" {...field} value={field.value || ""} />
+                          <Input
+                            placeholder="e.g. Business Services"
+                            {...field}
+                            value={field.value || ''}
+                          />
                         </FormControl>
                         <FormDescription>
                           The primary industry area for this package
@@ -416,11 +425,9 @@ export default function TrainingPackagesList() {
                       <FormItem>
                         <FormLabel>Release Date</FormLabel>
                         <FormControl>
-                          <Input type="date" {...field} value={field.value || ""} />
+                          <Input type="date" {...field} value={field.value || ''} />
                         </FormControl>
-                        <FormDescription>
-                          The date this version was released
-                        </FormDescription>
+                        <FormDescription>The date this version was released</FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -433,7 +440,11 @@ export default function TrainingPackagesList() {
                     <FormItem>
                       <FormLabel>Website URL</FormLabel>
                       <FormControl>
-                        <Input placeholder="e.g. https://training.gov.au/..." {...field} value={field.value || ""} />
+                        <Input
+                          placeholder="e.g. https://training.gov.au/..."
+                          {...field}
+                          value={field.value || ''}
+                        />
                       </FormControl>
                       <FormDescription>
                         Link to official information about this package
@@ -449,10 +460,7 @@ export default function TrainingPackagesList() {
                     render={({ field }) => (
                       <FormItem className="flex flex-row items-start space-x-3 space-y-0 p-4 border rounded-md">
                         <FormControl>
-                          <Switch
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
+                          <Switch checked={field.value} onCheckedChange={field.onChange} />
                         </FormControl>
                         <div className="space-y-1 leading-none">
                           <FormLabel>Active Package</FormLabel>
@@ -469,10 +477,7 @@ export default function TrainingPackagesList() {
                     render={({ field }) => (
                       <FormItem className="flex flex-row items-start space-x-3 space-y-0 p-4 border rounded-md">
                         <FormControl>
-                          <Switch
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
+                          <Switch checked={field.value} onCheckedChange={field.onChange} />
                         </FormControl>
                         <div className="space-y-1 leading-none">
                           <FormLabel>Superseded</FormLabel>
@@ -485,11 +490,7 @@ export default function TrainingPackagesList() {
                   />
                 </div>
                 <DialogFooter>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setIsDialogOpen(false)}
-                  >
+                  <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
                     Cancel
                   </Button>
                   <Button type="submit" disabled={createTrainingPackageMutation.isPending}>
@@ -521,14 +522,14 @@ export default function TrainingPackagesList() {
                 placeholder="Search by code, title or industry..."
                 className="pl-8"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={e => setSearchQuery(e.target.value)}
               />
             </div>
             <div>
-              <select 
+              <select
                 className="h-10 w-40 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
+                onChange={e => setStatusFilter(e.target.value)}
               >
                 <option value="all">All Packages</option>
                 <option value="active">Active</option>
@@ -537,7 +538,7 @@ export default function TrainingPackagesList() {
               </select>
             </div>
           </div>
-          
+
           {isLoading ? (
             <div className="space-y-4">
               <Skeleton className="h-12 w-full" />
@@ -549,11 +550,7 @@ export default function TrainingPackagesList() {
           ) : error ? (
             <div className="py-8 text-center">
               <p className="text-destructive">Error loading Training Packages</p>
-              <Button 
-                variant="outline" 
-                className="mt-4"
-                onClick={() => refetch()}
-              >
+              <Button variant="outline" className="mt-4" onClick={() => refetch()}>
                 Retry
               </Button>
             </div>
@@ -578,7 +575,7 @@ export default function TrainingPackagesList() {
                       </TableCell>
                     </TableRow>
                   ) : (
-                    filteredTrainingPackages?.map((pkg) => (
+                    filteredTrainingPackages?.map(pkg => (
                       <TableRow key={pkg.id}>
                         <TableCell className="font-medium">{pkg.code}</TableCell>
                         <TableCell>{pkg.title}</TableCell>
@@ -595,7 +592,10 @@ export default function TrainingPackagesList() {
                               Active
                             </Badge>
                           ) : (
-                            <Badge variant="outline" className="border-destructive text-destructive">
+                            <Badge
+                              variant="outline"
+                              className="border-destructive text-destructive"
+                            >
                               <XCircle className="mr-1 h-3 w-3" />
                               Inactive
                             </Badge>
@@ -610,16 +610,30 @@ export default function TrainingPackagesList() {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => navigate(`/vet/training-packages/${pkg.id}`)}>
+                              <DropdownMenuItem
+                                onClick={() => navigate(`/vet/training-packages/${pkg.id}`)}
+                              >
                                 <Eye className="mr-2 h-4 w-4" /> View Details
                               </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => toast({ title: "Edit Package", description: "Edit functionality coming soon" })}>
+                              <DropdownMenuItem
+                                onClick={() =>
+                                  toast({
+                                    title: 'Edit Package',
+                                    description: 'Edit functionality coming soon',
+                                  })
+                                }
+                              >
                                 <Pencil className="mr-2 h-4 w-4" /> Edit Package
                               </DropdownMenuItem>
                               <DropdownMenuSeparator />
-                              <DropdownMenuItem 
+                              <DropdownMenuItem
                                 className="text-destructive focus:text-destructive"
-                                onClick={() => toast({ title: "Delete Package", description: "Delete functionality coming soon" })}
+                                onClick={() =>
+                                  toast({
+                                    title: 'Delete Package',
+                                    description: 'Delete functionality coming soon',
+                                  })
+                                }
                               >
                                 <Trash2 className="mr-2 h-4 w-4" /> Delete Package
                               </DropdownMenuItem>

@@ -2,22 +2,58 @@ import { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { AlertTriangle, Check, Cloud, Database, Edit, ExternalLink, FileText, Globe, HardDrive, Plus, Server, Settings, Trash2, Webhook } from 'lucide-react';
+import {
+  AlertTriangle,
+  Check,
+  Cloud,
+  Database,
+  Edit,
+  ExternalLink,
+  FileText,
+  Globe,
+  HardDrive,
+  Plus,
+  Server,
+  Settings,
+  Trash2,
+  Webhook,
+} from 'lucide-react';
 
 // API Integration schema
 const apiIntegrationSchema = z.object({
@@ -96,16 +132,16 @@ type ApiIntegrationFormValues = z.infer<typeof apiIntegrationSchema>;
 type WebhookFormValues = z.infer<typeof webhookSchema>;
 type DocumentStorageFormValues = z.infer<typeof documentStorageSchema>;
 
-const IntegrationCard = ({ 
-  integration, 
-  onEdit, 
-  onDelete, 
-  onToggleActive
-}: { 
-  integration: Integration; 
-  onEdit: (integration: Integration) => void; 
-  onDelete: (id: number) => void; 
-  onToggleActive: (id: number, isActive: boolean) => void; 
+const IntegrationCard = ({
+  integration,
+  onEdit,
+  onDelete,
+  onToggleActive,
+}: {
+  integration: Integration;
+  onEdit: (integration: Integration) => void;
+  onDelete: (id: number) => void;
+  onToggleActive: (id: number, isActive: boolean) => void;
 }) => {
   const getIconByType = (type: string) => {
     switch (type) {
@@ -137,9 +173,11 @@ const IntegrationCard = ({
             <div>
               <CardTitle className="text-lg">{integration.name}</CardTitle>
               <CardDescription className="text-sm">
-                {integration.type === 'webhook' ? 'Webhook' : 
-                 integration.type === 's3' || integration.type === 'local' ? 'Storage Service' : 
-                 'API Integration'}
+                {integration.type === 'webhook'
+                  ? 'Webhook'
+                  : integration.type === 's3' || integration.type === 'local'
+                    ? 'Storage Service'
+                    : 'API Integration'}
               </CardDescription>
             </div>
           </div>
@@ -147,7 +185,9 @@ const IntegrationCard = ({
             {integration.isActive ? (
               <Badge className="bg-green-100 text-green-800 hover:bg-green-100">Active</Badge>
             ) : (
-              <Badge variant="outline" className="text-muted-foreground">Inactive</Badge>
+              <Badge variant="outline" className="text-muted-foreground">
+                Inactive
+              </Badge>
             )}
           </div>
         </div>
@@ -167,7 +207,7 @@ const IntegrationCard = ({
         )}
         {isWebhookIntegration(integration) && integration.events.length > 0 && (
           <div className="flex flex-wrap gap-1 mt-2">
-            {integration.events.map((event) => (
+            {integration.events.map(event => (
               <Badge key={event} variant="outline" className="text-xs">
                 {event}
               </Badge>
@@ -175,7 +215,9 @@ const IntegrationCard = ({
           </div>
         )}
         {isStorageIntegration(integration) && integration.isDefault && (
-          <Badge className="mt-2 bg-blue-100 text-blue-800 hover:bg-blue-100">Default Storage</Badge>
+          <Badge className="mt-2 bg-blue-100 text-blue-800 hover:bg-blue-100">
+            Default Storage
+          </Badge>
         )}
       </CardContent>
       <CardFooter className="flex justify-end gap-2 pt-2">
@@ -185,9 +227,13 @@ const IntegrationCard = ({
           onClick={() => onToggleActive(integration.id, !integration.isActive)}
         >
           {integration.isActive ? (
-            <><AlertTriangle className="h-4 w-4 mr-1" /> Disable</>
+            <>
+              <AlertTriangle className="h-4 w-4 mr-1" /> Disable
+            </>
           ) : (
-            <><Check className="h-4 w-4 mr-1" /> Enable</>
+            <>
+              <Check className="h-4 w-4 mr-1" /> Enable
+            </>
           )}
         </Button>
         <Button variant="ghost" size="sm" onClick={() => onEdit(integration)}>
@@ -283,7 +329,11 @@ const IntegrationsSettings = () => {
   // Update API integration mutation
   const updateApiIntegrationMutation = useMutation({
     mutationFn: async (data: { id: number; integrationData: ApiIntegrationFormValues }) => {
-      const response = await apiRequest('PATCH', `/api/integrations/${data.id}`, data.integrationData);
+      const response = await apiRequest(
+        'PATCH',
+        `/api/integrations/${data.id}`,
+        data.integrationData
+      );
       return await response.json();
     },
     onSuccess: () => {
@@ -427,7 +477,9 @@ const IntegrationsSettings = () => {
   // Toggle integration active status mutation
   const toggleIntegrationMutation = useMutation({
     mutationFn: async (data: { id: number; isActive: boolean }) => {
-      const response = await apiRequest('PATCH', `/api/integrations/${data.id}/toggle`, { isActive: data.isActive });
+      const response = await apiRequest('PATCH', `/api/integrations/${data.id}/toggle`, {
+        isActive: data.isActive,
+      });
       return await response.json();
     },
     onSuccess: () => {
@@ -542,15 +594,17 @@ const IntegrationsSettings = () => {
           <div className="space-y-4">
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-semibold">API Integrations</h2>
-              <Button onClick={() => {
-                apiForm.reset();
-                setSelectedIntegration(null);
-                setShowApiConfig(true);
-              }}>
+              <Button
+                onClick={() => {
+                  apiForm.reset();
+                  setSelectedIntegration(null);
+                  setShowApiConfig(true);
+                }}
+              >
                 <Plus className="h-4 w-4 mr-2" /> Add API Integration
               </Button>
             </div>
-            
+
             {isLoadingIntegrations ? (
               <div className="text-center py-8">Loading API integrations...</div>
             ) : integrations && integrations.filter(i => isApiIntegration(i)).length > 0 ? (
@@ -575,11 +629,13 @@ const IntegrationsSettings = () => {
                   <p className="text-muted-foreground">
                     You haven't added any API integrations yet.
                   </p>
-                  <Button onClick={() => {
-                    apiForm.reset();
-                    setSelectedIntegration(null);
-                    setShowApiConfig(true);
-                  }}>
+                  <Button
+                    onClick={() => {
+                      apiForm.reset();
+                      setSelectedIntegration(null);
+                      setShowApiConfig(true);
+                    }}
+                  >
                     <Plus className="h-4 w-4 mr-2" /> Add API Integration
                   </Button>
                 </div>
@@ -589,9 +645,12 @@ const IntegrationsSettings = () => {
             {showApiConfig && (
               <Card>
                 <CardHeader>
-                  <CardTitle>{selectedIntegration ? 'Edit API Integration' : 'Add New API Integration'}</CardTitle>
+                  <CardTitle>
+                    {selectedIntegration ? 'Edit API Integration' : 'Add New API Integration'}
+                  </CardTitle>
                   <CardDescription>
-                    Configure connections to external API services such as Training.gov.au, Fair Work, and other third-party systems.
+                    Configure connections to external API services such as Training.gov.au, Fair
+                    Work, and other third-party systems.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -656,9 +715,7 @@ const IntegrationsSettings = () => {
                               <FormControl>
                                 <Input placeholder="https://api.example.com" {...field} />
                               </FormControl>
-                              <FormDescription>
-                                The base URL for API requests
-                              </FormDescription>
+                              <FormDescription>The base URL for API requests</FormDescription>
                               <FormMessage />
                             </FormItem>
                           )}
@@ -689,7 +746,8 @@ const IntegrationsSettings = () => {
                               <Input placeholder="X-API-Key" {...field} />
                             </FormControl>
                             <FormDescription>
-                              The header name used for sending the API key (e.g., X-API-Key, Authorization)
+                              The header name used for sending the API key (e.g., X-API-Key,
+                              Authorization)
                             </FormDescription>
                             <FormMessage />
                           </FormItem>
@@ -703,10 +761,10 @@ const IntegrationsSettings = () => {
                           <FormItem>
                             <FormLabel>Description</FormLabel>
                             <FormControl>
-                              <Textarea 
-                                placeholder="Briefly describe what this integration is used for" 
-                                className="min-h-[100px]" 
-                                {...field} 
+                              <Textarea
+                                placeholder="Briefly describe what this integration is used for"
+                                className="min-h-[100px]"
+                                {...field}
                                 value={field.value || ''}
                               />
                             </FormControl>
@@ -722,22 +780,21 @@ const IntegrationsSettings = () => {
                           <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                             <div className="space-y-0.5">
                               <FormLabel className="text-base">Active</FormLabel>
-                              <FormDescription>
-                                Enable or disable this integration
-                              </FormDescription>
+                              <FormDescription>Enable or disable this integration</FormDescription>
                             </div>
                             <FormControl>
-                              <Switch
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                              />
+                              <Switch checked={field.value} onCheckedChange={field.onChange} />
                             </FormControl>
                           </FormItem>
                         )}
                       />
 
                       <CardFooter className="px-0 pt-4">
-                        <Button variant="outline" type="button" onClick={() => setShowApiConfig(false)}>
+                        <Button
+                          variant="outline"
+                          type="button"
+                          onClick={() => setShowApiConfig(false)}
+                        >
                           Cancel
                         </Button>
                         <Button type="submit" className="ml-2">
@@ -757,15 +814,17 @@ const IntegrationsSettings = () => {
           <div className="space-y-4">
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-semibold">Webhooks</h2>
-              <Button onClick={() => {
-                webhookForm.reset();
-                setSelectedIntegration(null);
-                setShowWebhookConfig(true);
-              }}>
+              <Button
+                onClick={() => {
+                  webhookForm.reset();
+                  setSelectedIntegration(null);
+                  setShowWebhookConfig(true);
+                }}
+              >
                 <Plus className="h-4 w-4 mr-2" /> Add Webhook
               </Button>
             </div>
-            
+
             {isLoadingIntegrations ? (
               <div className="text-center py-8">Loading webhooks...</div>
             ) : integrations && integrations.filter(i => isWebhookIntegration(i)).length > 0 ? (
@@ -787,14 +846,14 @@ const IntegrationsSettings = () => {
                 <div className="flex flex-col items-center space-y-3">
                   <Webhook className="h-10 w-10 text-muted-foreground" />
                   <h3 className="text-lg font-medium">No Webhooks</h3>
-                  <p className="text-muted-foreground">
-                    You haven't configured any webhooks yet.
-                  </p>
-                  <Button onClick={() => {
-                    webhookForm.reset();
-                    setSelectedIntegration(null);
-                    setShowWebhookConfig(true);
-                  }}>
+                  <p className="text-muted-foreground">You haven't configured any webhooks yet.</p>
+                  <Button
+                    onClick={() => {
+                      webhookForm.reset();
+                      setSelectedIntegration(null);
+                      setShowWebhookConfig(true);
+                    }}
+                  >
                     <Plus className="h-4 w-4 mr-2" /> Add Webhook
                   </Button>
                 </div>
@@ -806,12 +865,16 @@ const IntegrationsSettings = () => {
                 <CardHeader>
                   <CardTitle>{selectedIntegration ? 'Edit Webhook' : 'Add New Webhook'}</CardTitle>
                   <CardDescription>
-                    Configure webhooks to notify external systems when events occur in your application.
+                    Configure webhooks to notify external systems when events occur in your
+                    application.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <Form {...webhookForm}>
-                    <form onSubmit={webhookForm.handleSubmit(onWebhookSubmit)} className="space-y-4">
+                    <form
+                      onSubmit={webhookForm.handleSubmit(onWebhookSubmit)}
+                      className="space-y-4"
+                    >
                       <FormField
                         control={webhookForm.control}
                         name="name"
@@ -850,7 +913,12 @@ const IntegrationsSettings = () => {
                           <FormItem>
                             <FormLabel>Webhook Secret</FormLabel>
                             <FormControl>
-                              <Input type="password" placeholder="Secret key for signature verification" {...field} value={field.value || ''} />
+                              <Input
+                                type="password"
+                                placeholder="Secret key for signature verification"
+                                {...field}
+                                value={field.value || ''}
+                              />
                             </FormControl>
                             <FormDescription>
                               Optional secret used to sign webhook payloads
@@ -881,12 +949,15 @@ const IntegrationsSettings = () => {
                               <Checkbox
                                 id={`event-${event}`}
                                 checked={webhookForm.watch('events')?.includes(event)}
-                                onCheckedChange={(checked) => {
+                                onCheckedChange={checked => {
                                   const currentEvents = webhookForm.watch('events') || [];
                                   if (checked) {
                                     webhookForm.setValue('events', [...currentEvents, event]);
                                   } else {
-                                    webhookForm.setValue('events', currentEvents.filter(e => e !== event));
+                                    webhookForm.setValue(
+                                      'events',
+                                      currentEvents.filter(e => e !== event)
+                                    );
                                   }
                                 }}
                               />
@@ -913,22 +984,21 @@ const IntegrationsSettings = () => {
                           <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                             <div className="space-y-0.5">
                               <FormLabel className="text-base">Active</FormLabel>
-                              <FormDescription>
-                                Enable or disable this webhook
-                              </FormDescription>
+                              <FormDescription>Enable or disable this webhook</FormDescription>
                             </div>
                             <FormControl>
-                              <Switch
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                              />
+                              <Switch checked={field.value} onCheckedChange={field.onChange} />
                             </FormControl>
                           </FormItem>
                         )}
                       />
 
                       <CardFooter className="px-0 pt-4">
-                        <Button variant="outline" type="button" onClick={() => setShowWebhookConfig(false)}>
+                        <Button
+                          variant="outline"
+                          type="button"
+                          onClick={() => setShowWebhookConfig(false)}
+                        >
                           Cancel
                         </Button>
                         <Button type="submit" className="ml-2">
@@ -942,21 +1012,23 @@ const IntegrationsSettings = () => {
             )}
           </div>
         </TabsContent>
-        
+
         {/* Storage Services Tab */}
         <TabsContent value="storage">
           <div className="space-y-4">
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-semibold">Storage Services</h2>
-              <Button onClick={() => {
-                documentServiceForm.reset();
-                setSelectedIntegration(null);
-                setShowDocumentConfig(true);
-              }}>
+              <Button
+                onClick={() => {
+                  documentServiceForm.reset();
+                  setSelectedIntegration(null);
+                  setShowDocumentConfig(true);
+                }}
+              >
                 <Plus className="h-4 w-4 mr-2" /> Add Storage Service
               </Button>
             </div>
-            
+
             {isLoadingIntegrations ? (
               <div className="text-center py-8">Loading storage services...</div>
             ) : integrations && integrations.filter(i => isStorageIntegration(i)).length > 0 ? (
@@ -981,11 +1053,13 @@ const IntegrationsSettings = () => {
                   <p className="text-muted-foreground">
                     You haven't configured any document storage services yet.
                   </p>
-                  <Button onClick={() => {
-                    documentServiceForm.reset();
-                    setSelectedIntegration(null);
-                    setShowDocumentConfig(true);
-                  }}>
+                  <Button
+                    onClick={() => {
+                      documentServiceForm.reset();
+                      setSelectedIntegration(null);
+                      setShowDocumentConfig(true);
+                    }}
+                  >
                     <Plus className="h-4 w-4 mr-2" /> Add Storage Service
                   </Button>
                 </div>
@@ -995,14 +1069,19 @@ const IntegrationsSettings = () => {
             {showDocumentConfig && (
               <Card>
                 <CardHeader>
-                  <CardTitle>{selectedIntegration ? 'Edit Storage Service' : 'Add New Storage Service'}</CardTitle>
+                  <CardTitle>
+                    {selectedIntegration ? 'Edit Storage Service' : 'Add New Storage Service'}
+                  </CardTitle>
                   <CardDescription>
                     Configure storage services for document uploads and file storage.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <Form {...documentServiceForm}>
-                    <form onSubmit={documentServiceForm.handleSubmit(onDocumentStorageSubmit)} className="space-y-4">
+                    <form
+                      onSubmit={documentServiceForm.handleSubmit(onDocumentStorageSubmit)}
+                      className="space-y-4"
+                    >
                       <FormField
                         control={documentServiceForm.control}
                         name="name"
@@ -1025,7 +1104,7 @@ const IntegrationsSettings = () => {
                             <FormLabel>Storage Type</FormLabel>
                             <Select
                               value={field.value}
-                              onValueChange={(value) => {
+                              onValueChange={value => {
                                 field.onChange(value);
                                 // Reset config when changing type
                                 documentServiceForm.setValue('config', {});
@@ -1042,9 +1121,7 @@ const IntegrationsSettings = () => {
                                 <SelectItem value="s3">Amazon S3</SelectItem>
                               </SelectContent>
                             </Select>
-                            <FormDescription>
-                              The type of storage service to use
-                            </FormDescription>
+                            <FormDescription>The type of storage service to use</FormDescription>
                             <FormMessage />
                           </FormItem>
                         )}
@@ -1060,7 +1137,7 @@ const IntegrationsSettings = () => {
                                 id="s3-bucket"
                                 placeholder="my-app-bucket"
                                 value={documentServiceForm.watch('config.bucket') || ''}
-                                onChange={(e) => {
+                                onChange={e => {
                                   const config = documentServiceForm.watch('config') || {};
                                   documentServiceForm.setValue('config', {
                                     ...config,
@@ -1075,7 +1152,7 @@ const IntegrationsSettings = () => {
                                 id="s3-region"
                                 placeholder="ap-southeast-2"
                                 value={documentServiceForm.watch('config.region') || ''}
-                                onChange={(e) => {
+                                onChange={e => {
                                   const config = documentServiceForm.watch('config') || {};
                                   documentServiceForm.setValue('config', {
                                     ...config,
@@ -1090,7 +1167,7 @@ const IntegrationsSettings = () => {
                                 id="s3-access-key"
                                 placeholder="AKIAIOSFODNN7EXAMPLE"
                                 value={documentServiceForm.watch('config.accessKeyId') || ''}
-                                onChange={(e) => {
+                                onChange={e => {
                                   const config = documentServiceForm.watch('config') || {};
                                   documentServiceForm.setValue('config', {
                                     ...config,
@@ -1106,7 +1183,7 @@ const IntegrationsSettings = () => {
                                 type="password"
                                 placeholder="wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
                                 value={documentServiceForm.watch('config.secretAccessKey') || ''}
-                                onChange={(e) => {
+                                onChange={e => {
                                   const config = documentServiceForm.watch('config') || {};
                                   documentServiceForm.setValue('config', {
                                     ...config,
@@ -1128,7 +1205,7 @@ const IntegrationsSettings = () => {
                               id="storage-path"
                               placeholder="./uploads"
                               value={documentServiceForm.watch('config.path') || './uploads'}
-                              onChange={(e) => {
+                              onChange={e => {
                                 const config = documentServiceForm.watch('config') || {};
                                 documentServiceForm.setValue('config', {
                                   ...config,
@@ -1156,10 +1233,7 @@ const IntegrationsSettings = () => {
                                 </FormDescription>
                               </div>
                               <FormControl>
-                                <Switch
-                                  checked={field.value}
-                                  onCheckedChange={field.onChange}
-                                />
+                                <Switch checked={field.value} onCheckedChange={field.onChange} />
                               </FormControl>
                             </FormItem>
                           )}
@@ -1177,10 +1251,7 @@ const IntegrationsSettings = () => {
                                 </FormDescription>
                               </div>
                               <FormControl>
-                                <Switch
-                                  checked={field.value}
-                                  onCheckedChange={field.onChange}
-                                />
+                                <Switch checked={field.value} onCheckedChange={field.onChange} />
                               </FormControl>
                             </FormItem>
                           )}
@@ -1188,7 +1259,11 @@ const IntegrationsSettings = () => {
                       </div>
 
                       <CardFooter className="px-0 pt-4">
-                        <Button variant="outline" type="button" onClick={() => setShowDocumentConfig(false)}>
+                        <Button
+                          variant="outline"
+                          type="button"
+                          onClick={() => setShowDocumentConfig(false)}
+                        >
                           Cancel
                         </Button>
                         <Button type="submit" className="ml-2">

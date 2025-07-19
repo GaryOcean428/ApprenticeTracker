@@ -1,10 +1,10 @@
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { CalendarIcon, Upload } from "lucide-react";
-import { format } from "date-fns";
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { CalendarIcon, Upload } from 'lucide-react';
+import { format } from 'date-fns';
 
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
+import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -12,7 +12,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 import {
   Form,
   FormControl,
@@ -20,24 +20,20 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
-import { useToast } from "@/hooks/use-toast";
-import { queryClient } from "@/lib/queryClient";
+} from '@/components/ui/select';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { useToast } from '@/hooks/use-toast';
+import { queryClient } from '@/lib/queryClient';
 
 interface ExpenseFormDialogProps {
   open: boolean;
@@ -54,18 +50,18 @@ type FormValues = {
 };
 
 const EXPENSE_CATEGORIES = [
-  { id: "office-supplies", name: "Office Supplies" },
-  { id: "travel", name: "Travel" },
-  { id: "meals", name: "Meals & Entertainment" },
-  { id: "equipment", name: "Equipment" },
-  { id: "software", name: "Software & Subscriptions" },
-  { id: "prof-development", name: "Professional Development" },
-  { id: "utilities", name: "Utilities" },
-  { id: "rent", name: "Rent & Facilities" },
-  { id: "insurance", name: "Insurance" },
-  { id: "salary", name: "Salary & Benefits" },
-  { id: "marketing", name: "Marketing" },
-  { id: "other", name: "Other" },
+  { id: 'office-supplies', name: 'Office Supplies' },
+  { id: 'travel', name: 'Travel' },
+  { id: 'meals', name: 'Meals & Entertainment' },
+  { id: 'equipment', name: 'Equipment' },
+  { id: 'software', name: 'Software & Subscriptions' },
+  { id: 'prof-development', name: 'Professional Development' },
+  { id: 'utilities', name: 'Utilities' },
+  { id: 'rent', name: 'Rent & Facilities' },
+  { id: 'insurance', name: 'Insurance' },
+  { id: 'salary', name: 'Salary & Benefits' },
+  { id: 'marketing', name: 'Marketing' },
+  { id: 'other', name: 'Other' },
 ];
 
 export function ExpenseFormDialog({ open, onOpenChange }: ExpenseFormDialogProps) {
@@ -75,11 +71,11 @@ export function ExpenseFormDialog({ open, onOpenChange }: ExpenseFormDialogProps
 
   const form = useForm<FormValues>({
     defaultValues: {
-      description: "",
-      amount: "",
-      category: "",
+      description: '',
+      amount: '',
+      category: '',
       date: new Date(),
-      notes: "",
+      notes: '',
     },
   });
 
@@ -97,19 +93,19 @@ export function ExpenseFormDialog({ open, onOpenChange }: ExpenseFormDialogProps
 
       // Format the data for submission
       const formattedAmount = parseFloat(data.amount);
-      
+
       // In a real application, you would send this data to your backend
-      console.log("Submitting expense:", {
+      console.log('Submitting expense:', {
         ...data,
         amount: formattedAmount,
-        date: format(data.date, "yyyy-MM-dd"),
+        date: format(data.date, 'yyyy-MM-dd'),
         receiptFile: selectedFile?.name,
       });
 
       // Show success toast
       toast({
-        title: "Expense added",
-        description: "Your expense has been successfully added.",
+        title: 'Expense added',
+        description: 'Your expense has been successfully added.',
       });
 
       // Reset form and close dialog
@@ -120,11 +116,11 @@ export function ExpenseFormDialog({ open, onOpenChange }: ExpenseFormDialogProps
       // Invalidate expenses query to refresh the list
       queryClient.invalidateQueries({ queryKey: ['expenses'] });
     } catch (error) {
-      console.error("Error adding expense:", error);
+      console.error('Error adding expense:', error);
       toast({
-        title: "Error",
-        description: "There was a problem adding your expense.",
-        variant: "destructive",
+        title: 'Error',
+        description: 'There was a problem adding your expense.',
+        variant: 'destructive',
       });
     } finally {
       setIsSubmitting(false);
@@ -145,7 +141,7 @@ export function ExpenseFormDialog({ open, onOpenChange }: ExpenseFormDialogProps
             <FormField
               control={form.control}
               name="description"
-              rules={{ required: "Description is required" }}
+              rules={{ required: 'Description is required' }}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Description</FormLabel>
@@ -161,12 +157,12 @@ export function ExpenseFormDialog({ open, onOpenChange }: ExpenseFormDialogProps
               <FormField
                 control={form.control}
                 name="amount"
-                rules={{ 
-                  required: "Amount is required",
+                rules={{
+                  required: 'Amount is required',
                   pattern: {
                     value: /^[0-9]*\.?[0-9]+$/,
-                    message: "Please enter a valid amount"
-                  }
+                    message: 'Please enter a valid amount',
+                  },
                 }}
                 render={({ field }) => (
                   <FormItem>
@@ -174,12 +170,7 @@ export function ExpenseFormDialog({ open, onOpenChange }: ExpenseFormDialogProps
                     <FormControl>
                       <div className="relative">
                         <div className="absolute left-3 top-1/2 transform -translate-y-1/2">$</div>
-                        <Input 
-                          type="text" 
-                          className="pl-7" 
-                          placeholder="0.00" 
-                          {...field} 
-                        />
+                        <Input type="text" className="pl-7" placeholder="0.00" {...field} />
                       </div>
                     </FormControl>
                     <FormMessage />
@@ -190,25 +181,19 @@ export function ExpenseFormDialog({ open, onOpenChange }: ExpenseFormDialogProps
               <FormField
                 control={form.control}
                 name="category"
-                rules={{ required: "Category is required" }}
+                rules={{ required: 'Category is required' }}
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Category</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select category" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {EXPENSE_CATEGORIES.map((category) => (
-                          <SelectItem 
-                            key={category.id} 
-                            value={category.id}
-                          >
+                        {EXPENSE_CATEGORIES.map(category => (
+                          <SelectItem key={category.id} value={category.id}>
                             {category.name}
                           </SelectItem>
                         ))}
@@ -223,7 +208,7 @@ export function ExpenseFormDialog({ open, onOpenChange }: ExpenseFormDialogProps
             <FormField
               control={form.control}
               name="date"
-              rules={{ required: "Date is required" }}
+              rules={{ required: 'Date is required' }}
               render={({ field }) => (
                 <FormItem className="flex flex-col">
                   <FormLabel>Date</FormLabel>
@@ -231,17 +216,13 @@ export function ExpenseFormDialog({ open, onOpenChange }: ExpenseFormDialogProps
                     <PopoverTrigger asChild>
                       <FormControl>
                         <Button
-                          variant={"outline"}
+                          variant={'outline'}
                           className={cn(
-                            "pl-3 text-left font-normal",
-                            !field.value && "text-muted-foreground"
+                            'pl-3 text-left font-normal',
+                            !field.value && 'text-muted-foreground'
                           )}
                         >
-                          {field.value ? (
-                            format(field.value, "PPP")
-                          ) : (
-                            <span>Pick a date</span>
-                          )}
+                          {field.value ? format(field.value, 'PPP') : <span>Pick a date</span>}
                           <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                         </Button>
                       </FormControl>
@@ -273,13 +254,13 @@ export function ExpenseFormDialog({ open, onOpenChange }: ExpenseFormDialogProps
                         className="flex w-full cursor-pointer items-center justify-center rounded-md border border-dashed border-input py-4 text-sm font-medium hover:bg-muted"
                       >
                         <Upload className="mr-2 h-4 w-4" />
-                        {selectedFile ? selectedFile.name : "Upload receipt"}
+                        {selectedFile ? selectedFile.name : 'Upload receipt'}
                         <Input
                           id="receipt"
                           type="file"
                           accept="image/*,.pdf"
                           className="hidden"
-                          onChange={(e) => {
+                          onChange={e => {
                             handleFileChange(e);
                             onChange(e.target.files);
                           }}
@@ -315,16 +296,16 @@ export function ExpenseFormDialog({ open, onOpenChange }: ExpenseFormDialogProps
             />
 
             <DialogFooter className="pt-4">
-              <Button 
-                type="button" 
-                variant="outline" 
+              <Button
+                type="button"
+                variant="outline"
                 onClick={() => onOpenChange(false)}
                 disabled={isSubmitting}
               >
                 Cancel
               </Button>
               <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Submitting..." : "Add Expense"}
+                {isSubmitting ? 'Submitting...' : 'Add Expense'}
               </Button>
             </DialogFooter>
           </form>

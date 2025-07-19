@@ -2,7 +2,14 @@ import React, { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { queryClient } from '@/lib/queryClient';
 import { Loader2, CheckCircle, AlertCircle, Upload, Paperclip } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
@@ -22,20 +29,20 @@ export default function StandardAssessment() {
     notes: '',
     evidenceDescription: '',
     actionItems: [],
-    dueDate: ''
+    dueDate: '',
   });
 
   // Extract standard ID from URL query parameters
   const params = new URLSearchParams(window.location.search);
   const standardId = parseInt(params.get('id') || '0');
   const organizationId = parseInt(params.get('organization') || '1'); // Default to first org
-  
+
   // Handle form inputs
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setAssessmentData({
       ...assessmentData,
-      [name]: value
+      [name]: value,
     });
   };
 
@@ -43,7 +50,7 @@ export default function StandardAssessment() {
   const handleStatusChange = (value: string) => {
     setAssessmentData({
       ...assessmentData,
-      status: value
+      status: value,
     });
   };
 
@@ -60,7 +67,7 @@ export default function StandardAssessment() {
     queryKey: ['/api/gto-compliance/standards', standardId],
     queryFn: async () => {
       if (!standardId) return null;
-      
+
       try {
         const response = await fetch(`/api/gto-compliance/standards/${standardId}`);
         if (!response.ok) {
@@ -84,9 +91,11 @@ export default function StandardAssessment() {
     queryKey: ['/api/gto-compliance/assessments', organizationId, standardId],
     queryFn: async () => {
       if (!standardId || !organizationId) return null;
-      
+
       try {
-        const response = await fetch(`/api/gto-compliance/assessments/${organizationId}?standardId=${standardId}`);
+        const response = await fetch(
+          `/api/gto-compliance/assessments/${organizationId}?standardId=${standardId}`
+        );
         if (!response.ok) {
           if (response.status === 404) {
             return null; // No assessment exists yet
@@ -103,9 +112,9 @@ export default function StandardAssessment() {
         return null;
       }
     },
-    enabled: !!standardId && !!organizationId
+    enabled: !!standardId && !!organizationId,
   });
-  
+
   // Handle assessment data when it's loaded
   React.useEffect(() => {
     if (assessment) {
@@ -114,7 +123,7 @@ export default function StandardAssessment() {
         notes: assessment.notes || '',
         evidenceDescription: assessment.evidenceDescription || '',
         actionItems: assessment.actionItems || [],
-        dueDate: assessment.dueDate ? new Date(assessment.dueDate).toISOString().split('T')[0] : ''
+        dueDate: assessment.dueDate ? new Date(assessment.dueDate).toISOString().split('T')[0] : '',
       });
     }
   }, [assessment]);
@@ -132,7 +141,7 @@ export default function StandardAssessment() {
 
       const url = '/api/gto-compliance/assessments';
       const method = assessment ? 'PATCH' : 'POST';
-      
+
       const response = await fetch(url, {
         method,
         headers: {
@@ -156,7 +165,7 @@ export default function StandardAssessment() {
       queryClient.invalidateQueries({ queryKey: ['/api/gto-compliance/dashboard'] });
       navigate('/gto-compliance');
     },
-    onError: (error) => {
+    onError: error => {
       toast({
         title: 'Error',
         description: 'Failed to save assessment. Please try again.',
@@ -184,9 +193,7 @@ export default function StandardAssessment() {
             <p>The requested standard could not be found.</p>
           </CardContent>
           <CardFooter>
-            <Button onClick={() => navigate('/gto-compliance')}>
-              Back to Dashboard
-            </Button>
+            <Button onClick={() => navigate('/gto-compliance')}>Back to Dashboard</Button>
           </CardFooter>
         </Card>
       </div>
@@ -194,10 +201,26 @@ export default function StandardAssessment() {
   }
 
   const statusOptions = [
-    { value: 'compliant', label: 'Compliant', icon: <CheckCircle className="h-4 w-4 text-green-500" /> },
-    { value: 'at_risk', label: 'At Risk', icon: <AlertCircle className="h-4 w-4 text-yellow-500" /> },
-    { value: 'non_compliant', label: 'Non-Compliant', icon: <AlertCircle className="h-4 w-4 text-red-500" /> },
-    { value: 'in_progress', label: 'In Progress', icon: <Loader2 className="h-4 w-4 text-blue-500" /> },
+    {
+      value: 'compliant',
+      label: 'Compliant',
+      icon: <CheckCircle className="h-4 w-4 text-green-500" />,
+    },
+    {
+      value: 'at_risk',
+      label: 'At Risk',
+      icon: <AlertCircle className="h-4 w-4 text-yellow-500" />,
+    },
+    {
+      value: 'non_compliant',
+      label: 'Non-Compliant',
+      icon: <AlertCircle className="h-4 w-4 text-red-500" />,
+    },
+    {
+      value: 'in_progress',
+      label: 'In Progress',
+      icon: <Loader2 className="h-4 w-4 text-blue-500" />,
+    },
   ];
 
   return (
@@ -210,17 +233,15 @@ export default function StandardAssessment() {
               Assess compliance with the National Standards for GTOs
             </p>
           </div>
-          <Button onClick={() => navigate('/gto-compliance')}>
-            Back to Dashboard
-          </Button>
+          <Button onClick={() => navigate('/gto-compliance')}>Back to Dashboard</Button>
         </div>
 
         <Card>
           <CardHeader>
-            <CardTitle>{standard.standardNumber}: {standard.standardName}</CardTitle>
-            <CardDescription className="text-base">
-              {standard.standardDescription}
-            </CardDescription>
+            <CardTitle>
+              {standard.standardNumber}: {standard.standardName}
+            </CardTitle>
+            <CardDescription className="text-base">{standard.standardDescription}</CardDescription>
           </CardHeader>
           <CardContent>
             <Tabs value={selectedTab} onValueChange={setSelectedTab}>
@@ -229,7 +250,7 @@ export default function StandardAssessment() {
                 <TabsTrigger value="assessment">Assessment</TabsTrigger>
                 <TabsTrigger value="evidence">Evidence</TabsTrigger>
               </TabsList>
-              
+
               <TabsContent value="details">
                 <div className="space-y-6">
                   <div>
@@ -244,7 +265,7 @@ export default function StandardAssessment() {
                       <p>No specific evidence requirements defined.</p>
                     )}
                   </div>
-                  
+
                   <div>
                     <h3 className="text-lg font-semibold mb-2">Compliance Criteria</h3>
                     {standard.complianceCriteria && standard.complianceCriteria.length > 0 ? (
@@ -257,7 +278,7 @@ export default function StandardAssessment() {
                       <p>No specific compliance criteria defined.</p>
                     )}
                   </div>
-                  
+
                   <div>
                     <h3 className="text-lg font-semibold mb-2">Related Regulations</h3>
                     {standard.regulations && standard.regulations.length > 0 ? (
@@ -272,17 +293,17 @@ export default function StandardAssessment() {
                   </div>
                 </div>
               </TabsContent>
-              
+
               <TabsContent value="assessment">
                 <div className="space-y-6">
                   <div>
                     <h3 className="text-lg font-semibold mb-3">Assessment Status</h3>
-                    <RadioGroup 
-                      value={assessmentData.status} 
+                    <RadioGroup
+                      value={assessmentData.status}
                       onValueChange={handleStatusChange}
                       className="grid grid-cols-2 gap-4"
                     >
-                      {statusOptions.map((option) => (
+                      {statusOptions.map(option => (
                         <div key={option.value} className="flex items-center space-x-2">
                           <RadioGroupItem value={option.value} id={option.value} />
                           <Label htmlFor={option.value} className="flex items-center">
@@ -293,10 +314,10 @@ export default function StandardAssessment() {
                       ))}
                     </RadioGroup>
                   </div>
-                  
+
                   <div>
                     <h3 className="text-lg font-semibold mb-3">Assessment Notes</h3>
-                    <Textarea 
+                    <Textarea
                       name="notes"
                       value={assessmentData.notes}
                       onChange={handleInputChange}
@@ -304,11 +325,11 @@ export default function StandardAssessment() {
                       className="min-h-[150px]"
                     />
                   </div>
-                  
+
                   <div>
                     <h3 className="text-lg font-semibold mb-3">Due Date</h3>
                     <div className="max-w-sm">
-                      <Input 
+                      <Input
                         type="date"
                         name="dueDate"
                         value={assessmentData.dueDate}
@@ -318,12 +339,12 @@ export default function StandardAssessment() {
                   </div>
                 </div>
               </TabsContent>
-              
+
               <TabsContent value="evidence">
                 <div className="space-y-6">
                   <div>
                     <h3 className="text-lg font-semibold mb-3">Evidence Description</h3>
-                    <Textarea 
+                    <Textarea
                       name="evidenceDescription"
                       value={assessmentData.evidenceDescription}
                       onChange={handleInputChange}
@@ -331,7 +352,7 @@ export default function StandardAssessment() {
                       className="min-h-[100px]"
                     />
                   </div>
-                  
+
                   <div>
                     <h3 className="text-lg font-semibold mb-3">Upload Evidence</h3>
                     <div className="border border-dashed rounded-lg p-8 text-center">
@@ -340,7 +361,7 @@ export default function StandardAssessment() {
                       <p className="text-sm text-muted-foreground mb-4">
                         PDF, DOC, XLSX, JPEG, PNG files are supported
                       </p>
-                      <Input 
+                      <Input
                         type="file"
                         multiple
                         className="hidden"
@@ -353,7 +374,7 @@ export default function StandardAssessment() {
                         </Button>
                       </Label>
                     </div>
-                    
+
                     {evidenceFiles.length > 0 && (
                       <div className="mt-4 space-y-2">
                         <h4 className="font-medium">Selected Files</h4>
@@ -379,7 +400,7 @@ export default function StandardAssessment() {
             <Button variant="outline" onClick={() => navigate('/gto-compliance')}>
               Cancel
             </Button>
-            <Button 
+            <Button
               onClick={() => saveAssessmentMutation.mutate()}
               disabled={!assessmentData.status || saveAssessmentMutation.isPending}
             >

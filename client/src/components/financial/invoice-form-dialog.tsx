@@ -1,10 +1,10 @@
-import { useState } from "react";
-import { useForm, useFieldArray } from "react-hook-form";
-import { CalendarIcon, Plus, Trash } from "lucide-react";
-import { format, addDays } from "date-fns";
+import { useState } from 'react';
+import { useForm, useFieldArray } from 'react-hook-form';
+import { CalendarIcon, Plus, Trash } from 'lucide-react';
+import { format, addDays } from 'date-fns';
 
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
+import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -12,7 +12,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 import {
   Form,
   FormControl,
@@ -20,24 +20,20 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
-import { useToast } from "@/hooks/use-toast";
-import { queryClient } from "@/lib/queryClient";
+} from '@/components/ui/select';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { useToast } from '@/hooks/use-toast';
+import { queryClient } from '@/lib/queryClient';
 
 interface InvoiceFormDialogProps {
   open: boolean;
@@ -60,11 +56,11 @@ type FormValues = {
 
 // Dummy host employers for the demo
 const HOST_EMPLOYERS = [
-  { id: "101", name: "ABC Construction" },
-  { id: "102", name: "XYZ Electrical" },
-  { id: "103", name: "Brisbane Woodworking" },
-  { id: "104", name: "Gold Coast Plumbing" },
-  { id: "105", name: "Sunshine Coast Builders" },
+  { id: '101', name: 'ABC Construction' },
+  { id: '102', name: 'XYZ Electrical' },
+  { id: '103', name: 'Brisbane Woodworking' },
+  { id: '104', name: 'Gold Coast Plumbing' },
+  { id: '105', name: 'Sunshine Coast Builders' },
 ];
 
 export function InvoiceFormDialog({ open, onOpenChange }: InvoiceFormDialogProps) {
@@ -73,26 +69,26 @@ export function InvoiceFormDialog({ open, onOpenChange }: InvoiceFormDialogProps
 
   const form = useForm<FormValues>({
     defaultValues: {
-      hostEmployerId: "",
+      hostEmployerId: '',
       issueDate: new Date(),
       dueDate: addDays(new Date(), 30), // Default to 30 days due date
-      items: [{ description: "", quantity: "1", rate: "" }],
-      notes: "",
+      items: [{ description: '', quantity: '1', rate: '' }],
+      notes: '',
     },
   });
 
   const { fields, append, remove } = useFieldArray({
     control: form.control,
-    name: "items",
+    name: 'items',
   });
 
   // Calculate total invoice amount
   const calculateTotal = () => {
-    const items = form.getValues("items");
+    const items = form.getValues('items');
     return items.reduce((total, item) => {
       const quantity = parseFloat(item.quantity) || 0;
       const rate = parseFloat(item.rate) || 0;
-      return total + (quantity * rate);
+      return total + quantity * rate;
     }, 0);
   };
 
@@ -107,24 +103,24 @@ export function InvoiceFormDialog({ open, onOpenChange }: InvoiceFormDialogProps
         description: item.description,
         quantity: parseFloat(item.quantity),
         rate: parseFloat(item.rate),
-        amount: parseFloat(item.quantity) * parseFloat(item.rate)
+        amount: parseFloat(item.quantity) * parseFloat(item.rate),
       }));
-      
+
       const totalAmount = calculateTotal();
-      
+
       // In a real application, you would send this data to your backend
-      console.log("Submitting invoice:", {
+      console.log('Submitting invoice:', {
         ...data,
         items: formattedItems,
         totalAmount,
-        issueDate: format(data.issueDate, "yyyy-MM-dd"),
-        dueDate: format(data.dueDate, "yyyy-MM-dd"),
+        issueDate: format(data.issueDate, 'yyyy-MM-dd'),
+        dueDate: format(data.dueDate, 'yyyy-MM-dd'),
       });
 
       // Show success toast
       toast({
-        title: "Invoice created",
-        description: "Your invoice has been successfully created.",
+        title: 'Invoice created',
+        description: 'Your invoice has been successfully created.',
       });
 
       // Reset form and close dialog
@@ -134,11 +130,11 @@ export function InvoiceFormDialog({ open, onOpenChange }: InvoiceFormDialogProps
       // Invalidate invoices query to refresh the list
       queryClient.invalidateQueries({ queryKey: ['invoices'] });
     } catch (error) {
-      console.error("Error creating invoice:", error);
+      console.error('Error creating invoice:', error);
       toast({
-        title: "Error",
-        description: "There was a problem creating your invoice.",
-        variant: "destructive",
+        title: 'Error',
+        description: 'There was a problem creating your invoice.',
+        variant: 'destructive',
       });
     } finally {
       setIsSubmitting(false);
@@ -159,25 +155,19 @@ export function InvoiceFormDialog({ open, onOpenChange }: InvoiceFormDialogProps
             <FormField
               control={form.control}
               name="hostEmployerId"
-              rules={{ required: "Host employer is required" }}
+              rules={{ required: 'Host employer is required' }}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Host Employer</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Select host employer" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {HOST_EMPLOYERS.map((employer) => (
-                        <SelectItem 
-                          key={employer.id} 
-                          value={employer.id}
-                        >
+                      {HOST_EMPLOYERS.map(employer => (
+                        <SelectItem key={employer.id} value={employer.id}>
                           {employer.name}
                         </SelectItem>
                       ))}
@@ -192,7 +182,7 @@ export function InvoiceFormDialog({ open, onOpenChange }: InvoiceFormDialogProps
               <FormField
                 control={form.control}
                 name="issueDate"
-                rules={{ required: "Issue date is required" }}
+                rules={{ required: 'Issue date is required' }}
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
                     <FormLabel>Issue Date</FormLabel>
@@ -200,17 +190,13 @@ export function InvoiceFormDialog({ open, onOpenChange }: InvoiceFormDialogProps
                       <PopoverTrigger asChild>
                         <FormControl>
                           <Button
-                            variant={"outline"}
+                            variant={'outline'}
                             className={cn(
-                              "pl-3 text-left font-normal",
-                              !field.value && "text-muted-foreground"
+                              'pl-3 text-left font-normal',
+                              !field.value && 'text-muted-foreground'
                             )}
                           >
-                            {field.value ? (
-                              format(field.value, "PPP")
-                            ) : (
-                              <span>Pick a date</span>
-                            )}
+                            {field.value ? format(field.value, 'PPP') : <span>Pick a date</span>}
                             <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                           </Button>
                         </FormControl>
@@ -232,7 +218,7 @@ export function InvoiceFormDialog({ open, onOpenChange }: InvoiceFormDialogProps
               <FormField
                 control={form.control}
                 name="dueDate"
-                rules={{ required: "Due date is required" }}
+                rules={{ required: 'Due date is required' }}
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
                     <FormLabel>Due Date</FormLabel>
@@ -240,17 +226,13 @@ export function InvoiceFormDialog({ open, onOpenChange }: InvoiceFormDialogProps
                       <PopoverTrigger asChild>
                         <FormControl>
                           <Button
-                            variant={"outline"}
+                            variant={'outline'}
                             className={cn(
-                              "pl-3 text-left font-normal",
-                              !field.value && "text-muted-foreground"
+                              'pl-3 text-left font-normal',
+                              !field.value && 'text-muted-foreground'
                             )}
                           >
-                            {field.value ? (
-                              format(field.value, "PPP")
-                            ) : (
-                              <span>Pick a date</span>
-                            )}
+                            {field.value ? format(field.value, 'PPP') : <span>Pick a date</span>}
                             <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                           </Button>
                         </FormControl>
@@ -277,7 +259,7 @@ export function InvoiceFormDialog({ open, onOpenChange }: InvoiceFormDialogProps
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={() => append({ description: "", quantity: "1", rate: "" })}
+                  onClick={() => append({ description: '', quantity: '1', rate: '' })}
                 >
                   <Plus className="mr-1 h-4 w-4" />
                   Add Item
@@ -285,7 +267,10 @@ export function InvoiceFormDialog({ open, onOpenChange }: InvoiceFormDialogProps
               </div>
 
               {fields.map((field, index) => (
-                <div key={field.id} className="grid grid-cols-12 gap-4 p-4 border rounded-md relative">
+                <div
+                  key={field.id}
+                  className="grid grid-cols-12 gap-4 p-4 border rounded-md relative"
+                >
                   {fields.length > 1 && (
                     <Button
                       type="button"
@@ -302,7 +287,7 @@ export function InvoiceFormDialog({ open, onOpenChange }: InvoiceFormDialogProps
                   <FormField
                     control={form.control}
                     name={`items.${index}.description`}
-                    rules={{ required: "Description is required" }}
+                    rules={{ required: 'Description is required' }}
                     render={({ field }) => (
                       <FormItem className="col-span-6">
                         <FormLabel>Description</FormLabel>
@@ -317,12 +302,12 @@ export function InvoiceFormDialog({ open, onOpenChange }: InvoiceFormDialogProps
                   <FormField
                     control={form.control}
                     name={`items.${index}.quantity`}
-                    rules={{ 
-                      required: "Quantity is required",
+                    rules={{
+                      required: 'Quantity is required',
                       pattern: {
                         value: /^[0-9]*\.?[0-9]+$/,
-                        message: "Please enter a valid number"
-                      }
+                        message: 'Please enter a valid number',
+                      },
                     }}
                     render={({ field }) => (
                       <FormItem className="col-span-2">
@@ -338,19 +323,21 @@ export function InvoiceFormDialog({ open, onOpenChange }: InvoiceFormDialogProps
                   <FormField
                     control={form.control}
                     name={`items.${index}.rate`}
-                    rules={{ 
-                      required: "Rate is required",
+                    rules={{
+                      required: 'Rate is required',
                       pattern: {
                         value: /^[0-9]*\.?[0-9]+$/,
-                        message: "Please enter a valid amount"
-                      }
+                        message: 'Please enter a valid amount',
+                      },
                     }}
                     render={({ field }) => (
                       <FormItem className="col-span-3">
                         <FormLabel>Rate ($)</FormLabel>
                         <FormControl>
                           <div className="relative">
-                            <div className="absolute left-3 top-1/2 transform -translate-y-1/2">$</div>
+                            <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
+                              $
+                            </div>
                             <Input className="pl-7" {...field} />
                           </div>
                         </FormControl>
@@ -361,19 +348,18 @@ export function InvoiceFormDialog({ open, onOpenChange }: InvoiceFormDialogProps
 
                   <div className="col-span-1 flex items-end mb-1">
                     <div className="text-sm font-medium text-muted-foreground mt-2">
-                      ${
-                        (parseFloat(form.watch(`items.${index}.quantity`) || "0") * 
-                        parseFloat(form.watch(`items.${index}.rate`) || "0")).toFixed(2)
-                      }
+                      $
+                      {(
+                        parseFloat(form.watch(`items.${index}.quantity`) || '0') *
+                        parseFloat(form.watch(`items.${index}.rate`) || '0')
+                      ).toFixed(2)}
                     </div>
                   </div>
                 </div>
               ))}
 
               <div className="flex justify-end pt-2 border-t">
-                <div className="text-base font-medium">
-                  Total: ${calculateTotal().toFixed(2)}
-                </div>
+                <div className="text-base font-medium">Total: ${calculateTotal().toFixed(2)}</div>
               </div>
             </div>
 
@@ -396,16 +382,16 @@ export function InvoiceFormDialog({ open, onOpenChange }: InvoiceFormDialogProps
             />
 
             <DialogFooter className="pt-4">
-              <Button 
-                type="button" 
-                variant="outline" 
+              <Button
+                type="button"
+                variant="outline"
                 onClick={() => onOpenChange(false)}
                 disabled={isSubmitting}
               >
                 Cancel
               </Button>
               <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Creating..." : "Create Invoice"}
+                {isSubmitting ? 'Creating...' : 'Create Invoice'}
               </Button>
             </DialogFooter>
           </form>

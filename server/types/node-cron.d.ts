@@ -16,6 +16,6 @@ declare module 'node-cron' {
 
     export function validate(expression: string): boolean;
   }
-  
+
   export = cron;
 }

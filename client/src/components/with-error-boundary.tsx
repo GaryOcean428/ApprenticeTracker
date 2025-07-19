@@ -15,17 +15,17 @@ function withErrorBoundary<P extends object>(
   options: WithErrorBoundaryProps = {}
 ): ComponentType<P> {
   const { fallback } = options;
-  
+
   const WrappedComponent = (props: P) => (
     <ErrorBoundary fallback={fallback}>
       <Component {...props} />
     </ErrorBoundary>
   );
-  
+
   // Set display name for debugging
   const displayName = Component.displayName || Component.name || 'Component';
   WrappedComponent.displayName = `WithErrorBoundary(${displayName})`;
-  
+
   return WrappedComponent;
 }
 

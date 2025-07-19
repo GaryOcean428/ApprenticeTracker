@@ -13,7 +13,7 @@ import {
   ArrowUpDown,
   ChevronDown,
   Calendar,
-  Share2
+  Share2,
 } from 'lucide-react';
 import { ReportFormDialog } from '@/components/financial/report-form-dialog';
 
@@ -23,7 +23,7 @@ import {
   CardDescription,
   CardFooter,
   CardHeader,
-  CardTitle
+  CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { DatePickerWithRange } from '@/components/date-range-picker';
@@ -76,9 +76,9 @@ const DUMMY_REPORTS: FinancialReport[] = [
     period: 'Q1 2025',
     createdAt: '2025-04-15',
     status: 'final',
-    revenue: 527850.00,
+    revenue: 527850.0,
     expenses: 412635.45,
-    profit: 115214.55
+    profit: 115214.55,
   },
   {
     id: 'fin-2025-q1-bal',
@@ -86,7 +86,7 @@ const DUMMY_REPORTS: FinancialReport[] = [
     type: 'balance-sheet',
     period: 'Q1 2025',
     createdAt: '2025-04-15',
-    status: 'final'
+    status: 'final',
   },
   {
     id: 'fin-2025-cf-q1',
@@ -94,7 +94,7 @@ const DUMMY_REPORTS: FinancialReport[] = [
     type: 'cash-flow',
     period: 'Q1 2025',
     createdAt: '2025-04-15',
-    status: 'final'
+    status: 'final',
   },
   {
     id: 'fin-2025-mar',
@@ -105,7 +105,7 @@ const DUMMY_REPORTS: FinancialReport[] = [
     status: 'final',
     revenue: 185320.25,
     expenses: 142745.88,
-    profit: 42574.37
+    profit: 42574.37,
   },
   {
     id: 'fin-2025-apr-draft',
@@ -115,16 +115,16 @@ const DUMMY_REPORTS: FinancialReport[] = [
     createdAt: '2025-05-01',
     status: 'draft',
     revenue: 192482.75,
-    expenses: 151230.20,
-    profit: 41252.55
-  }
+    expenses: 151230.2,
+    profit: 41252.55,
+  },
 ];
 
 export default function FinancialReportsPage() {
   const { toast } = useToast();
   const [selectedTab, setSelectedTab] = useState('reports');
   const [reportFormOpen, setReportFormOpen] = useState(false);
-  
+
   // This would be replaced with a real API query in production
   const { data: reports, isLoading } = useQuery({
     queryKey: ['financial-reports'],
@@ -137,21 +137,21 @@ export default function FinancialReportsPage() {
 
   const handleExportReport = (id: string) => {
     toast({
-      title: "Export Started",
+      title: 'Export Started',
       description: `Report ${id} is being exported. It will be ready shortly.`,
     });
   };
 
   const handlePrintReport = (id: string) => {
     toast({
-      title: "Print Job Started",
+      title: 'Print Job Started',
       description: `Report ${id} has been sent to the printer.`,
     });
   };
 
   const handleEmailReport = (id: string) => {
     toast({
-      title: "Email Ready",
+      title: 'Email Ready',
       description: `Report ${id} is ready to email. Please configure recipients.`,
     });
   };
@@ -166,7 +166,7 @@ export default function FinancialReportsPage() {
   return (
     <div className="container mx-auto p-6">
       <ReportFormDialog open={reportFormOpen} onOpenChange={setReportFormOpen} />
-      
+
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Financial Reports</h1>
@@ -186,7 +186,12 @@ export default function FinancialReportsPage() {
         </div>
       </div>
 
-      <Tabs defaultValue="reports" value={selectedTab} onValueChange={setSelectedTab} className="mb-6">
+      <Tabs
+        defaultValue="reports"
+        value={selectedTab}
+        onValueChange={setSelectedTab}
+        className="mb-6"
+      >
         <div className="flex justify-between items-center mb-4">
           <TabsList>
             <TabsTrigger value="reports">All Reports</TabsTrigger>
@@ -195,7 +200,7 @@ export default function FinancialReportsPage() {
             <TabsTrigger value="cash-flow">Cash Flow</TabsTrigger>
             <TabsTrigger value="tax">Tax Reports</TabsTrigger>
           </TabsList>
-          
+
           <div className="flex items-center gap-2">
             <Select defaultValue="current-quarter">
               <SelectTrigger className="w-[180px]">
@@ -210,7 +215,7 @@ export default function FinancialReportsPage() {
                 <SelectItem value="custom">Custom Period</SelectItem>
               </SelectContent>
             </Select>
-            
+
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="icon">
@@ -251,7 +256,7 @@ export default function FinancialReportsPage() {
             <CardContent className="p-0">
               {isLoading ? (
                 <div className="p-6 space-y-4">
-                  {[1, 2, 3, 4, 5].map((i) => (
+                  {[1, 2, 3, 4, 5].map(i => (
                     <div key={i} className="flex items-center space-x-4">
                       <Skeleton className="h-10 w-10" />
                       <div className="space-y-2">
@@ -275,7 +280,7 @@ export default function FinancialReportsPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {reports?.map((report) => (
+                    {reports?.map(report => (
                       <TableRow key={report.id}>
                         <TableCell className="font-medium">{report.title}</TableCell>
                         <TableCell>
@@ -300,24 +305,24 @@ export default function FinancialReportsPage() {
                         </TableCell>
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-2">
-                            <Button 
-                              variant="ghost" 
+                            <Button
+                              variant="ghost"
                               size="icon"
                               onClick={() => handleExportReport(report.id)}
                             >
                               <Download className="h-4 w-4" />
                               <span className="sr-only">Download</span>
                             </Button>
-                            <Button 
-                              variant="ghost" 
+                            <Button
+                              variant="ghost"
                               size="icon"
                               onClick={() => handlePrintReport(report.id)}
                             >
                               <Printer className="h-4 w-4" />
                               <span className="sr-only">Print</span>
                             </Button>
-                            <Button 
-                              variant="ghost" 
+                            <Button
+                              variant="ghost"
                               size="icon"
                               onClick={() => handleEmailReport(report.id)}
                             >
@@ -383,13 +388,13 @@ export default function FinancialReportsPage() {
                     <CardTitle className="text-lg font-medium">Total Revenue</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-3xl font-bold">{formatCurrency(527850.00)}</div>
+                    <div className="text-3xl font-bold">{formatCurrency(527850.0)}</div>
                     <p className="text-xs text-muted-foreground">
                       <span className="text-success">+5.2%</span> from previous period
                     </p>
                   </CardContent>
                 </Card>
-                
+
                 <Card>
                   <CardHeader className="pb-2">
                     <CardTitle className="text-lg font-medium">Total Expenses</CardTitle>
@@ -401,7 +406,7 @@ export default function FinancialReportsPage() {
                     </p>
                   </CardContent>
                 </Card>
-                
+
                 <Card>
                   <CardHeader className="pb-2">
                     <CardTitle className="text-lg font-medium">Net Profit</CardTitle>
@@ -450,9 +455,7 @@ export default function FinancialReportsPage() {
           <Card>
             <CardHeader>
               <CardTitle>Cash Flow</CardTitle>
-              <CardDescription>
-                View your organization's cash inflows and outflows
-              </CardDescription>
+              <CardDescription>View your organization's cash inflows and outflows</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="h-80 bg-muted flex items-center justify-center rounded-lg mb-4">
@@ -470,9 +473,7 @@ export default function FinancialReportsPage() {
           <Card>
             <CardHeader>
               <CardTitle>Tax Reports</CardTitle>
-              <CardDescription>
-                View tax-related reports and summaries
-              </CardDescription>
+              <CardDescription>View tax-related reports and summaries</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="h-80 bg-muted flex items-center justify-center rounded-lg mb-4">

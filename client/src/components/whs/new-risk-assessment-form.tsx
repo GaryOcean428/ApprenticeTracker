@@ -32,18 +32,17 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Calendar } from '@/components/ui/calendar';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { CalendarIcon, Loader2, X } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 
 // Define the Risk Assessment form schema
 const riskAssessmentFormSchema = z.object({
-  title: z.string().min(5, 'Title must be at least 5 characters').max(100, 'Title must not exceed 100 characters'),
+  title: z
+    .string()
+    .min(5, 'Title must be at least 5 characters')
+    .max(100, 'Title must not exceed 100 characters'),
   location: z.string().min(3, 'Location must be at least 3 characters'),
   assessment_date: z.date({
     required_error: 'Assessment date is required',
@@ -58,18 +57,20 @@ const riskAssessmentFormSchema = z.object({
   }),
   work_area: z.string().min(2, 'Work area must be at least 2 characters'),
   // Hazards and controls
-  hazards: z.array(
-    z.object({
-      description: z.string().min(3, 'Hazard description must be at least 3 characters'),
-      risk_level: z.enum(['low', 'medium', 'high', 'critical'], {
-        required_error: 'Please select a risk level',
-      }),
-      controls: z.string().min(5, 'Control measures must be at least 5 characters'),
-      residual_risk: z.enum(['low', 'medium', 'high', 'critical'], {
-        required_error: 'Please select a residual risk level',
-      }),
-    })
-  ).min(1, 'At least one hazard must be identified'),
+  hazards: z
+    .array(
+      z.object({
+        description: z.string().min(3, 'Hazard description must be at least 3 characters'),
+        risk_level: z.enum(['low', 'medium', 'high', 'critical'], {
+          required_error: 'Please select a risk level',
+        }),
+        controls: z.string().min(5, 'Control measures must be at least 5 characters'),
+        residual_risk: z.enum(['low', 'medium', 'high', 'critical'], {
+          required_error: 'Please select a residual risk level',
+        }),
+      })
+    )
+    .min(1, 'At least one hazard must be identified'),
   approver_name: z.string().optional(),
   approval_date: z.date().optional(),
   approval_notes: z.string().optional(),
@@ -123,7 +124,7 @@ export function NewRiskAssessmentForm({ onSuccess, onCancel }: NewRiskAssessment
       hazards: [{ ...emptyHazard }],
     },
   });
-  
+
   // Create risk assessment mutation
   const createMutation = useMutation({
     mutationFn: async (data: RiskAssessmentFormValues) => {
@@ -170,11 +171,11 @@ export function NewRiskAssessmentForm({ onSuccess, onCancel }: NewRiskAssessment
       });
       return;
     }
-    
+
     const updatedHazards = [...hazards];
     updatedHazards.splice(index, 1);
     form.setValue('hazards', updatedHazards);
-    
+
     // If the active hazard was removed, reset the active index
     if (activeHazardIndex === index) {
       setActiveHazardIndex(null);
@@ -268,15 +269,8 @@ export function NewRiskAssessmentForm({ onSuccess, onCancel }: NewRiskAssessment
                 <Popover>
                   <PopoverTrigger asChild>
                     <FormControl>
-                      <Button
-                        variant="outline"
-                        className="w-full pl-3 text-left font-normal"
-                      >
-                        {field.value ? (
-                          format(field.value, 'PPP')
-                        ) : (
-                          <span>Pick a date</span>
-                        )}
+                      <Button variant="outline" className="w-full pl-3 text-left font-normal">
+                        {field.value ? format(field.value, 'PPP') : <span>Pick a date</span>}
                         <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                       </Button>
                     </FormControl>
@@ -286,7 +280,7 @@ export function NewRiskAssessmentForm({ onSuccess, onCancel }: NewRiskAssessment
                       mode="single"
                       selected={field.value}
                       onSelect={field.onChange}
-                      disabled={(date) => date > new Date()}
+                      disabled={date => date > new Date()}
                       initialFocus
                     />
                   </PopoverContent>
@@ -305,15 +299,8 @@ export function NewRiskAssessmentForm({ onSuccess, onCancel }: NewRiskAssessment
                 <Popover>
                   <PopoverTrigger asChild>
                     <FormControl>
-                      <Button
-                        variant="outline"
-                        className="w-full pl-3 text-left font-normal"
-                      >
-                        {field.value ? (
-                          format(field.value, 'PPP')
-                        ) : (
-                          <span>Pick a date</span>
-                        )}
+                      <Button variant="outline" className="w-full pl-3 text-left font-normal">
+                        {field.value ? format(field.value, 'PPP') : <span>Pick a date</span>}
                         <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                       </Button>
                     </FormControl>
@@ -323,14 +310,12 @@ export function NewRiskAssessmentForm({ onSuccess, onCancel }: NewRiskAssessment
                       mode="single"
                       selected={field.value || undefined}
                       onSelect={field.onChange}
-                      disabled={(date) => date < new Date()}
+                      disabled={date => date < new Date()}
                       initialFocus
                     />
                   </PopoverContent>
                 </Popover>
-                <FormDescription>
-                  Date when this assessment should be reviewed
-                </FormDescription>
+                <FormDescription>Date when this assessment should be reviewed</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -372,10 +357,10 @@ export function NewRiskAssessmentForm({ onSuccess, onCancel }: NewRiskAssessment
             <FormItem>
               <FormLabel>Description</FormLabel>
               <FormControl>
-                <Textarea 
-                  placeholder="Detailed description of the assessment purpose and scope" 
-                  className="min-h-[120px]" 
-                  {...field} 
+                <Textarea
+                  placeholder="Detailed description of the assessment purpose and scope"
+                  className="min-h-[120px]"
+                  {...field}
                 />
               </FormControl>
               <FormMessage />
@@ -396,21 +381,24 @@ export function NewRiskAssessmentForm({ onSuccess, onCancel }: NewRiskAssessment
             collapsible
             className="w-full"
             value={activeHazardIndex !== null ? `item-${activeHazardIndex}` : undefined}
-            onValueChange={(value) => setActiveHazardIndex(value ? parseInt(value.split('-')[1]) : null)}
+            onValueChange={value =>
+              setActiveHazardIndex(value ? parseInt(value.split('-')[1]) : null)
+            }
           >
             {form.watch('hazards')?.map((_, index) => (
               <AccordionItem key={index} value={`item-${index}`}>
                 <div className="flex items-center">
                   <AccordionTrigger className="flex-1">
-                    Hazard {index + 1}: {form.watch(`hazards.${index}.description`) || '(No description)'}
+                    Hazard {index + 1}:{' '}
+                    {form.watch(`hazards.${index}.description`) || '(No description)'}
                   </AccordionTrigger>
-                  <Button 
-                    type="button" 
-                    variant="ghost" 
-                    size="sm" 
-                    onClick={(e) => { 
-                      e.stopPropagation(); 
-                      removeHazard(index); 
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={e => {
+                      e.stopPropagation();
+                      removeHazard(index);
                     }}
                     className="mr-2"
                   >
@@ -426,10 +414,10 @@ export function NewRiskAssessmentForm({ onSuccess, onCancel }: NewRiskAssessment
                         <FormItem>
                           <FormLabel>Hazard Description</FormLabel>
                           <FormControl>
-                            <Textarea 
-                              placeholder="Describe the hazard in detail" 
-                              className="min-h-[80px]" 
-                              {...field} 
+                            <Textarea
+                              placeholder="Describe the hazard in detail"
+                              className="min-h-[80px]"
+                              {...field}
                             />
                           </FormControl>
                           <FormMessage />
@@ -444,14 +432,18 @@ export function NewRiskAssessmentForm({ onSuccess, onCancel }: NewRiskAssessment
                         <FormItem>
                           <FormLabel>Risk Level (Before Controls)</FormLabel>
                           <div className="flex flex-wrap gap-2 mt-1">
-                            {riskLevelOptions.map((option) => (
+                            {riskLevelOptions.map(option => (
                               <Badge
                                 key={option.value}
                                 variant="outline"
                                 className={`cursor-pointer px-3 py-1 ${
                                   field.value === option.value ? option.color : ''
                                 }`}
-                                onClick={() => form.setValue(`hazards.${index}.risk_level`, option.value, { shouldValidate: true })}
+                                onClick={() =>
+                                  form.setValue(`hazards.${index}.risk_level`, option.value, {
+                                    shouldValidate: true,
+                                  })
+                                }
                               >
                                 {option.label}
                               </Badge>
@@ -469,10 +461,10 @@ export function NewRiskAssessmentForm({ onSuccess, onCancel }: NewRiskAssessment
                         <FormItem>
                           <FormLabel>Control Measures</FormLabel>
                           <FormControl>
-                            <Textarea 
-                              placeholder="List the control measures to mitigate this hazard" 
-                              className="min-h-[80px]" 
-                              {...field} 
+                            <Textarea
+                              placeholder="List the control measures to mitigate this hazard"
+                              className="min-h-[80px]"
+                              {...field}
                             />
                           </FormControl>
                           <FormMessage />
@@ -487,14 +479,18 @@ export function NewRiskAssessmentForm({ onSuccess, onCancel }: NewRiskAssessment
                         <FormItem>
                           <FormLabel>Residual Risk (After Controls)</FormLabel>
                           <div className="flex flex-wrap gap-2 mt-1">
-                            {riskLevelOptions.map((option) => (
+                            {riskLevelOptions.map(option => (
                               <Badge
                                 key={option.value}
                                 variant="outline"
                                 className={`cursor-pointer px-3 py-1 ${
                                   field.value === option.value ? option.color : ''
                                 }`}
-                                onClick={() => form.setValue(`hazards.${index}.residual_risk`, option.value, { shouldValidate: true })}
+                                onClick={() =>
+                                  form.setValue(`hazards.${index}.residual_risk`, option.value, {
+                                    shouldValidate: true,
+                                  })
+                                }
                               >
                                 {option.label}
                               </Badge>
@@ -516,9 +512,7 @@ export function NewRiskAssessmentForm({ onSuccess, onCancel }: NewRiskAssessment
             Cancel
           </Button>
           <Button type="submit" disabled={createMutation.isPending}>
-            {createMutation.isPending && (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            )}
+            {createMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Create Risk Assessment
           </Button>
         </div>

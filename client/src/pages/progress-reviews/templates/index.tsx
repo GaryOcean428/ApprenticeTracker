@@ -1,7 +1,15 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'wouter';
-import { PlusCircle, ChevronRight, FileText, MoreHorizontal, Copy, Trash2, Check } from 'lucide-react';
+import {
+  PlusCircle,
+  ChevronRight,
+  FileText,
+  MoreHorizontal,
+  Copy,
+  Trash2,
+  Check,
+} from 'lucide-react';
 import {
   Card,
   CardContent,
@@ -42,15 +50,20 @@ export default function TemplatesListPage() {
   const [searchQuery, setSearchQuery] = useState('');
 
   // Fetch templates
-  const { data: templates, isLoading, refetch } = useQuery<Template[]>({
+  const {
+    data: templates,
+    isLoading,
+    refetch,
+  } = useQuery<Template[]>({
     queryKey: ['/api/progress-reviews/templates'],
   });
 
   // Filter templates based on search query
-  const filteredTemplates = templates?.filter(template => 
-    template.templateName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    template.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    template.templateVersion.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredTemplates = templates?.filter(
+    template =>
+      template.templateName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      template.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      template.templateVersion.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   // Duplicate a template
@@ -128,7 +141,9 @@ export default function TemplatesListPage() {
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-3xl font-bold">Review Templates</h1>
-          <p className="text-muted-foreground mt-1">Manage templates for apprentice progress reviews</p>
+          <p className="text-muted-foreground mt-1">
+            Manage templates for apprentice progress reviews
+          </p>
         </div>
         <Link href="/progress-reviews/templates/create">
           <Button>
@@ -141,7 +156,7 @@ export default function TemplatesListPage() {
         <Input
           placeholder="Search templates..."
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          onChange={e => setSearchQuery(e.target.value)}
           className="max-w-md"
         />
       </div>
@@ -154,7 +169,7 @@ export default function TemplatesListPage() {
         </div>
       ) : filteredTemplates && filteredTemplates.length > 0 ? (
         <div className="grid grid-cols-1 gap-4">
-          {filteredTemplates.map((template) => (
+          {filteredTemplates.map(template => (
             <Card key={template.id} className={!template.isActive ? 'opacity-70' : ''}>
               <CardContent className="p-6">
                 <div className="flex justify-between items-start">
@@ -169,7 +184,9 @@ export default function TemplatesListPage() {
                           {template.isActive ? 'Active' : 'Inactive'}
                         </Badge>
                       </div>
-                      <div className="text-sm text-muted-foreground mb-2">Version: {template.templateVersion}</div>
+                      <div className="text-sm text-muted-foreground mb-2">
+                        Version: {template.templateVersion}
+                      </div>
                       <p className="text-sm mb-2">{template.description}</p>
                       <div className="text-xs text-muted-foreground">
                         Last updated: {formatDate(template.updatedAt)}
@@ -234,7 +251,9 @@ export default function TemplatesListPage() {
             <FileText className="h-12 w-12 text-muted-foreground mb-4" />
             <h3 className="text-lg font-medium mb-2">No templates found</h3>
             <p className="text-muted-foreground text-center mb-6 max-w-md">
-              {searchQuery ? 'No templates match your search criteria.' : 'There are no templates available yet.'}
+              {searchQuery
+                ? 'No templates match your search criteria.'
+                : 'There are no templates available yet.'}
             </p>
             <Link href="/progress-reviews/templates/create">
               <Button>

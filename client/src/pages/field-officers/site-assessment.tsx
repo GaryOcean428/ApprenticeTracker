@@ -6,7 +6,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Input } from '@/components/ui/input';
 import { ArrowLeft, Calendar, Plus, Upload } from 'lucide-react';
@@ -45,40 +51,38 @@ export default function SiteAssessmentPage() {
 
   // State for corrective actions
   const [correctiveActions, setCorrectiveActions] = useState<CorrectiveAction[]>([
-    { 
-      id: '1', 
-      description: 'Replace missing signage', 
-      assignedTo: 'host', 
-      dueDate: '2025-05-20', 
-      completed: false 
+    {
+      id: '1',
+      description: 'Replace missing signage',
+      assignedTo: 'host',
+      dueDate: '2025-05-20',
+      completed: false,
     },
-    { 
-      id: '2', 
-      description: 'Service fire extinguishers', 
-      assignedTo: 'safety-officer', 
-      dueDate: '2025-05-15', 
-      completed: false 
+    {
+      id: '2',
+      description: 'Service fire extinguishers',
+      assignedTo: 'safety-officer',
+      dueDate: '2025-05-15',
+      completed: false,
     },
   ]);
 
   // State for host feedback
-  const [hostFeedback, setHostFeedback] = useState('Site very well maintained, apprentice John adjusting well to the workplace environment. Some minor safety issues to address but overall good compliance.');
+  const [hostFeedback, setHostFeedback] = useState(
+    'Site very well maintained, apprentice John adjusting well to the workplace environment. Some minor safety issues to address but overall good compliance.'
+  );
 
   // Toggle checklist item
   const toggleChecklistItem = (id: string) => {
-    setChecklistItems(prev => 
-      prev.map(item => 
-        item.id === id ? { ...item, checked: !item.checked } : item
-      )
+    setChecklistItems(prev =>
+      prev.map(item => (item.id === id ? { ...item, checked: !item.checked } : item))
     );
   };
 
   // Toggle corrective action completion
   const toggleCorrectiveAction = (id: string) => {
-    setCorrectiveActions(prev => 
-      prev.map(action => 
-        action.id === id ? { ...action, completed: !action.completed } : action
-      )
+    setCorrectiveActions(prev =>
+      prev.map(action => (action.id === id ? { ...action, completed: !action.completed } : action))
     );
   };
 
@@ -91,13 +95,16 @@ export default function SiteAssessmentPage() {
   // Add new corrective action
   const addCorrectiveAction = () => {
     const newId = (correctiveActions.length + 1).toString();
-    setCorrectiveActions([...correctiveActions, { 
-      id: newId, 
-      description: '', 
-      assignedTo: '', 
-      dueDate: '', 
-      completed: false 
-    }]);
+    setCorrectiveActions([
+      ...correctiveActions,
+      {
+        id: newId,
+        description: '',
+        assignedTo: '',
+        dueDate: '',
+        completed: false,
+      },
+    ]);
   };
 
   return (
@@ -106,9 +113,7 @@ export default function SiteAssessmentPage() {
       description="Complete safety and compliance assessment for host employer sites"
       showBackButton
       backUrl="/field-officers"
-      actions={
-        <Button className="ml-auto">Save Assessment</Button>
-      }
+      actions={<Button className="ml-auto">Save Assessment</Button>}
     >
       <div className="space-y-6">
         {/* Visit Selection */}
@@ -153,10 +158,10 @@ export default function SiteAssessmentPage() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {checklistItems.map((item) => (
+              {checklistItems.map(item => (
                 <div key={item.id} className="flex items-center space-x-2">
-                  <Checkbox 
-                    id={`item-${item.id}`} 
+                  <Checkbox
+                    id={`item-${item.id}`}
                     checked={item.checked}
                     onCheckedChange={() => toggleChecklistItem(item.id)}
                   />
@@ -165,9 +170,9 @@ export default function SiteAssessmentPage() {
                   </Label>
                 </div>
               ))}
-              <Button 
-                variant="outline" 
-                size="sm" 
+              <Button
+                variant="outline"
+                size="sm"
                 className="flex items-center gap-1"
                 onClick={addChecklistItem}
               >
@@ -191,15 +196,21 @@ export default function SiteAssessmentPage() {
             >
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="green" id="rating-green" />
-                <Label htmlFor="rating-green" className="text-green-600 font-semibold">Green</Label>
+                <Label htmlFor="rating-green" className="text-green-600 font-semibold">
+                  Green
+                </Label>
               </div>
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="amber" id="rating-amber" />
-                <Label htmlFor="rating-amber" className="text-amber-600 font-semibold">Amber</Label>
+                <Label htmlFor="rating-amber" className="text-amber-600 font-semibold">
+                  Amber
+                </Label>
               </div>
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="red" id="rating-red" />
-                <Label htmlFor="rating-red" className="text-red-600 font-semibold">Red</Label>
+                <Label htmlFor="rating-red" className="text-red-600 font-semibold">
+                  Red
+                </Label>
               </div>
             </RadioGroup>
           </CardContent>
@@ -216,15 +227,18 @@ export default function SiteAssessmentPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {correctiveActions.map((action) => (
+              {correctiveActions.map(action => (
                 <div key={action.id} className="flex items-center gap-3 border-b pb-3">
-                  <Checkbox 
-                    id={`action-${action.id}`} 
+                  <Checkbox
+                    id={`action-${action.id}`}
                     checked={action.completed}
                     onCheckedChange={() => toggleCorrectiveAction(action.id)}
                   />
                   <div className="grid gap-1 flex-1">
-                    <Label htmlFor={`action-${action.id}`} className={action.completed ? "line-through text-muted-foreground" : ""}>
+                    <Label
+                      htmlFor={`action-${action.id}`}
+                      className={action.completed ? 'line-through text-muted-foreground' : ''}
+                    >
                       {action.description}
                     </Label>
                     <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
@@ -246,7 +260,7 @@ export default function SiteAssessmentPage() {
           <CardContent>
             <Textarea
               value={hostFeedback}
-              onChange={(e) => setHostFeedback(e.target.value)}
+              onChange={e => setHostFeedback(e.target.value)}
               rows={4}
               placeholder="Enter host employer feedback..."
             />

@@ -1,13 +1,18 @@
 import { db } from './db';
 import { sql } from 'drizzle-orm';
-import { enrichmentPrograms, enrichmentParticipants, enrichmentWorkshops, workshopAttendees } from '@shared/schema';
+import {
+  enrichmentPrograms,
+  enrichmentParticipants,
+  enrichmentWorkshops,
+  workshopAttendees,
+} from '@shared/schema';
 
 /**
  * This script creates the enrichment program tables for apprentice enrichment activities
  */
 export async function migrateEnrichmentSchema() {
   console.log('Creating Enrichment Program tables...');
-  
+
   try {
     // Create enrichment_programs table
     await db.execute(sql`
@@ -30,7 +35,7 @@ export async function migrateEnrichmentSchema() {
       )
     `);
     console.log('Created enrichment_programs table');
-    
+
     // Create enrichment_participants table
     await db.execute(sql`
       CREATE TABLE IF NOT EXISTS enrichment_participants (
@@ -48,7 +53,7 @@ export async function migrateEnrichmentSchema() {
       )
     `);
     console.log('Created enrichment_participants table');
-    
+
     // Create enrichment_workshops table
     await db.execute(sql`
       CREATE TABLE IF NOT EXISTS enrichment_workshops (
@@ -68,7 +73,7 @@ export async function migrateEnrichmentSchema() {
       )
     `);
     console.log('Created enrichment_workshops table');
-    
+
     // Create workshop_attendees table
     await db.execute(sql`
       CREATE TABLE IF NOT EXISTS workshop_attendees (
@@ -84,7 +89,7 @@ export async function migrateEnrichmentSchema() {
       )
     `);
     console.log('Created workshop_attendees table');
-    
+
     console.log('Enrichment schema migration completed successfully');
     return true;
   } catch (error) {

@@ -1,27 +1,27 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { queryClient } from '@/lib/queryClient';
-import { 
-  Loader2, 
-  Plus, 
-  Filter, 
-  Search, 
-  MoreHorizontal, 
-  CheckCircle, 
-  AlertCircle, 
-  Clock, 
-  Paperclip 
+import {
+  Loader2,
+  Plus,
+  Filter,
+  Search,
+  MoreHorizontal,
+  CheckCircle,
+  AlertCircle,
+  Clock,
+  Paperclip,
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from '@/components/ui/table';
 import {
   DropdownMenu,
@@ -66,7 +66,7 @@ export default function ComplaintsManagement() {
     submittedBy: '',
     contactInfo: '',
   });
-  
+
   // Fetch complaints
   const { data: complaints, isLoading } = useQuery({
     queryKey: ['/api/gto-compliance/complaints'],
@@ -126,7 +126,7 @@ export default function ComplaintsManagement() {
       });
       queryClient.invalidateQueries({ queryKey: ['/api/gto-compliance/complaints'] });
     },
-    onError: (error) => {
+    onError: error => {
       toast({
         title: 'Error',
         description: 'Failed to create complaint',
@@ -140,7 +140,7 @@ export default function ComplaintsManagement() {
     id: number;
     status: string;
   };
-  
+
   const updateComplaintStatusMutation = useMutation<any, Error, UpdateStatusParams>({
     mutationFn: async ({ id, status }: UpdateStatusParams) => {
       const response = await fetch(`/api/gto-compliance/complaints/${id}/status`, {
@@ -164,7 +164,7 @@ export default function ComplaintsManagement() {
       });
       queryClient.invalidateQueries({ queryKey: ['/api/gto-compliance/complaints'] });
     },
-    onError: (error) => {
+    onError: error => {
       toast({
         title: 'Error',
         description: 'Failed to update complaint status',
@@ -173,7 +173,9 @@ export default function ComplaintsManagement() {
     },
   });
 
-  const handleNewComplaintChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleNewComplaintChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
     setNewComplaint({
       ...newComplaint,
@@ -211,13 +213,13 @@ export default function ComplaintsManagement() {
   // Filter complaints based on search query and status filter
   const filteredComplaints = complaints
     ? complaints.filter((complaint: Complaint) => {
-        const matchesSearch = 
+        const matchesSearch =
           complaint.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
           complaint.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
           complaint.submittedBy.toLowerCase().includes(searchQuery.toLowerCase());
-        
+
         const matchesStatus = statusFilter === 'all' || complaint.status === statusFilter;
-        
+
         return matchesSearch && matchesStatus;
       })
     : [];
@@ -333,7 +335,7 @@ export default function ComplaintsManagement() {
                     <Label htmlFor="category">Category</Label>
                     <Select
                       value={newComplaint.category}
-                      onValueChange={(value) => handleSelectChange('category', value)}
+                      onValueChange={value => handleSelectChange('category', value)}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Select category" />
@@ -352,7 +354,7 @@ export default function ComplaintsManagement() {
                     <Label htmlFor="priority">Priority</Label>
                     <Select
                       value={newComplaint.priority}
-                      onValueChange={(value) => handleSelectChange('priority', value)}
+                      onValueChange={value => handleSelectChange('priority', value)}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Select priority" />
@@ -387,10 +389,7 @@ export default function ComplaintsManagement() {
                 </div>
               </div>
               <DialogFooter>
-                <Button
-                  variant="secondary"
-                  onClick={() => setIsDialogOpen(false)}
-                >
+                <Button variant="secondary" onClick={() => setIsDialogOpen(false)}>
                   Cancel
                 </Button>
                 <Button
@@ -421,7 +420,7 @@ export default function ComplaintsManagement() {
                 <TabsTrigger value="complaints">Complaints</TabsTrigger>
                 <TabsTrigger value="appeals">Appeals</TabsTrigger>
               </TabsList>
-              
+
               <TabsContent value="complaints">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center w-full max-w-sm space-x-2">
@@ -432,13 +431,10 @@ export default function ComplaintsManagement() {
                         placeholder="Search complaints..."
                         className="pl-8"
                         value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
+                        onChange={e => setSearchQuery(e.target.value)}
                       />
                     </div>
-                    <Select
-                      value={statusFilter}
-                      onValueChange={setStatusFilter}
-                    >
+                    <Select value={statusFilter} onValueChange={setStatusFilter}>
                       <SelectTrigger className="w-[180px]">
                         <SelectValue placeholder="Filter by status" />
                       </SelectTrigger>
@@ -451,7 +447,7 @@ export default function ComplaintsManagement() {
                     </Select>
                   </div>
                 </div>
-                
+
                 <div className="rounded-md border">
                   <Table>
                     <TableHeader>
@@ -482,7 +478,8 @@ export default function ComplaintsManagement() {
                               </div>
                             </TableCell>
                             <TableCell>
-                              {complaint.category.charAt(0).toUpperCase() + complaint.category.slice(1)}
+                              {complaint.category.charAt(0).toUpperCase() +
+                                complaint.category.slice(1)}
                             </TableCell>
                             <TableCell>
                               <StatusBadge status={complaint.status} />
@@ -491,16 +488,15 @@ export default function ComplaintsManagement() {
                               <PriorityBadge priority={complaint.priority} />
                             </TableCell>
                             <TableCell>
-                              {formatDistanceToNow(new Date(complaint.dateSubmitted), { addSuffix: true })}
+                              {formatDistanceToNow(new Date(complaint.dateSubmitted), {
+                                addSuffix: true,
+                              })}
                             </TableCell>
                             <TableCell>{complaint.submittedBy}</TableCell>
                             <TableCell>
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                  <Button
-                                    variant="ghost"
-                                    className="h-8 w-8 p-0"
-                                  >
+                                  <Button variant="ghost" className="h-8 w-8 p-0">
                                     <span className="sr-only">Open menu</span>
                                     <MoreHorizontal className="h-4 w-4" />
                                   </Button>
@@ -509,7 +505,9 @@ export default function ComplaintsManagement() {
                                   <DropdownMenuItem>View Details</DropdownMenuItem>
                                   {complaint.status === 'open' && (
                                     <DropdownMenuItem
-                                      onClick={() => handleUpdateStatus(complaint.id, 'under_review')}
+                                      onClick={() =>
+                                        handleUpdateStatus(complaint.id, 'under_review')
+                                      }
                                     >
                                       Mark as Under Review
                                     </DropdownMenuItem>
@@ -538,7 +536,7 @@ export default function ComplaintsManagement() {
                   </Table>
                 </div>
               </TabsContent>
-              
+
               <TabsContent value="appeals">
                 <div className="flex items-center justify-center h-[300px] text-muted-foreground">
                   Appeals management functionality will be implemented in the next phase.

@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { 
-  Card, 
-  CardContent, 
-  CardHeader, 
+import {
+  Card,
+  CardContent,
+  CardHeader,
   CardTitle,
   CardDescription,
-  CardFooter
+  CardFooter,
 } from '@/components/ui/card';
 import {
   Dialog,
@@ -19,15 +19,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { 
-  Search, 
-  Plus, 
-  Download,
-  FileText,
-  Clock,
-  ExternalLink,
-  ShieldCheck
-} from 'lucide-react';
+import { Search, Plus, Download, FileText, Clock, ExternalLink, ShieldCheck } from 'lucide-react';
 
 export default function SafetyPoliciesList() {
   const [search, setSearch] = useState('');
@@ -65,7 +57,7 @@ export default function SafetyPoliciesList() {
                 placeholder="Search policies..."
                 className="pl-8"
                 value={search}
-                onChange={(e) => setSearch(e.target.value)}
+                onChange={e => setSearch(e.target.value)}
               />
             </div>
             <Button type="submit">Search</Button>
@@ -83,63 +75,63 @@ export default function SafetyPoliciesList() {
           ) : (
             <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
               {/* Example policies - would be replaced with actual data */}
-              <PolicyCard 
+              <PolicyCard
                 title="Workplace Safety Policy"
                 description="General workplace safety guidelines and responsibilities"
                 lastUpdated="2025-03-15"
                 docType="PDF"
                 status="active"
               />
-              <PolicyCard 
+              <PolicyCard
                 title="Incident Reporting Procedure"
                 description="Step-by-step guidelines for reporting workplace incidents and accidents"
                 lastUpdated="2025-04-02"
                 docType="PDF"
                 status="active"
               />
-              <PolicyCard 
+              <PolicyCard
                 title="Emergency Response Plan"
                 description="Procedures for responding to workplace emergencies"
                 lastUpdated="2025-01-25"
                 docType="PDF"
                 status="active"
               />
-              <PolicyCard 
+              <PolicyCard
                 title="PPE Requirements"
                 description="Personal protective equipment standards and usage guidelines"
                 lastUpdated="2025-02-18"
                 docType="PDF"
                 status="active"
               />
-              <PolicyCard 
+              <PolicyCard
                 title="Manual Handling Guidelines"
                 description="Safe techniques for lifting and manual handling tasks"
                 lastUpdated="2024-12-10"
                 docType="PDF"
                 status="review-needed"
               />
-              <PolicyCard 
+              <PolicyCard
                 title="First Aid Procedures"
                 description="First aid protocols and first responder guidelines"
                 lastUpdated="2025-03-05"
                 docType="PDF"
                 status="active"
               />
-              <PolicyCard 
+              <PolicyCard
                 title="WHS Training Requirements"
                 description="Training requirements and schedules for all staff"
                 lastUpdated="2024-11-20"
                 docType="PDF"
                 status="review-needed"
               />
-              <PolicyCard 
+              <PolicyCard
                 title="Risk Assessment Template"
                 description="Standard template for conducting workplace risk assessments"
                 lastUpdated="2025-04-10"
                 docType="DOCX"
                 status="active"
               />
-              <PolicyCard 
+              <PolicyCard
                 title="Site Safety Inspection Checklist"
                 description="Checklist for conducting regular safety inspections"
                 lastUpdated="2025-03-28"
@@ -158,22 +150,22 @@ export default function SafetyPoliciesList() {
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
-            <ExternalResourceCard 
+            <ExternalResourceCard
               title="SafeWork Australia"
               description="National WHS policies, legislation and guidance"
               link="https://www.safeworkaustralia.gov.au/"
             />
-            <ExternalResourceCard 
+            <ExternalResourceCard
               title="State WHS Regulator"
               description="State-specific WHS regulations and compliance information"
               link="#"
             />
-            <ExternalResourceCard 
+            <ExternalResourceCard
               title="Group Training Australia"
               description="GTO-specific safety resources and guidelines"
               link="https://www.grouptraining.com.au/"
             />
-            <ExternalResourceCard 
+            <ExternalResourceCard
               title="Australian Apprenticeships"
               description="WHS information for apprentices and trainees"
               link="https://www.australianapprenticeships.gov.au/"
@@ -213,13 +205,9 @@ function PolicyCard({ title, description, lastUpdated, docType, status }: Policy
         <div className="flex justify-between items-start">
           <div>
             <CardTitle className="text-base">{title}</CardTitle>
-            <CardDescription className="line-clamp-2 min-h-[40px]">
-              {description}
-            </CardDescription>
+            <CardDescription className="line-clamp-2 min-h-[40px]">{description}</CardDescription>
           </div>
-          <div>
-            {getStatusBadge(status)}
-          </div>
+          <div>{getStatusBadge(status)}</div>
         </div>
       </CardHeader>
       <CardContent>
@@ -280,7 +268,12 @@ function ExternalResourceCard({ title, description, link }: ExternalResourceCard
             <h3 className="font-medium mb-1">{title}</h3>
             <p className="text-sm text-muted-foreground mb-3">{description}</p>
             <Button variant="outline" size="sm" asChild>
-              <a href={link} target="_blank" rel="noopener noreferrer" className="flex items-center">
+              <a
+                href={link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center"
+              >
                 Visit Resource
                 <ExternalLink className="h-3.5 w-3.5 ml-1" />
               </a>

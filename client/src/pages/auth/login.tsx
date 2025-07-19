@@ -19,7 +19,14 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
 
@@ -36,7 +43,7 @@ export default function LoginPage() {
   const [, setLocation] = useLocation();
   const [showPassword, setShowPassword] = useState(false);
   const { user, isLoading } = useAuth();
-  
+
   // Redirect to appropriate dashboard if already authenticated
   useEffect(() => {
     if (user && !isLoading) {
@@ -71,27 +78,27 @@ export default function LoginPage() {
         username: data.username,
         password: data.password,
       });
-      
+
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || 'Login failed');
       }
-      
+
       return await response.json();
     },
-    onSuccess: (data) => {
+    onSuccess: data => {
       // Store the token in localStorage
       const token = data.token;
       localStorage.setItem('authToken', token);
-      
+
       // Update auth state
       queryClient.setQueryData(['/api/auth/user'], data.user);
-      
+
       toast({
         title: 'Login successful',
         description: `Welcome back, ${data.user.firstName}!`,
       });
-      
+
       // Redirect based on user role
       if (data.user.role === 'developer' || data.user.role === 'admin') {
         setLocation('/admin');
@@ -140,9 +147,9 @@ export default function LoginPage() {
                     <FormItem>
                       <FormLabel>Username</FormLabel>
                       <FormControl>
-                        <Input 
-                          placeholder="Enter your username" 
-                          {...field} 
+                        <Input
+                          placeholder="Enter your username"
+                          {...field}
                           disabled={loginMutation.isPending}
                         />
                       </FormControl>
@@ -200,23 +207,20 @@ export default function LoginPage() {
                             disabled={loginMutation.isPending}
                           />
                         </FormControl>
-                        <FormLabel className="text-sm font-normal">
-                          Remember me
-                        </FormLabel>
+                        <FormLabel className="text-sm font-normal">Remember me</FormLabel>
                       </FormItem>
                     )}
                   />
-                  
-                  <Link href="/auth/forgot-password" className="text-sm text-primary hover:underline">
+
+                  <Link
+                    href="/auth/forgot-password"
+                    className="text-sm text-primary hover:underline"
+                  >
                     Forgot password?
                   </Link>
                 </div>
 
-                <Button
-                  type="submit"
-                  className="w-full"
-                  disabled={loginMutation.isPending}
-                >
+                <Button type="submit" className="w-full" disabled={loginMutation.isPending}>
                   {loginMutation.isPending ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />

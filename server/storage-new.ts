@@ -1,14 +1,40 @@
-import { and, desc, eq } from "drizzle-orm";
-import { db } from "./db";
+import { and, desc, eq } from 'drizzle-orm';
+import { db } from './db';
 import {
-  Apprentice, Document, HostEmployer, InsertApprentice, InsertDocument,
-  InsertHostEmployer, InsertPlacement, InsertTrainingContract, InsertUser,
-  Placement, TrainingContract, User, users, apprentices, hostEmployers,
-  trainingContracts, placements, documents, complianceRecords, timesheets,
-  timesheetDetails, activityLogs, tasks, InsertComplianceRecord, ComplianceRecord,
-  InsertTimesheet, Timesheet, InsertTimesheetDetail, TimesheetDetail,
-  InsertActivityLog, ActivityLog, InsertTask, Task
-} from "@shared/schema";
+  Apprentice,
+  Document,
+  HostEmployer,
+  InsertApprentice,
+  InsertDocument,
+  InsertHostEmployer,
+  InsertPlacement,
+  InsertTrainingContract,
+  InsertUser,
+  Placement,
+  TrainingContract,
+  User,
+  users,
+  apprentices,
+  hostEmployers,
+  trainingContracts,
+  placements,
+  documents,
+  complianceRecords,
+  timesheets,
+  timesheetDetails,
+  activityLogs,
+  tasks,
+  InsertComplianceRecord,
+  ComplianceRecord,
+  InsertTimesheet,
+  Timesheet,
+  InsertTimesheetDetail,
+  TimesheetDetail,
+  InsertActivityLog,
+  ActivityLog,
+  InsertTask,
+  Task,
+} from '@shared/schema';
 
 export interface IStorage {
   // Users
@@ -17,29 +43,38 @@ export interface IStorage {
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: number, user: Partial<InsertUser>): Promise<User | undefined>;
   deleteUser(id: number): Promise<boolean>;
-  
+
   // Apprentices
   getAllApprentices(): Promise<Apprentice[]>;
   getApprentice(id: number): Promise<Apprentice | undefined>;
   createApprentice(apprentice: InsertApprentice): Promise<Apprentice>;
-  updateApprentice(id: number, apprentice: Partial<InsertApprentice>): Promise<Apprentice | undefined>;
+  updateApprentice(
+    id: number,
+    apprentice: Partial<InsertApprentice>
+  ): Promise<Apprentice | undefined>;
   deleteApprentice(id: number): Promise<boolean>;
-  
+
   // Host Employers
   getAllHostEmployers(): Promise<HostEmployer[]>;
   getHostEmployer(id: number): Promise<HostEmployer | undefined>;
   createHostEmployer(hostEmployer: InsertHostEmployer): Promise<HostEmployer>;
-  updateHostEmployer(id: number, hostEmployer: Partial<InsertHostEmployer>): Promise<HostEmployer | undefined>;
+  updateHostEmployer(
+    id: number,
+    hostEmployer: Partial<InsertHostEmployer>
+  ): Promise<HostEmployer | undefined>;
   deleteHostEmployer(id: number): Promise<boolean>;
-  
+
   // Training Contracts
   getAllTrainingContracts(): Promise<TrainingContract[]>;
   getTrainingContract(id: number): Promise<TrainingContract | undefined>;
   getTrainingContractsByApprentice(apprenticeId: number): Promise<TrainingContract[]>;
   createTrainingContract(contract: InsertTrainingContract): Promise<TrainingContract>;
-  updateTrainingContract(id: number, contract: Partial<InsertTrainingContract>): Promise<TrainingContract | undefined>;
+  updateTrainingContract(
+    id: number,
+    contract: Partial<InsertTrainingContract>
+  ): Promise<TrainingContract | undefined>;
   deleteTrainingContract(id: number): Promise<boolean>;
-  
+
   // Placements
   getAllPlacements(): Promise<Placement[]>;
   getPlacement(id: number): Promise<Placement | undefined>;
@@ -48,7 +83,7 @@ export interface IStorage {
   createPlacement(placement: InsertPlacement): Promise<Placement>;
   updatePlacement(id: number, placement: Partial<InsertPlacement>): Promise<Placement | undefined>;
   deletePlacement(id: number): Promise<boolean>;
-  
+
   // Documents
   getAllDocuments(): Promise<Document[]>;
   getDocument(id: number): Promise<Document | undefined>;
@@ -56,15 +91,18 @@ export interface IStorage {
   createDocument(document: InsertDocument): Promise<Document>;
   updateDocument(id: number, document: Partial<InsertDocument>): Promise<Document | undefined>;
   deleteDocument(id: number): Promise<boolean>;
-  
+
   // Compliance Records
   getAllComplianceRecords(): Promise<ComplianceRecord[]>;
   getComplianceRecord(id: number): Promise<ComplianceRecord | undefined>;
   getComplianceRecordsByRelation(relatedTo: string, relatedId: number): Promise<ComplianceRecord[]>;
   createComplianceRecord(record: InsertComplianceRecord): Promise<ComplianceRecord>;
-  updateComplianceRecord(id: number, record: Partial<InsertComplianceRecord>): Promise<ComplianceRecord | undefined>;
+  updateComplianceRecord(
+    id: number,
+    record: Partial<InsertComplianceRecord>
+  ): Promise<ComplianceRecord | undefined>;
   deleteComplianceRecord(id: number): Promise<boolean>;
-  
+
   // Timesheets
   getAllTimesheets(): Promise<Timesheet[]>;
   getTimesheet(id: number): Promise<Timesheet | undefined>;
@@ -72,18 +110,21 @@ export interface IStorage {
   createTimesheet(timesheet: InsertTimesheet): Promise<Timesheet>;
   updateTimesheet(id: number, timesheet: Partial<InsertTimesheet>): Promise<Timesheet | undefined>;
   deleteTimesheet(id: number): Promise<boolean>;
-  
+
   // Timesheet Details
   getTimesheetDetails(timesheetId: number): Promise<TimesheetDetail[]>;
   createTimesheetDetail(detail: InsertTimesheetDetail): Promise<TimesheetDetail>;
-  updateTimesheetDetail(id: number, detail: Partial<InsertTimesheetDetail>): Promise<TimesheetDetail | undefined>;
+  updateTimesheetDetail(
+    id: number,
+    detail: Partial<InsertTimesheetDetail>
+  ): Promise<TimesheetDetail | undefined>;
   deleteTimesheetDetail(id: number): Promise<boolean>;
-  
+
   // Activity Logs
   getAllActivityLogs(): Promise<ActivityLog[]>;
   getRecentActivityLogs(limit: number): Promise<ActivityLog[]>;
   createActivityLog(log: InsertActivityLog): Promise<ActivityLog>;
-  
+
   // Tasks
   getAllTasks(): Promise<Task[]>;
   getTask(id: number): Promise<Task | undefined>;
@@ -107,18 +148,12 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const [user] = await db
-      .insert(users)
-      .values(insertUser)
-      .returning();
+    const [user] = await db.insert(users).values(insertUser).returning();
     return user;
   }
 
   async updateUser(id: number, userData: Partial<InsertUser>): Promise<User | undefined> {
-    const [updatedUser] = await db.update(users)
-      .set(userData)
-      .where(eq(users.id, id))
-      .returning();
+    const [updatedUser] = await db.update(users).set(userData).where(eq(users.id, id)).returning();
     return updatedUser || undefined;
   }
 
@@ -142,8 +177,12 @@ export class DatabaseStorage implements IStorage {
     return apprentice;
   }
 
-  async updateApprentice(id: number, apprenticeData: Partial<InsertApprentice>): Promise<Apprentice | undefined> {
-    const [updatedApprentice] = await db.update(apprentices)
+  async updateApprentice(
+    id: number,
+    apprenticeData: Partial<InsertApprentice>
+  ): Promise<Apprentice | undefined> {
+    const [updatedApprentice] = await db
+      .update(apprentices)
       .set(apprenticeData)
       .where(eq(apprentices.id, id))
       .returning();
@@ -170,8 +209,12 @@ export class DatabaseStorage implements IStorage {
     return hostEmployer;
   }
 
-  async updateHostEmployer(id: number, hostEmployerData: Partial<InsertHostEmployer>): Promise<HostEmployer | undefined> {
-    const [updatedHostEmployer] = await db.update(hostEmployers)
+  async updateHostEmployer(
+    id: number,
+    hostEmployerData: Partial<InsertHostEmployer>
+  ): Promise<HostEmployer | undefined> {
+    const [updatedHostEmployer] = await db
+      .update(hostEmployers)
       .set(hostEmployerData)
       .where(eq(hostEmployers.id, id))
       .returning();
@@ -189,12 +232,18 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getTrainingContract(id: number): Promise<TrainingContract | undefined> {
-    const [contract] = await db.select().from(trainingContracts).where(eq(trainingContracts.id, id));
+    const [contract] = await db
+      .select()
+      .from(trainingContracts)
+      .where(eq(trainingContracts.id, id));
     return contract || undefined;
   }
 
   async getTrainingContractsByApprentice(apprenticeId: number): Promise<TrainingContract[]> {
-    return await db.select().from(trainingContracts).where(eq(trainingContracts.apprenticeId, apprenticeId));
+    return await db
+      .select()
+      .from(trainingContracts)
+      .where(eq(trainingContracts.apprenticeId, apprenticeId));
   }
 
   async createTrainingContract(insertContract: InsertTrainingContract): Promise<TrainingContract> {
@@ -202,8 +251,12 @@ export class DatabaseStorage implements IStorage {
     return contract;
   }
 
-  async updateTrainingContract(id: number, contractData: Partial<InsertTrainingContract>): Promise<TrainingContract | undefined> {
-    const [updatedContract] = await db.update(trainingContracts)
+  async updateTrainingContract(
+    id: number,
+    contractData: Partial<InsertTrainingContract>
+  ): Promise<TrainingContract | undefined> {
+    const [updatedContract] = await db
+      .update(trainingContracts)
       .set(contractData)
       .where(eq(trainingContracts.id, id))
       .returning();
@@ -238,8 +291,12 @@ export class DatabaseStorage implements IStorage {
     return placement;
   }
 
-  async updatePlacement(id: number, placementData: Partial<InsertPlacement>): Promise<Placement | undefined> {
-    const [updatedPlacement] = await db.update(placements)
+  async updatePlacement(
+    id: number,
+    placementData: Partial<InsertPlacement>
+  ): Promise<Placement | undefined> {
+    const [updatedPlacement] = await db
+      .update(placements)
       .set(placementData)
       .where(eq(placements.id, id))
       .returning();
@@ -262,11 +319,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getDocumentsByRelation(relatedTo: string, relatedId: number): Promise<Document[]> {
-    return await db.select().from(documents)
-      .where(and(
-        eq(documents.relatedTo, relatedTo),
-        eq(documents.relatedId, relatedId)
-      ));
+    return await db
+      .select()
+      .from(documents)
+      .where(and(eq(documents.relatedTo, relatedTo), eq(documents.relatedId, relatedId)));
   }
 
   async createDocument(insertDocument: InsertDocument): Promise<Document> {
@@ -274,8 +330,12 @@ export class DatabaseStorage implements IStorage {
     return document;
   }
 
-  async updateDocument(id: number, documentData: Partial<InsertDocument>): Promise<Document | undefined> {
-    const [updatedDocument] = await db.update(documents)
+  async updateDocument(
+    id: number,
+    documentData: Partial<InsertDocument>
+  ): Promise<Document | undefined> {
+    const [updatedDocument] = await db
+      .update(documents)
       .set(documentData)
       .where(eq(documents.id, id))
       .returning();
@@ -297,12 +357,16 @@ export class DatabaseStorage implements IStorage {
     return record || undefined;
   }
 
-  async getComplianceRecordsByRelation(relatedTo: string, relatedId: number): Promise<ComplianceRecord[]> {
-    return await db.select().from(complianceRecords)
-      .where(and(
-        eq(complianceRecords.relatedTo, relatedTo),
-        eq(complianceRecords.relatedId, relatedId)
-      ));
+  async getComplianceRecordsByRelation(
+    relatedTo: string,
+    relatedId: number
+  ): Promise<ComplianceRecord[]> {
+    return await db
+      .select()
+      .from(complianceRecords)
+      .where(
+        and(eq(complianceRecords.relatedTo, relatedTo), eq(complianceRecords.relatedId, relatedId))
+      );
   }
 
   async createComplianceRecord(insertRecord: InsertComplianceRecord): Promise<ComplianceRecord> {
@@ -310,8 +374,12 @@ export class DatabaseStorage implements IStorage {
     return record;
   }
 
-  async updateComplianceRecord(id: number, recordData: Partial<InsertComplianceRecord>): Promise<ComplianceRecord | undefined> {
-    const [updatedRecord] = await db.update(complianceRecords)
+  async updateComplianceRecord(
+    id: number,
+    recordData: Partial<InsertComplianceRecord>
+  ): Promise<ComplianceRecord | undefined> {
+    const [updatedRecord] = await db
+      .update(complianceRecords)
       .set(recordData)
       .where(eq(complianceRecords.id, id))
       .returning();
@@ -342,8 +410,12 @@ export class DatabaseStorage implements IStorage {
     return timesheet;
   }
 
-  async updateTimesheet(id: number, timesheetData: Partial<InsertTimesheet>): Promise<Timesheet | undefined> {
-    const [updatedTimesheet] = await db.update(timesheets)
+  async updateTimesheet(
+    id: number,
+    timesheetData: Partial<InsertTimesheet>
+  ): Promise<Timesheet | undefined> {
+    const [updatedTimesheet] = await db
+      .update(timesheets)
       .set(timesheetData)
       .where(eq(timesheets.id, id))
       .returning();
@@ -357,7 +429,10 @@ export class DatabaseStorage implements IStorage {
 
   // Timesheet Details
   async getTimesheetDetails(timesheetId: number): Promise<TimesheetDetail[]> {
-    return await db.select().from(timesheetDetails).where(eq(timesheetDetails.timesheetId, timesheetId));
+    return await db
+      .select()
+      .from(timesheetDetails)
+      .where(eq(timesheetDetails.timesheetId, timesheetId));
   }
 
   async createTimesheetDetail(insertDetail: InsertTimesheetDetail): Promise<TimesheetDetail> {
@@ -365,8 +440,12 @@ export class DatabaseStorage implements IStorage {
     return detail;
   }
 
-  async updateTimesheetDetail(id: number, detailData: Partial<InsertTimesheetDetail>): Promise<TimesheetDetail | undefined> {
-    const [updatedDetail] = await db.update(timesheetDetails)
+  async updateTimesheetDetail(
+    id: number,
+    detailData: Partial<InsertTimesheetDetail>
+  ): Promise<TimesheetDetail | undefined> {
+    const [updatedDetail] = await db
+      .update(timesheetDetails)
       .set(detailData)
       .where(eq(timesheetDetails.id, id))
       .returning();
@@ -384,9 +463,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getRecentActivityLogs(limit: number): Promise<ActivityLog[]> {
-    return await db.select().from(activityLogs)
-      .orderBy(desc(activityLogs.timestamp))
-      .limit(limit);
+    return await db.select().from(activityLogs).orderBy(desc(activityLogs.timestamp)).limit(limit);
   }
 
   async createActivityLog(insertLog: InsertActivityLog): Promise<ActivityLog> {
@@ -414,10 +491,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateTask(id: number, taskData: Partial<InsertTask>): Promise<Task | undefined> {
-    const [updatedTask] = await db.update(tasks)
-      .set(taskData)
-      .where(eq(tasks.id, id))
-      .returning();
+    const [updatedTask] = await db.update(tasks).set(taskData).where(eq(tasks.id, id)).returning();
     return updatedTask || undefined;
   }
 
@@ -429,9 +503,10 @@ export class DatabaseStorage implements IStorage {
   async completeTask(id: number): Promise<Task | undefined> {
     const now = new Date();
     const formattedDate = now.toISOString().split('T')[0];
-    
-    const [task] = await db.update(tasks)
-      .set({ status: "completed", completedAt: formattedDate })
+
+    const [task] = await db
+      .update(tasks)
+      .set({ status: 'completed', completedAt: formattedDate })
       .where(eq(tasks.id, id))
       .returning();
     return task || undefined;

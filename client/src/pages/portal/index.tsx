@@ -1,9 +1,28 @@
 import { useState } from 'react';
 import { useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Shield, ChevronRight, Building, GraduationCap, ClipboardList, Clock, Briefcase, Users, Calendar, CheckCircle, FileSpreadsheet } from 'lucide-react';
+import {
+  Shield,
+  ChevronRight,
+  Building,
+  GraduationCap,
+  ClipboardList,
+  Clock,
+  Briefcase,
+  Users,
+  Calendar,
+  CheckCircle,
+  FileSpreadsheet,
+} from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/use-auth';
 
@@ -21,7 +40,7 @@ export default function PortalPage() {
     });
     setLocation(path);
   };
-  
+
   // If still loading user data, show loading state
   if (isLoading) {
     return (
@@ -31,7 +50,7 @@ export default function PortalPage() {
       </div>
     );
   }
-  
+
   // If no user is found, redirect to login
   if (!user) {
     setLocation('/auth/login');
@@ -52,7 +71,7 @@ export default function PortalPage() {
       weekday: 'long',
       year: 'numeric',
       month: 'long',
-      day: 'numeric'
+      day: 'numeric',
     }).format(date);
   };
 
@@ -87,7 +106,7 @@ export default function PortalPage() {
             {isHost && <TabsTrigger value="host">Host Employer</TabsTrigger>}
             {isFieldOfficer && <TabsTrigger value="fieldOfficer">Field Officer</TabsTrigger>}
           </TabsList>
-          
+
           <TabsContent value="dashboard">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {/* Quick Actions Card */}
@@ -100,58 +119,98 @@ export default function PortalPage() {
                   <div className="space-y-2">
                     {isApprentice && (
                       <>
-                        <Button className="w-full justify-start" variant="outline" onClick={() => navigateTo('/apprentices/timesheets/submit')}>
+                        <Button
+                          className="w-full justify-start"
+                          variant="outline"
+                          onClick={() => navigateTo('/apprentices/timesheets/submit')}
+                        >
                           <Clock className="mr-2 h-4 w-4" /> Submit Timesheet
                         </Button>
-                        <Button className="w-full justify-start" variant="outline" onClick={() => navigateTo('/apprentices/qualifications')}>
+                        <Button
+                          className="w-full justify-start"
+                          variant="outline"
+                          onClick={() => navigateTo('/apprentices/qualifications')}
+                        >
                           <GraduationCap className="mr-2 h-4 w-4" /> View Training Progress
                         </Button>
                       </>
                     )}
-                    
+
                     {isHost && (
                       <>
-                        <Button className="w-full justify-start" variant="outline" onClick={() => navigateTo('/hosts/timesheets')}>
+                        <Button
+                          className="w-full justify-start"
+                          variant="outline"
+                          onClick={() => navigateTo('/hosts/timesheets')}
+                        >
                           <FileSpreadsheet className="mr-2 h-4 w-4" /> Approve Timesheets
                         </Button>
-                        <Button className="w-full justify-start" variant="outline" onClick={() => navigateTo('/hosts/placements')}>
+                        <Button
+                          className="w-full justify-start"
+                          variant="outline"
+                          onClick={() => navigateTo('/hosts/placements')}
+                        >
                           <Users className="mr-2 h-4 w-4" /> View Placements
                         </Button>
                       </>
                     )}
-                    
+
                     {isFieldOfficer && (
                       <>
-                        <Button className="w-full justify-start" variant="outline" onClick={() => navigateTo('/field-officers/visits/schedule')}>
+                        <Button
+                          className="w-full justify-start"
+                          variant="outline"
+                          onClick={() => navigateTo('/field-officers/visits/schedule')}
+                        >
                           <Calendar className="mr-2 h-4 w-4" /> Schedule Visit
                         </Button>
-                        <Button className="w-full justify-start" variant="outline" onClick={() => navigateTo('/field-officers/reviews')}>
+                        <Button
+                          className="w-full justify-start"
+                          variant="outline"
+                          onClick={() => navigateTo('/field-officers/reviews')}
+                        >
                           <ClipboardList className="mr-2 h-4 w-4" /> Progress Reviews
                         </Button>
                       </>
                     )}
-                    
+
                     {isAdmin && (
                       <>
-                        <Button className="w-full justify-start" variant="outline" onClick={() => navigateTo('/admin/apprentices')}>
+                        <Button
+                          className="w-full justify-start"
+                          variant="outline"
+                          onClick={() => navigateTo('/admin/apprentices')}
+                        >
                           <GraduationCap className="mr-2 h-4 w-4" /> Manage Apprentices
                         </Button>
-                        <Button className="w-full justify-start" variant="outline" onClick={() => navigateTo('/admin/hosts')}>
+                        <Button
+                          className="w-full justify-start"
+                          variant="outline"
+                          onClick={() => navigateTo('/admin/hosts')}
+                        >
                           <Building className="mr-2 h-4 w-4" /> Manage Host Employers
                         </Button>
-                        <Button className="w-full justify-start" variant="outline" onClick={() => navigateTo('/admin/compliance')}>
+                        <Button
+                          className="w-full justify-start"
+                          variant="outline"
+                          onClick={() => navigateTo('/admin/compliance')}
+                        >
                           <Shield className="mr-2 h-4 w-4" /> Compliance
                         </Button>
                       </>
                     )}
-                    
-                    <Button className="w-full justify-start" variant="outline" onClick={() => navigateTo('/profile')}>
+
+                    <Button
+                      className="w-full justify-start"
+                      variant="outline"
+                      onClick={() => navigateTo('/profile')}
+                    >
                       <Users className="mr-2 h-4 w-4" /> My Profile
                     </Button>
                   </div>
                 </CardContent>
               </Card>
-              
+
               {/* Recent Activity Card */}
               <Card className="col-span-1 md:col-span-2">
                 <CardHeader>
@@ -165,25 +224,31 @@ export default function PortalPage() {
                       <CheckCircle className="mt-1 h-5 w-5 text-green-500" />
                       <div className="flex-1 space-y-1">
                         <p className="text-sm font-medium">Progress Review Completed</p>
-                        <p className="text-xs text-gray-500">Your quarterly progress review has been completed</p>
+                        <p className="text-xs text-gray-500">
+                          Your quarterly progress review has been completed
+                        </p>
                         <p className="text-xs text-gray-400">15 minutes ago</p>
                       </div>
                     </div>
-                    
+
                     <div className="flex items-start space-x-4 rounded-md p-3 bg-gray-50 border border-gray-100">
                       <Clock className="mt-1 h-5 w-5 text-blue-500" />
                       <div className="flex-1 space-y-1">
                         <p className="text-sm font-medium">Timesheet Submitted</p>
-                        <p className="text-xs text-gray-500">Your timesheet for week ending 03/05/2025 has been submitted for approval</p>
+                        <p className="text-xs text-gray-500">
+                          Your timesheet for week ending 03/05/2025 has been submitted for approval
+                        </p>
                         <p className="text-xs text-gray-400">Yesterday</p>
                       </div>
                     </div>
-                    
+
                     <div className="flex items-start space-x-4 rounded-md p-3 bg-gray-50 border border-gray-100">
                       <Calendar className="mt-1 h-5 w-5 text-indigo-500" />
                       <div className="flex-1 space-y-1">
                         <p className="text-sm font-medium">Field Visit Scheduled</p>
-                        <p className="text-xs text-gray-500">Your field officer has scheduled a visit for 10/05/2025</p>
+                        <p className="text-xs text-gray-500">
+                          Your field officer has scheduled a visit for 10/05/2025
+                        </p>
                         <p className="text-xs text-gray-400">2 days ago</p>
                       </div>
                     </div>
@@ -201,44 +266,64 @@ export default function PortalPage() {
                     <Shield className="mr-2 h-5 w-5" />
                     Administration
                   </CardTitle>
-                  <CardDescription>
-                    Access the main administrative features
-                  </CardDescription>
+                  <CardDescription>Access the main administrative features</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2">
-                    <Button className="w-full justify-start" variant="outline" onClick={() => navigateTo('/admin')}>
+                    <Button
+                      className="w-full justify-start"
+                      variant="outline"
+                      onClick={() => navigateTo('/admin')}
+                    >
                       <Shield className="mr-2 h-4 w-4" /> Admin Dashboard
                     </Button>
-                    <Button className="w-full justify-start" variant="outline" onClick={() => navigateTo('/admin/users')}>
+                    <Button
+                      className="w-full justify-start"
+                      variant="outline"
+                      onClick={() => navigateTo('/admin/users')}
+                    >
                       <Users className="mr-2 h-4 w-4" /> User Management
                     </Button>
-                    <Button className="w-full justify-start" variant="outline" onClick={() => navigateTo('/admin/reports')}>
+                    <Button
+                      className="w-full justify-start"
+                      variant="outline"
+                      onClick={() => navigateTo('/admin/reports')}
+                    >
                       <FileSpreadsheet className="mr-2 h-4 w-4" /> Reports
                     </Button>
                   </div>
                 </CardContent>
               </Card>
-              
+
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center text-lg">
                     <GraduationCap className="mr-2 h-5 w-5" />
                     Apprentice Management
                   </CardTitle>
-                  <CardDescription>
-                    Manage apprentices and their training
-                  </CardDescription>
+                  <CardDescription>Manage apprentices and their training</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2">
-                    <Button className="w-full justify-start" variant="outline" onClick={() => navigateTo('/admin/apprentices')}>
+                    <Button
+                      className="w-full justify-start"
+                      variant="outline"
+                      onClick={() => navigateTo('/admin/apprentices')}
+                    >
                       <Users className="mr-2 h-4 w-4" /> View All Apprentices
                     </Button>
-                    <Button className="w-full justify-start" variant="outline" onClick={() => navigateTo('/admin/qualifications')}>
+                    <Button
+                      className="w-full justify-start"
+                      variant="outline"
+                      onClick={() => navigateTo('/admin/qualifications')}
+                    >
                       <GraduationCap className="mr-2 h-4 w-4" /> Qualifications
                     </Button>
-                    <Button className="w-full justify-start" variant="outline" onClick={() => navigateTo('/admin/progress-reviews')}>
+                    <Button
+                      className="w-full justify-start"
+                      variant="outline"
+                      onClick={() => navigateTo('/admin/progress-reviews')}
+                    >
                       <ClipboardList className="mr-2 h-4 w-4" /> Progress Reviews
                     </Button>
                   </div>
@@ -255,41 +340,57 @@ export default function PortalPage() {
                     <GraduationCap className="mr-2 h-5 w-5" />
                     Your Training
                   </CardTitle>
-                  <CardDescription>
-                    Access your training information
-                  </CardDescription>
+                  <CardDescription>Access your training information</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2">
-                    <Button className="w-full justify-start" variant="outline" onClick={() => navigateTo('/apprentices/qualification')}>
+                    <Button
+                      className="w-full justify-start"
+                      variant="outline"
+                      onClick={() => navigateTo('/apprentices/qualification')}
+                    >
                       <GraduationCap className="mr-2 h-4 w-4" /> My Qualification
                     </Button>
-                    <Button className="w-full justify-start" variant="outline" onClick={() => navigateTo('/apprentices/reviews')}>
+                    <Button
+                      className="w-full justify-start"
+                      variant="outline"
+                      onClick={() => navigateTo('/apprentices/reviews')}
+                    >
                       <ClipboardList className="mr-2 h-4 w-4" /> Progress Reviews
                     </Button>
-                    <Button className="w-full justify-start" variant="outline" onClick={() => navigateTo('/apprentices/resources')}>
+                    <Button
+                      className="w-full justify-start"
+                      variant="outline"
+                      onClick={() => navigateTo('/apprentices/resources')}
+                    >
                       <FileSpreadsheet className="mr-2 h-4 w-4" /> Learning Resources
                     </Button>
                   </div>
                 </CardContent>
               </Card>
-              
+
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center text-lg">
                     <Clock className="mr-2 h-5 w-5" />
                     Timesheets
                   </CardTitle>
-                  <CardDescription>
-                    Manage your work hours
-                  </CardDescription>
+                  <CardDescription>Manage your work hours</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2">
-                    <Button className="w-full justify-start" variant="outline" onClick={() => navigateTo('/apprentices/timesheets/submit')}>
+                    <Button
+                      className="w-full justify-start"
+                      variant="outline"
+                      onClick={() => navigateTo('/apprentices/timesheets/submit')}
+                    >
                       <Clock className="mr-2 h-4 w-4" /> Submit Timesheet
                     </Button>
-                    <Button className="w-full justify-start" variant="outline" onClick={() => navigateTo('/apprentices/timesheets')}>
+                    <Button
+                      className="w-full justify-start"
+                      variant="outline"
+                      onClick={() => navigateTo('/apprentices/timesheets')}
+                    >
                       <FileSpreadsheet className="mr-2 h-4 w-4" /> View Timesheets
                     </Button>
                   </div>
@@ -306,44 +407,64 @@ export default function PortalPage() {
                     <Users className="mr-2 h-5 w-5" />
                     Apprentice Placements
                   </CardTitle>
-                  <CardDescription>
-                    Manage your current apprentices
-                  </CardDescription>
+                  <CardDescription>Manage your current apprentices</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2">
-                    <Button className="w-full justify-start" variant="outline" onClick={() => navigateTo('/hosts/apprentices')}>
+                    <Button
+                      className="w-full justify-start"
+                      variant="outline"
+                      onClick={() => navigateTo('/hosts/apprentices')}
+                    >
                       <Users className="mr-2 h-4 w-4" /> Current Apprentices
                     </Button>
-                    <Button className="w-full justify-start" variant="outline" onClick={() => navigateTo('/hosts/placements')}>
+                    <Button
+                      className="w-full justify-start"
+                      variant="outline"
+                      onClick={() => navigateTo('/hosts/placements')}
+                    >
                       <Building className="mr-2 h-4 w-4" /> Placement Details
                     </Button>
-                    <Button className="w-full justify-start" variant="outline" onClick={() => navigateTo('/hosts/request')}>
+                    <Button
+                      className="w-full justify-start"
+                      variant="outline"
+                      onClick={() => navigateTo('/hosts/request')}
+                    >
                       <GraduationCap className="mr-2 h-4 w-4" /> Request New Apprentice
                     </Button>
                   </div>
                 </CardContent>
               </Card>
-              
+
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center text-lg">
                     <Clock className="mr-2 h-5 w-5" />
                     Timesheets & Compliance
                   </CardTitle>
-                  <CardDescription>
-                    Approve hours and access resources
-                  </CardDescription>
+                  <CardDescription>Approve hours and access resources</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2">
-                    <Button className="w-full justify-start" variant="outline" onClick={() => navigateTo('/hosts/timesheets')}>
+                    <Button
+                      className="w-full justify-start"
+                      variant="outline"
+                      onClick={() => navigateTo('/hosts/timesheets')}
+                    >
                       <Clock className="mr-2 h-4 w-4" /> Approve Timesheets
                     </Button>
-                    <Button className="w-full justify-start" variant="outline" onClick={() => navigateTo('/hosts/compliance')}>
+                    <Button
+                      className="w-full justify-start"
+                      variant="outline"
+                      onClick={() => navigateTo('/hosts/compliance')}
+                    >
                       <Shield className="mr-2 h-4 w-4" /> Compliance Resources
                     </Button>
-                    <Button className="w-full justify-start" variant="outline" onClick={() => navigateTo('/hosts/agreements')}>
+                    <Button
+                      className="w-full justify-start"
+                      variant="outline"
+                      onClick={() => navigateTo('/hosts/agreements')}
+                    >
                       <FileSpreadsheet className="mr-2 h-4 w-4" /> Training Agreements
                     </Button>
                   </div>
@@ -360,44 +481,64 @@ export default function PortalPage() {
                     <Users className="mr-2 h-5 w-5" />
                     Apprentice Support
                   </CardTitle>
-                  <CardDescription>
-                    Manage your assigned apprentices
-                  </CardDescription>
+                  <CardDescription>Manage your assigned apprentices</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2">
-                    <Button className="w-full justify-start" variant="outline" onClick={() => navigateTo('/field-officers/apprentices')}>
+                    <Button
+                      className="w-full justify-start"
+                      variant="outline"
+                      onClick={() => navigateTo('/field-officers/apprentices')}
+                    >
                       <Users className="mr-2 h-4 w-4" /> My Apprentices
                     </Button>
-                    <Button className="w-full justify-start" variant="outline" onClick={() => navigateTo('/field-officers/reviews')}>
+                    <Button
+                      className="w-full justify-start"
+                      variant="outline"
+                      onClick={() => navigateTo('/field-officers/reviews')}
+                    >
                       <ClipboardList className="mr-2 h-4 w-4" /> Progress Reviews
                     </Button>
-                    <Button className="w-full justify-start" variant="outline" onClick={() => navigateTo('/field-officers/support')}>
+                    <Button
+                      className="w-full justify-start"
+                      variant="outline"
+                      onClick={() => navigateTo('/field-officers/support')}
+                    >
                       <GraduationCap className="mr-2 h-4 w-4" /> Support Requests
                     </Button>
                   </div>
                 </CardContent>
               </Card>
-              
+
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center text-lg">
                     <Calendar className="mr-2 h-5 w-5" />
                     Site Visits & Activities
                   </CardTitle>
-                  <CardDescription>
-                    Manage your field activities
-                  </CardDescription>
+                  <CardDescription>Manage your field activities</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2">
-                    <Button className="w-full justify-start" variant="outline" onClick={() => navigateTo('/field-officers/visits/schedule')}>
+                    <Button
+                      className="w-full justify-start"
+                      variant="outline"
+                      onClick={() => navigateTo('/field-officers/visits/schedule')}
+                    >
                       <Calendar className="mr-2 h-4 w-4" /> Schedule Visit
                     </Button>
-                    <Button className="w-full justify-start" variant="outline" onClick={() => navigateTo('/field-officers/visits')}>
+                    <Button
+                      className="w-full justify-start"
+                      variant="outline"
+                      onClick={() => navigateTo('/field-officers/visits')}
+                    >
                       <Clock className="mr-2 h-4 w-4" /> Visit History
                     </Button>
-                    <Button className="w-full justify-start" variant="outline" onClick={() => navigateTo('/field-officers/hosts')}>
+                    <Button
+                      className="w-full justify-start"
+                      variant="outline"
+                      onClick={() => navigateTo('/field-officers/hosts')}
+                    >
                       <Building className="mr-2 h-4 w-4" /> Host Employers
                     </Button>
                   </div>

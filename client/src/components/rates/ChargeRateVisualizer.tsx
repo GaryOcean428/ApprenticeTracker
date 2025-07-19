@@ -1,6 +1,25 @@
 import React from 'react';
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend } from 'recharts';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip,
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Legend,
+} from 'recharts';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
@@ -85,7 +104,7 @@ export function ChargeRateVisualizer({
   ];
 
   // Prepare data for the bar chart (penalties)
-  const penaltyData = calculation.penaltyEstimates 
+  const penaltyData = calculation.penaltyEstimates
     ? Object.entries(calculation.penaltyEstimates).map(([name, value]) => ({
         name,
         value,
@@ -93,10 +112,20 @@ export function ChargeRateVisualizer({
     : [];
 
   // Colors for pie chart
-  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D', '#FFC658', '#8DD1E1'];
+  const COLORS = [
+    '#0088FE',
+    '#00C49F',
+    '#FFBB28',
+    '#FF8042',
+    '#8884D8',
+    '#82CA9D',
+    '#FFC658',
+    '#8DD1E1',
+  ];
 
   // Calculate profit margin as a percentage
-  const marginPercentage = (calculation.chargeRate - calculation.costPerHour) / calculation.costPerHour;
+  const marginPercentage =
+    (calculation.chargeRate - calculation.costPerHour) / calculation.costPerHour;
 
   // Helper to calculate percentage of total cost
   const getPercentageOfTotal = (value: number) => {
@@ -162,7 +191,10 @@ export function ChargeRateVisualizer({
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.setAttribute('href', url);
-    link.setAttribute('download', `charge-rate-calculation-${calculationId || new Date().getTime()}.csv`);
+    link.setAttribute(
+      'download',
+      `charge-rate-calculation-${calculationId || new Date().getTime()}.csv`
+    );
     link.click();
   };
 
@@ -181,14 +213,14 @@ export function ChargeRateVisualizer({
             </Badge>
           </div>
         )}
-        
+
         {calculationDate && (
           <div>
             <span className="text-sm text-muted-foreground">Date:</span>
             <span className="ml-2">{new Date(calculationDate).toLocaleDateString()}</span>
           </div>
         )}
-        
+
         {(apprenticeName || hostEmployerName) && (
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center py-2">
             {apprenticeName && (
@@ -205,7 +237,7 @@ export function ChargeRateVisualizer({
             )}
           </div>
         )}
-        
+
         {(awardName || classificationName) && (
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center py-2">
             {awardName && (
@@ -223,7 +255,7 @@ export function ChargeRateVisualizer({
           </div>
         )}
       </div>
-      
+
       {/* Rate summary card */}
       <Card>
         <CardHeader className="pb-2">
@@ -237,20 +269,24 @@ export function ChargeRateVisualizer({
               <span className="text-2xl font-bold">{formatCurrency(calculation.payRate)}</span>
               <span className="text-xs text-muted-foreground">per hour</span>
             </div>
-            
+
             <div className="flex flex-col items-center justify-center p-4 border rounded-md">
               <span className="text-sm text-muted-foreground mb-1">Cost Per Hour</span>
               <span className="text-2xl font-bold">{formatCurrency(calculation.costPerHour)}</span>
               <span className="text-xs text-muted-foreground">with all costs</span>
             </div>
-            
+
             <div className="flex flex-col items-center justify-center p-4 border rounded-md bg-primary/5">
               <span className="text-sm text-muted-foreground mb-1">Charge Rate</span>
-              <span className="text-3xl font-bold text-primary">{formatCurrency(calculation.chargeRate)}</span>
-              <span className="text-xs text-muted-foreground">including {formatPercent(marginPercentage)} margin</span>
+              <span className="text-3xl font-bold text-primary">
+                {formatCurrency(calculation.chargeRate)}
+              </span>
+              <span className="text-xs text-muted-foreground">
+                including {formatPercent(marginPercentage)} margin
+              </span>
             </div>
           </div>
-          
+
           <div className="mt-6">
             <h4 className="text-sm font-medium mb-2">Hours Breakdown</h4>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -270,7 +306,7 @@ export function ChargeRateVisualizer({
           </div>
         </CardContent>
       </Card>
-      
+
       {/* Cost breakdown section */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card>
@@ -296,13 +332,13 @@ export function ChargeRateVisualizer({
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip formatter={(value) => formatCurrency(value as number)} />
+                  <Tooltip formatter={value => formatCurrency(value as number)} />
                 </PieChart>
               </ResponsiveContainer>
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader>
             <CardTitle>Cost Details</CardTitle>
@@ -318,73 +354,89 @@ export function ChargeRateVisualizer({
                     <span className="font-medium w-16 text-right">%</span>
                   </div>
                 </div>
-                
+
                 <div className="flex justify-between items-center py-1">
                   <span>Base Wage</span>
                   <div className="flex space-x-4">
                     <span>{formatCurrency(calculation.baseWage)}</span>
-                    <span className="w-16 text-right">{formatPercent(getPercentageOfTotal(calculation.baseWage))}</span>
+                    <span className="w-16 text-right">
+                      {formatPercent(getPercentageOfTotal(calculation.baseWage))}
+                    </span>
                   </div>
                 </div>
-                
+
                 <div className="flex justify-between items-center py-1">
                   <span>Superannuation</span>
                   <div className="flex space-x-4">
                     <span>{formatCurrency(calculation.oncosts.superannuation)}</span>
-                    <span className="w-16 text-right">{formatPercent(getPercentageOfTotal(calculation.oncosts.superannuation))}</span>
+                    <span className="w-16 text-right">
+                      {formatPercent(getPercentageOfTotal(calculation.oncosts.superannuation))}
+                    </span>
                   </div>
                 </div>
-                
+
                 <div className="flex justify-between items-center py-1">
                   <span>Workers Compensation</span>
                   <div className="flex space-x-4">
                     <span>{formatCurrency(calculation.oncosts.workersComp)}</span>
-                    <span className="w-16 text-right">{formatPercent(getPercentageOfTotal(calculation.oncosts.workersComp))}</span>
+                    <span className="w-16 text-right">
+                      {formatPercent(getPercentageOfTotal(calculation.oncosts.workersComp))}
+                    </span>
                   </div>
                 </div>
-                
+
                 <div className="flex justify-between items-center py-1">
                   <span>Payroll Tax</span>
                   <div className="flex space-x-4">
                     <span>{formatCurrency(calculation.oncosts.payrollTax)}</span>
-                    <span className="w-16 text-right">{formatPercent(getPercentageOfTotal(calculation.oncosts.payrollTax))}</span>
+                    <span className="w-16 text-right">
+                      {formatPercent(getPercentageOfTotal(calculation.oncosts.payrollTax))}
+                    </span>
                   </div>
                 </div>
-                
+
                 <div className="flex justify-between items-center py-1">
                   <span>Leave Loading</span>
                   <div className="flex space-x-4">
                     <span>{formatCurrency(calculation.oncosts.leaveLoading)}</span>
-                    <span className="w-16 text-right">{formatPercent(getPercentageOfTotal(calculation.oncosts.leaveLoading))}</span>
+                    <span className="w-16 text-right">
+                      {formatPercent(getPercentageOfTotal(calculation.oncosts.leaveLoading))}
+                    </span>
                   </div>
                 </div>
-                
+
                 <div className="flex justify-between items-center py-1">
                   <span>Study Cost</span>
                   <div className="flex space-x-4">
                     <span>{formatCurrency(calculation.oncosts.studyCost)}</span>
-                    <span className="w-16 text-right">{formatPercent(getPercentageOfTotal(calculation.oncosts.studyCost))}</span>
+                    <span className="w-16 text-right">
+                      {formatPercent(getPercentageOfTotal(calculation.oncosts.studyCost))}
+                    </span>
                   </div>
                 </div>
-                
+
                 <div className="flex justify-between items-center py-1">
                   <span>PPE Cost</span>
                   <div className="flex space-x-4">
                     <span>{formatCurrency(calculation.oncosts.ppeCost)}</span>
-                    <span className="w-16 text-right">{formatPercent(getPercentageOfTotal(calculation.oncosts.ppeCost))}</span>
+                    <span className="w-16 text-right">
+                      {formatPercent(getPercentageOfTotal(calculation.oncosts.ppeCost))}
+                    </span>
                   </div>
                 </div>
-                
+
                 <div className="flex justify-between items-center py-1">
                   <span>Administration</span>
                   <div className="flex space-x-4">
                     <span>{formatCurrency(calculation.oncosts.adminCost)}</span>
-                    <span className="w-16 text-right">{formatPercent(getPercentageOfTotal(calculation.oncosts.adminCost))}</span>
+                    <span className="w-16 text-right">
+                      {formatPercent(getPercentageOfTotal(calculation.oncosts.adminCost))}
+                    </span>
                   </div>
                 </div>
-                
+
                 <Separator className="my-2" />
-                
+
                 <div className="flex justify-between items-center py-1 font-medium">
                   <span>Total Cost</span>
                   <div className="flex space-x-4">
@@ -397,7 +449,7 @@ export function ChargeRateVisualizer({
           </CardContent>
         </Card>
       </div>
-      
+
       {/* Penalty estimates section */}
       {calculation.penaltyEstimates && Object.keys(calculation.penaltyEstimates).length > 0 && (
         <Card>
@@ -418,17 +470,15 @@ export function ChargeRateVisualizer({
                   }}
                 >
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis 
-                    dataKey="name" 
-                    angle={-45} 
-                    textAnchor="end" 
-                    height={70} 
-                    tick={{ fontSize: 12 }} 
+                  <XAxis
+                    dataKey="name"
+                    angle={-45}
+                    textAnchor="end"
+                    height={70}
+                    tick={{ fontSize: 12 }}
                   />
-                  <YAxis
-                    tickFormatter={(value) => `$${value}`}
-                  />
-                  <Tooltip formatter={(value) => formatCurrency(value as number)} />
+                  <YAxis tickFormatter={value => `$${value}`} />
+                  <Tooltip formatter={value => formatCurrency(value as number)} />
                   <Legend />
                   <Bar dataKey="value" name="Additional Cost" fill="#8884d8" />
                 </BarChart>
@@ -437,7 +487,7 @@ export function ChargeRateVisualizer({
           </CardContent>
         </Card>
       )}
-      
+
       {/* Export options */}
       {showExportOptions && (
         <div className="flex justify-end space-x-2 mt-4 print:hidden">

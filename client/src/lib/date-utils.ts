@@ -1,4 +1,16 @@
-import { format, isValid, parse, formatDistanceToNow, parseISO, differenceInDays, addDays, subDays, isAfter, isBefore, isEqual } from 'date-fns';
+import {
+  format,
+  isValid,
+  parse,
+  formatDistanceToNow,
+  parseISO,
+  differenceInDays,
+  addDays,
+  subDays,
+  isAfter,
+  isBefore,
+  isEqual,
+} from 'date-fns';
 
 /**
  * Date formats for consistency throughout the application
@@ -29,7 +41,10 @@ export const DATE_FORMATS = {
 /**
  * Parse a date string with a given format
  */
-export function parseDate(dateString: string, formatString: string = DATE_FORMATS.isoDate): Date | null {
+export function parseDate(
+  dateString: string,
+  formatString: string = DATE_FORMATS.isoDate
+): Date | null {
   try {
     const parsedDate = parse(dateString, formatString, new Date());
     return isValid(parsedDate) ? parsedDate : null;
@@ -55,13 +70,16 @@ export function parseISODate(dateString: string): Date | null {
 /**
  * Format a date with the specified format
  */
-export function formatDate(date: Date | string | number | null | undefined, formatString: string = DATE_FORMATS.dayMonthYear): string {
+export function formatDate(
+  date: Date | string | number | null | undefined,
+  formatString: string = DATE_FORMATS.dayMonthYear
+): string {
   if (!date) return '';
-  
+
   try {
     const dateObj = typeof date === 'string' ? new Date(date) : date;
     if (!isValid(dateObj)) return '';
-    
+
     return format(dateObj, formatString);
   } catch (error) {
     console.error('Error formatting date:', error);
@@ -72,13 +90,16 @@ export function formatDate(date: Date | string | number | null | undefined, form
 /**
  * Format distance to the date in words (e.g. "2 days ago")
  */
-export function formatRelativeDate(date: Date | string | number | null | undefined, addSuffix: boolean = true): string {
+export function formatRelativeDate(
+  date: Date | string | number | null | undefined,
+  addSuffix: boolean = true
+): string {
   if (!date) return '';
-  
+
   try {
     const dateObj = typeof date === 'string' ? new Date(date) : date;
     if (!isValid(dateObj)) return '';
-    
+
     return formatDistanceToNow(dateObj, { addSuffix });
   } catch (error) {
     console.error('Error formatting relative date:', error);
@@ -95,28 +116,28 @@ export function formatDateRange(
   formatString: string = DATE_FORMATS.dayMonthYear
 ): string {
   if (!startDate) return '';
-  
+
   try {
     const start = typeof startDate === 'string' ? new Date(startDate) : startDate;
-    
+
     if (!endDate) {
       return formatDate(start, formatString);
     }
-    
+
     const end = typeof endDate === 'string' ? new Date(endDate) : endDate;
-    
+
     if (!isValid(start) || !isValid(end)) return '';
-    
+
     // Same day - return single date
     if (format(start, 'yyyy-MM-dd') === format(end, 'yyyy-MM-dd')) {
       return formatDate(start, formatString);
     }
-    
+
     // Same month and year - return range with single month/year
     if (format(start, 'MM yyyy') === format(end, 'MM yyyy')) {
       return `${format(start, 'd')} - ${format(end, formatString)}`;
     }
-    
+
     // Different months or years - return full range
     return `${formatDate(start, formatString)} - ${formatDate(end, formatString)}`;
   } catch (error) {
@@ -133,13 +154,13 @@ export function daysBetween(
   endDate: Date | string | null | undefined
 ): number {
   if (!startDate || !endDate) return 0;
-  
+
   try {
     const start = typeof startDate === 'string' ? new Date(startDate) : startDate;
     const end = typeof endDate === 'string' ? new Date(endDate) : endDate;
-    
+
     if (!isValid(start) || !isValid(end)) return 0;
-    
+
     return Math.abs(differenceInDays(end, start));
   } catch (error) {
     console.error('Error calculating days between dates:', error);
@@ -152,11 +173,11 @@ export function daysBetween(
  */
 export function isPastDate(date: Date | string | null | undefined): boolean {
   if (!date) return false;
-  
+
   try {
     const dateObj = typeof date === 'string' ? new Date(date) : date;
     if (!isValid(dateObj)) return false;
-    
+
     return isBefore(dateObj, new Date());
   } catch (error) {
     console.error('Error checking if date is in past:', error);
@@ -169,11 +190,11 @@ export function isPastDate(date: Date | string | null | undefined): boolean {
  */
 export function isFutureDate(date: Date | string | null | undefined): boolean {
   if (!date) return false;
-  
+
   try {
     const dateObj = typeof date === 'string' ? new Date(date) : date;
     if (!isValid(dateObj)) return false;
-    
+
     return isAfter(dateObj, new Date());
   } catch (error) {
     console.error('Error checking if date is in future:', error);
@@ -190,16 +211,16 @@ export function isDateBetween(
   endDate: Date | string | null | undefined
 ): boolean {
   if (!date || !startDate || !endDate) return false;
-  
+
   try {
     const dateObj = typeof date === 'string' ? new Date(date) : date;
     const start = typeof startDate === 'string' ? new Date(startDate) : startDate;
     const end = typeof endDate === 'string' ? new Date(endDate) : endDate;
-    
+
     if (!isValid(dateObj) || !isValid(start) || !isValid(end)) return false;
-    
+
     return (
-      (isAfter(dateObj, start) || isEqual(dateObj, start)) && 
+      (isAfter(dateObj, start) || isEqual(dateObj, start)) &&
       (isBefore(dateObj, end) || isEqual(dateObj, end))
     );
   } catch (error) {

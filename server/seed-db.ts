@@ -1,10 +1,22 @@
-import { storage } from "./storage";
-import { InsertUser, InsertApprentice, InsertHostEmployer, InsertTrainingContract, InsertPlacement, InsertDocument, InsertComplianceRecord, InsertTask, InsertActivityLog, apprentices, trainingContracts } from "@shared/schema";
-import { db } from "./db";
-import { eq } from "drizzle-orm";
-import { seedFairWorkData } from "./seed-fair-work";
-import { importHostEmployers } from "../scripts/import-host-employers";
-import { seedContacts, seedContactTags } from "./seed/contact-seed";
+import { storage } from './storage';
+import {
+  InsertUser,
+  InsertApprentice,
+  InsertHostEmployer,
+  InsertTrainingContract,
+  InsertPlacement,
+  InsertDocument,
+  InsertComplianceRecord,
+  InsertTask,
+  InsertActivityLog,
+  apprentices,
+  trainingContracts,
+} from '@shared/schema';
+import { db } from './db';
+import { eq } from 'drizzle-orm';
+import { seedFairWorkData } from './seed-fair-work';
+import { importHostEmployers } from '../scripts/import-host-employers';
+import { seedContacts, seedContactTags } from './seed/contact-seed';
 
 // Helper function to convert JavaScript Date to ISO string (date part only)
 function formatDate(date: Date): string {
@@ -16,48 +28,52 @@ function formatDate(date: Date): string {
  */
 export async function seedDatabase() {
   try {
-    console.log("Seeding database with sample data...");
-    
+    console.log('Seeding database with sample data...');
+
     // Create default roles if they don't exist
-    console.log("Creating default roles...");
+    console.log('Creating default roles...');
     let adminRoleId = 0;
     try {
-      const existingAdminRole = await storage.getRoleByName("admin");
+      const existingAdminRole = await storage.getRoleByName('admin');
       if (existingAdminRole) {
         adminRoleId = existingAdminRole.id;
-        console.log("Admin role already exists with ID:", adminRoleId);
+        console.log('Admin role already exists with ID:', adminRoleId);
       } else {
         const adminRole = await storage.createRole({
-          name: "admin",
-          description: "System administrator with full access",
-          isSystem: true
+          name: 'admin',
+          description: 'System administrator with full access',
+          isSystem: true,
         });
         adminRoleId = adminRole.id;
-        console.log("Created admin role with ID:", adminRoleId);
+        console.log('Created admin role with ID:', adminRoleId);
       }
 
       // Create developer role if it doesn't exist
-      const existingDevRole = await storage.getRoleByName("developer");
+      const existingDevRole = await storage.getRoleByName('developer');
       if (!existingDevRole) {
         const devRole = await storage.createRole({
-          name: "developer",
-          description: "Platform-level developer with access to all organizations",
-          isSystem: true
+          name: 'developer',
+          description: 'Platform-level developer with access to all organizations',
+          isSystem: true,
         });
-        console.log("Created developer role with ID:", devRole.id);
+        console.log('Created developer role with ID:', devRole.id);
       } else {
-        console.log("Developer role already exists with ID:", existingDevRole.id);
+        console.log('Developer role already exists with ID:', existingDevRole.id);
       }
-      
+
       // Other default roles
       const defaultRoles = [
-        { name: "organization_admin", description: "Organization administrator", isSystem: true },
-        { name: "field_officer", description: "Field officer for apprentice management", isSystem: true },
-        { name: "host_employer", description: "Host employer representative", isSystem: true },
-        { name: "apprentice", description: "Apprentice or trainee", isSystem: true },
-        { name: "rto_admin", description: "RTO/TAFE administrator", isSystem: true }
+        { name: 'organization_admin', description: 'Organization administrator', isSystem: true },
+        {
+          name: 'field_officer',
+          description: 'Field officer for apprentice management',
+          isSystem: true,
+        },
+        { name: 'host_employer', description: 'Host employer representative', isSystem: true },
+        { name: 'apprentice', description: 'Apprentice or trainee', isSystem: true },
+        { name: 'rto_admin', description: 'RTO/TAFE administrator', isSystem: true },
       ];
-      
+
       for (const roleData of defaultRoles) {
         const existingRole = await storage.getRoleByName(roleData.name);
         if (!existingRole) {
@@ -68,271 +84,280 @@ export async function seedDatabase() {
         }
       }
     } catch (error) {
-      console.error("Error creating default roles:", error);
+      console.error('Error creating default roles:', error);
     }
-    
+
     // Check if admin user exists, otherwise create one
     let admin;
-    const existingAdminUser = await storage.getUserByUsername("admin");
-    
+    const existingAdminUser = await storage.getUserByUsername('admin');
+
     if (existingAdminUser) {
-      console.log("Admin user already exists with ID:", existingAdminUser.id);
+      console.log('Admin user already exists with ID:', existingAdminUser.id);
       admin = existingAdminUser;
     } else {
       const adminUser: InsertUser = {
-        username: "admin",
-        password: "admin123", // In a real app, this would be hashed
-        email: "admin@crm7.com",
-        firstName: "Admin",
-        lastName: "User",
-        role: "admin",
+        username: 'admin',
+        password: 'admin123', // In a real app, this would be hashed
+        email: 'admin@crm7.com',
+        firstName: 'Admin',
+        lastName: 'User',
+        role: 'admin',
         roleId: adminRoleId, // Use the admin role ID
-        profileImage: "https://images.unsplash.com/photo-1531427186611-ecfd6d936c79?ixlib=rb-1.2.1&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=200&fit=max&ixid=eyJhcHBfaWQiOjE3Nzg0fQ",
-        isActive: true
+        profileImage:
+          'https://images.unsplash.com/photo-1531427186611-ecfd6d936c79?ixlib=rb-1.2.1&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=200&fit=max&ixid=eyJhcHBfaWQiOjE3Nzg0fQ',
+        isActive: true,
       };
-      
+
       admin = await storage.createUser(adminUser);
-      console.log("Admin user created:", admin.id);
+      console.log('Admin user created:', admin.id);
     }
-    
+
     // Check if developer user exists, otherwise create one
-    const devRoleResult = await storage.getRoleByName("developer");
+    const devRoleResult = await storage.getRoleByName('developer');
     if (!devRoleResult) {
-      console.error("Developer role not found");
+      console.error('Developer role not found');
       return;
     }
     const devRoleId = devRoleResult.id;
-    
-    const existingDevUser = await storage.getUserByUsername("developer");
+
+    const existingDevUser = await storage.getUserByUsername('developer');
     if (existingDevUser) {
-      console.log("Developer user already exists with ID:", existingDevUser.id);
+      console.log('Developer user already exists with ID:', existingDevUser.id);
     } else {
       // Get a past date for expired subscription
       const pastDate = new Date();
       pastDate.setMonth(pastDate.getMonth() - 2); // 2 months ago
-      
+
       const developerUser: InsertUser = {
-        username: "developer",
-        password: "dev123", // In a real app, this would be hashed
-        email: "developer@crm7.com",
-        firstName: "Dev",
-        lastName: "User",
-        role: "developer",
+        username: 'developer',
+        password: 'dev123', // In a real app, this would be hashed
+        email: 'developer@crm7.com',
+        firstName: 'Dev',
+        lastName: 'User',
+        role: 'developer',
         roleId: devRoleId,
-        profileImage: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-1.2.1&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=200&fit=max",
+        profileImage:
+          'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-1.2.1&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=200&fit=max',
         isActive: true,
-        subscriptionStatus: "expired", // Note: expired status but still active due to role
-        subscriptionEndsAt: pastDate // 2 months ago - expired!
+        subscriptionStatus: 'expired', // Note: expired status but still active due to role
+        subscriptionEndsAt: pastDate, // 2 months ago - expired!
       };
-      
+
       const dev = await storage.createUser(developerUser);
-      console.log("Developer user created with ID:", dev.id);
+      console.log('Developer user created with ID:', dev.id);
     }
-    
+
     // Add sample apprentices
     const apprentices: InsertApprentice[] = [
       {
         userId: admin.id,
-        firstName: "John",
-        lastName: "Smith",
-        email: "john.smith@example.com",
-        phone: "123-456-7890",
-        dateOfBirth: "1995-05-15",
-        trade: "Electrical",
-        status: "active",
-        profileImage: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80",
+        firstName: 'John',
+        lastName: 'Smith',
+        email: 'john.smith@example.com',
+        phone: '123-456-7890',
+        dateOfBirth: '1995-05-15',
+        trade: 'Electrical',
+        status: 'active',
+        profileImage:
+          'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80',
         progress: 75,
-        startDate: formatDate(new Date("2023-01-15")),
-        endDate: formatDate(new Date("2026-01-15")),
-        notes: "Excellent progress in technical skills",
-        aqfLevel: "Certificate III",
+        startDate: formatDate(new Date('2023-01-15')),
+        endDate: formatDate(new Date('2026-01-15')),
+        notes: 'Excellent progress in technical skills',
+        aqfLevel: 'Certificate III',
         apprenticeshipYear: 2,
-        gtoEnrolled: true
+        gtoEnrolled: true,
       },
       {
         userId: null,
-        firstName: "Sarah",
-        lastName: "Johnson",
-        email: "sarah.j@example.com",
-        phone: "123-456-7891",
-        dateOfBirth: "1998-08-22",
-        trade: "Carpentry",
-        status: "active",
-        profileImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80",
+        firstName: 'Sarah',
+        lastName: 'Johnson',
+        email: 'sarah.j@example.com',
+        phone: '123-456-7891',
+        dateOfBirth: '1998-08-22',
+        trade: 'Carpentry',
+        status: 'active',
+        profileImage:
+          'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80',
         progress: 45,
-        startDate: formatDate(new Date("2023-03-10")),
-        endDate: formatDate(new Date("2026-03-10")),
-        notes: "Needs improvement in time management",
-        aqfLevel: "Certificate III",
+        startDate: formatDate(new Date('2023-03-10')),
+        endDate: formatDate(new Date('2026-03-10')),
+        notes: 'Needs improvement in time management',
+        aqfLevel: 'Certificate III',
         apprenticeshipYear: 1,
-        gtoEnrolled: true
+        gtoEnrolled: true,
       },
       {
         userId: null,
-        firstName: "Michael",
-        lastName: "Chen",
-        email: "m.chen@example.com",
-        phone: "123-456-7892",
-        dateOfBirth: "1997-11-30",
-        trade: "IT Support",
-        status: "active",
-        profileImage: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80",
+        firstName: 'Michael',
+        lastName: 'Chen',
+        email: 'm.chen@example.com',
+        phone: '123-456-7892',
+        dateOfBirth: '1997-11-30',
+        trade: 'IT Support',
+        status: 'active',
+        profileImage:
+          'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80',
         progress: 90,
-        startDate: formatDate(new Date("2022-09-05")),
-        endDate: formatDate(new Date("2025-09-05")),
-        notes: "Excellent technical skills",
-        aqfLevel: "Certificate IV",
+        startDate: formatDate(new Date('2022-09-05')),
+        endDate: formatDate(new Date('2025-09-05')),
+        notes: 'Excellent technical skills',
+        aqfLevel: 'Certificate IV',
         apprenticeshipYear: 3,
-        gtoEnrolled: true
+        gtoEnrolled: true,
       },
       {
         userId: null,
-        firstName: "David",
-        lastName: "Wilson",
-        email: "d.wilson@example.com",
-        phone: "123-456-7893",
-        dateOfBirth: "1996-04-12",
-        trade: "Plumbing",
-        status: "on_hold",
-        profileImage: "https://images.unsplash.com/photo-1552374196-c4e7ffc6e126?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80",
+        firstName: 'David',
+        lastName: 'Wilson',
+        email: 'd.wilson@example.com',
+        phone: '123-456-7893',
+        dateOfBirth: '1996-04-12',
+        trade: 'Plumbing',
+        status: 'on_hold',
+        profileImage:
+          'https://images.unsplash.com/photo-1552374196-c4e7ffc6e126?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80',
         progress: 30,
-        startDate: formatDate(new Date("2023-02-20")),
-        endDate: formatDate(new Date("2026-02-20")),
-        notes: "Currently on hold due to personal reasons",
-        aqfLevel: "Certificate III",
+        startDate: formatDate(new Date('2023-02-20')),
+        endDate: formatDate(new Date('2026-02-20')),
+        notes: 'Currently on hold due to personal reasons',
+        aqfLevel: 'Certificate III',
         apprenticeshipYear: 1,
-        gtoEnrolled: false
-      }
+        gtoEnrolled: false,
+      },
     ];
-    
+
     const createdApprentices = [];
     for (const apprentice of apprentices) {
       try {
         // Try to find existing apprentice by email using storage instead of direct db access
         // This is more consistent with the rest of the codebase
         const apprenticesByEmail = await storage.getApprenticeByEmail(apprentice.email);
-        
+
         if (apprenticesByEmail) {
-          console.log(`Apprentice with email ${apprentice.email} already exists with ID:`, apprenticesByEmail.id);
+          console.log(
+            `Apprentice with email ${apprentice.email} already exists with ID:`,
+            apprenticesByEmail.id
+          );
           createdApprentices.push(apprenticesByEmail);
         } else {
           const created = await storage.createApprentice(apprentice);
           createdApprentices.push(created);
-          console.log("Apprentice created:", created.id);
+          console.log('Apprentice created:', created.id);
         }
       } catch (error) {
-        console.error("Error creating apprentice:", error);
+        console.error('Error creating apprentice:', error);
         // Continue with the next apprentice even if this one fails
       }
     }
-    
+
     // Add sample host employers
     const hostEmployers: InsertHostEmployer[] = [
       {
-        name: "PowerTech Industries",
-        industry: "Electrical",
-        contactPerson: "James Wilson",
-        email: "j.wilson@powertech.com",
-        phone: "123-456-7894",
-        address: "123 Power Ave, Metropolis",
-        status: "active",
+        name: 'PowerTech Industries',
+        industry: 'Electrical',
+        contactPerson: 'James Wilson',
+        email: 'j.wilson@powertech.com',
+        phone: '123-456-7894',
+        address: '123 Power Ave, Metropolis',
+        status: 'active',
         safetyRating: 9,
-        complianceStatus: "compliant",
-        notes: "Long-standing partner with excellent safety record",
+        complianceStatus: 'compliant',
+        notes: 'Long-standing partner with excellent safety record',
       },
       {
-        name: "BuildWell Construction",
-        industry: "Construction",
-        contactPerson: "Emma Roberts",
-        email: "e.roberts@buildwell.com",
-        phone: "123-456-7895",
-        address: "456 Builder St, Constructown",
-        status: "active",
+        name: 'BuildWell Construction',
+        industry: 'Construction',
+        contactPerson: 'Emma Roberts',
+        email: 'e.roberts@buildwell.com',
+        phone: '123-456-7895',
+        address: '456 Builder St, Constructown',
+        status: 'active',
         safetyRating: 8,
-        complianceStatus: "compliant",
-        notes: "Multiple apprentice placements annually",
+        complianceStatus: 'compliant',
+        notes: 'Multiple apprentice placements annually',
       },
       {
-        name: "TechSolutions Inc.",
-        industry: "Information Technology",
-        contactPerson: "Alex Chen",
-        email: "a.chen@techsolutions.com",
-        phone: "123-456-7896",
-        address: "789 Tech Blvd, Silicon Valley",
-        status: "active",
+        name: 'TechSolutions Inc.',
+        industry: 'Information Technology',
+        contactPerson: 'Alex Chen',
+        email: 'a.chen@techsolutions.com',
+        phone: '123-456-7896',
+        address: '789 Tech Blvd, Silicon Valley',
+        status: 'active',
         safetyRating: 10,
-        complianceStatus: "compliant",
-        notes: "Excellent mentoring program for IT apprentices",
+        complianceStatus: 'compliant',
+        notes: 'Excellent mentoring program for IT apprentices',
       },
       {
-        name: "FlowMasters Ltd.",
-        industry: "Plumbing",
-        contactPerson: "Robert Johnson",
-        email: "r.johnson@flowmasters.com",
-        phone: "123-456-7897",
-        address: "101 Plumber Lane, Watertown",
-        status: "active",
+        name: 'FlowMasters Ltd.',
+        industry: 'Plumbing',
+        contactPerson: 'Robert Johnson',
+        email: 'r.johnson@flowmasters.com',
+        phone: '123-456-7897',
+        address: '101 Plumber Lane, Watertown',
+        status: 'active',
         safetyRating: 7,
-        complianceStatus: "pending",
-        notes: "Safety compliance review in progress",
-      }
+        complianceStatus: 'pending',
+        notes: 'Safety compliance review in progress',
+      },
     ];
-    
+
     const createdHostEmployers = [];
     for (const hostEmployer of hostEmployers) {
       const created = await storage.createHostEmployer(hostEmployer);
       createdHostEmployers.push(created);
-      console.log("Host employer created:", created.id);
+      console.log('Host employer created:', created.id);
     }
-    
+
     // Add sample training contracts
     const contracts: InsertTrainingContract[] = [
       {
         apprenticeId: createdApprentices[0].id,
-        contractNumber: "TC-2023-001",
-        startDate: formatDate(new Date("2023-01-15")),
-        endDate: formatDate(new Date("2026-01-15")),
-        status: "active",
-        documentUrl: "/documents/contracts/TC-2023-001.pdf",
+        contractNumber: 'TC-2023-001',
+        startDate: formatDate(new Date('2023-01-15')),
+        endDate: formatDate(new Date('2026-01-15')),
+        status: 'active',
+        documentUrl: '/documents/contracts/TC-2023-001.pdf',
         terms: {},
-        approvedBy: "HR Manager",
-        approvalDate: formatDate(new Date("2023-01-10")),
+        approvedBy: 'HR Manager',
+        approvalDate: formatDate(new Date('2023-01-10')),
       },
       {
         apprenticeId: createdApprentices[1].id,
-        contractNumber: "TC-2023-002",
-        startDate: formatDate(new Date("2023-03-10")),
-        endDate: formatDate(new Date("2026-03-10")),
-        status: "active",
-        documentUrl: "/documents/contracts/TC-2023-002.pdf",
+        contractNumber: 'TC-2023-002',
+        startDate: formatDate(new Date('2023-03-10')),
+        endDate: formatDate(new Date('2026-03-10')),
+        status: 'active',
+        documentUrl: '/documents/contracts/TC-2023-002.pdf',
         terms: {},
-        approvedBy: "HR Manager",
-        approvalDate: formatDate(new Date("2023-03-05")),
+        approvedBy: 'HR Manager',
+        approvalDate: formatDate(new Date('2023-03-05')),
       },
       {
         apprenticeId: createdApprentices[2].id,
-        contractNumber: "TC-2022-015",
-        startDate: formatDate(new Date("2022-09-05")),
-        endDate: formatDate(new Date("2025-09-05")),
-        status: "active",
-        documentUrl: "/documents/contracts/TC-2022-015.pdf",
+        contractNumber: 'TC-2022-015',
+        startDate: formatDate(new Date('2022-09-05')),
+        endDate: formatDate(new Date('2025-09-05')),
+        status: 'active',
+        documentUrl: '/documents/contracts/TC-2022-015.pdf',
         terms: {},
-        approvedBy: "HR Manager",
-        approvalDate: formatDate(new Date("2022-09-01")),
+        approvedBy: 'HR Manager',
+        approvalDate: formatDate(new Date('2022-09-01')),
       },
       {
         apprenticeId: createdApprentices[3].id,
-        contractNumber: "TC-2023-003",
-        startDate: formatDate(new Date("2023-02-20")),
-        endDate: formatDate(new Date("2026-02-20")),
-        status: "on_hold",
-        documentUrl: "/documents/contracts/TC-2023-003.pdf",
+        contractNumber: 'TC-2023-003',
+        startDate: formatDate(new Date('2023-02-20')),
+        endDate: formatDate(new Date('2026-02-20')),
+        status: 'on_hold',
+        documentUrl: '/documents/contracts/TC-2023-003.pdf',
         terms: {},
-        approvedBy: "HR Manager",
-        approvalDate: formatDate(new Date("2023-02-15")),
-      }
+        approvedBy: 'HR Manager',
+        approvalDate: formatDate(new Date('2023-02-15')),
+      },
     ];
-    
+
     const createdContracts = [];
     for (const contract of contracts) {
       try {
@@ -341,261 +366,266 @@ export async function seedDatabase() {
           .select()
           .from(trainingContracts)
           .where(eq(trainingContracts.contractNumber, contract.contractNumber));
-        
+
         if (existingContracts.length > 0) {
-          console.log(`Training contract with number ${contract.contractNumber} already exists with ID: ${existingContracts[0].id}`);
+          console.log(
+            `Training contract with number ${contract.contractNumber} already exists with ID: ${existingContracts[0].id}`
+          );
           createdContracts.push(existingContracts[0]);
         } else {
           const created = await storage.createTrainingContract(contract);
           createdContracts.push(created);
-          console.log("Training contract created:", created.id);
+          console.log('Training contract created:', created.id);
         }
       } catch (error) {
-        console.error(`Error creating training contract ${contract.contractNumber}:`, error.message);
+        console.error(
+          `Error creating training contract ${contract.contractNumber}:`,
+          error.message
+        );
       }
     }
-    
+
     // Add sample placements
     const placements: InsertPlacement[] = [
       {
         apprenticeId: createdApprentices[0].id,
         hostEmployerId: createdHostEmployers[0].id,
-        startDate: formatDate(new Date("2023-01-20")),
-        endDate: formatDate(new Date("2023-07-20")),
-        status: "active",
-        position: "Electrical Apprentice",
-        supervisor: "Thomas Edison",
-        supervisorContact: "t.edison@powertech.com",
-        notes: "Performing well in all areas",
+        startDate: formatDate(new Date('2023-01-20')),
+        endDate: formatDate(new Date('2023-07-20')),
+        status: 'active',
+        position: 'Electrical Apprentice',
+        supervisor: 'Thomas Edison',
+        supervisorContact: 't.edison@powertech.com',
+        notes: 'Performing well in all areas',
       },
       {
         apprenticeId: createdApprentices[1].id,
         hostEmployerId: createdHostEmployers[1].id,
-        startDate: formatDate(new Date("2023-03-15")),
-        endDate: formatDate(new Date("2023-09-15")),
-        status: "active",
-        position: "Carpentry Apprentice",
-        supervisor: "Bob Builder",
-        supervisorContact: "b.builder@buildwell.com",
-        notes: "Needs more practice with advanced techniques",
+        startDate: formatDate(new Date('2023-03-15')),
+        endDate: formatDate(new Date('2023-09-15')),
+        status: 'active',
+        position: 'Carpentry Apprentice',
+        supervisor: 'Bob Builder',
+        supervisorContact: 'b.builder@buildwell.com',
+        notes: 'Needs more practice with advanced techniques',
       },
       {
         apprenticeId: createdApprentices[2].id,
         hostEmployerId: createdHostEmployers[2].id,
-        startDate: formatDate(new Date("2022-09-10")),
-        endDate: formatDate(new Date("2023-03-10")),
-        status: "completed",
-        position: "IT Support Apprentice",
-        supervisor: "Ada Lovelace",
-        supervisorContact: "a.lovelace@techsolutions.com",
-        notes: "Excellent technical skills, completed ahead of schedule",
+        startDate: formatDate(new Date('2022-09-10')),
+        endDate: formatDate(new Date('2023-03-10')),
+        status: 'completed',
+        position: 'IT Support Apprentice',
+        supervisor: 'Ada Lovelace',
+        supervisorContact: 'a.lovelace@techsolutions.com',
+        notes: 'Excellent technical skills, completed ahead of schedule',
       },
       {
         apprenticeId: createdApprentices[2].id,
         hostEmployerId: createdHostEmployers[2].id,
-        startDate: formatDate(new Date("2023-04-01")),
-        endDate: formatDate(new Date("2023-10-01")),
-        status: "active",
-        position: "IT Support Apprentice - Advanced",
-        supervisor: "Ada Lovelace",
-        supervisorContact: "a.lovelace@techsolutions.com",
-        notes: "Second placement with increased responsibilities",
+        startDate: formatDate(new Date('2023-04-01')),
+        endDate: formatDate(new Date('2023-10-01')),
+        status: 'active',
+        position: 'IT Support Apprentice - Advanced',
+        supervisor: 'Ada Lovelace',
+        supervisorContact: 'a.lovelace@techsolutions.com',
+        notes: 'Second placement with increased responsibilities',
       },
       {
         apprenticeId: createdApprentices[3].id,
         hostEmployerId: createdHostEmployers[3].id,
-        startDate: formatDate(new Date("2023-02-25")),
-        endDate: formatDate(new Date("2023-08-25")),
-        status: "on_hold",
-        position: "Plumbing Apprentice",
-        supervisor: "Joe Plumber",
-        supervisorContact: "j.plumber@flowmasters.com",
-        notes: "Placement on hold due to apprentice personal circumstances",
-      }
+        startDate: formatDate(new Date('2023-02-25')),
+        endDate: formatDate(new Date('2023-08-25')),
+        status: 'on_hold',
+        position: 'Plumbing Apprentice',
+        supervisor: 'Joe Plumber',
+        supervisorContact: 'j.plumber@flowmasters.com',
+        notes: 'Placement on hold due to apprentice personal circumstances',
+      },
     ];
-    
+
     for (const placement of placements) {
       const created = await storage.createPlacement(placement);
-      console.log("Placement created:", created.id);
+      console.log('Placement created:', created.id);
     }
-    
+
     // Add sample documents
     const documents: InsertDocument[] = [
       {
-        title: "Safety Manual v2.3",
-        type: "safety",
-        url: "/documents/safety/manual_v2.3.pdf",
+        title: 'Safety Manual v2.3',
+        type: 'safety',
+        url: '/documents/safety/manual_v2.3.pdf',
         uploadedBy: admin.id,
-        relatedTo: "system",
+        relatedTo: 'system',
         relatedId: 0,
         expiryDate: null,
-        status: "active",
+        status: 'active',
       },
       {
-        title: "Monthly Progress Report",
-        type: "report",
-        url: "/documents/reports/progress_report_202305.xlsx",
+        title: 'Monthly Progress Report',
+        type: 'report',
+        url: '/documents/reports/progress_report_202305.xlsx',
         uploadedBy: admin.id,
-        relatedTo: "system",
+        relatedTo: 'system',
         relatedId: 0,
         expiryDate: null,
-        status: "active",
+        status: 'active',
       },
       {
-        title: "Contract Template",
-        type: "template",
-        url: "/documents/templates/contract_template.docx",
+        title: 'Contract Template',
+        type: 'template',
+        url: '/documents/templates/contract_template.docx',
         uploadedBy: admin.id,
-        relatedTo: "system",
+        relatedTo: 'system',
         relatedId: 0,
         expiryDate: null,
-        status: "active",
-      }
+        status: 'active',
+      },
     ];
-    
+
     for (const document of documents) {
       const created = await storage.createDocument(document);
-      console.log("Document created:", created.id);
+      console.log('Document created:', created.id);
     }
-    
+
     // Add sample compliance records
     const complianceRecords: InsertComplianceRecord[] = [
       {
-        type: "safety",
-        relatedTo: "host",
+        type: 'safety',
+        relatedTo: 'host',
         relatedId: createdHostEmployers[3].id,
-        status: "pending",
+        status: 'pending',
         dueDate: formatDate(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)), // 7 days from now
         completionDate: null,
-        notes: "Workplace safety assessment due",
+        notes: 'Workplace safety assessment due',
       },
       {
-        type: "document",
-        relatedTo: "apprentice",
+        type: 'document',
+        relatedTo: 'apprentice',
         relatedId: createdApprentices[1].id,
-        status: "non-compliant",
+        status: 'non-compliant',
         dueDate: formatDate(new Date(Date.now() - 3 * 24 * 60 * 60 * 1000)), // 3 days ago
         completionDate: null,
-        notes: "Updated certifications required",
+        notes: 'Updated certifications required',
       },
       {
-        type: "contract",
-        relatedTo: "apprentice",
+        type: 'contract',
+        relatedTo: 'apprentice',
         relatedId: createdApprentices[0].id,
-        status: "compliant",
+        status: 'compliant',
         dueDate: formatDate(new Date(Date.now() - 10 * 24 * 60 * 60 * 1000)), // 10 days ago
         completionDate: formatDate(new Date(Date.now() - 12 * 24 * 60 * 60 * 1000)), // 12 days ago
-        notes: "Annual contract review completed",
-      }
+        notes: 'Annual contract review completed',
+      },
     ];
-    
+
     for (const record of complianceRecords) {
       const created = await storage.createComplianceRecord(record);
-      console.log("Compliance record created:", created.id);
+      console.log('Compliance record created:', created.id);
     }
-    
+
     // Add sample tasks
     const tasks: InsertTask[] = [
       {
-        title: "Review new apprentice applications",
-        description: "Review and process the applications received this week",
+        title: 'Review new apprentice applications',
+        description: 'Review and process the applications received this week',
         assignedTo: admin.id,
         dueDate: formatDate(new Date(Date.now() + 2 * 24 * 60 * 60 * 1000)), // 2 days from now
-        priority: "high",
-        status: "pending",
+        priority: 'high',
+        status: 'pending',
         relatedTo: null,
         relatedId: null,
         createdBy: admin.id,
       },
       {
-        title: "Schedule safety training for hosts",
-        description: "Set up the quarterly safety training session for host employers",
+        title: 'Schedule safety training for hosts',
+        description: 'Set up the quarterly safety training session for host employers',
         assignedTo: admin.id,
         dueDate: formatDate(new Date(Date.now() + 10 * 24 * 60 * 60 * 1000)), // 10 days from now
-        priority: "medium",
-        status: "pending",
+        priority: 'medium',
+        status: 'pending',
         relatedTo: null,
         relatedId: null,
         createdBy: admin.id,
       },
       {
-        title: "Update compliance documentation",
-        description: "Ensure all compliance documents are up to date for the upcoming audit",
+        title: 'Update compliance documentation',
+        description: 'Ensure all compliance documents are up to date for the upcoming audit',
         assignedTo: admin.id,
         dueDate: formatDate(new Date(Date.now() + 5 * 24 * 60 * 60 * 1000)), // 5 days from now
-        priority: "urgent",
-        status: "in_progress",
+        priority: 'urgent',
+        status: 'in_progress',
         relatedTo: null,
         relatedId: null,
         createdBy: admin.id,
-      }
+      },
     ];
-    
+
     for (const task of tasks) {
       const created = await storage.createTask(task);
-      console.log("Task created:", created.id);
+      console.log('Task created:', created.id);
     }
-    
+
     // Add sample activity logs
     const activityLogs: InsertActivityLog[] = [
       {
         userId: admin.id,
-        action: "created",
-        relatedTo: "apprentice",
+        action: 'created',
+        relatedTo: 'apprentice',
         relatedId: createdApprentices[0].id,
-        details: { message: "Created new apprentice profile" },
+        details: { message: 'Created new apprentice profile' },
       },
       {
         userId: admin.id,
-        action: "updated",
-        relatedTo: "host",
+        action: 'updated',
+        relatedTo: 'host',
         relatedId: createdHostEmployers[2].id,
-        details: { message: "Updated host employer contact information" },
+        details: { message: 'Updated host employer contact information' },
       },
       {
         userId: admin.id,
-        action: "created",
-        relatedTo: "placement",
+        action: 'created',
+        relatedTo: 'placement',
         relatedId: 1, // First placement ID
-        details: { message: "Created new apprentice placement" },
-      }
+        details: { message: 'Created new apprentice placement' },
+      },
     ];
-    
+
     for (const log of activityLogs) {
       const created = await storage.createActivityLog(log);
-      console.log("Activity log created:", created.id);
+      console.log('Activity log created:', created.id);
     }
-    
+
     // Seed Fair Work data (awards, classifications, etc.)
     await seedFairWorkData();
-    
+
     // Import host employers from CSV file
     try {
       await importHostEmployers();
-      console.log("Host employers imported from CSV successfully!");
+      console.log('Host employers imported from CSV successfully!');
     } catch (error) {
-      console.error("Error importing host employers from CSV:", error);
+      console.error('Error importing host employers from CSV:', error);
       // Continue execution even if importing host employers fails
     }
-    
+
     // Seed contacts data
     try {
       // For now, just seed the contact tags as a first step
       await seedContactTags();
-      console.log("Contact Tags seeded successfully");
-      
+      console.log('Contact Tags seeded successfully');
+
       // Uncomment when ready to seed full contacts data
       // await seedContacts();
       // console.log("Contacts data seeded successfully");
     } catch (error) {
-      console.error("Error seeding contacts data:", error);
+      console.error('Error seeding contacts data:', error);
       // Continue execution even if contact seeding fails
     }
-    
-    console.log("Database seeding completed successfully!");
+
+    console.log('Database seeding completed successfully!');
     return true;
   } catch (error) {
-    console.error("Error seeding database:", error);
+    console.error('Error seeding database:', error);
     return false;
   }
 }

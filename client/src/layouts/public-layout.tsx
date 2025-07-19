@@ -1,7 +1,7 @@
-import { Link } from "wouter";
-import { Button } from "@/components/ui/button";
-import { ReactNode } from "react";
-import logoPath from "@assets/500x160 Black Logo (1).png";
+import { Link } from 'wouter';
+import { Button } from '@/components/ui/button';
+import { ReactNode } from 'react';
+import logoPath from '@assets/500x160 Black Logo (1).png';
 
 interface PublicLayoutProps {
   children: ReactNode;
@@ -51,7 +51,12 @@ export default function PublicLayout({ children }: PublicLayoutProps) {
           </div>
           <div className="flex items-center gap-4">
             <Link href="/auth/login">
-              <Button variant="outline" className="border-braden-sky text-braden-navy border-2 bg-white hover:bg-gray-50">Log In</Button>
+              <Button
+                variant="outline"
+                className="border-braden-sky text-braden-navy border-2 bg-white hover:bg-gray-50"
+              >
+                Log In
+              </Button>
             </Link>
             <Link href="/auth/login">
               <Button className="bg-braden-sky hover:bg-blue-600 text-white">Portal Access</Button>
@@ -67,8 +72,10 @@ export default function PublicLayout({ children }: PublicLayoutProps) {
               <h3 className="text-lg font-medium text-braden-gold">Braden Group</h3>
               <p className="max-w-xs text-sm text-gray-300">
                 <span className="font-medium italic">People. Employment. Progress.</span>
-                <br /><br />
-                Connecting apprentices and employers for successful careers and business growth in Western Australia.
+                <br />
+                <br />
+                Connecting apprentices and employers for successful careers and business growth in
+                Western Australia.
               </p>
               <div className="flex space-x-4">
                 <a href="#" className="text-gray-300 hover:text-braden-sky">
@@ -225,12 +232,8 @@ export default function PublicLayout({ children }: PublicLayoutProps) {
                     <br />
                     Perth, WA 6000
                   </li>
-                  <li className="text-gray-300">
-                    info@bradengroup.com.au
-                  </li>
-                  <li className="text-gray-300">
-                    (08) 9123 4567
-                  </li>
+                  <li className="text-gray-300">info@bradengroup.com.au</li>
+                  <li className="text-gray-300">(08) 9123 4567</li>
                 </ul>
               </div>
             </div>

@@ -15,7 +15,7 @@ import {
   Target,
   Mail,
   Share2,
-  DollarSign
+  DollarSign,
 } from 'lucide-react';
 import { BudgetFormDialog } from '@/components/financial/budget-form-dialog';
 
@@ -25,7 +25,7 @@ import {
   CardDescription,
   CardFooter,
   CardHeader,
-  CardTitle
+  CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -110,10 +110,10 @@ const DUMMY_BUDGETS: Budget[] = [
             id: 'subcat-salaries',
             name: 'Salaries',
             planned: 230000,
-            actual: 175200.50,
-            variance: 54799.50,
+            actual: 175200.5,
+            variance: 54799.5,
             percentUsed: 76.2,
-            status: 'under'
+            status: 'under',
           },
           {
             id: 'subcat-benefits',
@@ -122,16 +122,16 @@ const DUMMY_BUDGETS: Budget[] = [
             actual: 35250.25,
             variance: 14749.75,
             percentUsed: 70.5,
-            status: 'under'
-          }
-        ]
+            status: 'under',
+          },
+        ],
       },
       {
         id: 'cat-operations',
         name: 'Operations',
         planned: 85000,
-        actual: 67890.20,
-        variance: 17109.80,
+        actual: 67890.2,
+        variance: 17109.8,
         percentUsed: 79.9,
         status: 'under',
         subCategories: [
@@ -142,7 +142,7 @@ const DUMMY_BUDGETS: Budget[] = [
             actual: 28950.75,
             variance: 6049.25,
             percentUsed: 82.7,
-            status: 'under'
+            status: 'under',
           },
           {
             id: 'subcat-equipment',
@@ -151,29 +151,29 @@ const DUMMY_BUDGETS: Budget[] = [
             actual: 38939.45,
             variance: 11060.55,
             percentUsed: 77.9,
-            status: 'under'
-          }
-        ]
+            status: 'under',
+          },
+        ],
       },
       {
         id: 'cat-training',
         name: 'Training & Development',
         planned: 45000,
-        actual: 38750.50,
-        variance: 6249.50,
+        actual: 38750.5,
+        variance: 6249.5,
         percentUsed: 86.1,
-        status: 'on-track'
+        status: 'on-track',
       },
       {
         id: 'cat-marketing',
         name: 'Marketing & Advertising',
         planned: 40000,
-        actual: 8689.00,
-        variance: 31311.00,
+        actual: 8689.0,
+        variance: 31311.0,
         percentUsed: 21.7,
-        status: 'under'
-      }
-    ]
+        status: 'under',
+      },
+    ],
   },
   {
     id: 'budget-2025-q1',
@@ -183,9 +183,9 @@ const DUMMY_BUDGETS: Budget[] = [
     endDate: '2025-03-31',
     status: 'completed',
     totalPlanned: 425000,
-    totalActual: 438950.30,
-    totalVariance: -13950.30,
-    categories: []
+    totalActual: 438950.3,
+    totalVariance: -13950.3,
+    categories: [],
   },
   {
     id: 'budget-2025-capital',
@@ -197,7 +197,7 @@ const DUMMY_BUDGETS: Budget[] = [
     totalPlanned: 250000,
     totalActual: 85230.75,
     totalVariance: 164769.25,
-    categories: []
+    categories: [],
   },
   {
     id: 'budget-2025-q3-draft',
@@ -209,8 +209,8 @@ const DUMMY_BUDGETS: Budget[] = [
     totalPlanned: 470000,
     totalActual: 0,
     totalVariance: 470000,
-    categories: []
-  }
+    categories: [],
+  },
 ];
 
 // Budget status badge component
@@ -228,15 +228,21 @@ const BudgetStatusBadge = ({ status }: { status: Budget['status'] }) => {
 };
 
 // Category status component
-const CategoryStatus = ({ status, percentUsed }: { status: BudgetCategory['status'], percentUsed: number }) => {
+const CategoryStatus = ({
+  status,
+  percentUsed,
+}: {
+  status: BudgetCategory['status'];
+  percentUsed: number;
+}) => {
   let color = 'bg-success';
-  
+
   if (status === 'over') {
     color = 'bg-destructive';
   } else if (status === 'on-track') {
     color = 'bg-warning';
   }
-  
+
   return (
     <div className="space-y-1">
       <div className="flex justify-between text-xs">
@@ -256,7 +262,7 @@ export default function BudgetPlanningPage() {
   const { toast } = useToast();
   const [selectedBudgetId, setSelectedBudgetId] = useState('budget-2025-q2');
   const [budgetFormOpen, setBudgetFormOpen] = useState(false);
-  
+
   // This would be replaced with a real API query in production
   const { data: budgets, isLoading } = useQuery({
     queryKey: ['budgets'],
@@ -271,22 +277,22 @@ export default function BudgetPlanningPage() {
 
   const handleExportBudget = (id: string) => {
     toast({
-      title: "Export Started",
+      title: 'Export Started',
       description: `Budget ${id} is being exported. It will be ready shortly.`,
     });
   };
 
   const handleCopyBudget = (id: string) => {
     toast({
-      title: "Budget Copied",
+      title: 'Budget Copied',
       description: `A copy of budget ${id} has been created as a draft.`,
     });
   };
 
   const handleShareBudget = (id: string) => {
     toast({
-      title: "Share Budget",
-      description: "Please select users or departments to share this budget with.",
+      title: 'Share Budget',
+      description: 'Please select users or departments to share this budget with.',
     });
   };
 
@@ -301,7 +307,7 @@ export default function BudgetPlanningPage() {
   return (
     <div className="container mx-auto p-6">
       <BudgetFormDialog open={budgetFormOpen} onOpenChange={setBudgetFormOpen} />
-      
+
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Budget Planning</h1>
@@ -331,7 +337,7 @@ export default function BudgetPlanningPage() {
             <p className="text-xs text-muted-foreground">Q2 2025 Operating Budget</p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-lg font-medium">Spent to Date</CardTitle>
@@ -345,7 +351,7 @@ export default function BudgetPlanningPage() {
             <Progress value={72} className="mt-2" />
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-lg font-medium">Remaining Budget</CardTitle>
@@ -362,14 +368,12 @@ export default function BudgetPlanningPage() {
           <Card>
             <CardHeader>
               <CardTitle>Budget List</CardTitle>
-              <CardDescription>
-                Select a budget to view details
-              </CardDescription>
+              <CardDescription>Select a budget to view details</CardDescription>
             </CardHeader>
             <CardContent>
               {isLoading ? (
                 <div className="space-y-4">
-                  {[1, 2, 3, 4].map((i) => (
+                  {[1, 2, 3, 4].map(i => (
                     <div key={i} className="space-y-2">
                       <Skeleton className="h-4 w-full" />
                       <Skeleton className="h-4 w-3/4" />
@@ -378,7 +382,7 @@ export default function BudgetPlanningPage() {
                 </div>
               ) : (
                 <div className="space-y-2">
-                  {budgets?.map((budget) => (
+                  {budgets?.map(budget => (
                     <div
                       key={budget.id}
                       className={`p-3 rounded-md cursor-pointer hover:bg-muted transition-colors ${
@@ -390,20 +394,14 @@ export default function BudgetPlanningPage() {
                       <div className="text-sm text-muted-foreground">
                         {budget.period} • <BudgetStatusBadge status={budget.status} />
                       </div>
-                      <div className="mt-2 text-sm">
-                        {formatCurrency(budget.totalPlanned)}
-                      </div>
+                      <div className="mt-2 text-sm">{formatCurrency(budget.totalPlanned)}</div>
                     </div>
                   ))}
                 </div>
               )}
             </CardContent>
             <CardFooter>
-              <Button 
-                variant="outline" 
-                className="w-full"
-                onClick={() => setBudgetFormOpen(true)}
-              >
+              <Button variant="outline" className="w-full" onClick={() => setBudgetFormOpen(true)}>
                 <PlusCircle className="mr-2 h-4 w-4" />
                 New Budget
               </Button>
@@ -418,10 +416,12 @@ export default function BudgetPlanningPage() {
                 <div>
                   <CardTitle className="text-2xl">{selectedBudget?.name}</CardTitle>
                   <CardDescription>
-                    {selectedBudget?.period} • {new Date(selectedBudget?.startDate as string).toLocaleDateString()} to {new Date(selectedBudget?.endDate as string).toLocaleDateString()}
+                    {selectedBudget?.period} •{' '}
+                    {new Date(selectedBudget?.startDate as string).toLocaleDateString()} to{' '}
+                    {new Date(selectedBudget?.endDate as string).toLocaleDateString()}
                   </CardDescription>
                 </div>
-                
+
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="outline">
@@ -446,9 +446,7 @@ export default function BudgetPlanningPage() {
                       <span>Share Budget</span>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem className="text-destructive">
-                      Delete Budget
-                    </DropdownMenuItem>
+                    <DropdownMenuItem className="text-destructive">Delete Budget</DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
@@ -461,7 +459,7 @@ export default function BudgetPlanningPage() {
                   <TabsTrigger value="timeline">Timeline</TabsTrigger>
                   <TabsTrigger value="reports">Reports</TabsTrigger>
                 </TabsList>
-                
+
                 <TabsContent value="overview">
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                     <Card>
@@ -469,42 +467,50 @@ export default function BudgetPlanningPage() {
                         <CardTitle className="text-sm font-medium">Planned</CardTitle>
                       </CardHeader>
                       <CardContent>
-                        <div className="text-2xl font-bold">{formatCurrency(selectedBudget?.totalPlanned || 0)}</div>
+                        <div className="text-2xl font-bold">
+                          {formatCurrency(selectedBudget?.totalPlanned || 0)}
+                        </div>
                       </CardContent>
                     </Card>
-                    
+
                     <Card>
                       <CardHeader className="py-2">
                         <CardTitle className="text-sm font-medium">Actual</CardTitle>
                       </CardHeader>
                       <CardContent>
-                        <div className="text-2xl font-bold">{formatCurrency(selectedBudget?.totalActual || 0)}</div>
+                        <div className="text-2xl font-bold">
+                          {formatCurrency(selectedBudget?.totalActual || 0)}
+                        </div>
                       </CardContent>
                     </Card>
-                    
+
                     <Card>
                       <CardHeader className="py-2">
                         <CardTitle className="text-sm font-medium">Variance</CardTitle>
                       </CardHeader>
                       <CardContent>
-                        <div className={`text-2xl font-bold ${(selectedBudget?.totalVariance || 0) < 0 ? 'text-destructive' : 'text-success'}`}>
+                        <div
+                          className={`text-2xl font-bold ${(selectedBudget?.totalVariance || 0) < 0 ? 'text-destructive' : 'text-success'}`}
+                        >
                           {formatCurrency(selectedBudget?.totalVariance || 0)}
                         </div>
                       </CardContent>
                     </Card>
                   </div>
-                  
+
                   <div className="h-72 bg-muted flex items-center justify-center rounded-lg mb-6">
                     <div className="text-center">
                       <BarChart3 className="h-16 w-16 mb-2 mx-auto text-muted-foreground" />
                       <p className="text-muted-foreground">Budget Overview Chart</p>
-                      <p className="text-xs text-muted-foreground">Planned vs. Actual by Category</p>
+                      <p className="text-xs text-muted-foreground">
+                        Planned vs. Actual by Category
+                      </p>
                     </div>
                   </div>
-                  
+
                   <div className="space-y-4">
                     <h3 className="text-lg font-semibold">Categories</h3>
-                    
+
                     <Table>
                       <TableHeader>
                         <TableRow>
@@ -516,16 +522,23 @@ export default function BudgetPlanningPage() {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {selectedBudget?.categories.map((category) => (
+                        {selectedBudget?.categories.map(category => (
                           <TableRow key={category.id}>
                             <TableCell className="font-medium">{category.name}</TableCell>
                             <TableCell>{formatCurrency(category.planned)}</TableCell>
                             <TableCell>{formatCurrency(category.actual)}</TableCell>
-                            <TableCell className={category.variance < 0 ? 'text-destructive' : 'text-success'}>
+                            <TableCell
+                              className={
+                                category.variance < 0 ? 'text-destructive' : 'text-success'
+                              }
+                            >
                               {formatCurrency(category.variance)}
                             </TableCell>
                             <TableCell>
-                              <CategoryStatus status={category.status} percentUsed={category.percentUsed} />
+                              <CategoryStatus
+                                status={category.status}
+                                percentUsed={category.percentUsed}
+                              />
                             </TableCell>
                           </TableRow>
                         ))}
@@ -533,7 +546,7 @@ export default function BudgetPlanningPage() {
                     </Table>
                   </div>
                 </TabsContent>
-                
+
                 <TabsContent value="categories">
                   <div className="space-y-4">
                     <div className="flex justify-between items-center">
@@ -543,7 +556,7 @@ export default function BudgetPlanningPage() {
                         Add Category
                       </Button>
                     </div>
-                    
+
                     <Table>
                       <TableHeader>
                         <TableRow>
@@ -556,50 +569,68 @@ export default function BudgetPlanningPage() {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {selectedBudget?.categories.flatMap((category) => [
+                        {selectedBudget?.categories.flatMap(category => [
                           <TableRow key={`category-${category.id}`}>
                             <TableCell className="font-medium">{category.name}</TableCell>
                             <TableCell>{formatCurrency(category.planned)}</TableCell>
                             <TableCell>{formatCurrency(category.actual)}</TableCell>
-                            <TableCell className={category.variance < 0 ? 'text-destructive' : 'text-success'}>
+                            <TableCell
+                              className={
+                                category.variance < 0 ? 'text-destructive' : 'text-success'
+                              }
+                            >
                               {formatCurrency(category.variance)}
                             </TableCell>
                             <TableCell>
-                              <CategoryStatus status={category.status} percentUsed={category.percentUsed} />
+                              <CategoryStatus
+                                status={category.status}
+                                percentUsed={category.percentUsed}
+                              />
                             </TableCell>
                             <TableCell className="text-right">
-                              <Button variant="ghost" size="sm">View</Button>
+                              <Button variant="ghost" size="sm">
+                                View
+                              </Button>
                             </TableCell>
                           </TableRow>,
-                          ...(category.subCategories?.map((subCategory) => (
+                          ...(category.subCategories?.map(subCategory => (
                             <TableRow key={`subcategory-${subCategory.id}`} className="bg-muted/40">
                               <TableCell className="pl-8">
                                 <span className="text-muted-foreground">└</span> {subCategory.name}
                               </TableCell>
                               <TableCell>{formatCurrency(subCategory.planned)}</TableCell>
                               <TableCell>{formatCurrency(subCategory.actual)}</TableCell>
-                              <TableCell className={subCategory.variance < 0 ? 'text-destructive' : 'text-success'}>
+                              <TableCell
+                                className={
+                                  subCategory.variance < 0 ? 'text-destructive' : 'text-success'
+                                }
+                              >
                                 {formatCurrency(subCategory.variance)}
                               </TableCell>
                               <TableCell>
-                                <CategoryStatus status={subCategory.status} percentUsed={subCategory.percentUsed} />
+                                <CategoryStatus
+                                  status={subCategory.status}
+                                  percentUsed={subCategory.percentUsed}
+                                />
                               </TableCell>
                               <TableCell className="text-right">
-                                <Button variant="ghost" size="sm">View</Button>
+                                <Button variant="ghost" size="sm">
+                                  View
+                                </Button>
                               </TableCell>
                             </TableRow>
-                          )) || [])
+                          )) || []),
                         ])}
                       </TableBody>
                     </Table>
                   </div>
                 </TabsContent>
-                
+
                 <TabsContent value="timeline">
                   <div className="space-y-4">
                     <h3 className="text-lg font-semibold">Budget Timeline</h3>
                     <p className="text-muted-foreground">Track budget progress over time</p>
-                    
+
                     <div className="h-80 bg-muted flex items-center justify-center rounded-lg">
                       <div className="text-center">
                         <ArrowRightLeft className="h-16 w-16 mb-2 mx-auto text-muted-foreground" />
@@ -609,7 +640,7 @@ export default function BudgetPlanningPage() {
                     </div>
                   </div>
                 </TabsContent>
-                
+
                 <TabsContent value="reports">
                   <div className="space-y-4">
                     <div className="flex justify-between items-center">
@@ -619,7 +650,7 @@ export default function BudgetPlanningPage() {
                         Generate Report
                       </Button>
                     </div>
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <Card>
                         <CardHeader>
@@ -631,10 +662,12 @@ export default function BudgetPlanningPage() {
                           </p>
                         </CardContent>
                         <CardFooter>
-                          <Button variant="outline" size="sm">View Report</Button>
+                          <Button variant="outline" size="sm">
+                            View Report
+                          </Button>
                         </CardFooter>
                       </Card>
-                      
+
                       <Card>
                         <CardHeader>
                           <CardTitle className="text-base">Category Breakdown</CardTitle>
@@ -645,10 +678,12 @@ export default function BudgetPlanningPage() {
                           </p>
                         </CardContent>
                         <CardFooter>
-                          <Button variant="outline" size="sm">View Report</Button>
+                          <Button variant="outline" size="sm">
+                            View Report
+                          </Button>
                         </CardFooter>
                       </Card>
-                      
+
                       <Card>
                         <CardHeader>
                           <CardTitle className="text-base">Year-to-Date Analysis</CardTitle>
@@ -659,10 +694,12 @@ export default function BudgetPlanningPage() {
                           </p>
                         </CardContent>
                         <CardFooter>
-                          <Button variant="outline" size="sm">View Report</Button>
+                          <Button variant="outline" size="sm">
+                            View Report
+                          </Button>
                         </CardFooter>
                       </Card>
-                      
+
                       <Card>
                         <CardHeader>
                           <CardTitle className="text-base">Comparative Analysis</CardTitle>
@@ -673,7 +710,9 @@ export default function BudgetPlanningPage() {
                           </p>
                         </CardContent>
                         <CardFooter>
-                          <Button variant="outline" size="sm">View Report</Button>
+                          <Button variant="outline" size="sm">
+                            View Report
+                          </Button>
                         </CardFooter>
                       </Card>
                     </div>

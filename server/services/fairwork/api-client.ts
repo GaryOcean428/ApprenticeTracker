@@ -126,12 +126,12 @@ export class FairWorkApiClient {
 
   constructor(config: FairWorkApiConfig) {
     // Log configuration for debugging (don't log the actual API key)
-    logger.info('Creating Fair Work API client', { 
+    logger.info('Creating Fair Work API client', {
       baseUrl: config.baseUrl,
       hasApiKey: !!config.apiKey,
-      environment: config.environment || 'production'
+      environment: config.environment || 'production',
     });
-    
+
     this.client = axios.create({
       baseURL: config.baseUrl,
       timeout: config.timeout || 10000,
@@ -171,10 +171,10 @@ export class FairWorkApiClient {
     try {
       // Make request to FWC API awards endpoint
       const response = await this.request<any>('/awards');
-      
+
       // Extract awards from the response based on API structure
       const awards = response.results || [];
-      
+
       // Transform to our internal model
       return awards.map((a: any) => ({
         id: a.award_fixed_id?.toString() || '',
@@ -185,7 +185,7 @@ export class FairWorkApiClient {
         published_year: a.published_year || null,
         version_number: a.version_number || null,
         effective_date: a.award_operative_from || null,
-        description: a.description || null
+        description: a.description || null,
       }));
     } catch (error) {
       logger.error('Failed to fetch active awards', { error });
@@ -201,16 +201,16 @@ export class FairWorkApiClient {
     try {
       // Get the specific award by code or id
       const response = await this.request<any>(`/awards/${code}`);
-      
+
       // Extract awards data from the response
       const awards = response.results || [];
-      
+
       // Should only be one award, but handle it as an array just in case
       if (awards.length === 0) return null;
-      
+
       // Take the first award in the results
       const award = awards[0];
-      
+
       // Transform to our internal model
       return {
         id: award.award_fixed_id?.toString() || '',
@@ -221,7 +221,7 @@ export class FairWorkApiClient {
         published_year: award.published_year || null,
         version_number: award.version_number || null,
         effective_date: award.award_operative_from || null,
-        description: award.description || null
+        description: award.description || null,
       };
     } catch (error) {
       if ((error as ApiError).statusCode === 404) {
@@ -254,10 +254,10 @@ export class FairWorkApiClient {
     try {
       // Get classifications for this specific award
       const response = await this.request<any>(`/awards/${awardCode}/classifications`);
-      
+
       // Extract classifications from the response based on API structure
       const classifications = response.results || [];
-      
+
       // Transform to our internal model if needed
       return classifications.map((c: any) => ({
         id: c.classification_fixed_id?.toString() || '',
@@ -266,7 +266,7 @@ export class FairWorkApiClient {
         level: c.classification_level?.toString() || '',
         description: c.clause_description || '',
         fair_work_level_code: c.clause_fixed_id?.toString() || null,
-        parent_classification_name: c.parent_classification_name || null
+        parent_classification_name: c.parent_classification_name || null,
       }));
     } catch (error) {
       logger.error('Failed to fetch award classifications', { error, awardCode });
@@ -279,7 +279,9 @@ export class FairWorkApiClient {
    */
   async getClassificationHierarchy(awardCode: string): Promise<ClassificationHierarchy | null> {
     try {
-      return await this.request<ClassificationHierarchy>(`/awards/${awardCode}/classifications/hierarchy`);
+      return await this.request<ClassificationHierarchy>(
+        `/awards/${awardCode}/classifications/hierarchy`
+      );
     } catch (error) {
       logger.error('Failed to fetch classification hierarchy', { error, awardCode });
       return null;
@@ -338,33 +340,39 @@ export class FairWorkApiClient {
    * Get pay rates for a specific award
    * Endpoint: GET /api/v1/awards/{id_or_code}/pay-rates
    */
-  async getPayRates(awardCode: string, options: {
-    classificationLevel?: number;
-    classificationFixedId?: number;
-    employeeRateTypeCode?: string;
-    operativeFrom?: string;
-    operativeTo?: string;
-    apprenticeYear?: number;
-  } = {}): Promise<PayRate[]> {
+  async getPayRates(
+    awardCode: string,
+    options: {
+      classificationLevel?: number;
+      classificationFixedId?: number;
+      employeeRateTypeCode?: string;
+      operativeFrom?: string;
+      operativeTo?: string;
+      apprenticeYear?: number;
+    } = {}
+  ): Promise<PayRate[]> {
     try {
       // Build query parameters
       const params: Record<string, string> = {};
-      if (options.classificationLevel) params.classification_level = options.classificationLevel.toString();
-      if (options.classificationFixedId) params.classification_fixed_id = options.classificationFixedId.toString();
-      if (options.employeeRateTypeCode) params.employee_rate_type_code = options.employeeRateTypeCode;
+      if (options.classificationLevel)
+        params.classification_level = options.classificationLevel.toString();
+      if (options.classificationFixedId)
+        params.classification_fixed_id = options.classificationFixedId.toString();
+      if (options.employeeRateTypeCode)
+        params.employee_rate_type_code = options.employeeRateTypeCode;
       if (options.operativeFrom) params.operative_from = options.operativeFrom;
       if (options.operativeTo) params.operative_to = options.operativeTo;
       if (options.apprenticeYear) params.apprentice_year = options.apprenticeYear.toString();
-      
+
       // Make the request with query parameters
       const queryString = new URLSearchParams(params).toString();
       const url = `/awards/${awardCode}/pay-rates${queryString ? `?${queryString}` : ''}`;
-      
+
       const response = await this.request<any>(url);
-      
+
       // Extract pay rates from the response
       const rates = response.results || [];
-      
+
       // Transform to our internal model
       return rates.map((r: any) => ({
         id: r.calculated_pay_rate_id?.toString() || '',
@@ -376,14 +384,16 @@ export class FairWorkApiClient {
         apprenticeship_year: r.apprentice_year ? parseInt(r.apprentice_year) : undefined,
         rate_description: r.classification || '',
         base_classification: r.parent_classification_name || '',
-        base_percentage: r.percentage_of_standard_rate ? parseFloat(r.percentage_of_standard_rate) : undefined
+        base_percentage: r.percentage_of_standard_rate
+          ? parseFloat(r.percentage_of_standard_rate)
+          : undefined,
       }));
     } catch (error) {
       logger.error('Failed to fetch pay rates', { error, awardCode, options });
       return [];
     }
   }
-  
+
   /**
    * Get rate templates for an award
    */
@@ -460,7 +470,7 @@ export class FairWorkApiClient {
    * @param options Additional options for filtering
    */
   async getApprenticeRates(
-    awardCode: string, 
+    awardCode: string,
     apprenticeYear?: number,
     options: {
       isAdult?: boolean;
@@ -474,27 +484,29 @@ export class FairWorkApiClient {
       const payRateOptions: any = {
         employeeRateTypeCode: 'AP', // AP = Apprentice in Fair Work API
       };
-      
+
       // Add apprentice year if provided
       if (apprenticeYear) {
         payRateOptions.apprenticeYear = apprenticeYear;
       }
-      
+
       // Add operative date range if provided
       if (options.operativeFrom) payRateOptions.operativeFrom = options.operativeFrom;
       if (options.operativeTo) payRateOptions.operativeTo = options.operativeTo;
-      
+
       // Get apprentice rates from the API
       const rates = await this.getPayRates(awardCode, payRateOptions);
-      
+
       // If no rates are returned, try the fallback calculation
       if (rates.length === 0) {
-        logger.info('No apprentice rates found directly, trying fallback calculation', { 
-          awardCode, apprenticeYear, options 
+        logger.info('No apprentice rates found directly, trying fallback calculation', {
+          awardCode,
+          apprenticeYear,
+          options,
         });
         return await this.calculateApprenticeRatesByReference(awardCode, apprenticeYear, options);
       }
-      
+
       // Sort rates by most recent effective date
       return rates.sort((a, b) => {
         return new Date(b.effective_from).getTime() - new Date(a.effective_from).getTime();
@@ -505,7 +517,7 @@ export class FairWorkApiClient {
       return await this.calculateApprenticeRatesByReference(awardCode, apprenticeYear, options);
     }
   }
-  
+
   /**
    * Calculate apprentice rates based on reference classification percentages
    * This is a fallback when direct API calls for apprentice rates don't return results
@@ -523,121 +535,161 @@ export class FairWorkApiClient {
   ): Promise<PayRate[]> {
     try {
       const { isAdult = false, hasCompletedYear12 = false } = options;
-      
+
       // Get the classifications for this award to find the reference classification
       const classifications = await this.getAwardClassifications(awardCode);
-      
+
       // Different awards use different reference classifications for apprentice percentages
       let referenceClassLevel: string | undefined;
-      
+
       // Use award-specific logic to determine reference classification
-      if (awardCode === 'MA000025') { // Electrical Award
+      if (awardCode === 'MA000025') {
+        // Electrical Award
         // Clause 16.4(a)(ii) specifies Electrical worker grade 5 as reference
-        const referenceClass = classifications.find(c => 
+        const referenceClass = classifications.find(c =>
           c.name.toLowerCase().includes('electrical worker grade 5')
         );
         if (referenceClass) {
           referenceClassLevel = referenceClass.fair_work_level_code;
         }
-      } else if (awardCode === 'MA000036') { // Plumbing Award
+      } else if (awardCode === 'MA000036') {
+        // Plumbing Award
         // For plumbing, use Plumbing and Mechanical Services Tradesperson / Level 1
-        const referenceClass = classifications.find(c => 
-          c.name.toLowerCase().includes('plumbing and mechanical services tradesperson') ||
-          c.name.toLowerCase().includes('level 1')
+        const referenceClass = classifications.find(
+          c =>
+            c.name.toLowerCase().includes('plumbing and mechanical services tradesperson') ||
+            c.name.toLowerCase().includes('level 1')
         );
         if (referenceClass) {
           referenceClassLevel = referenceClass.fair_work_level_code;
         }
-      } else if (awardCode === 'MA000003') { // Building and Construction Award
+      } else if (awardCode === 'MA000003') {
+        // Building and Construction Award
         // Use Level 3 - CW/ECW 3 for Building and Construction
-        const referenceClass = classifications.find(c => 
-          c.name.toLowerCase().includes('cw/ecw 3') ||
-          c.name.toLowerCase().includes('level 3')
+        const referenceClass = classifications.find(
+          c => c.name.toLowerCase().includes('cw/ecw 3') || c.name.toLowerCase().includes('level 3')
         );
         if (referenceClass) {
           referenceClassLevel = referenceClass.fair_work_level_code;
         }
       }
-      
+
       if (!referenceClassLevel) {
         throw new Error(`Could not find reference classification for award ${awardCode}`);
       }
-      
+
       // Get the reference pay rate
-      const referenceRates = await this.getPayRates(awardCode, { 
+      const referenceRates = await this.getPayRates(awardCode, {
         employeeRateTypeCode: 'ST', // Standard rate
-        classificationLevel: parseInt(referenceClassLevel)
+        classificationLevel: parseInt(referenceClassLevel),
       });
-      
+
       if (!referenceRates.length) {
         throw new Error('Reference classification rates not found');
       }
-      
+
       // Sort by most recent effective date and take the first one
       const referenceRate = referenceRates.sort((a, b) => {
         return new Date(b.effective_from).getTime() - new Date(a.effective_from).getTime();
       })[0];
-      
+
       // Calculate percentage based on award rules
       let percentage = 0;
-      
+
       // If no specific apprenticeYear provided, we'll create rates for all years
       const yearsToCalculate = apprenticeYear ? [apprenticeYear] : [1, 2, 3, 4];
-      
+
       // Create an array to hold results for all years
       const calculatedRates: PayRate[] = [];
-      
+
       // Get percentages from award-specific rules
       for (const year of yearsToCalculate) {
-        if (awardCode === 'MA000025') { // Electrical Award MA000025
+        if (awardCode === 'MA000025') {
+          // Electrical Award MA000025
           // Based on clause 16.4(a)(ii) for junior apprentices and 16.4(b)(ii) for adult apprentices
           // Updated with 2024/2025 FY exact percentages based on provided rates
-          
+
           if (isAdult) {
             // Adult apprentice percentages from 16.4(b)(ii)
             // Updated based on the reference data provided
             switch (year) {
-              case 1: percentage = 0.80; break; // $23.91/hr 
-              case 2: percentage = 0.885; break; // $26.42/hr
-              case 3: percentage = 0.885; break; // $26.42/hr
-              case 4: percentage = 0.885; break; // $26.42/hr
-              default: percentage = 0.80; // Default to 80%
+              case 1:
+                percentage = 0.8;
+                break; // $23.91/hr
+              case 2:
+                percentage = 0.885;
+                break; // $26.42/hr
+              case 3:
+                percentage = 0.885;
+                break; // $26.42/hr
+              case 4:
+                percentage = 0.885;
+                break; // $26.42/hr
+              default:
+                percentage = 0.8; // Default to 80%
             }
           } else {
             // Junior apprentice percentages from 16.4(a)(ii)
             // Updated based on the reference data provided
             if (hasCompletedYear12) {
               switch (year) {
-                case 1: percentage = 0.55; break; // $16.62/hr (55% of base)
-                case 2: percentage = 0.65; break; // $19.53/hr (65% of base) 
-                case 3: percentage = 0.70; break; // $20.99/hr (70% of base)
-                case 4: percentage = 0.82; break; // $24.49/hr (82% of base)
-                default: percentage = 0.55; // Default
+                case 1:
+                  percentage = 0.55;
+                  break; // $16.62/hr (55% of base)
+                case 2:
+                  percentage = 0.65;
+                  break; // $19.53/hr (65% of base)
+                case 3:
+                  percentage = 0.7;
+                  break; // $20.99/hr (70% of base)
+                case 4:
+                  percentage = 0.82;
+                  break; // $24.49/hr (82% of base)
+                default:
+                  percentage = 0.55; // Default
               }
             } else {
               switch (year) {
-                case 1: percentage = 0.50; break; // $15.16/hr (50% of base)
-                case 2: percentage = 0.60; break; // $18.08/hr (60% of base)
-                case 3: percentage = 0.70; break; // $20.99/hr (70% of base)
-                case 4: percentage = 0.82; break; // $24.49/hr (82% of base)
-                default: percentage = 0.50; // Default
+                case 1:
+                  percentage = 0.5;
+                  break; // $15.16/hr (50% of base)
+                case 2:
+                  percentage = 0.6;
+                  break; // $18.08/hr (60% of base)
+                case 3:
+                  percentage = 0.7;
+                  break; // $20.99/hr (70% of base)
+                case 4:
+                  percentage = 0.82;
+                  break; // $24.49/hr (82% of base)
+                default:
+                  percentage = 0.5; // Default
               }
             }
           }
         } else {
           // Generic percentages for other awards (adapt as needed)
           switch (year) {
-            case 1: percentage = 0.50; break; // 50%
-            case 2: percentage = 0.60; break; // 60%
-            case 3: percentage = 0.70; break; // 70%
-            case 4: percentage = 0.90; break; // 90%
-            default: percentage = 0.50; // Default
+            case 1:
+              percentage = 0.5;
+              break; // 50%
+            case 2:
+              percentage = 0.6;
+              break; // 60%
+            case 3:
+              percentage = 0.7;
+              break; // 70%
+            case 4:
+              percentage = 0.9;
+              break; // 90%
+            default:
+              percentage = 0.5; // Default
           }
         }
-        
+
         // Calculate the hourly rate based on the percentage
         const hourlyRate = referenceRate.hourly_rate * percentage;
-        
+
         // Create a PayRate object for this year
         calculatedRates.push({
           id: `calculated-apprentice-${awardCode}-year${year}`,
@@ -649,10 +701,10 @@ export class FairWorkApiClient {
           apprenticeship_year: year,
           rate_description: `${year}${this.getOrdinalSuffix(year)} Year Apprentice`,
           base_classification: `Based on ${referenceRate.rate_description || 'Reference Classification'}`,
-          base_percentage: percentage * 100
+          base_percentage: percentage * 100,
         });
       }
-      
+
       return calculatedRates;
     } catch (error) {
       logger.error('Failed to calculate apprentice rates by reference', { error, awardCode });

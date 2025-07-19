@@ -1,101 +1,212 @@
-import { 
-  roles, permissions, rolePermissions, subscriptionPlans, users, 
-  apprentices, hostEmployers, trainingContracts, placements, 
-  documents, complianceRecords, timesheets, timesheetDetails, 
-  activityLogs, tasks, qualifications, hostEmployerPreferredQualifications,
-  awards, awardClassifications, payRates, penaltyRules, allowanceRules,
-  publicHolidays, chargeRateCalculations, quotes, quoteLineItems,
-  fairworkComplianceLogs, enterpriseAgreements, gtoOrganizations,
-  gtoComplianceStandards, complianceAssessments, apprenticeRecruitment,
-  hostEmployerAgreements, apprenticeInduction, complaints, appeals,
-  unitsOfCompetency, qualificationStructure, apprenticeUnitProgress,
-  apprenticeQualifications, enrichmentPrograms, enrichmentParticipants,
-  enrichmentWorkshops, workshopAttendees, progressReviewTemplates,
-  progressReviews, progressReviewParticipants, progressReviewActionItems,
+import {
+  roles,
+  permissions,
+  rolePermissions,
+  subscriptionPlans,
+  users,
+  apprentices,
+  hostEmployers,
+  trainingContracts,
+  placements,
+  documents,
+  complianceRecords,
+  timesheets,
+  timesheetDetails,
+  activityLogs,
+  tasks,
+  qualifications,
+  hostEmployerPreferredQualifications,
+  awards,
+  awardClassifications,
+  payRates,
+  penaltyRules,
+  allowanceRules,
+  publicHolidays,
+  chargeRateCalculations,
+  quotes,
+  quoteLineItems,
+  fairworkComplianceLogs,
+  enterpriseAgreements,
+  gtoOrganizations,
+  gtoComplianceStandards,
+  complianceAssessments,
+  apprenticeRecruitment,
+  hostEmployerAgreements,
+  apprenticeInduction,
+  complaints,
+  appeals,
+  unitsOfCompetency,
+  qualificationStructure,
+  apprenticeUnitProgress,
+  apprenticeQualifications,
+  enrichmentPrograms,
+  enrichmentParticipants,
+  enrichmentWorkshops,
+  workshopAttendees,
+  progressReviewTemplates,
+  progressReviews,
+  progressReviewParticipants,
+  progressReviewActionItems,
   progressReviewDocuments,
-  type Role, type InsertRole,
-  type Permission, type InsertPermission,
-  type RolePermission, type InsertRolePermission,
-  type User, type InsertUser,
-  type SubscriptionPlan, type InsertSubscriptionPlan,
-  type Apprentice, type InsertApprentice,
-  type HostEmployer, type InsertHostEmployer,
-  type TrainingContract, type InsertTrainingContract,
-  type Placement, type InsertPlacement,
-  type Document, type InsertDocument,
-  type ComplianceRecord, type InsertComplianceRecord,
-  type Timesheet, type InsertTimesheet,
-  type TimesheetDetail, type InsertTimesheetDetail,
-  type ActivityLog, type InsertActivityLog,
-  type Task, type InsertTask,
-  type Qualification, type InsertQualification,
-  type HostEmployerPreferredQualification, type InsertHostEmployerPreferredQualification,
-  type Award, type InsertAward,
-  type AwardClassification, type InsertAwardClassification,
-  type PayRate, type InsertPayRate,
-  type PenaltyRule, type InsertPenaltyRule,
-  type AllowanceRule, type InsertAllowanceRule,
-  type PublicHoliday, type InsertPublicHoliday,
-  type ChargeRateCalculation, type InsertChargeRateCalculation,
-  type Quote, type InsertQuote,
-  type QuoteLineItem, type InsertQuoteLineItem,
-  type FairworkComplianceLog, type InsertFairworkComplianceLog,
-  type EnterpriseAgreement, type InsertEnterpriseAgreement,
-  type GtoOrganization, type InsertGtoOrganization,
-  type GtoComplianceStandard, type InsertGtoComplianceStandard,
-  type ComplianceAssessment, type InsertComplianceAssessment,
-  type ApprenticeRecruitment, type InsertApprenticeRecruitment,
-  type HostEmployerAgreement, type InsertHostEmployerAgreement,
-  type ApprenticeInduction, type InsertApprenticeInduction,
-  type Complaint, type InsertComplaint,
-  type Appeal, type InsertAppeal,
-  type UnitOfCompetency, type InsertUnitOfCompetency,
-  type QualificationStructure, type InsertQualificationStructure,
-  type ApprenticeUnitProgress, type InsertApprenticeUnitProgress,
-  type ApprenticeQualification, type InsertApprenticeQualification,
-  type EnrichmentProgram, type InsertEnrichmentProgram,
-  type EnrichmentParticipant, type InsertEnrichmentParticipant,
-  type EnrichmentWorkshop, type InsertEnrichmentWorkshop,
-  type WorkshopAttendee, type InsertWorkshopAttendee,
-  type ProgressReviewTemplate, type InsertProgressReviewTemplate,
-  type ProgressReview, type InsertProgressReview,
-  type ProgressReviewParticipant, type InsertProgressReviewParticipant,
-  type ProgressReviewActionItem, type InsertProgressReviewActionItem,
-  type ProgressReviewDocument, type InsertProgressReviewDocument
-} from "@shared/schema";
+  type Role,
+  type InsertRole,
+  type Permission,
+  type InsertPermission,
+  type RolePermission,
+  type InsertRolePermission,
+  type User,
+  type InsertUser,
+  type SubscriptionPlan,
+  type InsertSubscriptionPlan,
+  type Apprentice,
+  type InsertApprentice,
+  type HostEmployer,
+  type InsertHostEmployer,
+  type TrainingContract,
+  type InsertTrainingContract,
+  type Placement,
+  type InsertPlacement,
+  type Document,
+  type InsertDocument,
+  type ComplianceRecord,
+  type InsertComplianceRecord,
+  type Timesheet,
+  type InsertTimesheet,
+  type TimesheetDetail,
+  type InsertTimesheetDetail,
+  type ActivityLog,
+  type InsertActivityLog,
+  type Task,
+  type InsertTask,
+  type Qualification,
+  type InsertQualification,
+  type HostEmployerPreferredQualification,
+  type InsertHostEmployerPreferredQualification,
+  type Award,
+  type InsertAward,
+  type AwardClassification,
+  type InsertAwardClassification,
+  type PayRate,
+  type InsertPayRate,
+  type PenaltyRule,
+  type InsertPenaltyRule,
+  type AllowanceRule,
+  type InsertAllowanceRule,
+  type PublicHoliday,
+  type InsertPublicHoliday,
+  type ChargeRateCalculation,
+  type InsertChargeRateCalculation,
+  type Quote,
+  type InsertQuote,
+  type QuoteLineItem,
+  type InsertQuoteLineItem,
+  type FairworkComplianceLog,
+  type InsertFairworkComplianceLog,
+  type EnterpriseAgreement,
+  type InsertEnterpriseAgreement,
+  type GtoOrganization,
+  type InsertGtoOrganization,
+  type GtoComplianceStandard,
+  type InsertGtoComplianceStandard,
+  type ComplianceAssessment,
+  type InsertComplianceAssessment,
+  type ApprenticeRecruitment,
+  type InsertApprenticeRecruitment,
+  type HostEmployerAgreement,
+  type InsertHostEmployerAgreement,
+  type ApprenticeInduction,
+  type InsertApprenticeInduction,
+  type Complaint,
+  type InsertComplaint,
+  type Appeal,
+  type InsertAppeal,
+  type UnitOfCompetency,
+  type InsertUnitOfCompetency,
+  type QualificationStructure,
+  type InsertQualificationStructure,
+  type ApprenticeUnitProgress,
+  type InsertApprenticeUnitProgress,
+  type ApprenticeQualification,
+  type InsertApprenticeQualification,
+  type EnrichmentProgram,
+  type InsertEnrichmentProgram,
+  type EnrichmentParticipant,
+  type InsertEnrichmentParticipant,
+  type EnrichmentWorkshop,
+  type InsertEnrichmentWorkshop,
+  type WorkshopAttendee,
+  type InsertWorkshopAttendee,
+  type ProgressReviewTemplate,
+  type InsertProgressReviewTemplate,
+  type ProgressReview,
+  type InsertProgressReview,
+  type ProgressReviewParticipant,
+  type InsertProgressReviewParticipant,
+  type ProgressReviewActionItem,
+  type InsertProgressReviewActionItem,
+  type ProgressReviewDocument,
+  type InsertProgressReviewDocument,
+} from '@shared/schema';
 
 // Import labour hire types
 import {
-  labourHireWorkers, labourHirePlacements, labourHireTimesheets, 
-  labourHireTimesheetDetails, labourHireWorkerDocuments,
-  type LabourHireWorker, type InsertLabourHireWorker,
-  type LabourHirePlacement, type InsertLabourHirePlacement,
-  type LabourHireTimesheet, type InsertLabourHireTimesheet,
-  type LabourHireTimesheetDetail, type InsertLabourHireTimesheetDetail,
-  type LabourHireWorkerDocument, type InsertLabourHireWorkerDocument
-} from "@shared/schema";
+  labourHireWorkers,
+  labourHirePlacements,
+  labourHireTimesheets,
+  labourHireTimesheetDetails,
+  labourHireWorkerDocuments,
+  type LabourHireWorker,
+  type InsertLabourHireWorker,
+  type LabourHirePlacement,
+  type InsertLabourHirePlacement,
+  type LabourHireTimesheet,
+  type InsertLabourHireTimesheet,
+  type LabourHireTimesheetDetail,
+  type InsertLabourHireTimesheetDetail,
+  type LabourHireWorkerDocument,
+  type InsertLabourHireWorkerDocument,
+} from '@shared/schema';
 
 // Import unified contacts and clients types
 import {
-  contacts, contactTags, contactTagAssignments, contactGroups, 
-  contactGroupMembers, contactInteractions, clients, clientTypes, 
-  clientContacts, clientServices, clientInteractions,
-  type Contact, type InsertContact,
-  type ContactTag, type InsertContactTag,
-  type ContactTagAssignment, type InsertContactTagAssignment,
-  type ContactGroup, type InsertContactGroup,
-  type ContactGroupMember, type InsertContactGroupMember,
-  type ContactInteraction, type InsertContactInteraction,
-  type Client, type InsertClient,
-  type ClientType, type InsertClientType,
-  type ClientContact, type InsertClientContact,
-  type ClientService, type InsertClientService,
-  type ClientInteraction, type InsertClientInteraction
-} from "@shared/schema";
-import { db } from "./db";
-import { eq, and, or, desc, asc, sql, type SQL } from "drizzle-orm";
-import session from "express-session";
-import memorystore from "memorystore";
+  contacts,
+  contactTags,
+  contactTagAssignments,
+  contactGroups,
+  contactGroupMembers,
+  contactInteractions,
+  clients,
+  clientTypes,
+  clientContacts,
+  clientServices,
+  clientInteractions,
+  type Contact,
+  type InsertContact,
+  type ContactTag,
+  type InsertContactTag,
+  type ContactTagAssignment,
+  type InsertContactTagAssignment,
+  type ContactGroup,
+  type InsertContactGroup,
+  type ContactGroupMember,
+  type InsertContactGroupMember,
+  type ContactInteraction,
+  type InsertContactInteraction,
+  type Client,
+  type InsertClient,
+  type ClientType,
+  type InsertClientType,
+  type ClientContact,
+  type InsertClientContact,
+  type ClientService,
+  type InsertClientService,
+  type ClientInteraction,
+  type InsertClientInteraction,
+} from '@shared/schema';
+import { db } from './db';
+import { eq, and, or, desc, asc, sql, type SQL } from 'drizzle-orm';
+import session from 'express-session';
+import memorystore from 'memorystore';
 
 const MemoryStore = memorystore(session);
 
@@ -118,7 +229,10 @@ export interface IStorage {
   getApprenticeByEmail(email: string): Promise<Apprentice | undefined>;
   getAllApprentices(): Promise<Apprentice[]>;
   createApprentice(apprentice: InsertApprentice): Promise<Apprentice>;
-  updateApprentice(id: number, apprentice: Partial<InsertApprentice>): Promise<Apprentice | undefined>;
+  updateApprentice(
+    id: number,
+    apprentice: Partial<InsertApprentice>
+  ): Promise<Apprentice | undefined>;
   deleteApprentice(id: number): Promise<boolean>;
 
   // Role methods
@@ -139,14 +253,20 @@ export interface IStorage {
   getSubscriptionPlan(id: number): Promise<SubscriptionPlan | undefined>;
   getAllSubscriptionPlans(): Promise<SubscriptionPlan[]>;
   createSubscriptionPlan(plan: InsertSubscriptionPlan): Promise<SubscriptionPlan>;
-  updateSubscriptionPlan(id: number, plan: Partial<InsertSubscriptionPlan>): Promise<SubscriptionPlan | undefined>;
+  updateSubscriptionPlan(
+    id: number,
+    plan: Partial<InsertSubscriptionPlan>
+  ): Promise<SubscriptionPlan | undefined>;
   deleteSubscriptionPlan(id: number): Promise<boolean>;
 
   // Host Employer methods
   getHostEmployer(id: number): Promise<HostEmployer | undefined>;
   getAllHostEmployers(): Promise<HostEmployer[]>;
   createHostEmployer(employer: InsertHostEmployer): Promise<HostEmployer>;
-  updateHostEmployer(id: number, employer: Partial<InsertHostEmployer>): Promise<HostEmployer | undefined>;
+  updateHostEmployer(
+    id: number,
+    employer: Partial<InsertHostEmployer>
+  ): Promise<HostEmployer | undefined>;
   deleteHostEmployer(id: number): Promise<boolean>;
 
   // Training Contract methods
@@ -154,7 +274,10 @@ export interface IStorage {
   getAllTrainingContracts(): Promise<TrainingContract[]>;
   getTrainingContractsByApprentice(apprenticeId: number): Promise<TrainingContract[]>;
   createTrainingContract(contract: InsertTrainingContract): Promise<TrainingContract>;
-  updateTrainingContract(id: number, contract: Partial<InsertTrainingContract>): Promise<TrainingContract | undefined>;
+  updateTrainingContract(
+    id: number,
+    contract: Partial<InsertTrainingContract>
+  ): Promise<TrainingContract | undefined>;
   deleteTrainingContract(id: number): Promise<boolean>;
 
   // Placement methods
@@ -165,7 +288,7 @@ export interface IStorage {
   createPlacement(placement: InsertPlacement): Promise<Placement>;
   updatePlacement(id: number, placement: Partial<InsertPlacement>): Promise<Placement | undefined>;
   deletePlacement(id: number): Promise<boolean>;
-  
+
   // Document methods
   getDocument(id: number): Promise<Document | undefined>;
   getAllDocuments(): Promise<Document[]>;
@@ -173,12 +296,15 @@ export interface IStorage {
   createDocument(document: InsertDocument): Promise<Document>;
   updateDocument(id: number, document: Partial<InsertDocument>): Promise<Document | undefined>;
   deleteDocument(id: number): Promise<boolean>;
-  
+
   // Compliance Record methods
   getAllComplianceRecords(): Promise<ComplianceRecord[]>;
   getComplianceRecordsByRelation(relatedTo: string, relatedId: number): Promise<ComplianceRecord[]>;
   createComplianceRecord(record: InsertComplianceRecord): Promise<ComplianceRecord>;
-  updateComplianceRecord(id: number, record: Partial<InsertComplianceRecord>): Promise<ComplianceRecord | undefined>;
+  updateComplianceRecord(
+    id: number,
+    record: Partial<InsertComplianceRecord>
+  ): Promise<ComplianceRecord | undefined>;
 
   // Task methods
   getAllTasks(): Promise<Task[]>;
@@ -187,7 +313,7 @@ export interface IStorage {
   createTask(task: InsertTask): Promise<Task>;
   updateTask(id: number, task: Partial<InsertTask>): Promise<Task | undefined>;
   completeTask(id: number): Promise<Task | undefined>;
-  
+
   // Timesheet methods
   getAllTimesheets(): Promise<Timesheet[]>;
   getTimesheet(id: number): Promise<Timesheet | undefined>;
@@ -199,12 +325,20 @@ export interface IStorage {
   getTimesheetDetail(id: number): Promise<TimesheetDetail | undefined>;
   getTimesheetDetailsByTimesheet(timesheetId: number): Promise<TimesheetDetail[]>;
   createTimesheetDetail(detail: InsertTimesheetDetail): Promise<TimesheetDetail>;
-  updateTimesheetDetail(id: number, detail: Partial<InsertTimesheetDetail>): Promise<TimesheetDetail | undefined>;
+  updateTimesheetDetail(
+    id: number,
+    detail: Partial<InsertTimesheetDetail>
+  ): Promise<TimesheetDetail | undefined>;
   deleteTimesheetDetail(id: number): Promise<boolean>;
 
   // Activity Log methods
   createActivityLog(log: InsertActivityLog): Promise<ActivityLog>;
-  getActivityLogs(options?: { userId?: number, relatedTo?: string, relatedId?: number, limit?: number }): Promise<ActivityLog[]>;
+  getActivityLogs(options?: {
+    userId?: number;
+    relatedTo?: string;
+    relatedId?: number;
+    limit?: number;
+  }): Promise<ActivityLog[]>;
 
   // System Config methods - temporarily removed until schema is updated
   // getSystemConfig(key: string): Promise<any | undefined>;
@@ -238,130 +372,185 @@ export interface IStorage {
   // deleteDataView(id: number): Promise<boolean>;
 
   // Host Employer Preferred Qualifications methods
-  getHostEmployerPreferredQualifications(hostEmployerId: number): Promise<HostEmployerPreferredQualification[]>;
-  getHostEmployerPreferredQualification(id: number): Promise<HostEmployerPreferredQualification | undefined>;
-  addHostEmployerPreferredQualification(qualification: InsertHostEmployerPreferredQualification): Promise<HostEmployerPreferredQualification>;
-  updateHostEmployerPreferredQualification(id: number, qualification: Partial<InsertHostEmployerPreferredQualification>): Promise<HostEmployerPreferredQualification | undefined>;
+  getHostEmployerPreferredQualifications(
+    hostEmployerId: number
+  ): Promise<HostEmployerPreferredQualification[]>;
+  getHostEmployerPreferredQualification(
+    id: number
+  ): Promise<HostEmployerPreferredQualification | undefined>;
+  addHostEmployerPreferredQualification(
+    qualification: InsertHostEmployerPreferredQualification
+  ): Promise<HostEmployerPreferredQualification>;
+  updateHostEmployerPreferredQualification(
+    id: number,
+    qualification: Partial<InsertHostEmployerPreferredQualification>
+  ): Promise<HostEmployerPreferredQualification | undefined>;
   removeHostEmployerPreferredQualification(id: number): Promise<boolean>;
-  
+
   // Qualification methods
   getQualification(id: number): Promise<Qualification | undefined>;
   getAllQualifications(): Promise<Qualification[]>;
   searchQualifications(query: string): Promise<Qualification[]>;
-  
+
   // Labour Hire Worker methods
   getLabourHireWorker(id: number): Promise<LabourHireWorker | undefined>;
   getLabourHireWorkerByEmail(email: string): Promise<LabourHireWorker | undefined>;
   getAllLabourHireWorkers(): Promise<LabourHireWorker[]>;
   createLabourHireWorker(worker: InsertLabourHireWorker): Promise<LabourHireWorker>;
-  updateLabourHireWorker(id: number, worker: Partial<InsertLabourHireWorker>): Promise<LabourHireWorker | undefined>;
+  updateLabourHireWorker(
+    id: number,
+    worker: Partial<InsertLabourHireWorker>
+  ): Promise<LabourHireWorker | undefined>;
   deleteLabourHireWorker(id: number): Promise<boolean>;
-  
+
   // Labour Hire Placement methods
   getLabourHirePlacement(id: number): Promise<LabourHirePlacement | undefined>;
   getAllLabourHirePlacements(): Promise<LabourHirePlacement[]>;
   getLabourHirePlacementsByWorker(workerId: number): Promise<LabourHirePlacement[]>;
   getLabourHirePlacementsByHost(hostEmployerId: number): Promise<LabourHirePlacement[]>;
   createLabourHirePlacement(placement: InsertLabourHirePlacement): Promise<LabourHirePlacement>;
-  updateLabourHirePlacement(id: number, placement: Partial<InsertLabourHirePlacement>): Promise<LabourHirePlacement | undefined>;
+  updateLabourHirePlacement(
+    id: number,
+    placement: Partial<InsertLabourHirePlacement>
+  ): Promise<LabourHirePlacement | undefined>;
   deleteLabourHirePlacement(id: number): Promise<boolean>;
-  
+
   // Labour Hire Timesheet methods
   getLabourHireTimesheet(id: number): Promise<LabourHireTimesheet | undefined>;
   getAllLabourHireTimesheets(): Promise<LabourHireTimesheet[]>;
   getLabourHireTimesheetsByWorker(workerId: number): Promise<LabourHireTimesheet[]>;
   getLabourHireTimesheetsByPlacement(placementId: number): Promise<LabourHireTimesheet[]>;
   createLabourHireTimesheet(timesheet: InsertLabourHireTimesheet): Promise<LabourHireTimesheet>;
-  updateLabourHireTimesheet(id: number, timesheet: Partial<InsertLabourHireTimesheet>): Promise<LabourHireTimesheet | undefined>;
+  updateLabourHireTimesheet(
+    id: number,
+    timesheet: Partial<InsertLabourHireTimesheet>
+  ): Promise<LabourHireTimesheet | undefined>;
   submitLabourHireTimesheet(id: number): Promise<LabourHireTimesheet | undefined>;
-  approveLabourHireTimesheet(id: number, approvedBy: number): Promise<LabourHireTimesheet | undefined>;
+  approveLabourHireTimesheet(
+    id: number,
+    approvedBy: number
+  ): Promise<LabourHireTimesheet | undefined>;
   rejectLabourHireTimesheet(id: number, reason: string): Promise<LabourHireTimesheet | undefined>;
-  
+
   // Labour Hire Worker Document methods
   getLabourHireWorkerDocument(id: number): Promise<LabourHireWorkerDocument | undefined>;
   getLabourHireWorkerDocuments(workerId: number): Promise<LabourHireWorkerDocument[]>;
-  createLabourHireWorkerDocument(document: InsertLabourHireWorkerDocument): Promise<LabourHireWorkerDocument>;
-  updateLabourHireWorkerDocument(id: number, document: Partial<InsertLabourHireWorkerDocument>): Promise<LabourHireWorkerDocument | undefined>;
-  verifyLabourHireWorkerDocument(id: number, verifiedBy: number): Promise<LabourHireWorkerDocument | undefined>;
-  rejectLabourHireWorkerDocument(id: number, reason: string): Promise<LabourHireWorkerDocument | undefined>;
-  
+  createLabourHireWorkerDocument(
+    document: InsertLabourHireWorkerDocument
+  ): Promise<LabourHireWorkerDocument>;
+  updateLabourHireWorkerDocument(
+    id: number,
+    document: Partial<InsertLabourHireWorkerDocument>
+  ): Promise<LabourHireWorkerDocument | undefined>;
+  verifyLabourHireWorkerDocument(
+    id: number,
+    verifiedBy: number
+  ): Promise<LabourHireWorkerDocument | undefined>;
+  rejectLabourHireWorkerDocument(
+    id: number,
+    reason: string
+  ): Promise<LabourHireWorkerDocument | undefined>;
+
   // Unified Contacts methods
   getContact(id: number): Promise<Contact | undefined>;
   getContactByEmail(email: string): Promise<Contact | undefined>;
-  getAllContacts(options?: { primaryRole?: string, isActive?: boolean, organizationId?: number }): Promise<Contact[]>;
+  getAllContacts(options?: {
+    primaryRole?: string;
+    isActive?: boolean;
+    organizationId?: number;
+  }): Promise<Contact[]>;
   createContact(contact: InsertContact): Promise<Contact>;
   updateContact(id: number, contact: Partial<InsertContact>): Promise<Contact | undefined>;
   deactivateContact(id: number): Promise<boolean>;
   deleteContact(id: number): Promise<boolean>;
-  
+
   // Contact Tags methods
   getContactTag(id: number): Promise<ContactTag | undefined>;
   getAllContactTags(): Promise<ContactTag[]>;
   createContactTag(tag: InsertContactTag): Promise<ContactTag>;
   updateContactTag(id: number, tag: Partial<InsertContactTag>): Promise<ContactTag | undefined>;
   deleteContactTag(id: number): Promise<boolean>;
-  
+
   // Contact Tag Assignment methods
   assignTagToContact(assignment: InsertContactTagAssignment): Promise<ContactTagAssignment>;
   removeTagFromContact(contactId: number, tagId: number): Promise<boolean>;
   getContactTags(contactId: number): Promise<ContactTag[]>;
   getTaggedContacts(tagId: number): Promise<Contact[]>;
-  
+
   // Contact Groups methods
   getContactGroup(id: number): Promise<ContactGroup | undefined>;
   getAllContactGroups(organizationId?: number): Promise<ContactGroup[]>;
   createContactGroup(group: InsertContactGroup): Promise<ContactGroup>;
-  updateContactGroup(id: number, group: Partial<InsertContactGroup>): Promise<ContactGroup | undefined>;
+  updateContactGroup(
+    id: number,
+    group: Partial<InsertContactGroup>
+  ): Promise<ContactGroup | undefined>;
   deleteContactGroup(id: number): Promise<boolean>;
-  
+
   // Contact Group Members methods
   addContactToGroup(member: InsertContactGroupMember): Promise<ContactGroupMember>;
   removeContactFromGroup(groupId: number, contactId: number): Promise<boolean>;
   getGroupMembers(groupId: number): Promise<Contact[]>;
   getContactGroups(contactId: number): Promise<ContactGroup[]>;
-  
+
   // Contact Interactions methods
   getContactInteraction(id: number): Promise<ContactInteraction | undefined>;
   getContactInteractions(contactId: number): Promise<ContactInteraction[]>;
   createContactInteraction(interaction: InsertContactInteraction): Promise<ContactInteraction>;
-  updateContactInteraction(id: number, interaction: Partial<InsertContactInteraction>): Promise<ContactInteraction | undefined>;
+  updateContactInteraction(
+    id: number,
+    interaction: Partial<InsertContactInteraction>
+  ): Promise<ContactInteraction | undefined>;
   deleteContactInteraction(id: number): Promise<boolean>;
-  
+
   // Client methods
   getClient(id: number): Promise<Client | undefined>;
-  getAllClients(options?: { clientType?: string, status?: string, organizationId?: number }): Promise<Client[]>;
+  getAllClients(options?: {
+    clientType?: string;
+    status?: string;
+    organizationId?: number;
+  }): Promise<Client[]>;
   createClient(client: InsertClient): Promise<Client>;
   updateClient(id: number, client: Partial<InsertClient>): Promise<Client | undefined>;
   deactivateClient(id: number): Promise<boolean>;
   deleteClient(id: number): Promise<boolean>;
-  
+
   // Client Types methods
   getClientType(id: number): Promise<ClientType | undefined>;
   getAllClientTypes(): Promise<ClientType[]>;
   createClientType(type: InsertClientType): Promise<ClientType>;
   updateClientType(id: number, type: Partial<InsertClientType>): Promise<ClientType | undefined>;
   deleteClientType(id: number): Promise<boolean>;
-  
+
   // Client Contacts methods
   getClientContact(id: number): Promise<ClientContact | undefined>;
   getClientContacts(clientId: number): Promise<Contact[]>;
   addContactToClient(clientContact: InsertClientContact): Promise<ClientContact>;
-  updateClientContact(id: number, clientContact: Partial<InsertClientContact>): Promise<ClientContact | undefined>;
+  updateClientContact(
+    id: number,
+    clientContact: Partial<InsertClientContact>
+  ): Promise<ClientContact | undefined>;
   removeContactFromClient(clientId: number, contactId: number): Promise<boolean>;
   setPrimaryContact(clientId: number, contactId: number): Promise<boolean>;
-  
+
   // Client Services methods
   getClientService(id: number): Promise<ClientService | undefined>;
   getClientServices(clientId: number): Promise<ClientService[]>;
   addServiceToClient(service: InsertClientService): Promise<ClientService>;
-  updateClientService(id: number, service: Partial<InsertClientService>): Promise<ClientService | undefined>;
+  updateClientService(
+    id: number,
+    service: Partial<InsertClientService>
+  ): Promise<ClientService | undefined>;
   removeServiceFromClient(id: number): Promise<boolean>;
-  
+
   // Client Interactions methods
   getClientInteraction(id: number): Promise<ClientInteraction | undefined>;
   getClientInteractions(clientId: number): Promise<ClientInteraction[]>;
   createClientInteraction(interaction: InsertClientInteraction): Promise<ClientInteraction>;
-  updateClientInteraction(id: number, interaction: Partial<InsertClientInteraction>): Promise<ClientInteraction | undefined>;
+  updateClientInteraction(
+    id: number,
+    interaction: Partial<InsertClientInteraction>
+  ): Promise<ClientInteraction | undefined>;
   deleteClientInteraction(id: number): Promise<boolean>;
 
   // Award methods
@@ -376,8 +565,13 @@ export interface IStorage {
   getAwardClassification(id: number): Promise<AwardClassification | undefined>;
   getAwardClassificationsByAward(awardId: number): Promise<AwardClassification[]>;
   getAllAwardClassifications(): Promise<AwardClassification[]>;
-  createAwardClassification(classification: InsertAwardClassification): Promise<AwardClassification>;
-  updateAwardClassification(id: number, classification: Partial<InsertAwardClassification>): Promise<AwardClassification | undefined>;
+  createAwardClassification(
+    classification: InsertAwardClassification
+  ): Promise<AwardClassification>;
+  updateAwardClassification(
+    id: number,
+    classification: Partial<InsertAwardClassification>
+  ): Promise<AwardClassification | undefined>;
   deleteAwardClassification(id: number): Promise<boolean>;
 
   // Pay Rate methods
@@ -402,7 +596,10 @@ export interface IStorage {
   getAllowanceRulesByAward(awardId: number): Promise<AllowanceRule[]>;
   getAllAllowanceRules(): Promise<AllowanceRule[]>;
   createAllowanceRule(rule: InsertAllowanceRule): Promise<AllowanceRule>;
-  updateAllowanceRule(id: number, rule: Partial<InsertAllowanceRule>): Promise<AllowanceRule | undefined>;
+  updateAllowanceRule(
+    id: number,
+    rule: Partial<InsertAllowanceRule>
+  ): Promise<AllowanceRule | undefined>;
   deleteAllowanceRule(id: number): Promise<boolean>;
 
   // Public Holiday methods
@@ -411,7 +608,10 @@ export interface IStorage {
   getPublicHolidaysByYear(year: number): Promise<PublicHoliday[]>;
   getAllPublicHolidays(): Promise<PublicHoliday[]>;
   createPublicHoliday(holiday: InsertPublicHoliday): Promise<PublicHoliday>;
-  updatePublicHoliday(id: number, holiday: Partial<InsertPublicHoliday>): Promise<PublicHoliday | undefined>;
+  updatePublicHoliday(
+    id: number,
+    holiday: Partial<InsertPublicHoliday>
+  ): Promise<PublicHoliday | undefined>;
   deletePublicHoliday(id: number): Promise<boolean>;
 
   // Charge Rate Calculation methods
@@ -419,9 +619,17 @@ export interface IStorage {
   getChargeRateCalculationsByApprentice(apprenticeId: number): Promise<ChargeRateCalculation[]>;
   getChargeRateCalculationsByHost(hostEmployerId: number): Promise<ChargeRateCalculation[]>;
   getAllChargeRateCalculations(): Promise<ChargeRateCalculation[]>;
-  createChargeRateCalculation(calculation: InsertChargeRateCalculation): Promise<ChargeRateCalculation>;
-  updateChargeRateCalculation(id: number, calculation: Partial<InsertChargeRateCalculation>): Promise<ChargeRateCalculation | undefined>;
-  approveChargeRateCalculation(id: number, approvedBy: number): Promise<ChargeRateCalculation | undefined>;
+  createChargeRateCalculation(
+    calculation: InsertChargeRateCalculation
+  ): Promise<ChargeRateCalculation>;
+  updateChargeRateCalculation(
+    id: number,
+    calculation: Partial<InsertChargeRateCalculation>
+  ): Promise<ChargeRateCalculation | undefined>;
+  approveChargeRateCalculation(
+    id: number,
+    approvedBy: number
+  ): Promise<ChargeRateCalculation | undefined>;
   deleteChargeRateCalculation(id: number): Promise<boolean>;
 
   // Quote methods
@@ -438,7 +646,10 @@ export interface IStorage {
   getQuoteLineItem(id: number): Promise<QuoteLineItem | undefined>;
   getQuoteLineItemsByQuote(quoteId: number): Promise<QuoteLineItem[]>;
   createQuoteLineItem(item: InsertQuoteLineItem): Promise<QuoteLineItem>;
-  updateQuoteLineItem(id: number, item: Partial<InsertQuoteLineItem>): Promise<QuoteLineItem | undefined>;
+  updateQuoteLineItem(
+    id: number,
+    item: Partial<InsertQuoteLineItem>
+  ): Promise<QuoteLineItem | undefined>;
   deleteQuoteLineItem(id: number): Promise<boolean>;
 
   // Fair Work Compliance Log methods
@@ -447,7 +658,10 @@ export interface IStorage {
   getFairworkComplianceLogsByTimesheet(timesheetId: number): Promise<FairworkComplianceLog[]>;
   getAllFairworkComplianceLogs(): Promise<FairworkComplianceLog[]>;
   createFairworkComplianceLog(log: InsertFairworkComplianceLog): Promise<FairworkComplianceLog>;
-  updateFairworkComplianceLog(id: number, log: Partial<InsertFairworkComplianceLog>): Promise<FairworkComplianceLog | undefined>;
+  updateFairworkComplianceLog(
+    id: number,
+    log: Partial<InsertFairworkComplianceLog>
+  ): Promise<FairworkComplianceLog | undefined>;
   deleteFairworkComplianceLog(id: number): Promise<boolean>;
 
   // Enterprise Agreement methods
@@ -455,7 +669,10 @@ export interface IStorage {
   getAllEnterpriseAgreements(): Promise<EnterpriseAgreement[]>;
   getActiveEnterpriseAgreements(): Promise<EnterpriseAgreement[]>;
   createEnterpriseAgreement(agreement: InsertEnterpriseAgreement): Promise<EnterpriseAgreement>;
-  updateEnterpriseAgreement(id: number, agreement: Partial<InsertEnterpriseAgreement>): Promise<EnterpriseAgreement | undefined>;
+  updateEnterpriseAgreement(
+    id: number,
+    agreement: Partial<InsertEnterpriseAgreement>
+  ): Promise<EnterpriseAgreement | undefined>;
   deleteEnterpriseAgreement(id: number): Promise<boolean>;
 
   // GTO Organization methods
@@ -463,7 +680,10 @@ export interface IStorage {
   getAllGtoOrganizations(): Promise<GtoOrganization[]>;
   getActiveGtoOrganizations(): Promise<GtoOrganization[]>;
   createGtoOrganization(organization: InsertGtoOrganization): Promise<GtoOrganization>;
-  updateGtoOrganization(id: number, organization: Partial<InsertGtoOrganization>): Promise<GtoOrganization | undefined>;
+  updateGtoOrganization(
+    id: number,
+    organization: Partial<InsertGtoOrganization>
+  ): Promise<GtoOrganization | undefined>;
   deleteGtoOrganization(id: number): Promise<boolean>;
 
   // Units of Competency methods
@@ -472,31 +692,57 @@ export interface IStorage {
   getAllUnitsOfCompetency(): Promise<UnitOfCompetency[]>;
   searchUnitsOfCompetency(query: string): Promise<UnitOfCompetency[]>;
   createUnitOfCompetency(unit: InsertUnitOfCompetency): Promise<UnitOfCompetency>;
-  updateUnitOfCompetency(id: number, unit: Partial<InsertUnitOfCompetency>): Promise<UnitOfCompetency | undefined>;
+  updateUnitOfCompetency(
+    id: number,
+    unit: Partial<InsertUnitOfCompetency>
+  ): Promise<UnitOfCompetency | undefined>;
   deleteUnitOfCompetency(id: number): Promise<boolean>;
 
   // Qualification Structure methods
   getQualificationStructure(qualificationId: number): Promise<QualificationStructure[]>;
   addUnitToQualification(structure: InsertQualificationStructure): Promise<QualificationStructure>;
   removeUnitFromQualification(qualificationId: number, unitId: number): Promise<boolean>;
-  updateQualificationStructure(id: number, structure: Partial<InsertQualificationStructure>): Promise<QualificationStructure | undefined>;
+  updateQualificationStructure(
+    id: number,
+    structure: Partial<InsertQualificationStructure>
+  ): Promise<QualificationStructure | undefined>;
 
   // Apprentice Unit Progress methods
   getApprenticeUnitProgress(id: number): Promise<ApprenticeUnitProgress | undefined>;
   getApprenticeUnitProgressByApprentice(apprenticeId: number): Promise<ApprenticeUnitProgress[]>;
   getApprenticeUnitProgressByUnit(unitId: number): Promise<ApprenticeUnitProgress[]>;
-  createApprenticeUnitProgress(progress: InsertApprenticeUnitProgress): Promise<ApprenticeUnitProgress>;
-  updateApprenticeUnitProgress(id: number, progress: Partial<InsertApprenticeUnitProgress>): Promise<ApprenticeUnitProgress | undefined>;
-  completeApprenticeUnit(id: number, assessorId: number, result: string): Promise<ApprenticeUnitProgress | undefined>;
+  createApprenticeUnitProgress(
+    progress: InsertApprenticeUnitProgress
+  ): Promise<ApprenticeUnitProgress>;
+  updateApprenticeUnitProgress(
+    id: number,
+    progress: Partial<InsertApprenticeUnitProgress>
+  ): Promise<ApprenticeUnitProgress | undefined>;
+  completeApprenticeUnit(
+    id: number,
+    assessorId: number,
+    result: string
+  ): Promise<ApprenticeUnitProgress | undefined>;
   deleteApprenticeUnitProgress(id: number): Promise<boolean>;
 
   // Apprentice Qualification methods
   getApprenticeQualification(id: number): Promise<ApprenticeQualification | undefined>;
   getApprenticeQualificationsByApprentice(apprenticeId: number): Promise<ApprenticeQualification[]>;
-  getApprenticeQualificationsByQualification(qualificationId: number): Promise<ApprenticeQualification[]>;
-  createApprenticeQualification(qualification: InsertApprenticeQualification): Promise<ApprenticeQualification>;
-  updateApprenticeQualification(id: number, qualification: Partial<InsertApprenticeQualification>): Promise<ApprenticeQualification | undefined>;
-  completeApprenticeQualification(id: number, completionDate: Date, certificateNumber?: string): Promise<ApprenticeQualification | undefined>;
+  getApprenticeQualificationsByQualification(
+    qualificationId: number
+  ): Promise<ApprenticeQualification[]>;
+  createApprenticeQualification(
+    qualification: InsertApprenticeQualification
+  ): Promise<ApprenticeQualification>;
+  updateApprenticeQualification(
+    id: number,
+    qualification: Partial<InsertApprenticeQualification>
+  ): Promise<ApprenticeQualification | undefined>;
+  completeApprenticeQualification(
+    id: number,
+    completionDate: Date,
+    certificateNumber?: string
+  ): Promise<ApprenticeQualification | undefined>;
   deleteApprenticeQualification(id: number): Promise<boolean>;
 
   // Enrichment Program methods
@@ -504,24 +750,42 @@ export interface IStorage {
   getAllEnrichmentPrograms(): Promise<EnrichmentProgram[]>;
   getActiveEnrichmentPrograms(): Promise<EnrichmentProgram[]>;
   createEnrichmentProgram(program: InsertEnrichmentProgram): Promise<EnrichmentProgram>;
-  updateEnrichmentProgram(id: number, program: Partial<InsertEnrichmentProgram>): Promise<EnrichmentProgram | undefined>;
+  updateEnrichmentProgram(
+    id: number,
+    program: Partial<InsertEnrichmentProgram>
+  ): Promise<EnrichmentProgram | undefined>;
   deleteEnrichmentProgram(id: number): Promise<boolean>;
 
   // Enrichment Participant methods
   getEnrichmentParticipant(id: number): Promise<EnrichmentParticipant | undefined>;
   getEnrichmentParticipantsByProgram(programId: number): Promise<EnrichmentParticipant[]>;
   getEnrichmentParticipantsByApprentice(apprenticeId: number): Promise<EnrichmentParticipant[]>;
-  enrollApprenticeInProgram(participant: InsertEnrichmentParticipant): Promise<EnrichmentParticipant>;
-  updateEnrichmentParticipant(id: number, participant: Partial<InsertEnrichmentParticipant>): Promise<EnrichmentParticipant | undefined>;
-  completeEnrichmentProgram(id: number, completionDate: Date, feedback?: string): Promise<EnrichmentParticipant | undefined>;
-  withdrawFromEnrichmentProgram(id: number, reason?: string): Promise<EnrichmentParticipant | undefined>;
+  enrollApprenticeInProgram(
+    participant: InsertEnrichmentParticipant
+  ): Promise<EnrichmentParticipant>;
+  updateEnrichmentParticipant(
+    id: number,
+    participant: Partial<InsertEnrichmentParticipant>
+  ): Promise<EnrichmentParticipant | undefined>;
+  completeEnrichmentProgram(
+    id: number,
+    completionDate: Date,
+    feedback?: string
+  ): Promise<EnrichmentParticipant | undefined>;
+  withdrawFromEnrichmentProgram(
+    id: number,
+    reason?: string
+  ): Promise<EnrichmentParticipant | undefined>;
 
   // Enrichment Workshop methods
   getEnrichmentWorkshop(id: number): Promise<EnrichmentWorkshop | undefined>;
   getEnrichmentWorkshopsByProgram(programId: number): Promise<EnrichmentWorkshop[]>;
   getAllEnrichmentWorkshops(): Promise<EnrichmentWorkshop[]>;
   createEnrichmentWorkshop(workshop: InsertEnrichmentWorkshop): Promise<EnrichmentWorkshop>;
-  updateEnrichmentWorkshop(id: number, workshop: Partial<InsertEnrichmentWorkshop>): Promise<EnrichmentWorkshop | undefined>;
+  updateEnrichmentWorkshop(
+    id: number,
+    workshop: Partial<InsertEnrichmentWorkshop>
+  ): Promise<EnrichmentWorkshop | undefined>;
   deleteEnrichmentWorkshop(id: number): Promise<boolean>;
 
   // Workshop Attendee methods
@@ -529,7 +793,10 @@ export interface IStorage {
   getWorkshopAttendeesByWorkshop(workshopId: number): Promise<WorkshopAttendee[]>;
   getWorkshopAttendeesByApprentice(apprenticeId: number): Promise<WorkshopAttendee[]>;
   registerForWorkshop(attendee: InsertWorkshopAttendee): Promise<WorkshopAttendee>;
-  updateWorkshopAttendee(id: number, attendee: Partial<InsertWorkshopAttendee>): Promise<WorkshopAttendee | undefined>;
+  updateWorkshopAttendee(
+    id: number,
+    attendee: Partial<InsertWorkshopAttendee>
+  ): Promise<WorkshopAttendee | undefined>;
   markWorkshopAttendance(id: number, status: string): Promise<WorkshopAttendee | undefined>;
   cancelWorkshopRegistration(id: number): Promise<boolean>;
 
@@ -537,8 +804,13 @@ export interface IStorage {
   getProgressReviewTemplate(id: number): Promise<ProgressReviewTemplate | undefined>;
   getAllProgressReviewTemplates(): Promise<ProgressReviewTemplate[]>;
   getActiveProgressReviewTemplates(): Promise<ProgressReviewTemplate[]>;
-  createProgressReviewTemplate(template: InsertProgressReviewTemplate): Promise<ProgressReviewTemplate>;
-  updateProgressReviewTemplate(id: number, template: Partial<InsertProgressReviewTemplate>): Promise<ProgressReviewTemplate | undefined>;
+  createProgressReviewTemplate(
+    template: InsertProgressReviewTemplate
+  ): Promise<ProgressReviewTemplate>;
+  updateProgressReviewTemplate(
+    id: number,
+    template: Partial<InsertProgressReviewTemplate>
+  ): Promise<ProgressReviewTemplate | undefined>;
   deleteProgressReviewTemplate(id: number): Promise<boolean>;
 
   // Progress Review methods
@@ -547,31 +819,53 @@ export interface IStorage {
   getProgressReviewsByReviewer(reviewerId: number): Promise<ProgressReview[]>;
   getAllProgressReviews(): Promise<ProgressReview[]>;
   createProgressReview(review: InsertProgressReview): Promise<ProgressReview>;
-  updateProgressReview(id: number, review: Partial<InsertProgressReview>): Promise<ProgressReview | undefined>;
-  completeProgressReview(id: number, summary: string, rating?: number): Promise<ProgressReview | undefined>;
+  updateProgressReview(
+    id: number,
+    review: Partial<InsertProgressReview>
+  ): Promise<ProgressReview | undefined>;
+  completeProgressReview(
+    id: number,
+    summary: string,
+    rating?: number
+  ): Promise<ProgressReview | undefined>;
   cancelProgressReview(id: number): Promise<ProgressReview | undefined>;
   deleteProgressReview(id: number): Promise<boolean>;
 
   // Progress Review Participant methods
   getProgressReviewParticipant(id: number): Promise<ProgressReviewParticipant | undefined>;
   getProgressReviewParticipantsByReview(reviewId: number): Promise<ProgressReviewParticipant[]>;
-  addProgressReviewParticipant(participant: InsertProgressReviewParticipant): Promise<ProgressReviewParticipant>;
-  updateProgressReviewParticipant(id: number, participant: Partial<InsertProgressReviewParticipant>): Promise<ProgressReviewParticipant | undefined>;
+  addProgressReviewParticipant(
+    participant: InsertProgressReviewParticipant
+  ): Promise<ProgressReviewParticipant>;
+  updateProgressReviewParticipant(
+    id: number,
+    participant: Partial<InsertProgressReviewParticipant>
+  ): Promise<ProgressReviewParticipant | undefined>;
   removeProgressReviewParticipant(id: number): Promise<boolean>;
 
   // Progress Review Action Item methods
   getProgressReviewActionItem(id: number): Promise<ProgressReviewActionItem | undefined>;
   getProgressReviewActionItemsByReview(reviewId: number): Promise<ProgressReviewActionItem[]>;
   getProgressReviewActionItemsByAssignee(assigneeId: number): Promise<ProgressReviewActionItem[]>;
-  createProgressReviewActionItem(actionItem: InsertProgressReviewActionItem): Promise<ProgressReviewActionItem>;
-  updateProgressReviewActionItem(id: number, actionItem: Partial<InsertProgressReviewActionItem>): Promise<ProgressReviewActionItem | undefined>;
-  completeProgressReviewActionItem(id: number, completionNotes?: string): Promise<ProgressReviewActionItem | undefined>;
+  createProgressReviewActionItem(
+    actionItem: InsertProgressReviewActionItem
+  ): Promise<ProgressReviewActionItem>;
+  updateProgressReviewActionItem(
+    id: number,
+    actionItem: Partial<InsertProgressReviewActionItem>
+  ): Promise<ProgressReviewActionItem | undefined>;
+  completeProgressReviewActionItem(
+    id: number,
+    completionNotes?: string
+  ): Promise<ProgressReviewActionItem | undefined>;
   deleteProgressReviewActionItem(id: number): Promise<boolean>;
 
   // Progress Review Document methods
   getProgressReviewDocument(id: number): Promise<ProgressReviewDocument | undefined>;
   getProgressReviewDocumentsByReview(reviewId: number): Promise<ProgressReviewDocument[]>;
-  addProgressReviewDocument(document: InsertProgressReviewDocument): Promise<ProgressReviewDocument>;
+  addProgressReviewDocument(
+    document: InsertProgressReviewDocument
+  ): Promise<ProgressReviewDocument>;
   removeProgressReviewDocument(id: number): Promise<boolean>;
 }
 
@@ -583,16 +877,13 @@ export class DatabaseStorage implements IStorage {
       checkPeriod: 86400000, // 24 hours
     });
   }
-  
+
   // Labour Hire Worker methods
   async getLabourHireWorker(id: number): Promise<LabourHireWorker | undefined> {
-    const [worker] = await db
-      .select()
-      .from(labourHireWorkers)
-      .where(eq(labourHireWorkers.id, id));
+    const [worker] = await db.select().from(labourHireWorkers).where(eq(labourHireWorkers.id, id));
     return worker;
   }
-  
+
   async getLabourHireWorkerByEmail(email: string): Promise<LabourHireWorker | undefined> {
     const [worker] = await db
       .select()
@@ -600,45 +891,46 @@ export class DatabaseStorage implements IStorage {
       .where(eq(labourHireWorkers.email, email));
     return worker;
   }
-  
+
   async getAllLabourHireWorkers(): Promise<LabourHireWorker[]> {
     return await db
       .select()
       .from(labourHireWorkers)
       .orderBy(labourHireWorkers.lastName, labourHireWorkers.firstName);
   }
-  
+
   async createLabourHireWorker(worker: InsertLabourHireWorker): Promise<LabourHireWorker> {
     const [createdWorker] = await db
       .insert(labourHireWorkers)
       .values({
         ...worker,
         createdAt: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
       })
       .returning();
     return createdWorker;
   }
-  
-  async updateLabourHireWorker(id: number, worker: Partial<InsertLabourHireWorker>): Promise<LabourHireWorker | undefined> {
+
+  async updateLabourHireWorker(
+    id: number,
+    worker: Partial<InsertLabourHireWorker>
+  ): Promise<LabourHireWorker | undefined> {
     const [updatedWorker] = await db
       .update(labourHireWorkers)
       .set({
         ...worker,
-        updatedAt: new Date()
+        updatedAt: new Date(),
       })
       .where(eq(labourHireWorkers.id, id))
       .returning();
     return updatedWorker;
   }
-  
+
   async deleteLabourHireWorker(id: number): Promise<boolean> {
-    const result = await db
-      .delete(labourHireWorkers)
-      .where(eq(labourHireWorkers.id, id));
+    const result = await db.delete(labourHireWorkers).where(eq(labourHireWorkers.id, id));
     return result.rowCount ? result.rowCount > 0 : false;
   }
-  
+
   // Labour Hire Placement methods
   async getLabourHirePlacement(id: number): Promise<LabourHirePlacement | undefined> {
     const [placement] = await db
@@ -647,14 +939,14 @@ export class DatabaseStorage implements IStorage {
       .where(eq(labourHirePlacements.id, id));
     return placement;
   }
-  
+
   async getAllLabourHirePlacements(): Promise<LabourHirePlacement[]> {
     return await db
       .select()
       .from(labourHirePlacements)
       .orderBy(desc(labourHirePlacements.startDate));
   }
-  
+
   async getLabourHirePlacementsByWorker(workerId: number): Promise<LabourHirePlacement[]> {
     return await db
       .select()
@@ -662,7 +954,7 @@ export class DatabaseStorage implements IStorage {
       .where(eq(labourHirePlacements.workerId, workerId))
       .orderBy(desc(labourHirePlacements.startDate));
   }
-  
+
   async getLabourHirePlacementsByHost(hostEmployerId: number): Promise<LabourHirePlacement[]> {
     return await db
       .select()
@@ -670,38 +962,41 @@ export class DatabaseStorage implements IStorage {
       .where(eq(labourHirePlacements.hostEmployerId, hostEmployerId))
       .orderBy(desc(labourHirePlacements.startDate));
   }
-  
-  async createLabourHirePlacement(placement: InsertLabourHirePlacement): Promise<LabourHirePlacement> {
+
+  async createLabourHirePlacement(
+    placement: InsertLabourHirePlacement
+  ): Promise<LabourHirePlacement> {
     const [createdPlacement] = await db
       .insert(labourHirePlacements)
       .values({
         ...placement,
         createdAt: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
       })
       .returning();
     return createdPlacement;
   }
-  
-  async updateLabourHirePlacement(id: number, placement: Partial<InsertLabourHirePlacement>): Promise<LabourHirePlacement | undefined> {
+
+  async updateLabourHirePlacement(
+    id: number,
+    placement: Partial<InsertLabourHirePlacement>
+  ): Promise<LabourHirePlacement | undefined> {
     const [updatedPlacement] = await db
       .update(labourHirePlacements)
       .set({
         ...placement,
-        updatedAt: new Date()
+        updatedAt: new Date(),
       })
       .where(eq(labourHirePlacements.id, id))
       .returning();
     return updatedPlacement;
   }
-  
+
   async deleteLabourHirePlacement(id: number): Promise<boolean> {
-    const result = await db
-      .delete(labourHirePlacements)
-      .where(eq(labourHirePlacements.id, id));
+    const result = await db.delete(labourHirePlacements).where(eq(labourHirePlacements.id, id));
     return result.rowCount ? result.rowCount > 0 : false;
   }
-  
+
   // Labour Hire Timesheet methods
   async getLabourHireTimesheet(id: number): Promise<LabourHireTimesheet | undefined> {
     const [timesheet] = await db
@@ -710,14 +1005,14 @@ export class DatabaseStorage implements IStorage {
       .where(eq(labourHireTimesheets.id, id));
     return timesheet;
   }
-  
+
   async getAllLabourHireTimesheets(): Promise<LabourHireTimesheet[]> {
     return await db
       .select()
       .from(labourHireTimesheets)
       .orderBy(desc(labourHireTimesheets.weekStarting));
   }
-  
+
   async getLabourHireTimesheetsByWorker(workerId: number): Promise<LabourHireTimesheet[]> {
     return await db
       .select()
@@ -725,7 +1020,7 @@ export class DatabaseStorage implements IStorage {
       .where(eq(labourHireTimesheets.workerId, workerId))
       .orderBy(desc(labourHireTimesheets.weekStarting));
   }
-  
+
   async getLabourHireTimesheetsByPlacement(placementId: number): Promise<LabourHireTimesheet[]> {
     return await db
       .select()
@@ -733,71 +1028,82 @@ export class DatabaseStorage implements IStorage {
       .where(eq(labourHireTimesheets.placementId, placementId))
       .orderBy(desc(labourHireTimesheets.weekStarting));
   }
-  
-  async createLabourHireTimesheet(timesheet: InsertLabourHireTimesheet): Promise<LabourHireTimesheet> {
+
+  async createLabourHireTimesheet(
+    timesheet: InsertLabourHireTimesheet
+  ): Promise<LabourHireTimesheet> {
     const [createdTimesheet] = await db
       .insert(labourHireTimesheets)
       .values({
         ...timesheet,
         createdAt: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
       })
       .returning();
     return createdTimesheet;
   }
-  
-  async updateLabourHireTimesheet(id: number, timesheet: Partial<InsertLabourHireTimesheet>): Promise<LabourHireTimesheet | undefined> {
+
+  async updateLabourHireTimesheet(
+    id: number,
+    timesheet: Partial<InsertLabourHireTimesheet>
+  ): Promise<LabourHireTimesheet | undefined> {
     const [updatedTimesheet] = await db
       .update(labourHireTimesheets)
       .set({
         ...timesheet,
-        updatedAt: new Date()
+        updatedAt: new Date(),
       })
       .where(eq(labourHireTimesheets.id, id))
       .returning();
     return updatedTimesheet;
   }
-  
+
   async submitLabourHireTimesheet(id: number): Promise<LabourHireTimesheet | undefined> {
     const [updatedTimesheet] = await db
       .update(labourHireTimesheets)
       .set({
         status: 'submitted',
         submittedDate: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
       })
       .where(eq(labourHireTimesheets.id, id))
       .returning();
     return updatedTimesheet;
   }
-  
-  async approveLabourHireTimesheet(id: number, approvedBy: number): Promise<LabourHireTimesheet | undefined> {
+
+  async approveLabourHireTimesheet(
+    id: number,
+    approvedBy: number
+  ): Promise<LabourHireTimesheet | undefined> {
     const [updatedTimesheet] = await db
       .update(labourHireTimesheets)
       .set({
         status: 'approved',
         approvedBy,
         approvalDate: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
       })
       .where(eq(labourHireTimesheets.id, id))
       .returning();
     return updatedTimesheet;
   }
-  
-  async rejectLabourHireTimesheet(id: number, reason: string): Promise<LabourHireTimesheet | undefined> {
+
+  async rejectLabourHireTimesheet(
+    id: number,
+    reason: string
+  ): Promise<LabourHireTimesheet | undefined> {
     const [updatedTimesheet] = await db
       .update(labourHireTimesheets)
       .set({
         status: 'rejected',
         notes: reason,
-        updatedAt: new Date()
+        updatedAt: new Date(),
       })
       .where(eq(labourHireTimesheets.id, id))
       .returning();
     return updatedTimesheet;
   }
-  
+
   // Labour Hire Worker Document methods
   async getLabourHireWorkerDocument(id: number): Promise<LabourHireWorkerDocument | undefined> {
     const [document] = await db
@@ -806,7 +1112,7 @@ export class DatabaseStorage implements IStorage {
       .where(eq(labourHireWorkerDocuments.id, id));
     return document;
   }
-  
+
   async getLabourHireWorkerDocuments(workerId: number): Promise<LabourHireWorkerDocument[]> {
     return await db
       .select()
@@ -814,132 +1120,142 @@ export class DatabaseStorage implements IStorage {
       .where(eq(labourHireWorkerDocuments.workerId, workerId))
       .orderBy(labourHireWorkerDocuments.documentType);
   }
-  
-  async createLabourHireWorkerDocument(document: InsertLabourHireWorkerDocument): Promise<LabourHireWorkerDocument> {
+
+  async createLabourHireWorkerDocument(
+    document: InsertLabourHireWorkerDocument
+  ): Promise<LabourHireWorkerDocument> {
     const [createdDocument] = await db
       .insert(labourHireWorkerDocuments)
       .values({
         ...document,
         createdAt: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
       })
       .returning();
     return createdDocument;
   }
-  
-  async updateLabourHireWorkerDocument(id: number, document: Partial<InsertLabourHireWorkerDocument>): Promise<LabourHireWorkerDocument | undefined> {
+
+  async updateLabourHireWorkerDocument(
+    id: number,
+    document: Partial<InsertLabourHireWorkerDocument>
+  ): Promise<LabourHireWorkerDocument | undefined> {
     const [updatedDocument] = await db
       .update(labourHireWorkerDocuments)
       .set({
         ...document,
-        updatedAt: new Date()
+        updatedAt: new Date(),
       })
       .where(eq(labourHireWorkerDocuments.id, id))
       .returning();
     return updatedDocument;
   }
-  
-  async verifyLabourHireWorkerDocument(id: number, verifiedBy: number): Promise<LabourHireWorkerDocument | undefined> {
+
+  async verifyLabourHireWorkerDocument(
+    id: number,
+    verifiedBy: number
+  ): Promise<LabourHireWorkerDocument | undefined> {
     const [updatedDocument] = await db
       .update(labourHireWorkerDocuments)
       .set({
         verificationStatus: 'verified',
         verifiedBy,
         verificationDate: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
       })
       .where(eq(labourHireWorkerDocuments.id, id))
       .returning();
     return updatedDocument;
   }
-  
-  async rejectLabourHireWorkerDocument(id: number, reason: string): Promise<LabourHireWorkerDocument | undefined> {
+
+  async rejectLabourHireWorkerDocument(
+    id: number,
+    reason: string
+  ): Promise<LabourHireWorkerDocument | undefined> {
     const [updatedDocument] = await db
       .update(labourHireWorkerDocuments)
       .set({
         verificationStatus: 'rejected',
         notes: reason,
-        updatedAt: new Date()
+        updatedAt: new Date(),
       })
       .where(eq(labourHireWorkerDocuments.id, id))
       .returning();
     return updatedDocument;
   }
-  
+
   // Host Employer Preferred Qualifications methods
-  async getHostEmployerPreferredQualifications(hostEmployerId: number): Promise<HostEmployerPreferredQualification[]> {
+  async getHostEmployerPreferredQualifications(
+    hostEmployerId: number
+  ): Promise<HostEmployerPreferredQualification[]> {
     return await db
       .select()
       .from(hostEmployerPreferredQualifications)
       .where(eq(hostEmployerPreferredQualifications.hostEmployerId, hostEmployerId));
   }
-  
-  async getHostEmployerPreferredQualification(id: number): Promise<HostEmployerPreferredQualification | undefined> {
+
+  async getHostEmployerPreferredQualification(
+    id: number
+  ): Promise<HostEmployerPreferredQualification | undefined> {
     const [qualification] = await db
       .select()
       .from(hostEmployerPreferredQualifications)
       .where(eq(hostEmployerPreferredQualifications.id, id));
     return qualification;
   }
-  
-  async addHostEmployerPreferredQualification(qualification: InsertHostEmployerPreferredQualification): Promise<HostEmployerPreferredQualification> {
+
+  async addHostEmployerPreferredQualification(
+    qualification: InsertHostEmployerPreferredQualification
+  ): Promise<HostEmployerPreferredQualification> {
     const [created] = await db
       .insert(hostEmployerPreferredQualifications)
       .values(qualification)
       .returning();
     return created;
   }
-  
-  async updateHostEmployerPreferredQualification(id: number, qualification: Partial<InsertHostEmployerPreferredQualification>): Promise<HostEmployerPreferredQualification | undefined> {
+
+  async updateHostEmployerPreferredQualification(
+    id: number,
+    qualification: Partial<InsertHostEmployerPreferredQualification>
+  ): Promise<HostEmployerPreferredQualification | undefined> {
     const [updated] = await db
       .update(hostEmployerPreferredQualifications)
       .set({
         ...qualification,
-        updatedAt: new Date()
+        updatedAt: new Date(),
       })
       .where(eq(hostEmployerPreferredQualifications.id, id))
       .returning();
     return updated;
   }
-  
+
   async removeHostEmployerPreferredQualification(id: number): Promise<boolean> {
     const result = await db
       .delete(hostEmployerPreferredQualifications)
       .where(eq(hostEmployerPreferredQualifications.id, id));
     return result.rowCount ? result.rowCount > 0 : false;
   }
-  
+
   // Qualification methods
   async getQualification(id: number): Promise<Qualification | undefined> {
-    const [qualification] = await db
-      .select()
-      .from(qualifications)
-      .where(eq(qualifications.id, id));
+    const [qualification] = await db.select().from(qualifications).where(eq(qualifications.id, id));
     return qualification;
   }
-  
+
   async getAllQualifications(): Promise<Qualification[]> {
-    return await db
-      .select()
-      .from(qualifications)
-      .orderBy(qualifications.qualificationTitle);
+    return await db.select().from(qualifications).orderBy(qualifications.qualificationTitle);
   }
-  
+
   async searchQualifications(query: string): Promise<Qualification[]> {
     const searchTerm = query.trim().toLowerCase();
-    const allQualifications = await db
-      .select()
-      .from(qualifications);
-      
+    const allQualifications = await db.select().from(qualifications);
+
     // Filter qualifications that match the search term in a case-insensitive way
     return allQualifications.filter(qualification => {
       const title = qualification.qualificationTitle?.toLowerCase() || '';
       const code = qualification.qualificationCode?.toLowerCase() || '';
       const desc = qualification.qualificationDescription?.toLowerCase() || '';
-      
-      return title.includes(searchTerm) || 
-             code.includes(searchTerm) || 
-             desc.includes(searchTerm);
+
+      return title.includes(searchTerm) || code.includes(searchTerm) || desc.includes(searchTerm);
     });
   }
 
@@ -1035,7 +1351,7 @@ export class DatabaseStorage implements IStorage {
       .from(permissions)
       .innerJoin(rolePermissions, eq(permissions.id, rolePermissions.permissionId))
       .where(eq(rolePermissions.roleId, roleId));
-    
+
     return result.map(r => ({ ...r.permissions }));
   }
 
@@ -1050,16 +1366,13 @@ export class DatabaseStorage implements IStorage {
           eq(rolePermissions.permissionId, rolePermission.permissionId)
         )
       );
-    
+
     if (existing) {
       return existing;
     }
-    
-    const [created] = await db
-      .insert(rolePermissions)
-      .values(rolePermission)
-      .returning();
-    
+
+    const [created] = await db.insert(rolePermissions).values(rolePermission).returning();
+
     return created;
   }
 
@@ -1067,12 +1380,9 @@ export class DatabaseStorage implements IStorage {
     const result = await db
       .delete(rolePermissions)
       .where(
-        and(
-          eq(rolePermissions.roleId, roleId),
-          eq(rolePermissions.permissionId, permissionId)
-        )
+        and(eq(rolePermissions.roleId, roleId), eq(rolePermissions.permissionId, permissionId))
       );
-    
+
     return result.rowCount > 0;
   }
 
@@ -1091,7 +1401,10 @@ export class DatabaseStorage implements IStorage {
     return createdPlan;
   }
 
-  async updateSubscriptionPlan(id: number, plan: Partial<InsertSubscriptionPlan>): Promise<SubscriptionPlan | undefined> {
+  async updateSubscriptionPlan(
+    id: number,
+    plan: Partial<InsertSubscriptionPlan>
+  ): Promise<SubscriptionPlan | undefined> {
     const [updatedPlan] = await db
       .update(subscriptionPlans)
       .set({ ...plan, updatedAt: new Date() })
@@ -1121,11 +1434,11 @@ export class DatabaseStorage implements IStorage {
         complianceStatus: sql<string>`compliance_status`,
         notes: hostEmployers.notes,
         isGto: sql<boolean>`is_gto`,
-        labourHireLicenceNo: sql<string>`labour_hire_licence_no`
+        labourHireLicenceNo: sql<string>`labour_hire_licence_no`,
       })
       .from(hostEmployers)
       .where(eq(hostEmployers.id, id));
-    
+
     return hostEmployer as HostEmployer | undefined;
   }
 
@@ -1144,11 +1457,11 @@ export class DatabaseStorage implements IStorage {
         complianceStatus: sql<string>`compliance_status`,
         notes: hostEmployers.notes,
         isGto: sql<boolean>`is_gto`,
-        labourHireLicenceNo: sql<string>`labour_hire_licence_no`
+        labourHireLicenceNo: sql<string>`labour_hire_licence_no`,
       })
       .from(hostEmployers)
       .orderBy(hostEmployers.name);
-    
+
     return employers as HostEmployer[];
   }
 
@@ -1177,36 +1490,43 @@ export class DatabaseStorage implements IStorage {
         notes, is_gto as "isGto", 
         labour_hire_licence_no as "labourHireLicenceNo"
     `);
-    
+
     if (result.rows.length === 0) {
       throw new Error('Failed to create host employer');
     }
     return result.rows[0] as HostEmployer;
   }
 
-  async updateHostEmployer(id: number, employer: Partial<InsertHostEmployer>): Promise<HostEmployer | undefined> {
+  async updateHostEmployer(
+    id: number,
+    employer: Partial<InsertHostEmployer>
+  ): Promise<HostEmployer | undefined> {
     // If no fields to update, return the existing record
     if (Object.keys(employer).length === 0) {
       return await this.getHostEmployer(id);
     }
-    
+
     // Build a dynamic SQL query with included fields
     let query = sql`UPDATE host_employers SET `;
-    let setClauses: SQL[] = [];
-    
+    const setClauses: SQL[] = [];
+
     if (employer.name !== undefined) setClauses.push(sql`name = ${employer.name}`);
     if (employer.industry !== undefined) setClauses.push(sql`industry = ${employer.industry}`);
-    if (employer.contactPerson !== undefined) setClauses.push(sql`contact_person = ${employer.contactPerson}`);
+    if (employer.contactPerson !== undefined)
+      setClauses.push(sql`contact_person = ${employer.contactPerson}`);
     if (employer.email !== undefined) setClauses.push(sql`email = ${employer.email}`);
     if (employer.phone !== undefined) setClauses.push(sql`phone = ${employer.phone}`);
     if (employer.address !== undefined) setClauses.push(sql`address = ${employer.address}`);
     if (employer.status !== undefined) setClauses.push(sql`status = ${employer.status}`);
-    if (employer.safetyRating !== undefined) setClauses.push(sql`safety_rating = ${employer.safetyRating}`);
-    if (employer.complianceStatus !== undefined) setClauses.push(sql`compliance_status = ${employer.complianceStatus}`);
+    if (employer.safetyRating !== undefined)
+      setClauses.push(sql`safety_rating = ${employer.safetyRating}`);
+    if (employer.complianceStatus !== undefined)
+      setClauses.push(sql`compliance_status = ${employer.complianceStatus}`);
     if (employer.notes !== undefined) setClauses.push(sql`notes = ${employer.notes}`);
     if (employer.isGto !== undefined) setClauses.push(sql`is_gto = ${employer.isGto}`);
-    if (employer.labourHireLicenceNo !== undefined) setClauses.push(sql`labour_hire_licence_no = ${employer.labourHireLicenceNo}`);
-    
+    if (employer.labourHireLicenceNo !== undefined)
+      setClauses.push(sql`labour_hire_licence_no = ${employer.labourHireLicenceNo}`);
+
     // Join the SET clauses
     for (let i = 0; i < setClauses.length; i++) {
       query = sql`${query}${setClauses[i]}`;
@@ -1214,7 +1534,7 @@ export class DatabaseStorage implements IStorage {
         query = sql`${query}, `;
       }
     }
-    
+
     query = sql`${query} WHERE id = ${id} RETURNING 
       id, name, industry, contact_person as "contactPerson", 
       email, phone, address, status, 
@@ -1222,9 +1542,9 @@ export class DatabaseStorage implements IStorage {
       compliance_status as "complianceStatus", 
       notes, is_gto as "isGto", 
       labour_hire_licence_no as "labourHireLicenceNo"`;
-    
+
     const result = await db.execute(query);
-    return result.rows.length > 0 ? result.rows[0] as HostEmployer : undefined;
+    return result.rows.length > 0 ? (result.rows[0] as HostEmployer) : undefined;
   }
 
   async deleteHostEmployer(id: number): Promise<boolean> {
@@ -1252,7 +1572,10 @@ export class DatabaseStorage implements IStorage {
     return createdApprentice;
   }
 
-  async updateApprentice(id: number, apprentice: Partial<InsertApprentice>): Promise<Apprentice | undefined> {
+  async updateApprentice(
+    id: number,
+    apprentice: Partial<InsertApprentice>
+  ): Promise<Apprentice | undefined> {
     const [updatedApprentice] = await db
       .update(apprentices)
       .set(apprentice)
@@ -1268,7 +1591,10 @@ export class DatabaseStorage implements IStorage {
 
   // Training Contract methods
   async getTrainingContract(id: number): Promise<TrainingContract | undefined> {
-    const [contract] = await db.select().from(trainingContracts).where(eq(trainingContracts.id, id));
+    const [contract] = await db
+      .select()
+      .from(trainingContracts)
+      .where(eq(trainingContracts.id, id));
     return contract;
   }
 
@@ -1277,7 +1603,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getTrainingContractsByApprentice(apprenticeId: number): Promise<TrainingContract[]> {
-    return await db.select().from(trainingContracts).where(eq(trainingContracts.apprenticeId, apprenticeId));
+    return await db
+      .select()
+      .from(trainingContracts)
+      .where(eq(trainingContracts.apprenticeId, apprenticeId));
   }
 
   async createTrainingContract(contract: InsertTrainingContract): Promise<TrainingContract> {
@@ -1285,7 +1614,10 @@ export class DatabaseStorage implements IStorage {
     return createdContract;
   }
 
-  async updateTrainingContract(id: number, contract: Partial<InsertTrainingContract>): Promise<TrainingContract | undefined> {
+  async updateTrainingContract(
+    id: number,
+    contract: Partial<InsertTrainingContract>
+  ): Promise<TrainingContract | undefined> {
     const [updatedContract] = await db
       .update(trainingContracts)
       .set(contract)
@@ -1322,7 +1654,10 @@ export class DatabaseStorage implements IStorage {
     return createdPlacement;
   }
 
-  async updatePlacement(id: number, placement: Partial<InsertPlacement>): Promise<Placement | undefined> {
+  async updatePlacement(
+    id: number,
+    placement: Partial<InsertPlacement>
+  ): Promise<Placement | undefined> {
     const [updatedPlacement] = await db
       .update(placements)
       .set(placement)
@@ -1335,7 +1670,7 @@ export class DatabaseStorage implements IStorage {
     const result = await db.delete(placements).where(eq(placements.id, id));
     return result.rowCount > 0;
   }
-  
+
   // Document methods
   async getDocument(id: number): Promise<Document | undefined> {
     const [document] = await db.select().from(documents).where(eq(documents.id, id));
@@ -1347,13 +1682,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getDocumentsByRelation(relatedTo: string, relatedId: number): Promise<Document[]> {
-    return await db.select().from(documents)
-      .where(
-        and(
-          eq(documents.relatedTo, relatedTo),
-          eq(documents.relatedId, relatedId)
-        )
-      );
+    return await db
+      .select()
+      .from(documents)
+      .where(and(eq(documents.relatedTo, relatedTo), eq(documents.relatedId, relatedId)));
   }
 
   async createDocument(document: InsertDocument): Promise<Document> {
@@ -1361,7 +1693,10 @@ export class DatabaseStorage implements IStorage {
     return createdDocument;
   }
 
-  async updateDocument(id: number, document: Partial<InsertDocument>): Promise<Document | undefined> {
+  async updateDocument(
+    id: number,
+    document: Partial<InsertDocument>
+  ): Promise<Document | undefined> {
     const [updatedDocument] = await db
       .update(documents)
       .set(document)
@@ -1374,19 +1709,21 @@ export class DatabaseStorage implements IStorage {
     const result = await db.delete(documents).where(eq(documents.id, id));
     return result.rowCount > 0;
   }
-  
+
   // Compliance Record methods
   async getAllComplianceRecords(): Promise<ComplianceRecord[]> {
     return await db.select().from(complianceRecords);
   }
 
-  async getComplianceRecordsByRelation(relatedTo: string, relatedId: number): Promise<ComplianceRecord[]> {
-    return await db.select().from(complianceRecords)
+  async getComplianceRecordsByRelation(
+    relatedTo: string,
+    relatedId: number
+  ): Promise<ComplianceRecord[]> {
+    return await db
+      .select()
+      .from(complianceRecords)
       .where(
-        and(
-          eq(complianceRecords.relatedTo, relatedTo),
-          eq(complianceRecords.relatedId, relatedId)
-        )
+        and(eq(complianceRecords.relatedTo, relatedTo), eq(complianceRecords.relatedId, relatedId))
       );
   }
 
@@ -1395,7 +1732,10 @@ export class DatabaseStorage implements IStorage {
     return createdRecord;
   }
 
-  async updateComplianceRecord(id: number, record: Partial<InsertComplianceRecord>): Promise<ComplianceRecord | undefined> {
+  async updateComplianceRecord(
+    id: number,
+    record: Partial<InsertComplianceRecord>
+  ): Promise<ComplianceRecord | undefined> {
     const [updatedRecord] = await db
       .update(complianceRecords)
       .set(record)
@@ -1403,7 +1743,7 @@ export class DatabaseStorage implements IStorage {
       .returning();
     return updatedRecord;
   }
-  
+
   // Task methods
   async getAllTasks(): Promise<Task[]> {
     return await db.select().from(tasks).orderBy(desc(tasks.dueDate));
@@ -1415,7 +1755,11 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getTasksByAssignee(assigneeId: number): Promise<Task[]> {
-    return await db.select().from(tasks).where(eq(tasks.assignedTo, assigneeId)).orderBy(desc(tasks.dueDate));
+    return await db
+      .select()
+      .from(tasks)
+      .where(eq(tasks.assignedTo, assigneeId))
+      .orderBy(desc(tasks.dueDate));
   }
 
   async createTask(task: InsertTask): Promise<Task> {
@@ -1424,11 +1768,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateTask(id: number, task: Partial<InsertTask>): Promise<Task | undefined> {
-    const [updatedTask] = await db
-      .update(tasks)
-      .set(task)
-      .where(eq(tasks.id, id))
-      .returning();
+    const [updatedTask] = await db.update(tasks).set(task).where(eq(tasks.id, id)).returning();
     return updatedTask;
   }
 
@@ -1437,13 +1777,13 @@ export class DatabaseStorage implements IStorage {
       .update(tasks)
       .set({
         status: 'completed',
-        completedAt: new Date()
+        completedAt: new Date(),
       })
       .where(eq(tasks.id, id))
       .returning();
     return completedTask;
   }
-  
+
   // Timesheet methods
   async getAllTimesheets(): Promise<Timesheet[]> {
     return await db.select().from(timesheets).orderBy(desc(timesheets.weekStarting));
@@ -1455,7 +1795,9 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getTimesheetsByApprentice(apprenticeId: number): Promise<Timesheet[]> {
-    return await db.select().from(timesheets)
+    return await db
+      .select()
+      .from(timesheets)
       .where(eq(timesheets.apprenticeId, apprenticeId))
       .orderBy(desc(timesheets.weekStarting));
   }
@@ -1465,7 +1807,10 @@ export class DatabaseStorage implements IStorage {
     return createdTimesheet;
   }
 
-  async updateTimesheet(id: number, timesheet: Partial<InsertTimesheet>): Promise<Timesheet | undefined> {
+  async updateTimesheet(
+    id: number,
+    timesheet: Partial<InsertTimesheet>
+  ): Promise<Timesheet | undefined> {
     const [updatedTimesheet] = await db
       .update(timesheets)
       .set(timesheet)
@@ -1473,32 +1818,37 @@ export class DatabaseStorage implements IStorage {
       .returning();
     return updatedTimesheet;
   }
-  
+
   // Activity Log methods
   async createActivityLog(log: InsertActivityLog): Promise<ActivityLog> {
     const [createdLog] = await db.insert(activityLogs).values(log).returning();
     return createdLog;
   }
 
-  async getActivityLogs(options?: { userId?: number, relatedTo?: string, relatedId?: number, limit?: number }): Promise<ActivityLog[]> {
+  async getActivityLogs(options?: {
+    userId?: number;
+    relatedTo?: string;
+    relatedId?: number;
+    limit?: number;
+  }): Promise<ActivityLog[]> {
     let query = db.select().from(activityLogs).orderBy(desc(activityLogs.timestamp));
-    
+
     if (options?.userId) {
       query = query.where(eq(activityLogs.userId, options.userId));
     }
-    
+
     if (options?.relatedTo) {
       query = query.where(eq(activityLogs.relatedTo, options.relatedTo));
     }
-    
+
     if (options?.relatedId) {
       query = query.where(eq(activityLogs.relatedId, options.relatedId));
     }
-    
+
     if (options?.limit) {
       query = query.limit(options.limit);
     }
-    
+
     return await query;
   }
 
@@ -1517,26 +1867,26 @@ export class DatabaseStorage implements IStorage {
   }
 
   async setSystemConfig(config: InsertSystemConfig): Promise<SystemConfig> {
-    const [existingConfig] = await db.select().from(systemConfig).where(eq(systemConfig.key, config.key));
-    
+    const [existingConfig] = await db
+      .select()
+      .from(systemConfig)
+      .where(eq(systemConfig.key, config.key));
+
     if (existingConfig) {
       const [updatedConfig] = await db
         .update(systemConfig)
         .set({
           value: config.value,
           description: config.description,
-          updatedAt: new Date()
+          updatedAt: new Date(),
         })
         .where(eq(systemConfig.key, config.key))
         .returning();
-      
+
       return updatedConfig;
     } else {
-      const [newConfig] = await db
-        .insert(systemConfig)
-        .values(config)
-        .returning();
-      
+      const [newConfig] = await db.insert(systemConfig).values(config).returning();
+
       return newConfig;
     }
   }
@@ -1553,7 +1903,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getIntegrationByProvider(provider: string): Promise<Integration | undefined> {
-    const [integration] = await db.select().from(integrations).where(eq(integrations.provider, provider));
+    const [integration] = await db
+      .select()
+      .from(integrations)
+      .where(eq(integrations.provider, provider));
     return integration;
   }
 
@@ -1566,7 +1919,10 @@ export class DatabaseStorage implements IStorage {
     return createdIntegration;
   }
 
-  async updateIntegration(id: number, integration: Partial<InsertIntegration>): Promise<Integration | undefined> {
+  async updateIntegration(
+    id: number,
+    integration: Partial<InsertIntegration>
+  ): Promise<Integration | undefined> {
     const [updatedIntegration] = await db
       .update(integrations)
       .set({ ...integration, updatedAt: new Date() })
@@ -1580,39 +1936,39 @@ export class DatabaseStorage implements IStorage {
     return result.rowCount > 0;
   }
 
-  async testIntegrationConnection(id: number): Promise<{ success: boolean, message: string }> {
+  async testIntegrationConnection(id: number): Promise<{ success: boolean; message: string }> {
     const [integration] = await db.select().from(integrations).where(eq(integrations.id, id));
-    
+
     if (!integration) {
-      return { success: false, message: "Integration not found" };
+      return { success: false, message: 'Integration not found' };
     }
-    
+
     // Simulate testing different integrations
     switch (integration.type) {
       case 'api':
         if (integration.provider === 'Fair Work') {
           if (integration.apiKey && integration.apiUrl) {
-            return { success: true, message: "Successfully connected to Fair Work API" };
+            return { success: true, message: 'Successfully connected to Fair Work API' };
           } else {
-            return { success: false, message: "Missing API key or URL" };
+            return { success: false, message: 'Missing API key or URL' };
           }
         }
         break;
-      
+
       case 'notification':
         if (integration.provider === 'SMTP') {
-          const config = integration.config as Record<string, any> || {};
+          const config = (integration.config as Record<string, any>) || {};
           if (config.smtpHost && config.smtpPort) {
-            return { success: true, message: "Successfully connected to SMTP server" };
+            return { success: true, message: 'Successfully connected to SMTP server' };
           } else {
-            return { success: false, message: "Missing SMTP configuration" };
+            return { success: false, message: 'Missing SMTP configuration' };
           }
         }
         break;
     }
-    
+
     // Generic success response for other integrations
-    return { success: true, message: "Test connection simulated successfully" };
+    return { success: true, message: 'Test connection simulated successfully' };
   }
 
   async syncIntegration(id: number): Promise<boolean> {
@@ -1620,11 +1976,11 @@ export class DatabaseStorage implements IStorage {
       .update(integrations)
       .set({
         lastSynced: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
       })
       .where(eq(integrations.id, id))
       .returning();
-    
+
     return !!integration;
   }
 
@@ -1634,21 +1990,25 @@ export class DatabaseStorage implements IStorage {
     return job;
   }
 
-  async getAllDataJobs(options?: { type?: string, status?: string, limit?: number }): Promise<DataJob[]> {
+  async getAllDataJobs(options?: {
+    type?: string;
+    status?: string;
+    limit?: number;
+  }): Promise<DataJob[]> {
     let query = db.select().from(dataJobs).orderBy(desc(dataJobs.createdAt));
-    
+
     if (options?.type) {
       query = query.where(eq(dataJobs.type, options.type));
     }
-    
+
     if (options?.status) {
       query = query.where(eq(dataJobs.status, options.status));
     }
-    
+
     if (options?.limit) {
       query = query.limit(options.limit);
     }
-    
+
     return await query;
   }
 
@@ -1657,27 +2017,31 @@ export class DatabaseStorage implements IStorage {
     return createdJob;
   }
 
-  async updateDataJobStatus(id: number, status: string, options?: { recordsProcessed?: number, errors?: any[] }): Promise<DataJob | undefined> {
+  async updateDataJobStatus(
+    id: number,
+    status: string,
+    options?: { recordsProcessed?: number; errors?: any[] }
+  ): Promise<DataJob | undefined> {
     const updates: Partial<DataJob> = { status };
-    
+
     if (options?.recordsProcessed !== undefined) {
       updates.recordsProcessed = options.recordsProcessed;
     }
-    
+
     if (options?.errors !== undefined) {
       updates.errors = options.errors;
     }
-    
+
     if (status === 'completed' || status === 'failed') {
       updates.completedAt = new Date();
     }
-    
+
     const [updatedJob] = await db
       .update(dataJobs)
       .set(updates)
       .where(eq(dataJobs.id, id))
       .returning();
-    
+
     return updatedJob;
   }
 
@@ -1694,16 +2058,11 @@ export class DatabaseStorage implements IStorage {
 
   async getAllDataViews(userId?: number): Promise<DataView[]> {
     let query = db.select().from(dataViews);
-    
+
     if (userId) {
-      query = query.where(
-        or(
-          eq(dataViews.userId, userId),
-          eq(dataViews.isPublic, true)
-        )
-      );
+      query = query.where(or(eq(dataViews.userId, userId), eq(dataViews.isPublic, true)));
     }
-    
+
     return await query;
   }
 
@@ -1725,102 +2084,95 @@ export class DatabaseStorage implements IStorage {
     const result = await db.delete(dataViews).where(eq(dataViews.id, id));
     return result.rowCount > 0;
   }
-  
+
   // =============== UNIFIED CONTACTS SYSTEM ===============
-  
+
   // Unified Contacts methods
   async getContact(id: number): Promise<Contact | undefined> {
-    const [contact] = await db
-      .select()
-      .from(contacts)
-      .where(eq(contacts.id, id));
+    const [contact] = await db.select().from(contacts).where(eq(contacts.id, id));
     return contact;
   }
-  
+
   async getContactByEmail(email: string): Promise<Contact | undefined> {
-    const [contact] = await db
-      .select()
-      .from(contacts)
-      .where(eq(contacts.email, email));
+    const [contact] = await db.select().from(contacts).where(eq(contacts.email, email));
     return contact;
   }
-  
-  async getAllContacts(options?: { primaryRole?: string, isActive?: boolean, organizationId?: number }): Promise<Contact[]> {
+
+  async getAllContacts(options?: {
+    primaryRole?: string;
+    isActive?: boolean;
+    organizationId?: number;
+  }): Promise<Contact[]> {
     let query = db.select().from(contacts);
-    
+
     if (options) {
       if (options.primaryRole) {
         query = query.where(eq(contacts.primaryRole, options.primaryRole));
       }
-      
+
       if (options.isActive !== undefined) {
         query = query.where(eq(contacts.isActive, options.isActive));
       }
-      
+
       if (options.organizationId) {
         query = query.where(eq(contacts.organizationId, options.organizationId));
       }
     }
-    
+
     return await query.orderBy(contacts.lastName, contacts.firstName);
   }
-  
+
   async createContact(contact: InsertContact): Promise<Contact> {
     const [createdContact] = await db
       .insert(contacts)
       .values({
         ...contact,
         createdAt: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
       })
       .returning();
     return createdContact;
   }
-  
+
   async updateContact(id: number, contact: Partial<InsertContact>): Promise<Contact | undefined> {
     const [updatedContact] = await db
       .update(contacts)
       .set({
         ...contact,
-        updatedAt: new Date()
+        updatedAt: new Date(),
       })
       .where(eq(contacts.id, id))
       .returning();
     return updatedContact;
   }
-  
+
   async deactivateContact(id: number): Promise<boolean> {
     const [updatedContact] = await db
       .update(contacts)
       .set({
         isActive: false,
-        updatedAt: new Date()
+        updatedAt: new Date(),
       })
       .where(eq(contacts.id, id))
       .returning();
     return !!updatedContact;
   }
-  
+
   async deleteContact(id: number): Promise<boolean> {
-    const result = await db
-      .delete(contacts)
-      .where(eq(contacts.id, id));
+    const result = await db.delete(contacts).where(eq(contacts.id, id));
     return result.rowCount ? result.rowCount > 0 : false;
   }
-  
+
   // Contact Tags methods
   async getContactTag(id: number): Promise<ContactTag | undefined> {
-    const [tag] = await db
-      .select()
-      .from(contactTags)
-      .where(eq(contactTags.id, id));
+    const [tag] = await db.select().from(contactTags).where(eq(contactTags.id, id));
     return tag;
   }
-  
+
   async getAllContactTags(): Promise<ContactTag[]> {
     try {
-      console.log("Getting all contact tags...");
-      
+      console.log('Getting all contact tags...');
+
       // Use SQL directly to avoid Drizzle ORM issues with schema
       const result = await db.execute(
         sql`SELECT id, name, description, color, is_system as "isSystem", 
@@ -1828,25 +2180,25 @@ export class DatabaseStorage implements IStorage {
             FROM contact_tags
             ORDER BY name ASC`
       );
-      
-      console.log("Tags retrieved:", result.length);
+
+      console.log('Tags retrieved:', result.length);
       return result;
     } catch (error) {
-      console.error("Error getting all contact tags:", error);
-      console.error("Error details:", error.stack);
+      console.error('Error getting all contact tags:', error);
+      console.error('Error details:', error.stack);
       throw error;
     }
   }
-  
+
   async createContactTag(tag: InsertContactTag): Promise<ContactTag> {
-    const [createdTag] = await db
-      .insert(contactTags)
-      .values(tag)
-      .returning();
+    const [createdTag] = await db.insert(contactTags).values(tag).returning();
     return createdTag;
   }
-  
-  async updateContactTag(id: number, tag: Partial<InsertContactTag>): Promise<ContactTag | undefined> {
+
+  async updateContactTag(
+    id: number,
+    tag: Partial<InsertContactTag>
+  ): Promise<ContactTag | undefined> {
     const [updatedTag] = await db
       .update(contactTags)
       .set(tag)
@@ -1854,14 +2206,12 @@ export class DatabaseStorage implements IStorage {
       .returning();
     return updatedTag;
   }
-  
+
   async deleteContactTag(id: number): Promise<boolean> {
-    const result = await db
-      .delete(contactTags)
-      .where(eq(contactTags.id, id));
+    const result = await db.delete(contactTags).where(eq(contactTags.id, id));
     return result.rowCount ? result.rowCount > 0 : false;
   }
-  
+
   // Contact Tag Assignment methods
   async assignTagToContact(assignment: InsertContactTagAssignment): Promise<ContactTagAssignment> {
     const [createdAssignment] = await db
@@ -1870,19 +2220,16 @@ export class DatabaseStorage implements IStorage {
       .returning();
     return createdAssignment;
   }
-  
+
   async removeTagFromContact(contactId: number, tagId: number): Promise<boolean> {
     const result = await db
       .delete(contactTagAssignments)
       .where(
-        and(
-          eq(contactTagAssignments.contactId, contactId),
-          eq(contactTagAssignments.tagId, tagId)
-        )
+        and(eq(contactTagAssignments.contactId, contactId), eq(contactTagAssignments.tagId, tagId))
       );
     return result.rowCount ? result.rowCount > 0 : false;
   }
-  
+
   async getContactTags(contactId: number): Promise<ContactTag[]> {
     return await db
       .select({
@@ -1893,14 +2240,14 @@ export class DatabaseStorage implements IStorage {
         organizationId: contactTags.organizationId,
         isSystem: contactTags.isSystem,
         createdAt: contactTags.createdAt,
-        updatedAt: contactTags.updatedAt
+        updatedAt: contactTags.updatedAt,
       })
       .from(contactTagAssignments)
       .innerJoin(contactTags, eq(contactTagAssignments.tagId, contactTags.id))
       .where(eq(contactTagAssignments.contactId, contactId))
       .orderBy(contactTags.name);
   }
-  
+
   async getTaggedContacts(tagId: number): Promise<Contact[]> {
     return await db
       .select({
@@ -1916,45 +2263,45 @@ export class DatabaseStorage implements IStorage {
         isActive: contacts.isActive,
         organizationId: contacts.organizationId,
         createdAt: contacts.createdAt,
-        updatedAt: contacts.updatedAt
+        updatedAt: contacts.updatedAt,
       })
       .from(contactTagAssignments)
       .innerJoin(contacts, eq(contactTagAssignments.contactId, contacts.id))
       .where(eq(contactTagAssignments.tagId, tagId))
       .orderBy(contacts.lastName, contacts.firstName);
   }
-  
+
   // Contact Groups methods
   async getContactGroup(id: number): Promise<ContactGroup | undefined> {
-    const [group] = await db
-      .select()
-      .from(contactGroups)
-      .where(eq(contactGroups.id, id));
+    const [group] = await db.select().from(contactGroups).where(eq(contactGroups.id, id));
     return group;
   }
-  
+
   async getAllContactGroups(organizationId?: number): Promise<ContactGroup[]> {
     let query = db.select().from(contactGroups);
-    
+
     if (organizationId) {
       query = query.where(eq(contactGroups.organizationId, organizationId));
     }
-    
+
     return await query.orderBy(contactGroups.name);
   }
-  
+
   async createContactGroup(group: InsertContactGroup): Promise<ContactGroup> {
     const [createdGroup] = await db
       .insert(contactGroups)
       .values({
         ...group,
-        createdAt: new Date()
+        createdAt: new Date(),
       })
       .returning();
     return createdGroup;
   }
-  
-  async updateContactGroup(id: number, group: Partial<InsertContactGroup>): Promise<ContactGroup | undefined> {
+
+  async updateContactGroup(
+    id: number,
+    group: Partial<InsertContactGroup>
+  ): Promise<ContactGroup | undefined> {
     const [updatedGroup] = await db
       .update(contactGroups)
       .set(group)
@@ -1962,35 +2309,27 @@ export class DatabaseStorage implements IStorage {
       .returning();
     return updatedGroup;
   }
-  
+
   async deleteContactGroup(id: number): Promise<boolean> {
-    const result = await db
-      .delete(contactGroups)
-      .where(eq(contactGroups.id, id));
+    const result = await db.delete(contactGroups).where(eq(contactGroups.id, id));
     return result.rowCount ? result.rowCount > 0 : false;
   }
-  
+
   // Contact Group Members methods
   async addContactToGroup(member: InsertContactGroupMember): Promise<ContactGroupMember> {
-    const [createdMember] = await db
-      .insert(contactGroupMembers)
-      .values(member)
-      .returning();
+    const [createdMember] = await db.insert(contactGroupMembers).values(member).returning();
     return createdMember;
   }
-  
+
   async removeContactFromGroup(groupId: number, contactId: number): Promise<boolean> {
     const result = await db
       .delete(contactGroupMembers)
       .where(
-        and(
-          eq(contactGroupMembers.groupId, groupId),
-          eq(contactGroupMembers.contactId, contactId)
-        )
+        and(eq(contactGroupMembers.groupId, groupId), eq(contactGroupMembers.contactId, contactId))
       );
     return result.rowCount ? result.rowCount > 0 : false;
   }
-  
+
   async getGroupMembers(groupId: number): Promise<Contact[]> {
     return await db
       .select({
@@ -2006,14 +2345,14 @@ export class DatabaseStorage implements IStorage {
         isActive: contacts.isActive,
         organizationId: contacts.organizationId,
         createdAt: contacts.createdAt,
-        updatedAt: contacts.updatedAt
+        updatedAt: contacts.updatedAt,
       })
       .from(contactGroupMembers)
       .innerJoin(contacts, eq(contactGroupMembers.contactId, contacts.id))
       .where(eq(contactGroupMembers.groupId, groupId))
       .orderBy(contacts.lastName, contacts.firstName);
   }
-  
+
   async getContactGroups(contactId: number): Promise<ContactGroup[]> {
     return await db
       .select({
@@ -2021,14 +2360,14 @@ export class DatabaseStorage implements IStorage {
         name: contactGroups.name,
         description: contactGroups.description,
         organizationId: contactGroups.organizationId,
-        createdAt: contactGroups.createdAt
+        createdAt: contactGroups.createdAt,
       })
       .from(contactGroupMembers)
       .innerJoin(contactGroups, eq(contactGroupMembers.groupId, contactGroups.id))
       .where(eq(contactGroupMembers.contactId, contactId))
       .orderBy(contactGroups.name);
   }
-  
+
   // Contact Interactions methods
   async getContactInteraction(id: number): Promise<ContactInteraction | undefined> {
     const [interaction] = await db
@@ -2037,7 +2376,7 @@ export class DatabaseStorage implements IStorage {
       .where(eq(contactInteractions.id, id));
     return interaction;
   }
-  
+
   async getContactInteractions(contactId: number): Promise<ContactInteraction[]> {
     return await db
       .select()
@@ -2045,19 +2384,24 @@ export class DatabaseStorage implements IStorage {
       .where(eq(contactInteractions.contactId, contactId))
       .orderBy(desc(contactInteractions.interactionDate));
   }
-  
-  async createContactInteraction(interaction: InsertContactInteraction): Promise<ContactInteraction> {
+
+  async createContactInteraction(
+    interaction: InsertContactInteraction
+  ): Promise<ContactInteraction> {
     const [createdInteraction] = await db
       .insert(contactInteractions)
       .values({
         ...interaction,
-        createdAt: new Date()
+        createdAt: new Date(),
       })
       .returning();
     return createdInteraction;
   }
-  
-  async updateContactInteraction(id: number, interaction: Partial<InsertContactInteraction>): Promise<ContactInteraction | undefined> {
+
+  async updateContactInteraction(
+    id: number,
+    interaction: Partial<InsertContactInteraction>
+  ): Promise<ContactInteraction | undefined> {
     const [updatedInteraction] = await db
       .update(contactInteractions)
       .set(interaction)
@@ -2065,113 +2409,104 @@ export class DatabaseStorage implements IStorage {
       .returning();
     return updatedInteraction;
   }
-  
+
   async deleteContactInteraction(id: number): Promise<boolean> {
-    const result = await db
-      .delete(contactInteractions)
-      .where(eq(contactInteractions.id, id));
+    const result = await db.delete(contactInteractions).where(eq(contactInteractions.id, id));
     return result.rowCount ? result.rowCount > 0 : false;
   }
-  
+
   // =============== CLIENT MANAGEMENT SYSTEM ===============
-  
+
   // Client methods
   async getClient(id: number): Promise<Client | undefined> {
-    const [client] = await db
-      .select()
-      .from(clients)
-      .where(eq(clients.id, id));
+    const [client] = await db.select().from(clients).where(eq(clients.id, id));
     return client;
   }
-  
-  async getAllClients(options?: { clientType?: string, status?: string, organizationId?: number }): Promise<Client[]> {
+
+  async getAllClients(options?: {
+    clientType?: string;
+    status?: string;
+    organizationId?: number;
+  }): Promise<Client[]> {
     let query = db.select().from(clients);
-    
+
     if (options) {
       if (options.clientType) {
         query = query.where(eq(clients.clientType, options.clientType));
       }
-      
+
       if (options.status) {
         query = query.where(eq(clients.status, options.status));
       }
-      
+
       if (options.organizationId) {
         query = query.where(eq(clients.organizationId, options.organizationId));
       }
     }
-    
+
     return await query.orderBy(clients.name);
   }
-  
+
   async createClient(client: InsertClient): Promise<Client> {
     const [createdClient] = await db
       .insert(clients)
       .values({
         ...client,
         createdAt: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
       })
       .returning();
     return createdClient;
   }
-  
+
   async updateClient(id: number, client: Partial<InsertClient>): Promise<Client | undefined> {
     const [updatedClient] = await db
       .update(clients)
       .set({
         ...client,
-        updatedAt: new Date()
+        updatedAt: new Date(),
       })
       .where(eq(clients.id, id))
       .returning();
     return updatedClient;
   }
-  
+
   async deactivateClient(id: number): Promise<boolean> {
     const [updatedClient] = await db
       .update(clients)
       .set({
         status: 'inactive',
-        updatedAt: new Date()
+        updatedAt: new Date(),
       })
       .where(eq(clients.id, id))
       .returning();
     return !!updatedClient;
   }
-  
+
   async deleteClient(id: number): Promise<boolean> {
-    const result = await db
-      .delete(clients)
-      .where(eq(clients.id, id));
+    const result = await db.delete(clients).where(eq(clients.id, id));
     return result.rowCount ? result.rowCount > 0 : false;
   }
-  
+
   // Client Types methods
   async getClientType(id: number): Promise<ClientType | undefined> {
-    const [type] = await db
-      .select()
-      .from(clientTypes)
-      .where(eq(clientTypes.id, id));
+    const [type] = await db.select().from(clientTypes).where(eq(clientTypes.id, id));
     return type;
   }
-  
+
   async getAllClientTypes(): Promise<ClientType[]> {
-    return await db
-      .select()
-      .from(clientTypes)
-      .orderBy(clientTypes.name);
+    return await db.select().from(clientTypes).orderBy(clientTypes.name);
   }
-  
+
   async createClientType(type: InsertClientType): Promise<ClientType> {
-    const [createdType] = await db
-      .insert(clientTypes)
-      .values(type)
-      .returning();
+    const [createdType] = await db.insert(clientTypes).values(type).returning();
     return createdType;
   }
-  
-  async updateClientType(id: number, type: Partial<InsertClientType>): Promise<ClientType | undefined> {
+
+  async updateClientType(
+    id: number,
+    type: Partial<InsertClientType>
+  ): Promise<ClientType | undefined> {
     const [updatedType] = await db
       .update(clientTypes)
       .set(type)
@@ -2179,23 +2514,18 @@ export class DatabaseStorage implements IStorage {
       .returning();
     return updatedType;
   }
-  
+
   async deleteClientType(id: number): Promise<boolean> {
-    const result = await db
-      .delete(clientTypes)
-      .where(eq(clientTypes.id, id));
+    const result = await db.delete(clientTypes).where(eq(clientTypes.id, id));
     return result.rowCount ? result.rowCount > 0 : false;
   }
-  
+
   // Client Contacts methods
   async getClientContact(id: number): Promise<ClientContact | undefined> {
-    const [clientContact] = await db
-      .select()
-      .from(clientContacts)
-      .where(eq(clientContacts.id, id));
+    const [clientContact] = await db.select().from(clientContacts).where(eq(clientContacts.id, id));
     return clientContact;
   }
-  
+
   async getClientContacts(clientId: number): Promise<Contact[]> {
     return await db
       .select({
@@ -2211,14 +2541,14 @@ export class DatabaseStorage implements IStorage {
         isActive: contacts.isActive,
         organizationId: contacts.organizationId,
         createdAt: contacts.createdAt,
-        updatedAt: contacts.updatedAt
+        updatedAt: contacts.updatedAt,
       })
       .from(clientContacts)
       .innerJoin(contacts, eq(clientContacts.contactId, contacts.id))
       .where(eq(clientContacts.clientId, clientId))
       .orderBy(contacts.lastName, contacts.firstName);
   }
-  
+
   async addContactToClient(clientContact: InsertClientContact): Promise<ClientContact> {
     const [createdClientContact] = await db
       .insert(clientContacts)
@@ -2226,8 +2556,11 @@ export class DatabaseStorage implements IStorage {
       .returning();
     return createdClientContact;
   }
-  
-  async updateClientContact(id: number, clientContact: Partial<InsertClientContact>): Promise<ClientContact | undefined> {
+
+  async updateClientContact(
+    id: number,
+    clientContact: Partial<InsertClientContact>
+  ): Promise<ClientContact | undefined> {
     const [updatedClientContact] = await db
       .update(clientContacts)
       .set(clientContact)
@@ -2235,50 +2568,37 @@ export class DatabaseStorage implements IStorage {
       .returning();
     return updatedClientContact;
   }
-  
+
   async removeContactFromClient(clientId: number, contactId: number): Promise<boolean> {
     const result = await db
       .delete(clientContacts)
-      .where(
-        and(
-          eq(clientContacts.clientId, clientId),
-          eq(clientContacts.contactId, contactId)
-        )
-      );
+      .where(and(eq(clientContacts.clientId, clientId), eq(clientContacts.contactId, contactId)));
     return result.rowCount ? result.rowCount > 0 : false;
   }
-  
+
   async setPrimaryContact(clientId: number, contactId: number): Promise<boolean> {
     // First, reset all contacts for this client to non-primary
     await db
       .update(clientContacts)
       .set({ isPrimary: false })
       .where(eq(clientContacts.clientId, clientId));
-    
+
     // Then set the specified contact as primary
     const [updatedContact] = await db
       .update(clientContacts)
       .set({ isPrimary: true })
-      .where(
-        and(
-          eq(clientContacts.clientId, clientId),
-          eq(clientContacts.contactId, contactId)
-        )
-      )
+      .where(and(eq(clientContacts.clientId, clientId), eq(clientContacts.contactId, contactId)))
       .returning();
-    
+
     return !!updatedContact;
   }
-  
+
   // Client Services methods
   async getClientService(id: number): Promise<ClientService | undefined> {
-    const [service] = await db
-      .select()
-      .from(clientServices)
-      .where(eq(clientServices.id, id));
+    const [service] = await db.select().from(clientServices).where(eq(clientServices.id, id));
     return service;
   }
-  
+
   async getClientServices(clientId: number): Promise<ClientService[]> {
     return await db
       .select()
@@ -2286,38 +2606,39 @@ export class DatabaseStorage implements IStorage {
       .where(eq(clientServices.clientId, clientId))
       .orderBy(clientServices.serviceType);
   }
-  
+
   async addServiceToClient(service: InsertClientService): Promise<ClientService> {
     const [createdService] = await db
       .insert(clientServices)
       .values({
         ...service,
         createdAt: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
       })
       .returning();
     return createdService;
   }
-  
-  async updateClientService(id: number, service: Partial<InsertClientService>): Promise<ClientService | undefined> {
+
+  async updateClientService(
+    id: number,
+    service: Partial<InsertClientService>
+  ): Promise<ClientService | undefined> {
     const [updatedService] = await db
       .update(clientServices)
       .set({
         ...service,
-        updatedAt: new Date()
+        updatedAt: new Date(),
       })
       .where(eq(clientServices.id, id))
       .returning();
     return updatedService;
   }
-  
+
   async removeServiceFromClient(id: number): Promise<boolean> {
-    const result = await db
-      .delete(clientServices)
-      .where(eq(clientServices.id, id));
+    const result = await db.delete(clientServices).where(eq(clientServices.id, id));
     return result.rowCount ? result.rowCount > 0 : false;
   }
-  
+
   // Client Interactions methods
   async getClientInteraction(id: number): Promise<ClientInteraction | undefined> {
     const [interaction] = await db
@@ -2326,7 +2647,7 @@ export class DatabaseStorage implements IStorage {
       .where(eq(clientInteractions.id, id));
     return interaction;
   }
-  
+
   async getClientInteractions(clientId: number): Promise<ClientInteraction[]> {
     return await db
       .select()
@@ -2334,19 +2655,22 @@ export class DatabaseStorage implements IStorage {
       .where(eq(clientInteractions.clientId, clientId))
       .orderBy(desc(clientInteractions.date));
   }
-  
+
   async createClientInteraction(interaction: InsertClientInteraction): Promise<ClientInteraction> {
     const [createdInteraction] = await db
       .insert(clientInteractions)
       .values({
         ...interaction,
-        createdAt: new Date()
+        createdAt: new Date(),
       })
       .returning();
     return createdInteraction;
   }
-  
-  async updateClientInteraction(id: number, interaction: Partial<InsertClientInteraction>): Promise<ClientInteraction | undefined> {
+
+  async updateClientInteraction(
+    id: number,
+    interaction: Partial<InsertClientInteraction>
+  ): Promise<ClientInteraction | undefined> {
     const [updatedInteraction] = await db
       .update(clientInteractions)
       .set(interaction)
@@ -2354,11 +2678,9 @@ export class DatabaseStorage implements IStorage {
       .returning();
     return updatedInteraction;
   }
-  
+
   async deleteClientInteraction(id: number): Promise<boolean> {
-    const result = await db
-      .delete(clientInteractions)
-      .where(eq(clientInteractions.id, id));
+    const result = await db.delete(clientInteractions).where(eq(clientInteractions.id, id));
     return result.rowCount ? result.rowCount > 0 : false;
   }
 }

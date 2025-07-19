@@ -1,6 +1,6 @@
-import { Button } from "@/components/ui/button";
-import PublicLayout from "@/layouts/public-layout";
-import { Link } from "wouter";
+import { Button } from '@/components/ui/button';
+import PublicLayout from '@/layouts/public-layout';
+import { Link } from 'wouter';
 
 export default function HomePage() {
   return (
@@ -11,20 +11,31 @@ export default function HomePage() {
           <div className="flex flex-col items-center justify-center space-y-8 text-center">
             <div className="space-y-4 max-w-4xl">
               <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl">
-                <span className="text-braden-sky">Connecting apprentices with career opportunities, and employers with skilled talent.</span>
+                <span className="text-braden-sky">
+                  Connecting apprentices with career opportunities, and employers with skilled
+                  talent.
+                </span>
               </h1>
               <p className="mx-auto max-w-[700px] text-braden-navy md:text-xl">
-                Group Training Organisation specialising in apprenticeship and traineeship management in Western Australia.
+                Group Training Organisation specialising in apprenticeship and traineeship
+                management in Western Australia.
               </p>
             </div>
             <div className="flex flex-wrap justify-center gap-4 mt-8">
               <Link href="/find-apprenticeship">
-                <Button className="bg-braden-sky hover:bg-blue-600 text-white font-semibold px-6 py-3" size="lg">
+                <Button
+                  className="bg-braden-sky hover:bg-blue-600 text-white font-semibold px-6 py-3"
+                  size="lg"
+                >
                   Find an Apprenticeship
                 </Button>
               </Link>
               <Link href="/host-apprentice">
-                <Button variant="outline" size="lg" className="border-2 border-braden-navy bg-gray-900 text-white hover:bg-gray-800 font-semibold px-6 py-3">
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="border-2 border-braden-navy bg-gray-900 text-white hover:bg-gray-800 font-semibold px-6 py-3"
+                >
                   Become a Host Employer
                 </Button>
               </Link>
@@ -39,7 +50,9 @@ export default function HomePage() {
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
             <div className="flex flex-col items-center justify-center space-y-2 border-2 border-braden-sky rounded-lg p-6 shadow-md">
               <div className="text-4xl font-bold text-braden-navy">100+</div>
-              <div className="text-center text-sm text-braden-navy font-medium">Apprentices Placed</div>
+              <div className="text-center text-sm text-braden-navy font-medium">
+                Apprentices Placed
+              </div>
             </div>
             <div className="flex flex-col items-center justify-center space-y-2 border-2 border-braden-sky rounded-lg p-6 shadow-md">
               <div className="text-4xl font-bold text-braden-navy">50+</div>
@@ -47,11 +60,15 @@ export default function HomePage() {
             </div>
             <div className="flex flex-col items-center justify-center space-y-2 border-2 border-braden-sky rounded-lg p-6 shadow-md">
               <div className="text-4xl font-bold text-braden-navy">95%</div>
-              <div className="text-center text-sm text-braden-navy font-medium">Completion Rate</div>
+              <div className="text-center text-sm text-braden-navy font-medium">
+                Completion Rate
+              </div>
             </div>
             <div className="flex flex-col items-center justify-center space-y-2 border-2 border-braden-sky rounded-lg p-6 shadow-md">
               <div className="text-4xl font-bold text-braden-navy">15+</div>
-              <div className="text-center text-sm text-braden-navy font-medium">Industries Served</div>
+              <div className="text-center text-sm text-braden-navy font-medium">
+                Industries Served
+              </div>
             </div>
           </div>
         </div>
@@ -66,7 +83,8 @@ export default function HomePage() {
                 What Our Clients Say
               </h2>
               <p className="mx-auto max-w-[700px] text-braden-navy md:text-xl">
-                Hear from our apprentices and host employers about their experience working with Braden Group.
+                Hear from our apprentices and host employers about their experience working with
+                Braden Group.
               </p>
             </div>
             <div className="w-full grid gap-6 py-8 md:grid-cols-2 lg:gap-10 max-w-5xl">
@@ -84,7 +102,8 @@ export default function HomePage() {
                     </div>
                   </div>
                   <blockquote className="mt-4 border-l-4 border-braden-gold pl-4 italic text-braden-navy">
-                    "Braden Group made it easy to find an apprenticeship that matched my skills and interests. The support I've received has been amazing."
+                    "Braden Group made it easy to find an apprenticeship that matched my skills and
+                    interests. The support I've received has been amazing."
                   </blockquote>
                 </div>
               </div>
@@ -98,11 +117,14 @@ export default function HomePage() {
                     </div>
                     <div className="grid gap-1">
                       <h3 className="text-xl font-bold text-braden-navy">Sarah Johnson</h3>
-                      <p className="text-sm text-braden-slate">Host Employer - Johnson Construction</p>
+                      <p className="text-sm text-braden-slate">
+                        Host Employer - Johnson Construction
+                      </p>
                     </div>
                   </div>
                   <blockquote className="mt-4 border-l-4 border-braden-gold pl-4 italic text-braden-navy">
-                    "Working with Braden Group has removed the administrative burden of managing apprentices while giving us access to top talent."
+                    "Working with Braden Group has removed the administrative burden of managing
+                    apprentices while giving us access to top talent."
                   </blockquote>
                 </div>
               </div>
@@ -120,12 +142,16 @@ export default function HomePage() {
                 Ready to get started?
               </h2>
               <p className="mx-auto max-w-[600px] text-gray-200 md:text-xl">
-                Whether you're looking for an apprenticeship or want to host an apprentice, we're here to help.
+                Whether you're looking for an apprenticeship or want to host an apprentice, we're
+                here to help.
               </p>
             </div>
             <div className="mt-6">
               <Link href="/contact">
-                <Button className="bg-braden-sky hover:bg-blue-600 text-white font-semibold px-6 py-3" size="lg">
+                <Button
+                  className="bg-braden-sky hover:bg-blue-600 text-white font-semibold px-6 py-3"
+                  size="lg"
+                >
                   Contact Us Today
                 </Button>
               </Link>

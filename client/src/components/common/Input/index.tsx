@@ -37,14 +37,11 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ className, variant, size, error, label, helperText, ...props }, ref) => {
     // If there's an error, apply the error variant
     const inputVariant = error ? 'error' : variant;
-    
+
     return (
       <div className="space-y-1">
         {label && (
-          <label
-            htmlFor={props.id}
-            className="block text-sm font-medium text-foreground"
-          >
+          <label htmlFor={props.id} className="block text-sm font-medium text-foreground">
             {label}
           </label>
         )}
@@ -54,10 +51,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           {...props}
         />
         {(error || helperText) && (
-          <p className={cn(
-            "text-xs",
-            error ? "text-red-500" : "text-muted-foreground"  
-          )}>
+          <p className={cn('text-xs', error ? 'text-red-500' : 'text-muted-foreground')}>
             {error || helperText}
           </p>
         )}

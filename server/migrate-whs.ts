@@ -185,7 +185,9 @@ export async function migrateWHS() {
     logger.info('WHS tables created successfully');
     return true;
   } catch (error) {
-    logger.error('Error creating WHS tables: ' + (error instanceof Error ? error.message : String(error)));
+    logger.error(
+      'Error creating WHS tables: ' + (error instanceof Error ? error.message : String(error))
+    );
     throw error;
   }
 }

@@ -19,17 +19,10 @@ interface LoadingSpinnerProps {
 /**
  * Simple loading spinner with optional text
  */
-export function LoadingSpinner({
-  size = 24,
-  text,
-  className,
-}: LoadingSpinnerProps) {
+export function LoadingSpinner({ size = 24, text, className }: LoadingSpinnerProps) {
   return (
     <div className={cn('flex flex-col items-center justify-center', className)}>
-      <Loader2
-        className="animate-spin text-primary"
-        style={{ width: size, height: size }}
-      />
+      <Loader2 className="animate-spin text-primary" style={{ width: size, height: size }} />
       {text && <p className="mt-2 text-sm text-muted-foreground">{text}</p>}
     </div>
   );
@@ -69,11 +62,7 @@ export function LoadingCard({
         <div className="space-y-4">
           <Skeleton className="h-8 w-full" />
           {Array.from({ length: items }).map((_, i) => (
-            <Skeleton
-              key={i}
-              className="w-full"
-              style={{ height: `${itemHeight}px` }}
-            />
+            <Skeleton key={i} className="w-full" style={{ height: `${itemHeight}px` }} />
           ))}
         </div>
       </CardContent>
@@ -184,12 +173,7 @@ export function CardSkeleton({
   className,
 }: CardSkeletonProps) {
   return (
-    <div
-      className={cn(
-        'rounded-lg border bg-card p-4 shadow-sm',
-        className
-      )}
-    >
+    <div className={cn('rounded-lg border bg-card p-4 shadow-sm', className)}>
       {hasHeader && (
         <div className="mb-4 flex items-center gap-4">
           <Skeleton className="h-12 w-12 rounded-full" />
@@ -199,15 +183,15 @@ export function CardSkeleton({
           </div>
         </div>
       )}
-      
+
       {hasImage && <Skeleton className="mb-4 h-48 w-full rounded-md" />}
-      
+
       <div className="space-y-2">
         {Array.from({ length: lines }).map((_, i) => (
           <Skeleton key={i} className={`h-4 w-${i === lines - 1 ? '3/4' : 'full'}`} />
         ))}
       </div>
-      
+
       {hasFooter && (
         <div className="mt-4 flex justify-end gap-2">
           <Skeleton className="h-9 w-20 rounded-md" />

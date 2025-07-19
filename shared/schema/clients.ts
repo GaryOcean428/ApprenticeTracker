@@ -17,11 +17,11 @@ export const clientTypes = pgTable("client_types", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
-export const insertClientTypeSchema = createInsertSchema(clientTypes).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-} as const);
+export const insertClientTypeSchema = z.object({
+  name: z.string(),
+  description: z.string().optional(),
+  isActive: z.boolean().optional(),
+});
 
 export type ClientType = typeof clientTypes.$inferSelect;
 export type InsertClientType = z.infer<typeof insertClientTypeSchema>;
@@ -86,7 +86,7 @@ export const insertClientSchema = createInsertSchema(clients).omit({
   createdAt: true,
   updatedAt: true,
   lastInteractionDate: true,
-} as const);
+});
 
 export type Client = typeof clients.$inferSelect;
 export type InsertClient = z.infer<typeof insertClientSchema>;
@@ -108,7 +108,7 @@ export const insertClientContactSchema = createInsertSchema(clientContacts).omit
   id: true,
   createdAt: true,
   updatedAt: true,
-} as const);
+});
 
 export type ClientContact = typeof clientContacts.$inferSelect;
 export type InsertClientContact = z.infer<typeof insertClientContactSchema>;
@@ -133,7 +133,7 @@ export const insertClientServiceSchema = createInsertSchema(clientServices).omit
   id: true,
   createdAt: true,
   updatedAt: true,
-} as const);
+});
 
 export type ClientService = typeof clientServices.$inferSelect;
 export type InsertClientService = z.infer<typeof insertClientServiceSchema>;
@@ -160,7 +160,7 @@ export const insertClientInteractionSchema = createInsertSchema(clientInteractio
   id: true,
   createdAt: true,
   updatedAt: true,
-} as const);
+});
 
 export type ClientInteraction = typeof clientInteractions.$inferSelect;
 export type InsertClientInteraction = z.infer<typeof insertClientInteractionSchema>;

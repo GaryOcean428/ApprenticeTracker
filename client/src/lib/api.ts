@@ -63,10 +63,7 @@ export type ApiResponse<T> = ApiSuccessResponse<T> | ApiErrorResponse;
 /**
  * Parse API response with Zod schema validation
  */
-export async function parseApiResponse<T>(
-  response: Response, 
-  schema?: z.ZodType<T>
-): Promise<T> {
+export async function parseApiResponse<T>(response: Response, schema?: z.ZodType<T>): Promise<T> {
   const data = await response.json();
 
   if (!response.ok) {
@@ -87,7 +84,8 @@ export async function parseApiResponse<T>(
 }
 
 // API Configuration - use relative paths in production
-const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '' : 'http://localhost:5000');
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '' : 'http://localhost:5000');
 
 export async function apiRequest(
   method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH',
@@ -189,7 +187,7 @@ export function createApiEndpoints<T, CreateType, UpdateType = Partial<CreateTyp
     /**
      * Update an existing item
      */
-    update: (id: number | string, data: UpdateType) => 
+    update: (id: number | string, data: UpdateType) =>
       api.patch<T, UpdateType>(`${basePath}/${id}`, data, schemas?.single),
 
     /**
@@ -206,15 +204,18 @@ export const hostEmployerApi = {
   /**
    * Submit a host employer inquiry
    */
-  submitInquiry: async (inquiry: HostEmployerInquiry): Promise<ApiSuccessResponse<{ id: string }>> => {
+  submitInquiry: async (
+    inquiry: HostEmployerInquiry
+  ): Promise<ApiSuccessResponse<{ id: string }>> => {
     // In a real application, this would submit to the backend
     // For now, just simulate a successful API call
     return {
       success: true,
-      data: { id: "inq-" + Math.floor(Math.random() * 1000) },
-      message: "Your inquiry has been submitted successfully. Our team will contact you shortly to discuss how we can help your business."
+      data: { id: 'inq-' + Math.floor(Math.random() * 1000) },
+      message:
+        'Your inquiry has been submitted successfully. Our team will contact you shortly to discuss how we can help your business.',
     };
-  }
+  },
 };
 
 /**
@@ -228,63 +229,69 @@ export const jobsApi = {
     // Mock data for development - in production, this would be fetched from the server
     return [
       {
-        id: "job-1",
-        title: "Electrical Apprenticeship",
-        location: "Perth, WA",
-        type: "Full-time",
-        description: "Join our team as an electrical apprentice and learn all aspects of the electrical trade while gaining valuable hands-on experience.",
+        id: 'job-1',
+        title: 'Electrical Apprenticeship',
+        location: 'Perth, WA',
+        type: 'Full-time',
+        description:
+          'Join our team as an electrical apprentice and learn all aspects of the electrical trade while gaining valuable hands-on experience.',
         requirements: [
-          "Year 12 completion or equivalent",
-          "Basic knowledge of electrical systems",
-          "Strong work ethic and willingness to learn",
-          "Valid driver's license"
+          'Year 12 completion or equivalent',
+          'Basic knowledge of electrical systems',
+          'Strong work ethic and willingness to learn',
+          "Valid driver's license",
         ],
-        postedDate: "2023-04-15",
-        category: "Electrical"
+        postedDate: '2023-04-15',
+        category: 'Electrical',
       },
       {
-        id: "job-2",
-        title: "Carpentry Apprenticeship",
-        location: "Fremantle, WA",
-        type: "Full-time",
-        description: "Exciting opportunity to start your career in carpentry with on-the-job training and formal classroom instruction.",
+        id: 'job-2',
+        title: 'Carpentry Apprenticeship',
+        location: 'Fremantle, WA',
+        type: 'Full-time',
+        description:
+          'Exciting opportunity to start your career in carpentry with on-the-job training and formal classroom instruction.',
         requirements: [
-          "Year 10 completion or equivalent",
-          "Good hand-eye coordination and practical skills",
-          "Physically fit",
-          "Reliable transportation"
+          'Year 10 completion or equivalent',
+          'Good hand-eye coordination and practical skills',
+          'Physically fit',
+          'Reliable transportation',
         ],
-        postedDate: "2023-04-12",
-        category: "Construction"
+        postedDate: '2023-04-12',
+        category: 'Construction',
       },
       {
-        id: "job-3",
-        title: "Business Administration Traineeship",
-        location: "Joondalup, WA",
-        type: "Full-time",
-        description: "Gain valuable skills in business administration, customer service, and office procedures in a supportive environment.",
+        id: 'job-3',
+        title: 'Business Administration Traineeship',
+        location: 'Joondalup, WA',
+        type: 'Full-time',
+        description:
+          'Gain valuable skills in business administration, customer service, and office procedures in a supportive environment.',
         requirements: [
-          "Year 12 completion or equivalent",
-          "Basic computer skills",
-          "Strong communication abilities",
-          "Attention to detail"
+          'Year 12 completion or equivalent',
+          'Basic computer skills',
+          'Strong communication abilities',
+          'Attention to detail',
         ],
-        postedDate: "2023-04-10",
-        category: "Business"
-      }
+        postedDate: '2023-04-10',
+        category: 'Business',
+      },
     ];
   },
 
   /**
    * Submit a job application
    */
-  submitApplication: async (application: JobApplication): Promise<ApiSuccessResponse<{ id: string }>> => {
+  submitApplication: async (
+    application: JobApplication
+  ): Promise<ApiSuccessResponse<{ id: string }>> => {
     // In a real application, this would submit to the backend
     // For now, just simulate a successful API call
     return {
       success: true,
-      data: { id: "app-" + Math.floor(Math.random() * 1000) },
-      message: "Your application has been submitted successfully. Our team will contact you shortly."
+      data: { id: 'app-' + Math.floor(Math.random() * 1000) },
+      message:
+        'Your application has been submitted successfully. Our team will contact you shortly.',
     };
-  }
+  },
 };

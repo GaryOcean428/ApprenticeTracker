@@ -1,6 +1,16 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Card, CardHeader, CardTitle, CardContent, Button, Loader, Alert, AlertTitle, AlertDescription } from '@/components/common';
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  Button,
+  Loader,
+  Alert,
+  AlertTitle,
+  AlertDescription,
+} from '@/components/common';
 import { Calendar, CheckCircle, Clock, DollarSign, Filter, Search } from 'lucide-react';
 
 interface AwardRate {
@@ -21,11 +31,19 @@ const AwardRatesPage: React.FC = () => {
   const [selectedAward, setSelectedAward] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState<string>('');
 
-  const { data: awards = [], isLoading: awardsLoading, error: awardsError } = useQuery<any[]>({
+  const {
+    data: awards = [],
+    isLoading: awardsLoading,
+    error: awardsError,
+  } = useQuery<any[]>({
     queryKey: ['/api/payroll/awards'],
   });
 
-  const { data: rates = [], isLoading: ratesLoading, error: ratesError } = useQuery<AwardRate[]>({
+  const {
+    data: rates = [],
+    isLoading: ratesLoading,
+    error: ratesError,
+  } = useQuery<AwardRate[]>({
     queryKey: ['/api/payroll/rates', selectedAward],
     enabled: !!selectedAward,
   });
@@ -34,10 +52,13 @@ const AwardRatesPage: React.FC = () => {
   const error = awardsError || ratesError;
 
   // Filter rates based on search term
-  const filteredRates = rates ? rates.filter((rate: AwardRate) => 
-    rate.classificationName.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    rate.classificationCode.toLowerCase().includes(searchTerm.toLowerCase())
-  ) : [];
+  const filteredRates = rates
+    ? rates.filter(
+        (rate: AwardRate) =>
+          rate.classificationName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          rate.classificationCode.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    : [];
 
   return (
     <div className="container mx-auto p-6">
@@ -110,9 +131,9 @@ const AwardRatesPage: React.FC = () => {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>
-                {selectedAward ? 
-                  `${awards?.find((a: { code: string }) => a.code === selectedAward)?.name} (${selectedAward})` : 
-                  'Select an Award'}
+                {selectedAward
+                  ? `${awards?.find((a: { code: string }) => a.code === selectedAward)?.name} (${selectedAward})`
+                  : 'Select an Award'}
               </CardTitle>
               <div className="flex space-x-2">
                 <div className="relative w-64">
@@ -120,7 +141,7 @@ const AwardRatesPage: React.FC = () => {
                   <input
                     type="text"
                     value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onChange={e => setSearchTerm(e.target.value)}
                     placeholder="Search classifications..."
                     className="pl-8 w-full h-9 rounded-md border bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                   />

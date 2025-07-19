@@ -10,34 +10,34 @@ import { z } from 'zod';
 
 export type HttpMethod = 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
-export interface OptimizedMutationOptions<TData, TVariables> extends 
-  Omit<UseMutationOptions<TData, Error, TVariables>, 'mutationFn'> {
+export interface OptimizedMutationOptions<TData, TVariables>
+  extends Omit<UseMutationOptions<TData, Error, TVariables>, 'mutationFn'> {
   /**
    * The API endpoint to send data to
    */
   endpoint: string;
-  
+
   /**
    * HTTP method to use
    * @default 'POST'
    */
   method?: HttpMethod;
-  
+
   /**
    * Optional Zod schema to validate request data against
    */
   requestSchema?: z.ZodType<TVariables>;
-  
+
   /**
    * Optional Zod schema to validate response data against
    */
   responseSchema?: z.ZodType<TData>;
-  
+
   /**
    * Query keys to invalidate after successful mutation
    */
   invalidateQueries?: string[];
-  
+
   /**
    * Toast notification configuration for success state
    */
@@ -47,7 +47,7 @@ export interface OptimizedMutationOptions<TData, TVariables> extends
     /** Message to show in toast notification on success */
     message?: string;
   };
-  
+
   /**
    * Toast notification configuration for error state
    */
@@ -67,7 +67,7 @@ export function useOptimizedMutation<TData = unknown, TVariables = unknown>(
 ): UseMutationResult<TData, Error, TVariables> {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  
+
   const {
     endpoint,
     method = 'POST',
@@ -83,10 +83,10 @@ export function useOptimizedMutation<TData = unknown, TVariables = unknown>(
     },
     ...mutationOptions
   } = options;
-  
+
   return useMutation<TData, Error, TVariables>({
     ...mutationOptions,
-    
+
     mutationFn: async (variables: TVariables) => {
       // Validate request data if schema is provided
       if (requestSchema) {
@@ -94,16 +94,18 @@ export function useOptimizedMutation<TData = unknown, TVariables = unknown>(
           requestSchema.parse(variables);
         } catch (err) {
           console.error('Request validation error:', err);
-          throw new Error('The data you submitted is invalid. Please check your inputs and try again.');
+          throw new Error(
+            'The data you submitted is invalid. Please check your inputs and try again.'
+          );
         }
       }
-      
+
       // Send the API request
       const response = await apiRequest(method, endpoint, variables);
-      
+
       // Parse the response
       let data = await response.json();
-      
+
       // Validate response data if schema is provided
       if (responseSchema) {
         try {
@@ -113,10 +115,10 @@ export function useOptimizedMutation<TData = unknown, TVariables = unknown>(
           throw new Error('The server returned invalid data. Please try again later.');
         }
       }
-      
+
       return data;
     },
-    
+
     onSuccess: (data, variables, context) => {
       // Show success toast if configured
       if (successConfig.showToast) {
@@ -125,20 +127,20 @@ export function useOptimizedMutation<TData = unknown, TVariables = unknown>(
           description: successConfig.message,
         });
       }
-      
+
       // Invalidate relevant queries
       if (invalidateQueries.length > 0) {
         invalidateQueries.forEach(queryKey => {
           queryClient.invalidateQueries({ queryKey: [queryKey] });
         });
       }
-      
+
       // Call custom onSuccess handler if provided
       if (mutationOptions.onSuccess) {
         mutationOptions.onSuccess(data, variables, context);
       }
     },
-    
+
     onError: (error, variables, context) => {
       // Show error toast if configured
       if (errorConfig.showToast) {
@@ -148,7 +150,7 @@ export function useOptimizedMutation<TData = unknown, TVariables = unknown>(
           variant: 'destructive',
         });
       }
-      
+
       // Call custom onError handler if provided
       if (mutationOptions.onError) {
         mutationOptions.onError(error, variables, context);

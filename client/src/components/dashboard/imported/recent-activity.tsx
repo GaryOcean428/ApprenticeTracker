@@ -41,18 +41,15 @@ export function RecentActivity(): JSX.Element {
         <CardTitle>Recent Activity</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className='space-y-4'>
+        <div className="space-y-4">
           {activities.map((activity, index) => (
-            <div
-              key={index}
-              className='flex items-start gap-4'
-            >
-              <div className='rounded-full bg-gray-100 p-2'>
-                <div className='h-2 w-2 rounded-full bg-gray-600' />
+            <div key={index} className="flex items-start gap-4">
+              <div className="rounded-full bg-gray-100 p-2">
+                <div className="h-2 w-2 rounded-full bg-gray-600" />
               </div>
-              <div className='space-y-1'>
-                <p className='text-sm font-medium'>{activity.description}</p>
-                <p className='text-sm text-gray-500'>{activity.time}</p>
+              <div className="space-y-1">
+                <p className="text-sm font-medium">{activity.description}</p>
+                <p className="text-sm text-gray-500">{activity.time}</p>
               </div>
             </div>
           ))}

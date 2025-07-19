@@ -22,7 +22,7 @@ import {
   AlertTriangle,
   BanknoteIcon,
   FileCheck,
-  RefreshCcw
+  RefreshCcw,
 } from 'lucide-react';
 import { InvoiceFormDialog } from '@/components/financial/invoice-form-dialog';
 
@@ -32,7 +32,7 @@ import {
   CardDescription,
   CardFooter,
   CardHeader,
-  CardTitle
+  CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -103,37 +103,37 @@ const DUMMY_INVOICES: Invoice[] = [
     hostEmployer: {
       id: 101,
       name: 'ABC Construction',
-      logo: ''
+      logo: '',
     },
     issueDate: '2025-05-01',
     dueDate: '2025-05-31',
     status: 'sent',
-    amount: 12850.00,
+    amount: 12850.0,
     amountPaid: 0,
-    balance: 12850.00,
+    balance: 12850.0,
     items: [
       {
         id: 'item-1',
         description: 'Apprentice placement fees - May 2025',
         quantity: 5,
-        rate: 1950.00,
-        amount: 9750.00
+        rate: 1950.0,
+        amount: 9750.0,
       },
       {
         id: 'item-2',
         description: 'Administrative fees',
         quantity: 1,
-        rate: 1500.00,
-        amount: 1500.00
+        rate: 1500.0,
+        amount: 1500.0,
       },
       {
         id: 'item-3',
         description: 'Safety training - Group session',
         quantity: 1,
-        rate: 1600.00,
-        amount: 1600.00
-      }
-    ]
+        rate: 1600.0,
+        amount: 1600.0,
+      },
+    ],
   },
   {
     id: 'inv-7999',
@@ -141,30 +141,30 @@ const DUMMY_INVOICES: Invoice[] = [
     hostEmployer: {
       id: 102,
       name: 'XYZ Electrical',
-      logo: ''
+      logo: '',
     },
     issueDate: '2025-04-15',
     dueDate: '2025-05-15',
     status: 'paid',
-    amount: 4850.00,
-    amountPaid: 4850.00,
+    amount: 4850.0,
+    amountPaid: 4850.0,
     balance: 0,
     items: [
       {
         id: 'item-1',
         description: 'Apprentice placement fees - April 2025',
         quantity: 2,
-        rate: 1950.00,
-        amount: 3900.00
+        rate: 1950.0,
+        amount: 3900.0,
       },
       {
         id: 'item-2',
         description: 'Administrative fees',
         quantity: 1,
-        rate: 950.00,
-        amount: 950.00
-      }
-    ]
+        rate: 950.0,
+        amount: 950.0,
+      },
+    ],
   },
   {
     id: 'inv-7995',
@@ -172,30 +172,30 @@ const DUMMY_INVOICES: Invoice[] = [
     hostEmployer: {
       id: 103,
       name: 'Brisbane Woodworking',
-      logo: ''
+      logo: '',
     },
     issueDate: '2025-04-01',
     dueDate: '2025-05-01',
     status: 'overdue',
-    amount: 7800.00,
-    amountPaid: 3500.00,
-    balance: 4300.00,
+    amount: 7800.0,
+    amountPaid: 3500.0,
+    balance: 4300.0,
     items: [
       {
         id: 'item-1',
         description: 'Apprentice placement fees - April 2025',
         quantity: 3,
-        rate: 1950.00,
-        amount: 5850.00
+        rate: 1950.0,
+        amount: 5850.0,
       },
       {
         id: 'item-2',
         description: 'Equipment charges',
         quantity: 1,
-        rate: 1950.00,
-        amount: 1950.00
-      }
-    ]
+        rate: 1950.0,
+        amount: 1950.0,
+      },
+    ],
   },
   {
     id: 'inv-8002',
@@ -203,24 +203,24 @@ const DUMMY_INVOICES: Invoice[] = [
     hostEmployer: {
       id: 104,
       name: 'Gold Coast Plumbing',
-      logo: ''
+      logo: '',
     },
     issueDate: '2025-05-05',
     dueDate: '2025-06-04',
     status: 'draft',
-    amount: 3900.00,
+    amount: 3900.0,
     amountPaid: 0,
-    balance: 3900.00,
+    balance: 3900.0,
     items: [
       {
         id: 'item-1',
         description: 'Apprentice placement fees - May 2025',
         quantity: 2,
-        rate: 1950.00,
-        amount: 3900.00
-      }
-    ]
-  }
+        rate: 1950.0,
+        amount: 3900.0,
+      },
+    ],
+  },
 ];
 
 // Invoice status badge component
@@ -246,7 +246,7 @@ export default function InvoicingPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedInvoiceId, setSelectedInvoiceId] = useState<string | null>(null);
   const [invoiceFormOpen, setInvoiceFormOpen] = useState(false);
-  
+
   // This would be replaced with a real API query in production
   const { data: invoices, isLoading } = useQuery({
     queryKey: ['invoices'],
@@ -261,28 +261,28 @@ export default function InvoicingPage() {
 
   const handleSendInvoice = (id: string) => {
     toast({
-      title: "Invoice Sent",
+      title: 'Invoice Sent',
       description: `Invoice ${id} has been sent to the client.`,
     });
   };
 
   const handleMarkAsPaid = (id: string) => {
     toast({
-      title: "Invoice Marked as Paid",
+      title: 'Invoice Marked as Paid',
       description: `Invoice ${id} has been marked as paid.`,
     });
   };
 
   const handleDownloadInvoice = (id: string) => {
     toast({
-      title: "Invoice Downloaded",
+      title: 'Invoice Downloaded',
       description: `Invoice ${id} has been downloaded.`,
     });
   };
 
   const handlePrintInvoice = (id: string) => {
     toast({
-      title: "Printing Invoice",
+      title: 'Printing Invoice',
       description: `Invoice ${id} has been sent to the printer.`,
     });
   };
@@ -297,7 +297,7 @@ export default function InvoicingPage() {
   return (
     <div className="container mx-auto p-6">
       <InvoiceFormDialog open={invoiceFormOpen} onOpenChange={setInvoiceFormOpen} />
-      
+
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Invoicing</h1>
@@ -323,27 +323,27 @@ export default function InvoicingPage() {
             <CardTitle className="text-lg font-medium">Total Outstanding</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">{formatCurrency(17150.00)}</div>
+            <div className="text-3xl font-bold">{formatCurrency(17150.0)}</div>
             <p className="text-xs text-muted-foreground">From 2 unpaid invoices</p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-lg font-medium">Overdue</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-destructive">{formatCurrency(4300.00)}</div>
+            <div className="text-3xl font-bold text-destructive">{formatCurrency(4300.0)}</div>
             <p className="text-xs text-muted-foreground">1 invoice past due date</p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-lg font-medium">Paid (Last 30 Days)</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-success">{formatCurrency(4850.00)}</div>
+            <div className="text-3xl font-bold text-success">{formatCurrency(4850.0)}</div>
             <p className="text-xs text-muted-foreground">1 invoice paid</p>
           </CardContent>
         </Card>
@@ -358,7 +358,7 @@ export default function InvoicingPage() {
             <TabsTrigger value="paid">Paid</TabsTrigger>
             <TabsTrigger value="overdue">Overdue</TabsTrigger>
           </TabsList>
-          
+
           <div className="flex items-center gap-2">
             <div className="relative">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -367,10 +367,10 @@ export default function InvoicingPage() {
                 placeholder="Search invoices..."
                 className="w-60 pl-8"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={e => setSearchQuery(e.target.value)}
               />
             </div>
-            
+
             <DatePickerWithRange className="w-auto" />
           </div>
         </div>
@@ -397,7 +397,7 @@ export default function InvoicingPage() {
             <CardContent className="p-0">
               {isLoading ? (
                 <div className="p-6 space-y-4">
-                  {[1, 2, 3, 4, 5].map((i) => (
+                  {[1, 2, 3, 4, 5].map(i => (
                     <div key={i} className="flex items-center space-x-4">
                       <Skeleton className="h-12 w-12 rounded-full" />
                       <div className="space-y-2">
@@ -422,8 +422,8 @@ export default function InvoicingPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {invoices?.map((invoice) => (
-                      <TableRow 
+                    {invoices?.map(invoice => (
+                      <TableRow
                         key={invoice.id}
                         className={`cursor-pointer ${selectedInvoiceId === invoice.id ? 'bg-muted' : ''}`}
                         onClick={() => setSelectedInvoiceId(invoice.id)}
@@ -433,7 +433,9 @@ export default function InvoicingPage() {
                           <div className="flex items-center">
                             <Avatar className="h-8 w-8 mr-2">
                               <AvatarImage src={invoice.hostEmployer.logo} />
-                              <AvatarFallback>{invoice.hostEmployer.name.substring(0, 2)}</AvatarFallback>
+                              <AvatarFallback>
+                                {invoice.hostEmployer.name.substring(0, 2)}
+                              </AvatarFallback>
                             </Avatar>
                             {invoice.hostEmployer.name}
                           </div>
@@ -441,10 +443,12 @@ export default function InvoicingPage() {
                         <TableCell>{new Date(invoice.issueDate).toLocaleDateString()}</TableCell>
                         <TableCell>{new Date(invoice.dueDate).toLocaleDateString()}</TableCell>
                         <TableCell>{formatCurrency(invoice.amount)}</TableCell>
-                        <TableCell><InvoiceStatusBadge status={invoice.status} /></TableCell>
+                        <TableCell>
+                          <InvoiceStatusBadge status={invoice.status} />
+                        </TableCell>
                         <TableCell className="text-right">
                           <DropdownMenu>
-                            <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                            <DropdownMenuTrigger asChild onClick={e => e.stopPropagation()}>
                               <Button variant="ghost" size="sm">
                                 <span className="sr-only">Open menu</span>
                                 <ChevronDown className="h-4 w-4" />
@@ -536,9 +540,7 @@ export default function InvoicingPage() {
           <Card>
             <CardHeader>
               <CardTitle>Draft Invoices</CardTitle>
-              <CardDescription>
-                Create and modify draft invoices before sending
-              </CardDescription>
+              <CardDescription>Create and modify draft invoices before sending</CardDescription>
             </CardHeader>
             <CardContent>
               {/* Draft invoices content */}
@@ -551,9 +553,7 @@ export default function InvoicingPage() {
           <Card>
             <CardHeader>
               <CardTitle>Sent Invoices</CardTitle>
-              <CardDescription>
-                Invoices that have been sent to clients
-              </CardDescription>
+              <CardDescription>Invoices that have been sent to clients</CardDescription>
             </CardHeader>
             <CardContent>
               {/* Sent invoices content */}
@@ -566,9 +566,7 @@ export default function InvoicingPage() {
           <Card>
             <CardHeader>
               <CardTitle>Paid Invoices</CardTitle>
-              <CardDescription>
-                Invoices that have been paid by clients
-              </CardDescription>
+              <CardDescription>Invoices that have been paid by clients</CardDescription>
             </CardHeader>
             <CardContent>
               {/* Paid invoices content */}
@@ -581,9 +579,7 @@ export default function InvoicingPage() {
           <Card>
             <CardHeader>
               <CardTitle>Overdue Invoices</CardTitle>
-              <CardDescription>
-                Invoices that are past their due date
-              </CardDescription>
+              <CardDescription>Invoices that are past their due date</CardDescription>
             </CardHeader>
             <CardContent>
               {/* Overdue invoices content */}
@@ -599,7 +595,9 @@ export default function InvoicingPage() {
             <div className="flex justify-between items-start">
               <div>
                 <CardTitle className="text-2xl">{selectedInvoice.number}</CardTitle>
-                <CardDescription>Host Employer: {selectedInvoice.hostEmployer.name}</CardDescription>
+                <CardDescription>
+                  Host Employer: {selectedInvoice.hostEmployer.name}
+                </CardDescription>
               </div>
               <InvoiceStatusBadge status={selectedInvoice.status} />
             </div>
@@ -619,9 +617,9 @@ export default function InvoicingPage() {
                 <div className="text-lg font-bold">{formatCurrency(selectedInvoice.amount)}</div>
               </div>
             </div>
-            
+
             <h3 className="text-lg font-semibold mb-4">Invoice Items</h3>
-            
+
             <Table>
               <TableHeader>
                 <TableRow>
@@ -632,7 +630,7 @@ export default function InvoicingPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {selectedInvoice.items.map((item) => (
+                {selectedInvoice.items.map(item => (
                   <TableRow key={item.id}>
                     <TableCell>{item.description}</TableCell>
                     <TableCell>{item.quantity}</TableCell>
@@ -650,7 +648,7 @@ export default function InvoicingPage() {
                 </TableRow>
               </TableBody>
             </Table>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
               <div>
                 <h4 className="text-sm font-semibold mb-2">Payment Status</h4>
@@ -661,7 +659,9 @@ export default function InvoicingPage() {
                   </div>
                   <div className="flex justify-between text-sm">
                     <span>Amount Paid:</span>
-                    <span className="font-medium">{formatCurrency(selectedInvoice.amountPaid)}</span>
+                    <span className="font-medium">
+                      {formatCurrency(selectedInvoice.amountPaid)}
+                    </span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span>Balance Due:</span>
@@ -669,7 +669,7 @@ export default function InvoicingPage() {
                   </div>
                 </div>
               </div>
-              
+
               <div>
                 <h4 className="text-sm font-semibold mb-2">Actions</h4>
                 <div className="flex flex-wrap gap-2">
@@ -691,7 +691,11 @@ export default function InvoicingPage() {
                         <CheckCircle className="mr-2 h-4 w-4" />
                         Mark as Paid
                       </Button>
-                      <Button size="sm" variant="outline" onClick={() => handleSendInvoice(selectedInvoice.id)}>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleSendInvoice(selectedInvoice.id)}
+                      >
                         <RefreshCcw className="mr-2 h-4 w-4" />
                         Send Reminder
                       </Button>
@@ -701,11 +705,19 @@ export default function InvoicingPage() {
                       </Button>
                     </>
                   )}
-                  <Button size="sm" variant="outline" onClick={() => handleDownloadInvoice(selectedInvoice.id)}>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => handleDownloadInvoice(selectedInvoice.id)}
+                  >
                     <Download className="mr-2 h-4 w-4" />
                     Download
                   </Button>
-                  <Button size="sm" variant="outline" onClick={() => handlePrintInvoice(selectedInvoice.id)}>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => handlePrintInvoice(selectedInvoice.id)}
+                  >
                     <Printer className="mr-2 h-4 w-4" />
                     Print
                   </Button>

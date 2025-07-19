@@ -1,10 +1,10 @@
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { CalendarIcon } from "lucide-react";
-import { format, addMonths } from "date-fns";
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { CalendarIcon } from 'lucide-react';
+import { format, addMonths } from 'date-fns';
 
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
+import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -12,7 +12,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 import {
   Form,
   FormControl,
@@ -20,24 +20,20 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
-import { useToast } from "@/hooks/use-toast";
-import { queryClient } from "@/lib/queryClient";
+} from '@/components/ui/select';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { useToast } from '@/hooks/use-toast';
+import { queryClient } from '@/lib/queryClient';
 
 interface BudgetFormDialogProps {
   open: boolean;
@@ -54,10 +50,10 @@ type FormValues = {
 };
 
 const BUDGET_PERIODS = [
-  { id: "monthly", name: "Monthly" },
-  { id: "quarterly", name: "Quarterly" },
-  { id: "annual", name: "Annual" },
-  { id: "custom", name: "Custom" },
+  { id: 'monthly', name: 'Monthly' },
+  { id: 'quarterly', name: 'Quarterly' },
+  { id: 'annual', name: 'Annual' },
+  { id: 'custom', name: 'Custom' },
 ];
 
 export function BudgetFormDialog({ open, onOpenChange }: BudgetFormDialogProps) {
@@ -66,12 +62,12 @@ export function BudgetFormDialog({ open, onOpenChange }: BudgetFormDialogProps) 
 
   const form = useForm<FormValues>({
     defaultValues: {
-      name: "",
-      period: "",
+      name: '',
+      period: '',
       startDate: new Date(),
       endDate: addMonths(new Date(), 3), // Default to 3 months for quarterly budget
-      totalAmount: "",
-      description: "",
+      totalAmount: '',
+      description: '',
     },
   });
 
@@ -79,7 +75,7 @@ export function BudgetFormDialog({ open, onOpenChange }: BudgetFormDialogProps) 
   const handlePeriodChange = (value: string) => {
     const startDate = form.getValues('startDate');
     let endDate;
-    
+
     switch (value) {
       case 'monthly':
         endDate = addMonths(startDate, 1);
@@ -94,7 +90,7 @@ export function BudgetFormDialog({ open, onOpenChange }: BudgetFormDialogProps) 
         // For custom, don't change the end date
         return;
     }
-    
+
     form.setValue('endDate', endDate);
   };
 
@@ -106,19 +102,19 @@ export function BudgetFormDialog({ open, onOpenChange }: BudgetFormDialogProps) 
 
       // Format the data for submission
       const formattedAmount = parseFloat(data.totalAmount);
-      
+
       // In a real application, you would send this data to your backend
-      console.log("Submitting budget:", {
+      console.log('Submitting budget:', {
         ...data,
         totalAmount: formattedAmount,
-        startDate: format(data.startDate, "yyyy-MM-dd"),
-        endDate: format(data.endDate, "yyyy-MM-dd"),
+        startDate: format(data.startDate, 'yyyy-MM-dd'),
+        endDate: format(data.endDate, 'yyyy-MM-dd'),
       });
 
       // Show success toast
       toast({
-        title: "Budget created",
-        description: "Your budget has been successfully created.",
+        title: 'Budget created',
+        description: 'Your budget has been successfully created.',
       });
 
       // Reset form and close dialog
@@ -128,11 +124,11 @@ export function BudgetFormDialog({ open, onOpenChange }: BudgetFormDialogProps) 
       // Invalidate budgets query to refresh the list
       queryClient.invalidateQueries({ queryKey: ['budgets'] });
     } catch (error) {
-      console.error("Error creating budget:", error);
+      console.error('Error creating budget:', error);
       toast({
-        title: "Error",
-        description: "There was a problem creating your budget.",
-        variant: "destructive",
+        title: 'Error',
+        description: 'There was a problem creating your budget.',
+        variant: 'destructive',
       });
     } finally {
       setIsSubmitting(false);
@@ -153,7 +149,7 @@ export function BudgetFormDialog({ open, onOpenChange }: BudgetFormDialogProps) 
             <FormField
               control={form.control}
               name="name"
-              rules={{ required: "Budget name is required" }}
+              rules={{ required: 'Budget name is required' }}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Budget Name</FormLabel>
@@ -168,12 +164,12 @@ export function BudgetFormDialog({ open, onOpenChange }: BudgetFormDialogProps) 
             <FormField
               control={form.control}
               name="period"
-              rules={{ required: "Budget period is required" }}
+              rules={{ required: 'Budget period is required' }}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Budget Period</FormLabel>
                   <Select
-                    onValueChange={(value) => {
+                    onValueChange={value => {
                       field.onChange(value);
                       handlePeriodChange(value);
                     }}
@@ -185,11 +181,8 @@ export function BudgetFormDialog({ open, onOpenChange }: BudgetFormDialogProps) 
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {BUDGET_PERIODS.map((period) => (
-                        <SelectItem 
-                          key={period.id} 
-                          value={period.id}
-                        >
+                      {BUDGET_PERIODS.map(period => (
+                        <SelectItem key={period.id} value={period.id}>
                           {period.name}
                         </SelectItem>
                       ))}
@@ -204,7 +197,7 @@ export function BudgetFormDialog({ open, onOpenChange }: BudgetFormDialogProps) 
               <FormField
                 control={form.control}
                 name="startDate"
-                rules={{ required: "Start date is required" }}
+                rules={{ required: 'Start date is required' }}
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
                     <FormLabel>Start Date</FormLabel>
@@ -212,17 +205,13 @@ export function BudgetFormDialog({ open, onOpenChange }: BudgetFormDialogProps) 
                       <PopoverTrigger asChild>
                         <FormControl>
                           <Button
-                            variant={"outline"}
+                            variant={'outline'}
                             className={cn(
-                              "pl-3 text-left font-normal",
-                              !field.value && "text-muted-foreground"
+                              'pl-3 text-left font-normal',
+                              !field.value && 'text-muted-foreground'
                             )}
                           >
-                            {field.value ? (
-                              format(field.value, "PPP")
-                            ) : (
-                              <span>Pick a date</span>
-                            )}
+                            {field.value ? format(field.value, 'PPP') : <span>Pick a date</span>}
                             <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                           </Button>
                         </FormControl>
@@ -244,7 +233,7 @@ export function BudgetFormDialog({ open, onOpenChange }: BudgetFormDialogProps) 
               <FormField
                 control={form.control}
                 name="endDate"
-                rules={{ required: "End date is required" }}
+                rules={{ required: 'End date is required' }}
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
                     <FormLabel>End Date</FormLabel>
@@ -252,17 +241,13 @@ export function BudgetFormDialog({ open, onOpenChange }: BudgetFormDialogProps) 
                       <PopoverTrigger asChild>
                         <FormControl>
                           <Button
-                            variant={"outline"}
+                            variant={'outline'}
                             className={cn(
-                              "pl-3 text-left font-normal",
-                              !field.value && "text-muted-foreground"
+                              'pl-3 text-left font-normal',
+                              !field.value && 'text-muted-foreground'
                             )}
                           >
-                            {field.value ? (
-                              format(field.value, "PPP")
-                            ) : (
-                              <span>Pick a date</span>
-                            )}
+                            {field.value ? format(field.value, 'PPP') : <span>Pick a date</span>}
                             <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                           </Button>
                         </FormControl>
@@ -285,12 +270,12 @@ export function BudgetFormDialog({ open, onOpenChange }: BudgetFormDialogProps) 
             <FormField
               control={form.control}
               name="totalAmount"
-              rules={{ 
-                required: "Total amount is required",
+              rules={{
+                required: 'Total amount is required',
                 pattern: {
                   value: /^[0-9]*\.?[0-9]+$/,
-                  message: "Please enter a valid amount"
-                }
+                  message: 'Please enter a valid amount',
+                },
               }}
               render={({ field }) => (
                 <FormItem>
@@ -298,12 +283,7 @@ export function BudgetFormDialog({ open, onOpenChange }: BudgetFormDialogProps) 
                   <FormControl>
                     <div className="relative">
                       <div className="absolute left-3 top-1/2 transform -translate-y-1/2">$</div>
-                      <Input 
-                        type="text" 
-                        className="pl-7" 
-                        placeholder="0.00" 
-                        {...field} 
-                      />
+                      <Input type="text" className="pl-7" placeholder="0.00" {...field} />
                     </div>
                   </FormControl>
                   <FormMessage />
@@ -330,16 +310,16 @@ export function BudgetFormDialog({ open, onOpenChange }: BudgetFormDialogProps) 
             />
 
             <DialogFooter className="pt-4">
-              <Button 
-                type="button" 
-                variant="outline" 
+              <Button
+                type="button"
+                variant="outline"
                 onClick={() => onOpenChange(false)}
                 disabled={isSubmitting}
               >
                 Cancel
               </Button>
               <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Creating..." : "Create Budget"}
+                {isSubmitting ? 'Creating...' : 'Create Budget'}
               </Button>
             </DialogFooter>
           </form>

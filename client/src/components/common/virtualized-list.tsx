@@ -21,25 +21,25 @@ interface VirtualizedListProps<T> {
  * A virtualized list component that only renders items visible in the viewport
  * to improve performance with large lists.
  */
-export function VirtualizedList<T>({ 
-  items, 
-  height, 
-  rowHeight, 
-  overscan = 5, 
+export function VirtualizedList<T>({
+  items,
+  height,
+  rowHeight,
+  overscan = 5,
   renderItem,
   className,
-  rowClassName
+  rowClassName,
 }: VirtualizedListProps<T>) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [scrollTop, setScrollTop] = useState(0);
-  
+
   // Calculate which items should be visible
   const visibleItemsCount = Math.ceil(height / rowHeight) + overscan * 2;
   const startIndex = Math.max(0, Math.floor(scrollTop / rowHeight) - overscan);
   const endIndex = Math.min(items.length - 1, startIndex + visibleItemsCount);
-  
+
   const visibleItems = items.slice(startIndex, endIndex + 1);
-  
+
   // Update scroll position when user scrolls
   useEffect(() => {
     const handleScroll = () => {
@@ -47,16 +47,16 @@ export function VirtualizedList<T>({
         setScrollTop(containerRef.current.scrollTop);
       }
     };
-    
+
     const container = containerRef.current;
     if (container) {
       container.addEventListener('scroll', handleScroll);
       return () => container.removeEventListener('scroll', handleScroll);
     }
   }, []);
-  
+
   return (
-    <div 
+    <div
       ref={containerRef}
       className={`overflow-auto ${className || ''}`}
       style={{ height: `${height}px` }}
@@ -67,7 +67,7 @@ export function VirtualizedList<T>({
         {visibleItems.map((item, index) => {
           const actualIndex = startIndex + index;
           return (
-            <div 
+            <div
               key={actualIndex}
               className={rowClassName}
               style={{

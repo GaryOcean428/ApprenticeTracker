@@ -2,12 +2,12 @@ import { Request, Response, NextFunction } from 'express';
 
 /**
  * Authentication middleware to ensure the user is logged in
- * 
+ *
  * @returns Middleware function
  */
 export function authenticateUser(req: Request, res: Response, next: NextFunction) {
   const user = (req as any).user;
-  
+
   // If no user is attached to the request, they're not authenticated
   if (!user) {
     return res.status(401).json({
@@ -15,13 +15,13 @@ export function authenticateUser(req: Request, res: Response, next: NextFunction
       message: 'Authentication required',
     });
   }
-  
+
   next();
 }
 
 /**
  * Permission check middleware to ensure the user has the required permission on a resource
- * 
+ *
  * @param action The action being performed (e.g. 'read', 'update', 'delete')
  * @param resource The resource being accessed (e.g. 'award', 'classification')
  * @returns Middleware function
@@ -29,7 +29,7 @@ export function authenticateUser(req: Request, res: Response, next: NextFunction
 export function requirePermission(action: string, resource: string) {
   return (req: Request, res: Response, next: NextFunction) => {
     const user = (req as any).user;
-    
+
     // If no user is attached to the request, they're not authenticated
     if (!user) {
       return res.status(401).json({
@@ -37,39 +37,39 @@ export function requirePermission(action: string, resource: string) {
         message: 'Authentication required',
       });
     }
-    
+
     // Developer role has all permissions
     if (user.role === 'developer') {
       return next();
     }
-    
+
     // Format the permission string
     const permission = `${action}:${resource}`;
-    
+
     // Check if the user's role has the required permission
     const hasAccess = checkPermission(user.role, permission);
-    
+
     if (!hasAccess) {
       return res.status(403).json({
         success: false,
         message: 'Insufficient permissions',
       });
     }
-    
+
     next();
   };
 }
 
 /**
  * Middleware to check if the user has the required permission
- * 
+ *
  * @param permission The permission to check
  * @returns Middleware function
  */
 export function hasPermission(permission: string) {
   return (req: Request, res: Response, next: NextFunction) => {
     const user = (req as any).user;
-    
+
     // If no user is attached to the request, they're not authenticated
     if (!user) {
       return res.status(401).json({
@@ -77,30 +77,30 @@ export function hasPermission(permission: string) {
         message: 'Authentication required',
       });
     }
-    
+
     // Developer role has all permissions
     if (user.role === 'developer') {
       return next();
     }
-    
+
     // Check if the user's role has the required permission
     // This would ideally query a permissions database or cache
     const hasAccess = checkPermission(user.role, permission);
-    
+
     if (!hasAccess) {
       return res.status(403).json({
         success: false,
         message: 'Insufficient permissions',
       });
     }
-    
+
     next();
   };
 }
 
 /**
  * Check if a role has a specific permission
- * 
+ *
  * @param role The user role
  * @param permission The permission to check
  * @returns boolean indicating if the role has the permission
@@ -108,9 +108,9 @@ export function hasPermission(permission: string) {
 function checkPermission(role: string, permission: string): boolean {
   // Define role permissions - this would ideally come from a database
   const permissions: Record<string, string[]> = {
-    'admin': ['*'], // Admin has all permissions
-    'developer': ['*'], // Developer has all permissions
-    'organization_admin': [
+    admin: ['*'], // Admin has all permissions
+    developer: ['*'], // Developer has all permissions
+    organization_admin: [
       'view:dashboard',
       'view:apprentices',
       'manage:apprentices',
@@ -155,7 +155,7 @@ function checkPermission(role: string, permission: string): boolean {
       'create:labour_hire_worker_document',
       'verify:labour_hire_worker_document',
     ],
-    'field_officer': [
+    field_officer: [
       'view:dashboard',
       'view:apprentices',
       'view:hosts',
@@ -188,7 +188,7 @@ function checkPermission(role: string, permission: string): boolean {
       'create:labour_hire_worker_document',
       'verify:labour_hire_worker_document',
     ],
-    'host_employer': [
+    host_employer: [
       'view:dashboard',
       'view:apprentices',
       'view:contracts',
@@ -205,10 +205,10 @@ function checkPermission(role: string, permission: string): boolean {
       'read:labour_hire_worker',
       'read:labour_hire_placement',
       'read:labour_hire_timesheet',
-      'approve:labour_hire_timesheet', 
+      'approve:labour_hire_timesheet',
       'read:labour_hire_worker_document',
     ],
-    'apprentice': [
+    apprentice: [
       'view:dashboard',
       'view:contracts',
       'view:placements',
@@ -221,7 +221,7 @@ function checkPermission(role: string, permission: string): boolean {
       'view:fair_work',
       'read:award',
     ],
-    'rto_admin': [
+    rto_admin: [
       'view:dashboard',
       'view:apprentices',
       'view:vet_qualifications',
@@ -230,7 +230,7 @@ function checkPermission(role: string, permission: string): boolean {
       'manage:documents',
       'read:award',
     ],
-    'labour_hire_worker': [
+    labour_hire_worker: [
       'view:dashboard',
       'view:documents',
       'upload:documents',
@@ -247,31 +247,31 @@ function checkPermission(role: string, permission: string): boolean {
       'create:labour_hire_worker_document',
     ],
   };
-  
+
   // If the role doesn't exist in our permissions map
   if (!permissions[role]) {
     return false;
   }
-  
+
   // Check for wildcard permission
   if (permissions[role].includes('*')) {
     return true;
   }
-  
+
   // Check for specific permission
   return permissions[role].includes(permission);
 }
 
 /**
  * Middleware to check if the user has any of the required permissions
- * 
+ *
  * @param permissionList Array of permissions to check
  * @returns Middleware function
  */
 export function hasAnyPermission(permissionList: string[]) {
   return (req: Request, res: Response, next: NextFunction) => {
     const user = (req as any).user;
-    
+
     // If no user is attached to the request, they're not authenticated
     if (!user) {
       return res.status(401).json({
@@ -279,24 +279,22 @@ export function hasAnyPermission(permissionList: string[]) {
         message: 'Authentication required',
       });
     }
-    
+
     // Developer role has all permissions
     if (user.role === 'developer') {
       return next();
     }
-    
+
     // Check if the user has any of the required permissions
-    const hasAccess = permissionList.some(permission => 
-      checkPermission(user.role, permission)
-    );
-    
+    const hasAccess = permissionList.some(permission => checkPermission(user.role, permission));
+
     if (!hasAccess) {
       return res.status(403).json({
         success: false,
         message: 'Insufficient permissions',
       });
     }
-    
+
     next();
   };
 }

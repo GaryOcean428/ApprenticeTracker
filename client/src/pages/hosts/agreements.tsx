@@ -1,27 +1,29 @@
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { Link } from "wouter";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle
-} from "@/components/ui/card";
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { Link } from 'wouter';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
-  TableRow
-} from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
-import { AlertTriangle, CheckCircle, FileText, Search, CalendarCheck, HardHat, Plus } from "lucide-react";
-import { format } from "date-fns";
-import { Input } from "@/components/ui/input";
+  TableRow,
+} from '@/components/ui/table';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import {
+  AlertTriangle,
+  CheckCircle,
+  FileText,
+  Search,
+  CalendarCheck,
+  HardHat,
+  Plus,
+} from 'lucide-react';
+import { format } from 'date-fns';
+import { Input } from '@/components/ui/input';
 
 // Define types for host employer agreement data
 interface HostEmployerAgreement {
@@ -30,23 +32,23 @@ interface HostEmployerAgreement {
   hostEmployerName: string;
   agreementDate: string;
   expiryDate: string;
-  status: "current" | "expired" | "pending";
-  whsCompliance: "compliant" | "review_required" | "non_compliant";
+  status: 'current' | 'expired' | 'pending';
+  whsCompliance: 'compliant' | 'review_required' | 'non_compliant';
   documentUrl: string;
 }
 
 const HostAgreementsPage = () => {
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
 
   // Fetch all host employer agreements
   const { data: agreements, isLoading } = useQuery({
-    queryKey: ["/api/host-agreements"],
+    queryKey: ['/api/host-agreements'],
     queryFn: async () => {
-      const res = await fetch("/api/host-agreements");
+      const res = await fetch('/api/host-agreements');
       if (!res.ok) {
         // If the endpoint doesn't exist yet, return mock data
-        console.warn("API endpoint not available, returning empty array");
+        console.warn('API endpoint not available, returning empty array');
         return [];
       }
       return res.json() as Promise<HostEmployerAgreement[]>;
@@ -55,18 +57,17 @@ const HostAgreementsPage = () => {
 
   // Format date for display
   const formatDate = (dateStr: string) => {
-    return format(new Date(dateStr), "dd MMM yyyy");
+    return format(new Date(dateStr), 'dd MMM yyyy');
   };
 
   // Filter agreements based on search query and status filter
   const filteredAgreements = agreements
-    ? agreements.filter((agreement) => {
+    ? agreements.filter(agreement => {
         const matchesSearch = agreement.hostEmployerName
           .toLowerCase()
           .includes(searchQuery.toLowerCase());
 
-        const matchesStatus =
-          !statusFilter || agreement.status === statusFilter;
+        const matchesStatus = !statusFilter || agreement.status === statusFilter;
 
         return matchesSearch && matchesStatus;
       })
@@ -75,19 +76,19 @@ const HostAgreementsPage = () => {
   // Get status badge with appropriate color
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case "current":
+      case 'current':
         return (
           <Badge className="bg-green-100 text-green-800">
             <CheckCircle className="mr-1 h-3 w-3" /> Current
           </Badge>
         );
-      case "expired":
+      case 'expired':
         return (
           <Badge className="bg-red-100 text-red-800">
             <AlertTriangle className="mr-1 h-3 w-3" /> Expired
           </Badge>
         );
-      case "pending":
+      case 'pending':
         return (
           <Badge className="bg-yellow-100 text-yellow-800">
             <CalendarCheck className="mr-1 h-3 w-3" /> Pending
@@ -101,19 +102,19 @@ const HostAgreementsPage = () => {
   // Get WHS compliance badge
   const getComplianceBadge = (compliance: string) => {
     switch (compliance) {
-      case "compliant":
+      case 'compliant':
         return (
           <Badge className="bg-green-100 text-green-800">
             <CheckCircle className="mr-1 h-3 w-3" /> Compliant
           </Badge>
         );
-      case "review_required":
+      case 'review_required':
         return (
           <Badge className="bg-yellow-100 text-yellow-800">
             <AlertTriangle className="mr-1 h-3 w-3" /> Review Required
           </Badge>
         );
-      case "non_compliant":
+      case 'non_compliant':
         return (
           <Badge className="bg-red-100 text-red-800">
             <AlertTriangle className="mr-1 h-3 w-3" /> Non-Compliant
@@ -163,35 +164,35 @@ const HostAgreementsPage = () => {
                 placeholder="Search by host employer name..."
                 className="pl-8"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={e => setSearchQuery(e.target.value)}
               />
             </div>
             <div className="flex gap-2">
               <Button
-                variant={statusFilter === null ? "default" : "outline"}
+                variant={statusFilter === null ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setStatusFilter(null)}
               >
                 All
               </Button>
               <Button
-                variant={statusFilter === "current" ? "default" : "outline"}
+                variant={statusFilter === 'current' ? 'default' : 'outline'}
                 size="sm"
-                onClick={() => setStatusFilter("current")}
+                onClick={() => setStatusFilter('current')}
               >
                 Current
               </Button>
               <Button
-                variant={statusFilter === "expired" ? "default" : "outline"}
+                variant={statusFilter === 'expired' ? 'default' : 'outline'}
                 size="sm"
-                onClick={() => setStatusFilter("expired")}
+                onClick={() => setStatusFilter('expired')}
               >
                 Expired
               </Button>
               <Button
-                variant={statusFilter === "pending" ? "default" : "outline"}
+                variant={statusFilter === 'pending' ? 'default' : 'outline'}
                 size="sm"
-                onClick={() => setStatusFilter("pending")}
+                onClick={() => setStatusFilter('pending')}
               >
                 Pending
               </Button>
@@ -211,7 +212,7 @@ const HostAgreementsPage = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredAgreements.map((agreement) => (
+                {filteredAgreements.map(agreement => (
                   <TableRow key={agreement.id}>
                     <TableCell>
                       <Link href={`/hosts/${agreement.hostEmployerId}`}>
@@ -223,9 +224,7 @@ const HostAgreementsPage = () => {
                     <TableCell>{formatDate(agreement.agreementDate)}</TableCell>
                     <TableCell>{formatDate(agreement.expiryDate)}</TableCell>
                     <TableCell>{getStatusBadge(agreement.status)}</TableCell>
-                    <TableCell>
-                      {getComplianceBadge(agreement.whsCompliance)}
-                    </TableCell>
+                    <TableCell>{getComplianceBadge(agreement.whsCompliance)}</TableCell>
                     <TableCell>
                       <div className="flex gap-2">
                         <Button variant="ghost" size="sm">
@@ -250,8 +249,8 @@ const HostAgreementsPage = () => {
               <h3 className="mt-4 text-lg font-medium">No agreements found</h3>
               <p className="mt-2 text-sm text-muted-foreground">
                 {searchQuery || statusFilter
-                  ? "Try changing your search or filter criteria"
-                  : "Get started by creating your first host employer agreement"}
+                  ? 'Try changing your search or filter criteria'
+                  : 'Get started by creating your first host employer agreement'}
               </p>
               <Link href="/hosts/agreements/new">
                 <Button className="mt-4">

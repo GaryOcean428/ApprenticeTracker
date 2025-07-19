@@ -1,14 +1,14 @@
-import { db } from "./db";
-import { sql } from "drizzle-orm";
-import logger from "./utils/logger";
+import { db } from './db';
+import { sql } from 'drizzle-orm';
+import logger from './utils/logger';
 
 /**
  * This script adds the AVETMISS and Fair Work fields to the host_employers table
  * to ensure data consistency across tables
  */
 export async function migrateHostEmployersFields() {
-  console.log("Starting host employers fields migration...");
-  
+  console.log('Starting host employers fields migration...');
+
   try {
     // Check for existing columns to avoid errors if they already exist
     const result = await db.execute(sql`
@@ -18,8 +18,9 @@ export async function migrateHostEmployersFields() {
       ) as has_employer_identifier;
     `);
 
-    const hasEmployerIdentifier = result.length > 0 && result[0] && (result[0] as any).has_employer_identifier === true;
-    
+    const hasEmployerIdentifier =
+      result.length > 0 && result[0] && (result[0] as any).has_employer_identifier === true;
+
     if (!hasEmployerIdentifier) {
       // Add AVETMISS and Fair Work fields
       await db.execute(sql`
@@ -39,16 +40,16 @@ export async function migrateHostEmployersFields() {
         ADD COLUMN IF NOT EXISTS billing_cycle TEXT DEFAULT 'weekly',
         ADD COLUMN IF NOT EXISTS agreement_expiry DATE
       `);
-      console.log("Added AVETMISS and Fair Work fields to host_employers table");
+      console.log('Added AVETMISS and Fair Work fields to host_employers table');
     } else {
-      console.log("AVETMISS and Fair Work fields already exist in host_employers table");
+      console.log('AVETMISS and Fair Work fields already exist in host_employers table');
     }
 
-    console.log("Host employers fields migration completed successfully!");
+    console.log('Host employers fields migration completed successfully!');
     return true;
   } catch (error) {
-    console.error("Host employers fields migration failed:", error);
-    logger.error("Host employers fields migration failed", { error });
+    console.error('Host employers fields migration failed:', error);
+    logger.error('Host employers fields migration failed', { error });
     throw error;
   }
 }

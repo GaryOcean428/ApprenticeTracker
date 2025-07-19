@@ -35,15 +35,15 @@ app.get('/test-api-classifications/:awardId', async (req, res) => {
   try {
     const { awardId } = req.params;
     console.log(`Testing classifications API for award ID ${awardId}`);
-    
+
     // Get classifications for this award
     const classifications = await db
       .select()
       .from(awardClassifications)
       .where(eq(awardClassifications.awardId, parseInt(awardId)));
-    
+
     console.log(`Found ${classifications.length} classifications for award ID ${awardId}`);
-    
+
     return res.json({
       success: true,
       message: 'Classifications test API',
@@ -64,15 +64,15 @@ app.get('/test-api-penalty-rules/:awardId', async (req, res) => {
   try {
     const { awardId } = req.params;
     console.log(`Testing penalty rules API for award ID ${awardId}`);
-    
+
     // Get penalty rules for this award
     const rules = await db
       .select()
       .from(penaltyRules)
       .where(eq(penaltyRules.awardId, parseInt(awardId)));
-    
+
     console.log(`Found ${rules.length} penalty rules for award ID ${awardId}`);
-    
+
     return res.json({
       success: true,
       message: 'Penalty Rules test API',
@@ -92,14 +92,12 @@ app.get('/test-api-penalty-rules/:awardId', async (req, res) => {
 app.get('/test-api-all-penalty-rules', async (req, res) => {
   try {
     console.log('Testing all penalty rules API');
-    
+
     // Get all penalty rules
-    const rules = await db
-      .select()
-      .from(penaltyRules);
-    
+    const rules = await db.select().from(penaltyRules);
+
     console.log(`Found ${rules.length} total penalty rules`);
-    
+
     return res.json({
       success: true,
       message: 'All Penalty Rules test API',

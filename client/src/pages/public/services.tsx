@@ -1,6 +1,6 @@
-import PublicLayout from "@/layouts/public-layout";
-import { Button } from "@/components/ui/button";
-import { Link } from "wouter";
+import PublicLayout from '@/layouts/public-layout';
+import { Button } from '@/components/ui/button';
+import { Link } from 'wouter';
 
 export default function ServicesPage() {
   return (
@@ -14,7 +14,8 @@ export default function ServicesPage() {
                 Our Services
               </h1>
               <p className="mx-auto max-w-[700px] text-gray-500 md:text-xl">
-                Comprehensive apprenticeship and traineeship management services for both apprentices and host employers.
+                Comprehensive apprenticeship and traineeship management services for both
+                apprentices and host employers.
               </p>
             </div>
           </div>
@@ -33,8 +34,8 @@ export default function ServicesPage() {
                 Apprenticeship & Traineeship Management
               </h2>
               <p className="text-gray-500 md:text-xl/relaxed">
-                Braden Group offers complete end-to-end management of your apprenticeship or traineeship journey, 
-                handling all aspects from recruitment to completion.
+                Braden Group offers complete end-to-end management of your apprenticeship or
+                traineeship journey, handling all aspects from recruitment to completion.
               </p>
               <ul className="space-y-2">
                 <li className="flex items-center">
@@ -125,14 +126,10 @@ export default function ServicesPage() {
               </ul>
               <div className="flex flex-col sm:flex-row gap-3 pt-4">
                 <Link href="/find-apprenticeship">
-                  <Button className="bg-blue-600 hover:bg-blue-700">
-                    Find an Apprenticeship
-                  </Button>
+                  <Button className="bg-blue-600 hover:bg-blue-700">Find an Apprenticeship</Button>
                 </Link>
                 <Link href="/host-apprentice">
-                  <Button variant="outline">
-                    Become a Host Employer
-                  </Button>
+                  <Button variant="outline">Become a Host Employer</Button>
                 </Link>
               </div>
             </div>
@@ -162,8 +159,8 @@ export default function ServicesPage() {
                 Payroll Processing & Compliance Support
               </h2>
               <p className="text-gray-500 md:text-xl/relaxed">
-                We handle all administrative aspects of employing apprentices, ensuring compliance with regulations 
-                and taking the burden off both apprentices and host employers.
+                We handle all administrative aspects of employing apprentices, ensuring compliance
+                with regulations and taking the burden off both apprentices and host employers.
               </p>
               <ul className="space-y-2">
                 <li className="flex items-center">
@@ -269,8 +266,8 @@ export default function ServicesPage() {
                 Recruitment & Workforce Solutions
               </h2>
               <p className="text-gray-500 md:text-xl/relaxed">
-                Beyond apprenticeships, Braden Group provides comprehensive workforce solutions to help 
-                businesses find the right talent and manage their workforce efficiently.
+                Beyond apprenticeships, Braden Group provides comprehensive workforce solutions to
+                help businesses find the right talent and manage their workforce efficiently.
               </p>
               <ul className="space-y-2">
                 <li className="flex items-center">
@@ -369,8 +366,9 @@ export default function ServicesPage() {
                 Financing & Subsidy Assistance
               </h2>
               <p className="text-gray-500 md:text-xl/relaxed">
-                We help both apprentices and host employers access available government incentives, 
-                subsidies, and financial support to make apprenticeships more accessible and affordable.
+                We help both apprentices and host employers access available government incentives,
+                subsidies, and financial support to make apprenticeships more accessible and
+                affordable.
               </p>
               <ul className="space-y-2">
                 <li className="flex items-center">
@@ -444,9 +442,7 @@ export default function ServicesPage() {
               </ul>
               <div className="pt-4">
                 <Link href="/contact">
-                  <Button className="bg-blue-600 hover:bg-blue-700">
-                    Inquire About Subsidies
-                  </Button>
+                  <Button className="bg-blue-600 hover:bg-blue-700">Inquire About Subsidies</Button>
                 </Link>
               </div>
             </div>
@@ -463,7 +459,8 @@ export default function ServicesPage() {
                 Ready to partner with Braden Group?
               </h2>
               <p className="mx-auto max-w-[600px] text-gray-200 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-                Contact us today to discuss how we can support your apprenticeship or workforce needs.
+                Contact us today to discuss how we can support your apprenticeship or workforce
+                needs.
               </p>
             </div>
             <div className="space-x-4">

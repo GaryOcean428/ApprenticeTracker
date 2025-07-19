@@ -1,10 +1,10 @@
-import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { Link } from "wouter";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { User, FileText, AlertTriangle, Check } from "lucide-react";
-import { ActivityLog } from "@shared/schema";
+import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { Link } from 'wouter';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import { User, FileText, AlertTriangle, Check } from 'lucide-react';
+import { ActivityLog } from '@shared/schema';
 
 interface ActivityItemProps {
   icon: React.ReactNode;
@@ -18,7 +18,9 @@ const ActivityItem = ({ icon, iconBackground, title, timestamp }: ActivityItemPr
     <li className="py-3">
       <div className="flex items-start">
         <div className="flex-shrink-0">
-          <span className={`w-8 h-8 flex items-center justify-center rounded-full ${iconBackground}`}>
+          <span
+            className={`w-8 h-8 flex items-center justify-center rounded-full ${iconBackground}`}
+          >
             {icon}
           </span>
         </div>
@@ -33,32 +35,32 @@ const ActivityItem = ({ icon, iconBackground, title, timestamp }: ActivityItemPr
 
 const getActivityIcon = (action: string) => {
   switch (action) {
-    case "created":
-    case "registered":
+    case 'created':
+    case 'registered':
       return {
         icon: <User className="h-4 w-4" />,
-        bg: "bg-primary-100 text-primary"
+        bg: 'bg-primary-100 text-primary',
       };
-    case "approved":
-    case "updated":
+    case 'approved':
+    case 'updated':
       return {
         icon: <FileText className="h-4 w-4" />,
-        bg: "bg-secondary-100 text-secondary"
+        bg: 'bg-secondary-100 text-secondary',
       };
-    case "warning":
+    case 'warning':
       return {
         icon: <AlertTriangle className="h-4 w-4" />,
-        bg: "bg-yellow-100 text-warning"
+        bg: 'bg-yellow-100 text-warning',
       };
-    case "completed":
+    case 'completed':
       return {
         icon: <Check className="h-4 w-4" />,
-        bg: "bg-green-100 text-success"
+        bg: 'bg-green-100 text-success',
       };
     default:
       return {
         icon: <FileText className="h-4 w-4" />,
-        bg: "bg-muted text-muted-foreground"
+        bg: 'bg-muted text-muted-foreground',
       };
   }
 };
@@ -70,7 +72,7 @@ const formatTimestamp = (timestamp: string) => {
   const diffInMinutes = Math.floor(diffInMilliseconds / (1000 * 60));
   const diffInHours = Math.floor(diffInMilliseconds / (1000 * 60 * 60));
   const diffInDays = Math.floor(diffInMilliseconds / (1000 * 60 * 60 * 24));
-  
+
   if (diffInMinutes < 60) {
     return diffInMinutes <= 1 ? 'Just now' : `${diffInMinutes} minutes ago`;
   } else if (diffInHours < 24) {
@@ -78,25 +80,29 @@ const formatTimestamp = (timestamp: string) => {
   } else if (diffInDays < 2) {
     return 'Yesterday';
   } else {
-    return date.toLocaleDateString('en-US', { 
-      month: 'short', 
-      day: 'numeric', 
-      hour: '2-digit', 
-      minute: '2-digit' 
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
     });
   }
 };
 
 const RecentActivity = () => {
-  const { data: activities, isLoading, error } = useQuery({
+  const {
+    data: activities,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ['/api/activities/recent'],
     queryFn: async () => {
       const res = await fetch('/api/activities/recent?limit=4');
       if (!res.ok) throw new Error('Failed to fetch activities');
       return res.json() as Promise<ActivityLog[]>;
-    }
+    },
   });
-  
+
   if (isLoading) {
     return (
       <Card>
@@ -119,7 +125,7 @@ const RecentActivity = () => {
       </Card>
     );
   }
-  
+
   if (error) {
     return (
       <Card>
@@ -132,7 +138,7 @@ const RecentActivity = () => {
       </Card>
     );
   }
-  
+
   return (
     <Card>
       <CardHeader>
@@ -141,14 +147,17 @@ const RecentActivity = () => {
       <CardContent>
         <div className="overflow-hidden">
           <ul className="divide-y divide-border">
-            {activities?.map((activity) => {
+            {activities?.map(activity => {
               const { icon, bg } = getActivityIcon(activity.action);
               return (
                 <ActivityItem
                   key={activity.id}
                   icon={icon}
                   iconBackground={bg}
-                  title={activity.details?.message as string || `${activity.action} ${activity.relatedTo}`}
+                  title={
+                    (activity.details?.message as string) ||
+                    `${activity.action} ${activity.relatedTo}`
+                  }
                   timestamp={formatTimestamp(activity.timestamp.toString())}
                 />
               );

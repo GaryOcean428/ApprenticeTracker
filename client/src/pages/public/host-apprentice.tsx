@@ -1,22 +1,28 @@
-import PublicLayout from "@/layouts/public-layout";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useState } from "react";
-import { useToast } from "@/hooks/use-toast";
-import { hostEmployerApi, type HostEmployerInquiry } from "@/lib/api";
+import PublicLayout from '@/layouts/public-layout';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { useState } from 'react';
+import { useToast } from '@/hooks/use-toast';
+import { hostEmployerApi, type HostEmployerInquiry } from '@/lib/api';
 
 export default function HostApprenticePage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const { toast } = useToast();
-  
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
+
     const formData = new FormData(e.currentTarget);
     const inquiry: HostEmployerInquiry = {
       companyName: formData.get('company-name') as string,
@@ -27,33 +33,33 @@ export default function HostApprenticePage() {
       employeeCount: formData.get('employee-count') as string,
       message: formData.get('message') as string,
     };
-    
+
     try {
       // Connect to the CRM through our API
       const result = await hostEmployerApi.submitInquiry(inquiry);
-      
+
       if (result.success) {
         setSubmitted(true);
         toast({
-          title: "Inquiry Submitted",
+          title: 'Inquiry Submitted',
           description: result.message,
-          variant: "success",
+          variant: 'success',
         });
       } else {
-        throw new Error("Failed to submit inquiry");
+        throw new Error('Failed to submit inquiry');
       }
     } catch (err) {
-      console.error("Error submitting inquiry:", err);
+      console.error('Error submitting inquiry:', err);
       toast({
-        title: "Submission Error",
-        description: "There was a problem submitting your inquiry. Please try again later.",
-        variant: "destructive",
+        title: 'Submission Error',
+        description: 'There was a problem submitting your inquiry. Please try again later.',
+        variant: 'destructive',
       });
     } finally {
       setIsSubmitting(false);
     }
   };
-  
+
   return (
     <PublicLayout>
       {/* Hero Section */}
@@ -65,7 +71,8 @@ export default function HostApprenticePage() {
                 Host an Apprentice
               </h1>
               <p className="mx-auto max-w-[700px] text-gray-500 md:text-xl">
-                Partner with Braden Group to host skilled, motivated apprentices and grow your business while developing the next generation of skilled workers.
+                Partner with Braden Group to host skilled, motivated apprentices and grow your
+                business while developing the next generation of skilled workers.
               </p>
             </div>
           </div>
@@ -85,7 +92,7 @@ export default function HostApprenticePage() {
               </p>
             </div>
           </div>
-          
+
           <div className="grid gap-6 md:grid-cols-3">
             <div className="flex flex-col items-center text-center p-6 bg-blue-50 rounded-lg">
               <div className="h-12 w-12 flex items-center justify-center rounded-full bg-blue-100 text-blue-600 mb-4">
@@ -108,10 +115,11 @@ export default function HostApprenticePage() {
               </div>
               <h3 className="text-xl font-bold mb-2">Cost-Effective Solution</h3>
               <p className="text-gray-700">
-                Braden Group handles all payroll, insurance, and administrative responsibilities, reducing your overhead costs.
+                Braden Group handles all payroll, insurance, and administrative responsibilities,
+                reducing your overhead costs.
               </p>
             </div>
-            
+
             <div className="flex flex-col items-center text-center p-6 bg-blue-50 rounded-lg">
               <div className="h-12 w-12 flex items-center justify-center rounded-full bg-blue-100 text-blue-600 mb-4">
                 <svg
@@ -144,10 +152,11 @@ export default function HostApprenticePage() {
               </div>
               <h3 className="text-xl font-bold mb-2">Government Incentives</h3>
               <p className="text-gray-700">
-                Access to various government subsidies and incentives specifically designed for businesses hosting apprentices.
+                Access to various government subsidies and incentives specifically designed for
+                businesses hosting apprentices.
               </p>
             </div>
-            
+
             <div className="flex flex-col items-center text-center p-6 bg-blue-50 rounded-lg">
               <div className="h-12 w-12 flex items-center justify-center rounded-full bg-blue-100 text-blue-600 mb-4">
                 <svg
@@ -170,10 +179,11 @@ export default function HostApprenticePage() {
               </div>
               <h3 className="text-xl font-bold mb-2">Skilled Workforce</h3>
               <p className="text-gray-700">
-                Develop workers trained specifically to meet your business needs and industry standards.
+                Develop workers trained specifically to meet your business needs and industry
+                standards.
               </p>
             </div>
-            
+
             <div className="flex flex-col items-center text-center p-6 bg-blue-50 rounded-lg">
               <div className="h-12 w-12 flex items-center justify-center rounded-full bg-blue-100 text-blue-600 mb-4">
                 <svg
@@ -198,10 +208,11 @@ export default function HostApprenticePage() {
               </div>
               <h3 className="text-xl font-bold mb-2">Reduced Paperwork</h3>
               <p className="text-gray-700">
-                We handle all compliance, documentation, and training records, saving you valuable administrative time.
+                We handle all compliance, documentation, and training records, saving you valuable
+                administrative time.
               </p>
             </div>
-            
+
             <div className="flex flex-col items-center text-center p-6 bg-blue-50 rounded-lg">
               <div className="h-12 w-12 flex items-center justify-center rounded-full bg-blue-100 text-blue-600 mb-4">
                 <svg
@@ -227,10 +238,11 @@ export default function HostApprenticePage() {
               </div>
               <h3 className="text-xl font-bold mb-2">Flexibility</h3>
               <p className="text-gray-700">
-                If your work slows down, we can rotate the apprentice to another host employer until you're ready to have them back.
+                If your work slows down, we can rotate the apprentice to another host employer until
+                you're ready to have them back.
               </p>
             </div>
-            
+
             <div className="flex flex-col items-center text-center p-6 bg-blue-50 rounded-lg">
               <div className="h-12 w-12 flex items-center justify-center rounded-full bg-blue-100 text-blue-600 mb-4">
                 <svg
@@ -251,13 +263,14 @@ export default function HostApprenticePage() {
               </div>
               <h3 className="text-xl font-bold mb-2">Ongoing Support</h3>
               <p className="text-gray-700">
-                Our dedicated field officers provide regular check-ins and support to ensure a successful apprenticeship.
+                Our dedicated field officers provide regular check-ins and support to ensure a
+                successful apprenticeship.
               </p>
             </div>
           </div>
         </div>
       </section>
-      
+
       {/* How It Works Section */}
       <section className="w-full py-12 md:py-24 bg-gray-50">
         <div className="container px-4 md:px-6">
@@ -271,17 +284,20 @@ export default function HostApprenticePage() {
               </p>
             </div>
           </div>
-          
+
           <div className="relative">
             {/* Timeline line */}
             <div className="absolute left-1/2 transform -translate-x-1/2 h-full w-1 bg-blue-200 hidden md:block"></div>
-            
+
             <div className="space-y-12 relative">
               <div className="flex flex-col md:flex-row items-center">
                 <div className="flex md:w-1/2 md:pr-10 md:text-right">
                   <div className="flex-1">
                     <h3 className="text-xl font-bold mb-2">Initial Consultation</h3>
-                    <p className="text-gray-600">We meet with you to understand your business needs, workplace environment, and the type of apprentice that would best suit your company.</p>
+                    <p className="text-gray-600">
+                      We meet with you to understand your business needs, workplace environment, and
+                      the type of apprentice that would best suit your company.
+                    </p>
                   </div>
                 </div>
                 <div className="bg-blue-500 text-white rounded-full h-12 w-12 flex items-center justify-center z-10 my-4 md:my-0">
@@ -289,7 +305,7 @@ export default function HostApprenticePage() {
                 </div>
                 <div className="md:w-1/2 md:pl-10 invisible md:visible"></div>
               </div>
-              
+
               <div className="flex flex-col md:flex-row items-center">
                 <div className="md:w-1/2 md:pr-10 invisible md:visible"></div>
                 <div className="bg-blue-500 text-white rounded-full h-12 w-12 flex items-center justify-center z-10 my-4 md:my-0">
@@ -298,16 +314,22 @@ export default function HostApprenticePage() {
                 <div className="flex md:w-1/2 md:pl-10 md:text-left">
                   <div className="flex-1">
                     <h3 className="text-xl font-bold mb-2">Matching Process</h3>
-                    <p className="text-gray-600">We select qualified candidates from our pool of apprentices who match your requirements and arrange interviews.</p>
+                    <p className="text-gray-600">
+                      We select qualified candidates from our pool of apprentices who match your
+                      requirements and arrange interviews.
+                    </p>
                   </div>
                 </div>
               </div>
-              
+
               <div className="flex flex-col md:flex-row items-center">
                 <div className="flex md:w-1/2 md:pr-10 md:text-right">
                   <div className="flex-1">
                     <h3 className="text-xl font-bold mb-2">Placement Confirmation</h3>
-                    <p className="text-gray-600">Once you've selected your apprentice, we handle all the paperwork and formally arrange the placement.</p>
+                    <p className="text-gray-600">
+                      Once you've selected your apprentice, we handle all the paperwork and formally
+                      arrange the placement.
+                    </p>
                   </div>
                 </div>
                 <div className="bg-blue-500 text-white rounded-full h-12 w-12 flex items-center justify-center z-10 my-4 md:my-0">
@@ -315,7 +337,7 @@ export default function HostApprenticePage() {
                 </div>
                 <div className="md:w-1/2 md:pl-10 invisible md:visible"></div>
               </div>
-              
+
               <div className="flex flex-col md:flex-row items-center">
                 <div className="md:w-1/2 md:pr-10 invisible md:visible"></div>
                 <div className="bg-blue-500 text-white rounded-full h-12 w-12 flex items-center justify-center z-10 my-4 md:my-0">
@@ -324,7 +346,10 @@ export default function HostApprenticePage() {
                 <div className="flex md:w-1/2 md:pl-10 md:text-left">
                   <div className="flex-1">
                     <h3 className="text-xl font-bold mb-2">Ongoing Support</h3>
-                    <p className="text-gray-600">Our field officers conduct regular site visits to monitor progress, provide support, and ensure both you and the apprentice are satisfied.</p>
+                    <p className="text-gray-600">
+                      Our field officers conduct regular site visits to monitor progress, provide
+                      support, and ensure both you and the apprentice are satisfied.
+                    </p>
                   </div>
                 </div>
               </div>
@@ -343,11 +368,12 @@ export default function HostApprenticePage() {
                   Register Your Interest
                 </h2>
                 <p className="text-gray-500 md:text-xl/relaxed">
-                  Fill out the form below to express your interest in hosting an apprentice or to learn more about our services.
+                  Fill out the form below to express your interest in hosting an apprentice or to
+                  learn more about our services.
                 </p>
               </div>
             </div>
-            
+
             {submitted ? (
               <div className="p-8 text-center bg-blue-50 rounded-lg">
                 <svg
@@ -366,8 +392,12 @@ export default function HostApprenticePage() {
                   <polyline points="22 4 12 14.01 9 11.01" />
                 </svg>
                 <h3 className="text-2xl font-bold mb-4">Thank You for Your Interest!</h3>
-                <p className="text-gray-600 mb-6">Your inquiry has been successfully submitted. One of our team members will contact you shortly to discuss hosting an apprentice and answer any questions you may have.</p>
-                <Button 
+                <p className="text-gray-600 mb-6">
+                  Your inquiry has been successfully submitted. One of our team members will contact
+                  you shortly to discuss hosting an apprentice and answer any questions you may
+                  have.
+                </p>
+                <Button
                   className="bg-blue-600 hover:bg-blue-700"
                   onClick={() => setSubmitted(false)}
                 >
@@ -386,7 +416,7 @@ export default function HostApprenticePage() {
                     <Input id="contact-name" name="contact-name" required />
                   </div>
                 </div>
-                
+
                 <div className="grid gap-6 md:grid-cols-2">
                   <div className="space-y-2">
                     <Label htmlFor="email">Email *</Label>
@@ -397,7 +427,7 @@ export default function HostApprenticePage() {
                     <Input id="phone" name="phone" type="tel" required />
                   </div>
                 </div>
-                
+
                 <div className="grid gap-6 md:grid-cols-2">
                   <div className="space-y-2">
                     <Label htmlFor="industry">Industry *</Label>
@@ -434,33 +464,51 @@ export default function HostApprenticePage() {
                     </Select>
                   </div>
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="message">Additional Information *</Label>
-                  <Textarea 
-                    id="message" 
-                    name="message" 
+                  <Textarea
+                    id="message"
+                    name="message"
                     placeholder="Please tell us about your business and the type of apprentice you're looking for"
                     className="min-h-[120px]"
-                    required 
+                    required
                   />
                 </div>
-                
+
                 <div className="flex justify-end">
-                  <Button 
-                    type="submit" 
+                  <Button
+                    type="submit"
                     className="bg-blue-600 hover:bg-blue-700 w-full md:w-auto"
                     disabled={isSubmitting}
                   >
                     {isSubmitting ? (
                       <>
-                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        <svg
+                          className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          ></circle>
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                          ></path>
                         </svg>
                         Submitting...
                       </>
-                    ) : 'Submit Inquiry'}
+                    ) : (
+                      'Submit Inquiry'
+                    )}
                   </Button>
                 </div>
               </form>
@@ -482,7 +530,7 @@ export default function HostApprenticePage() {
               </p>
             </div>
           </div>
-          
+
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
             <div className="bg-white p-6 rounded-lg shadow-sm">
               <div className="flex items-center mb-4">
@@ -495,27 +543,74 @@ export default function HostApprenticePage() {
                 </div>
               </div>
               <p className="italic text-gray-600 mb-4">
-                "Braden Group has made hiring apprentices simple and stress-free. They handle all the administrative work while we focus on training. The apprentices they send us are well-prepared and motivated."
+                "Braden Group has made hiring apprentices simple and stress-free. They handle all
+                the administrative work while we focus on training. The apprentices they send us are
+                well-prepared and motivated."
               </p>
               <div className="flex text-yellow-400">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-                  <path fillRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clipRule="evenodd" />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  className="w-5 h-5"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z"
+                    clipRule="evenodd"
+                  />
                 </svg>
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-                  <path fillRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clipRule="evenodd" />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  className="w-5 h-5"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z"
+                    clipRule="evenodd"
+                  />
                 </svg>
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-                  <path fillRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clipRule="evenodd" />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  className="w-5 h-5"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z"
+                    clipRule="evenodd"
+                  />
                 </svg>
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-                  <path fillRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clipRule="evenodd" />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  className="w-5 h-5"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z"
+                    clipRule="evenodd"
+                  />
                 </svg>
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-                  <path fillRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clipRule="evenodd" />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  className="w-5 h-5"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z"
+                    clipRule="evenodd"
+                  />
                 </svg>
               </div>
             </div>
-            
+
             <div className="bg-white p-6 rounded-lg shadow-sm">
               <div className="flex items-center mb-4">
                 <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold mr-4">
@@ -527,27 +622,74 @@ export default function HostApprenticePage() {
                 </div>
               </div>
               <p className="italic text-gray-600 mb-4">
-                "The flexibility offered by Braden Group has been invaluable for our seasonal business. When work slows down, they relocate our apprentice temporarily, and bring them back when we need them."
+                "The flexibility offered by Braden Group has been invaluable for our seasonal
+                business. When work slows down, they relocate our apprentice temporarily, and bring
+                them back when we need them."
               </p>
               <div className="flex text-yellow-400">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-                  <path fillRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clipRule="evenodd" />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  className="w-5 h-5"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z"
+                    clipRule="evenodd"
+                  />
                 </svg>
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-                  <path fillRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clipRule="evenodd" />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  className="w-5 h-5"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z"
+                    clipRule="evenodd"
+                  />
                 </svg>
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-                  <path fillRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clipRule="evenodd" />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  className="w-5 h-5"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z"
+                    clipRule="evenodd"
+                  />
                 </svg>
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-                  <path fillRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clipRule="evenodd" />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  className="w-5 h-5"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z"
+                    clipRule="evenodd"
+                  />
                 </svg>
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-                  <path fillRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clipRule="evenodd" />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  className="w-5 h-5"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z"
+                    clipRule="evenodd"
+                  />
                 </svg>
               </div>
             </div>
-            
+
             <div className="bg-white p-6 rounded-lg shadow-sm">
               <div className="flex items-center mb-4">
                 <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold mr-4">
@@ -559,23 +701,70 @@ export default function HostApprenticePage() {
                 </div>
               </div>
               <p className="italic text-gray-600 mb-4">
-                "The government incentives we accessed through Braden Group have made hosting apprentices cost-effective for our business. Their knowledge of available subsidies has been extremely valuable."
+                "The government incentives we accessed through Braden Group have made hosting
+                apprentices cost-effective for our business. Their knowledge of available subsidies
+                has been extremely valuable."
               </p>
               <div className="flex text-yellow-400">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-                  <path fillRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clipRule="evenodd" />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  className="w-5 h-5"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z"
+                    clipRule="evenodd"
+                  />
                 </svg>
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-                  <path fillRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clipRule="evenodd" />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  className="w-5 h-5"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z"
+                    clipRule="evenodd"
+                  />
                 </svg>
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-                  <path fillRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clipRule="evenodd" />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  className="w-5 h-5"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z"
+                    clipRule="evenodd"
+                  />
                 </svg>
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-                  <path fillRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clipRule="evenodd" />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  className="w-5 h-5"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z"
+                    clipRule="evenodd"
+                  />
                 </svg>
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-                  <path fillRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clipRule="evenodd" />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  className="w-5 h-5"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z"
+                    clipRule="evenodd"
+                  />
                 </svg>
               </div>
             </div>
@@ -592,11 +781,18 @@ export default function HostApprenticePage() {
                 Ready to grow your business with an apprentice?
               </h2>
               <p className="mx-auto max-w-[600px] text-gray-200 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-                Contact us today to discuss your specific needs and discover how hosting an apprentice can benefit your business.
+                Contact us today to discuss your specific needs and discover how hosting an
+                apprentice can benefit your business.
               </p>
             </div>
             <div className="space-x-4">
-              <Button variant="secondary" size="lg" onClick={() => document.getElementById('inquiry-form')?.scrollIntoView({ behavior: 'smooth' })}>
+              <Button
+                variant="secondary"
+                size="lg"
+                onClick={() =>
+                  document.getElementById('inquiry-form')?.scrollIntoView({ behavior: 'smooth' })
+                }
+              >
                 Register Your Interest
               </Button>
             </div>

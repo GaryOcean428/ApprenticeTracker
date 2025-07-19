@@ -1,8 +1,8 @@
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { useState } from "react";
-import { PageHeader } from "@/components/page-header";
-import { DashboardShell } from "@/components/dashboard-shell";
-import { SkeletonTable } from "@/components/skeleton-table";
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { useState } from 'react';
+import { PageHeader } from '@/components/page-header';
+import { DashboardShell } from '@/components/dashboard-shell';
+import { SkeletonTable } from '@/components/skeleton-table';
 import {
   Table,
   TableBody,
@@ -10,8 +10,8 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
+} from '@/components/ui/table';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogClose,
@@ -21,7 +21,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 import {
   Form,
   FormControl,
@@ -30,29 +30,24 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardFooter, 
-  CardHeader, 
-  CardTitle 
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { 
-  TagIcon, 
-  PlusIcon, 
-  PencilIcon, 
-  TrashIcon 
-} from "lucide-react";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { useToast } from "@/hooks/use-toast";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { TagIcon, PlusIcon, PencilIcon, TrashIcon } from 'lucide-react';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import { useToast } from '@/hooks/use-toast';
+import { apiRequest, queryClient } from '@/lib/queryClient';
 
 // Define type for contact tag
 type ContactTag = {
@@ -68,9 +63,9 @@ type ContactTag = {
 
 // Form schema for creating/editing a tag
 const tagFormSchema = z.object({
-  name: z.string().min(1, "Tag name is required"),
+  name: z.string().min(1, 'Tag name is required'),
   description: z.string().optional(),
-  color: z.string().default("#6366F1"),
+  color: z.string().default('#6366F1'),
 });
 
 type TagFormValues = z.infer<typeof tagFormSchema>;
@@ -78,7 +73,7 @@ type TagFormValues = z.infer<typeof tagFormSchema>;
 export default function ContactTagsPage() {
   const { toast } = useToast();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  
+
   // Fetch contact tags
   const { data: tags, isLoading } = useQuery<ContactTag[]>({
     queryKey: ['/api/contacts/contact-tags'],
@@ -88,16 +83,16 @@ export default function ContactTagsPage() {
   const form = useForm<TagFormValues>({
     resolver: zodResolver(tagFormSchema),
     defaultValues: {
-      name: "",
-      description: "",
-      color: "#6366F1",
+      name: '',
+      description: '',
+      color: '#6366F1',
     },
   });
 
   // Mutation for adding new tag
   const addTagMutation = useMutation({
     mutationFn: async (values: TagFormValues) => {
-      const res = await apiRequest("POST", "/api/contacts/tags", values);
+      const res = await apiRequest('POST', '/api/contacts/tags', values);
       return await res.json();
     },
     onSuccess: () => {
@@ -105,15 +100,15 @@ export default function ContactTagsPage() {
       setIsAddDialogOpen(false);
       form.reset();
       toast({
-        title: "Success",
-        description: "Contact tag created successfully",
+        title: 'Success',
+        description: 'Contact tag created successfully',
       });
     },
     onError: (error: any) => {
       toast({
-        title: "Error",
+        title: 'Error',
         description: `Failed to create contact tag: ${error.message}`,
-        variant: "destructive",
+        variant: 'destructive',
       });
     },
   });
@@ -121,20 +116,20 @@ export default function ContactTagsPage() {
   // Mutation for deleting a tag
   const deleteTagMutation = useMutation({
     mutationFn: async (id: number) => {
-      await apiRequest("DELETE", `/api/contacts/tags/${id}`);
+      await apiRequest('DELETE', `/api/contacts/tags/${id}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/contacts/contact-tags'] });
       toast({
-        title: "Success",
-        description: "Contact tag deleted successfully",
+        title: 'Success',
+        description: 'Contact tag deleted successfully',
       });
     },
     onError: (error: any) => {
       toast({
-        title: "Error",
+        title: 'Error',
         description: `Failed to delete contact tag: ${error.message}`,
-        variant: "destructive",
+        variant: 'destructive',
       });
     },
   });
@@ -146,18 +141,18 @@ export default function ContactTagsPage() {
   const handleDelete = (tag: ContactTag) => {
     if (tag.isSystem) {
       toast({
-        title: "Cannot Delete",
-        description: "System tags cannot be deleted",
-        variant: "destructive",
+        title: 'Cannot Delete',
+        description: 'System tags cannot be deleted',
+        variant: 'destructive',
       });
       return;
     }
-    
-    if (confirm("Are you sure you want to delete this contact tag?")) {
+
+    if (confirm('Are you sure you want to delete this contact tag?')) {
       deleteTagMutation.mutate(tag.id);
     }
   };
-  
+
   return (
     <DashboardShell>
       <PageHeader
@@ -174,11 +169,9 @@ export default function ContactTagsPage() {
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Create Contact Tag</DialogTitle>
-              <DialogDescription>
-                Add a new tag to categorize your contacts
-              </DialogDescription>
+              <DialogDescription>Add a new tag to categorize your contacts</DialogDescription>
             </DialogHeader>
-            
+
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <FormField
@@ -194,7 +187,7 @@ export default function ContactTagsPage() {
                     </FormItem>
                   )}
                 />
-                
+
                 <FormField
                   control={form.control}
                   name="description"
@@ -202,17 +195,17 @@ export default function ContactTagsPage() {
                     <FormItem>
                       <FormLabel>Description</FormLabel>
                       <FormControl>
-                        <Textarea 
-                          placeholder="What does this tag represent?" 
-                          {...field} 
-                          value={field.value || ""}
+                        <Textarea
+                          placeholder="What does this tag represent?"
+                          {...field}
+                          value={field.value || ''}
                         />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-                
+
                 <FormField
                   control={form.control}
                   name="color"
@@ -221,32 +214,24 @@ export default function ContactTagsPage() {
                       <FormLabel>Color</FormLabel>
                       <div className="flex items-center space-x-2">
                         <FormControl>
-                          <Input
-                            type="color"
-                            {...field}
-                            className="w-16 h-10 p-1"
-                          />
+                          <Input type="color" {...field} className="w-16 h-10 p-1" />
                         </FormControl>
-                        <Input 
-                          {...field} 
-                          placeholder="#6366F1" 
-                          className="w-24"
-                        />
+                        <Input {...field} placeholder="#6366F1" className="w-24" />
                       </div>
-                      <FormDescription>
-                        Choose a color for the tag
-                      </FormDescription>
+                      <FormDescription>Choose a color for the tag</FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-                
+
                 <DialogFooter>
                   <DialogClose asChild>
-                    <Button type="button" variant="outline">Cancel</Button>
+                    <Button type="button" variant="outline">
+                      Cancel
+                    </Button>
                   </DialogClose>
                   <Button type="submit" disabled={addTagMutation.isPending}>
-                    {addTagMutation.isPending ? "Creating..." : "Create Tag"}
+                    {addTagMutation.isPending ? 'Creating...' : 'Create Tag'}
                   </Button>
                 </DialogFooter>
               </form>
@@ -262,9 +247,7 @@ export default function ContactTagsPage() {
           <Card>
             <CardHeader>
               <CardTitle>All Tags</CardTitle>
-              <CardDescription>
-                Manage your contact tags
-              </CardDescription>
+              <CardDescription>Manage your contact tags</CardDescription>
             </CardHeader>
             <CardContent>
               {tags && tags.length > 0 ? (
@@ -278,20 +261,18 @@ export default function ContactTagsPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {tags.map((tag) => (
+                    {tags.map(tag => (
                       <TableRow key={tag.id}>
                         <TableCell>
                           <div className="flex items-center space-x-2">
-                            <div 
-                              className="w-4 h-4 rounded-full" 
+                            <div
+                              className="w-4 h-4 rounded-full"
                               style={{ backgroundColor: tag.color }}
                             />
                             <span className="font-medium">{tag.name}</span>
                           </div>
                         </TableCell>
-                        <TableCell>
-                          {tag.description || "No description"}
-                        </TableCell>
+                        <TableCell>{tag.description || 'No description'}</TableCell>
                         <TableCell>
                           {tag.isSystem ? (
                             <Badge variant="secondary">System</Badge>
@@ -304,9 +285,9 @@ export default function ContactTagsPage() {
                             <Button variant="ghost" size="icon">
                               <PencilIcon className="h-4 w-4" />
                             </Button>
-                            <Button 
-                              variant="ghost" 
-                              size="icon" 
+                            <Button
+                              variant="ghost"
+                              size="icon"
                               onClick={() => handleDelete(tag)}
                               disabled={deleteTagMutation.isPending || tag.isSystem}
                             >
@@ -324,9 +305,7 @@ export default function ContactTagsPage() {
                   <p className="text-center text-muted-foreground mb-4">
                     No tags found. Create your first tag to get started.
                   </p>
-                  <Button
-                    onClick={() => setIsAddDialogOpen(true)}
-                  >
+                  <Button onClick={() => setIsAddDialogOpen(true)}>
                     <PlusIcon className="mr-2 h-4 w-4" />
                     Create Your First Tag
                   </Button>
@@ -336,7 +315,7 @@ export default function ContactTagsPage() {
           </Card>
         )}
       </div>
-      
+
       <div className="mt-6">
         <Card>
           <CardHeader>
@@ -354,11 +333,11 @@ export default function ContactTagsPage() {
                   <li>Review and clean up unused tags periodically</li>
                 </ul>
               </div>
-              
+
               <div>
                 <h3 className="font-medium">System Tags:</h3>
                 <p className="text-sm text-muted-foreground mt-2">
-                  System tags are pre-defined and cannot be deleted. They ensure consistent 
+                  System tags are pre-defined and cannot be deleted. They ensure consistent
                   categorization across the platform.
                 </p>
               </div>

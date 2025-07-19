@@ -1,9 +1,9 @@
-import { db } from "./db";
-import { sql } from "drizzle-orm";
+import { db } from './db';
+import { sql } from 'drizzle-orm';
 
 export async function migrateHostPreferredQualifications() {
-  console.log("Creating Host Employer Preferred Qualifications table...");
-  
+  console.log('Creating Host Employer Preferred Qualifications table...');
+
   try {
     // Create host_employer_preferred_qualifications table
     await db.execute(sql`
@@ -19,7 +19,7 @@ export async function migrateHostPreferredQualifications() {
       )
     `);
     console.log('Host Employer Preferred Qualifications table created');
-    
+
     console.log('Host Preferred Qualifications migration completed successfully');
     return true;
   } catch (error) {

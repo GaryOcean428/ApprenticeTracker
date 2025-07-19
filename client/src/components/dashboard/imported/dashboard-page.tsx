@@ -12,7 +12,7 @@ const mockMonthlyData = [
   { date: '2023-02', count: 15 },
   { date: '2023-03', count: 18 },
   // ... more data
-].map((item) => ({
+].map(item => ({
   date: item.date,
   count: item.count,
 }));

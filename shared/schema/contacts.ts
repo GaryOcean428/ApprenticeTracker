@@ -23,7 +23,7 @@ export const insertContactTagSchema = createInsertSchema(contactTags).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
-} as const);
+});
 
 export type ContactTag = typeof contactTags.$inferSelect;
 export type InsertContactTag = z.infer<typeof insertContactTagSchema>;
@@ -79,7 +79,7 @@ export const insertContactSchema = createInsertSchema(contacts).omit({
   createdAt: true,
   updatedAt: true,
   lastContactedAt: true,
-} as const);
+});
 
 export type Contact = typeof contacts.$inferSelect;
 export type InsertContact = z.infer<typeof insertContactSchema>;
@@ -95,7 +95,7 @@ export const contactTagAssignments = pgTable("contact_tag_assignments", {
 export const insertContactTagAssignmentSchema = createInsertSchema(contactTagAssignments).omit({
   id: true,
   createdAt: true,
-} as const);
+});
 
 export type ContactTagAssignment = typeof contactTagAssignments.$inferSelect;
 export type InsertContactTagAssignment = z.infer<typeof insertContactTagAssignmentSchema>;
@@ -116,7 +116,7 @@ export const insertContactGroupSchema = createInsertSchema(contactGroups).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
-} as const);
+});
 
 export type ContactGroup = typeof contactGroups.$inferSelect;
 export type InsertContactGroup = z.infer<typeof insertContactGroupSchema>;
@@ -133,7 +133,7 @@ export const contactGroupMembers = pgTable("contact_group_members", {
 export const insertContactGroupMemberSchema = createInsertSchema(contactGroupMembers).omit({
   id: true,
   createdAt: true,
-} as const);
+});
 
 export type ContactGroupMember = typeof contactGroupMembers.$inferSelect;
 export type InsertContactGroupMember = z.infer<typeof insertContactGroupMemberSchema>;
@@ -156,7 +156,7 @@ export const insertContactInteractionSchema = createInsertSchema(contactInteract
   id: true,
   createdAt: true,
   updatedAt: true,
-} as const);
+});
 
 export type ContactInteraction = typeof contactInteractions.$inferSelect;
 export type InsertContactInteraction = z.infer<typeof insertContactInteractionSchema>;

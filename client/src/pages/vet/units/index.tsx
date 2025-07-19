@@ -1,77 +1,70 @@
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { Link } from "wouter";
-import { UnitOfCompetency } from "@shared/schema";
-import { 
-  Card, 
-  CardContent, 
-  CardHeader, 
-  CardTitle 
-} from "@/components/ui/card";
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from "@/components/ui/table";
-import { 
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { Link } from 'wouter';
+import { UnitOfCompetency } from '@shared/schema';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
-import { 
-  Eye, 
-  Pencil, 
-  Trash2, 
-  MoreHorizontal, 
-  Plus, 
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import {
+  Eye,
+  Pencil,
+  Trash2,
+  MoreHorizontal,
+  Plus,
   Search,
   Filter,
   CheckCircle,
-  XCircle
-} from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+  XCircle,
+} from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 export default function UnitsOfCompetencyList() {
   const { toast } = useToast();
   const [filter, setFilter] = useState({
-    search: "",
-    trainingPackage: "",
-    isActive: ""
+    search: '',
+    trainingPackage: '',
+    isActive: '',
   });
-  
+
   // Fetch units of competency
-  const { 
-    data: units, 
-    isLoading, 
-    error 
+  const {
+    data: units,
+    isLoading,
+    error,
   } = useQuery({
     queryKey: ['/api/vet/units'],
     queryFn: async () => {
       const res = await fetch('/api/vet/units');
       if (!res.ok) throw new Error('Failed to fetch units of competency');
       return res.json() as Promise<UnitOfCompetency[]>;
-    }
+    },
   });
-  
+
   // Fetch training packages for filter
-  const { 
-    data: trainingPackages 
-  } = useQuery({
+  const { data: trainingPackages } = useQuery({
     queryKey: ['/api/vet/training-packages'],
     queryFn: async () => {
       try {
@@ -80,34 +73,33 @@ export default function UnitsOfCompetencyList() {
         return res.json() as Promise<string[]>;
       } catch (error) {
         toast({
-          title: "Error",
-          description: "Failed to fetch training packages.",
-          variant: "destructive"
+          title: 'Error',
+          description: 'Failed to fetch training packages.',
+          variant: 'destructive',
         });
         return [];
       }
-    }
+    },
   });
-  
+
   // Filter units based on search and filters
   const filteredUnits = units?.filter(unit => {
-    const matchesSearch = 
-      filter.search === "" || 
+    const matchesSearch =
+      filter.search === '' ||
       (unit.unitCode?.toLowerCase() || '').includes(filter.search.toLowerCase()) ||
       (unit.unitTitle?.toLowerCase() || '').includes(filter.search.toLowerCase());
-    
-    const matchesTrainingPackage = 
-      filter.trainingPackage === "" || 
-      unit.trainingPackage === filter.trainingPackage;
-    
-    const matchesStatus = 
-      filter.isActive === "" || 
-      (filter.isActive === "active" && unit.isActive) ||
-      (filter.isActive === "inactive" && !unit.isActive);
-    
+
+    const matchesTrainingPackage =
+      filter.trainingPackage === '' || unit.trainingPackage === filter.trainingPackage;
+
+    const matchesStatus =
+      filter.isActive === '' ||
+      (filter.isActive === 'active' && unit.isActive) ||
+      (filter.isActive === 'inactive' && !unit.isActive);
+
     return matchesSearch && matchesTrainingPackage && matchesStatus;
   });
-  
+
   return (
     <>
       <div className="flex justify-between items-center mb-6">
@@ -119,7 +111,7 @@ export default function UnitsOfCompetencyList() {
           </Link>
         </Button>
       </div>
-      
+
       <Card className="mb-8">
         <CardHeader>
           <CardTitle>Units of Competency</CardTitle>
@@ -133,13 +125,13 @@ export default function UnitsOfCompetencyList() {
                 placeholder="Search by code or title..."
                 className="pl-8"
                 value={filter.search}
-                onChange={(e) => setFilter({...filter, search: e.target.value})}
+                onChange={e => setFilter({ ...filter, search: e.target.value })}
               />
             </div>
             <div className="flex gap-4">
               <Select
                 value={filter.trainingPackage}
-                onValueChange={(value) => setFilter({...filter, trainingPackage: value})}
+                onValueChange={value => setFilter({ ...filter, trainingPackage: value })}
               >
                 <SelectTrigger className="w-[180px]">
                   <SelectValue placeholder="Training Package" />
@@ -153,10 +145,10 @@ export default function UnitsOfCompetencyList() {
                   ))}
                 </SelectContent>
               </Select>
-              
+
               <Select
                 value={filter.isActive}
-                onValueChange={(value) => setFilter({...filter, isActive: value})}
+                onValueChange={value => setFilter({ ...filter, isActive: value })}
               >
                 <SelectTrigger className="w-[180px]">
                   <SelectValue placeholder="Status" />
@@ -169,7 +161,7 @@ export default function UnitsOfCompetencyList() {
               </Select>
             </div>
           </div>
-          
+
           {isLoading ? (
             <div className="space-y-4">
               <Skeleton className="h-8 w-full" />
@@ -180,11 +172,7 @@ export default function UnitsOfCompetencyList() {
           ) : error ? (
             <div className="py-8 text-center">
               <p className="text-destructive">Failed to load units of competency</p>
-              <Button 
-                variant="outline" 
-                className="mt-4"
-                onClick={() => window.location.reload()}
-              >
+              <Button variant="outline" className="mt-4" onClick={() => window.location.reload()}>
                 Retry
               </Button>
             </div>
@@ -209,7 +197,7 @@ export default function UnitsOfCompetencyList() {
                       </TableCell>
                     </TableRow>
                   ) : (
-                    filteredUnits?.map((unit) => (
+                    filteredUnits?.map(unit => (
                       <TableRow key={unit.id}>
                         <TableCell className="font-medium">{unit.unitCode}</TableCell>
                         <TableCell>{unit.unitTitle}</TableCell>
@@ -222,7 +210,10 @@ export default function UnitsOfCompetencyList() {
                               Active
                             </Badge>
                           ) : (
-                            <Badge variant="outline" className="border-destructive text-destructive">
+                            <Badge
+                              variant="outline"
+                              className="border-destructive text-destructive"
+                            >
                               <XCircle className="mr-1 h-3 w-3" />
                               Inactive
                             </Badge>
@@ -253,9 +244,9 @@ export default function UnitsOfCompetencyList() {
                                 className="text-destructive focus:text-destructive"
                                 onClick={() => {
                                   toast({
-                                    title: "Not Implemented",
-                                    description: "Delete functionality will be implemented soon.",
-                                    variant: "default"
+                                    title: 'Not Implemented',
+                                    description: 'Delete functionality will be implemented soon.',
+                                    variant: 'default',
                                   });
                                 }}
                               >

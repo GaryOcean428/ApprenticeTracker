@@ -60,7 +60,7 @@ authRouter.post('/login', validateBody(loginSchema), async (req: Request, res: R
   try {
     // Ensure we always return JSON
     res.setHeader('Content-Type', 'application/json');
-    
+
     const { username, password } = req.body;
 
     // Find user by username
@@ -83,7 +83,7 @@ authRouter.post('/login', validateBody(loginSchema), async (req: Request, res: R
 
     // Verify password - check if plain text match or hashed password
     let isPasswordValid = false;
-    
+
     // First check if it's a plain text match (for development/seeded accounts)
     if (password === user.password) {
       isPasswordValid = true;
@@ -122,10 +122,7 @@ authRouter.post('/login', validateBody(loginSchema), async (req: Request, res: R
     });
 
     // Update last login time
-    await db
-      .update(users)
-      .set({ lastLogin: new Date() })
-      .where(eq(users.id, user.id));
+    await db.update(users).set({ lastLogin: new Date() }).where(eq(users.id, user.id));
 
     // Return token and user info
     return res.status(200).json({
@@ -160,14 +157,12 @@ authRouter.post('/register', validateBody(registerSchema), async (req: Request, 
   try {
     // Ensure we always return JSON
     res.setHeader('Content-Type', 'application/json');
-    
-    const { username, password, email, firstName, lastName, role, roleId, organizationId } = req.body;
+
+    const { username, password, email, firstName, lastName, role, roleId, organizationId } =
+      req.body;
 
     // Check if username already exists
-    const [existingUsername] = await db
-      .select()
-      .from(users)
-      .where(eq(users.username, username));
+    const [existingUsername] = await db.select().from(users).where(eq(users.username, username));
 
     if (existingUsername) {
       return res.status(400).json({
@@ -177,10 +172,7 @@ authRouter.post('/register', validateBody(registerSchema), async (req: Request, 
     }
 
     // Check if email already exists
-    const [existingEmail] = await db
-      .select()
-      .from(users)
-      .where(eq(users.email, email));
+    const [existingEmail] = await db.select().from(users).where(eq(users.email, email));
 
     if (existingEmail) {
       return res.status(400).json({
@@ -235,7 +227,6 @@ authRouter.post('/register', validateBody(registerSchema), async (req: Request, 
       message: 'User registered successfully',
       user: newUser,
     });
-    
   } catch (error) {
     console.error('Registration error:', error);
     return res.status(500).json({
@@ -253,7 +244,7 @@ authRouter.get('/verify', async (req: Request, res: Response) => {
   try {
     // Ensure we always return JSON
     res.setHeader('Content-Type', 'application/json');
-    
+
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -270,10 +261,7 @@ authRouter.get('/verify', async (req: Request, res: Response) => {
       const decoded = jwt.verify(token, JWT_SECRET) as { id: number };
 
       // Get user from database
-      const [user] = await db
-        .select()
-        .from(users)
-        .where(eq(users.id, decoded.id));
+      const [user] = await db.select().from(users).where(eq(users.id, decoded.id));
 
       if (!user) {
         return res.status(404).json({

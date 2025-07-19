@@ -1,17 +1,23 @@
-import { useState } from "react";
-import { useToast } from "@/hooks/use-toast";
-import MainLayout from "@/layouts/main-layout";
-import { QualificationSearch } from "@/components/vet/qualification-search";
-import { apiRequest, queryClient } from "@/lib/queryClient";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { Loader2, AlertCircle, Check, ExternalLink } from "lucide-react";
-import { useMutation } from "@tanstack/react-query";
-import { useLocation } from "wouter";
+import { useState } from 'react';
+import { useToast } from '@/hooks/use-toast';
+import MainLayout from '@/layouts/main-layout';
+import { QualificationSearch } from '@/components/vet/qualification-search';
+import { apiRequest, queryClient } from '@/lib/queryClient';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from '@/components/ui/sheet';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
+import { Loader2, AlertCircle, Check, ExternalLink } from 'lucide-react';
+import { useMutation } from '@tanstack/react-query';
+import { useLocation } from 'wouter';
 
 interface Qualification {
   code: string;
@@ -38,31 +44,31 @@ export default function ImportQualifications() {
 
   const importMutation = useMutation({
     mutationFn: async ({ code }: { code: string }) => {
-      const response = await apiRequest("POST", `/api/tga/import/${code}`, {
-        importUnits: true
+      const response = await apiRequest('POST', `/api/tga/import/${code}`, {
+        importUnits: true,
       });
-      return await response.json() as ImportResponse;
+      return (await response.json()) as ImportResponse;
     },
     onSuccess: (data: ImportResponse) => {
       toast({
-        title: "Qualification imported",
+        title: 'Qualification imported',
         description: `Successfully imported qualification with ID ${data.qualificationId}`,
       });
-      
-      queryClient.invalidateQueries({ queryKey: ["/api/vet/qualifications"] });
-      
+
+      queryClient.invalidateQueries({ queryKey: ['/api/vet/qualifications'] });
+
       // Close the sheet
       setIsOpen(false);
       setSelectedQualification(null);
-      
+
       // Navigate to the qualification detail page
       navigate(`/vet/qualifications/${data.qualificationId}`);
     },
     onError: (error: Error) => {
       toast({
-        title: "Import failed",
+        title: 'Import failed',
         description: error.message,
-        variant: "destructive",
+        variant: 'destructive',
       });
     },
   });
@@ -115,7 +121,10 @@ export default function ImportQualifications() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                <QualificationSearch onImport={handleImport} isImporting={importMutation.isPending} />
+                <QualificationSearch
+                  onImport={handleImport}
+                  isImporting={importMutation.isPending}
+                />
               </CardContent>
             </Card>
           </TabsContent>
@@ -133,8 +142,8 @@ export default function ImportQualifications() {
                   <AlertCircle className="h-4 w-4" />
                   <AlertTitle>Feature coming soon</AlertTitle>
                   <AlertDescription>
-                    Bulk import functionality is currently under development. 
-                    Please use the search feature to import qualifications one at a time.
+                    Bulk import functionality is currently under development. Please use the search
+                    feature to import qualifications one at a time.
                   </AlertDescription>
                 </Alert>
               </CardContent>
@@ -172,22 +181,20 @@ export default function ImportQualifications() {
                   <div>
                     <p className="text-muted-foreground">Training Package</p>
                     <p>
-                      {selectedQualification.trainingPackage.code} -{" "}
+                      {selectedQualification.trainingPackage.code} -{' '}
                       {selectedQualification.trainingPackage.title}
                     </p>
                   </div>
                   <div>
                     <p className="text-muted-foreground">Release Date</p>
-                    <p>
-                      {new Date(selectedQualification.releaseDate).toLocaleDateString()}
-                    </p>
+                    <p>{new Date(selectedQualification.releaseDate).toLocaleDateString()}</p>
                   </div>
                 </div>
 
                 <div className="pt-4">
                   <p className="text-sm text-muted-foreground mb-2">
-                    This will import the qualification and all its units of competency
-                    from Training.gov.au into your system.
+                    This will import the qualification and all its units of competency from
+                    Training.gov.au into your system.
                   </p>
                 </div>
               </div>

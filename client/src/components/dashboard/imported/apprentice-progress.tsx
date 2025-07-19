@@ -84,10 +84,7 @@ export function ApprenticeProgress(): React.ReactElement {
   };
 
   return (
-    <Tabs
-      defaultValue="progress"
-      className="space-y-4"
-    >
+    <Tabs defaultValue="progress" className="space-y-4">
       <TabsList>
         <TabsTrigger value="progress">Progress</TabsTrigger>
         <TabsTrigger value="assessments">Assessments</TabsTrigger>
@@ -100,18 +97,17 @@ export function ApprenticeProgress(): React.ReactElement {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {modules.map((module) => (
+              {modules.map(module => (
                 <div key={module.module} className="space-y-2">
                   <div className="flex justify-between items-center">
                     <div>
                       <p className="font-medium">{module.module}</p>
                       <p className={`text-sm ${getStatusColor(module.status)}`}>
-                        {module.status.replace('_', ' ').charAt(0).toUpperCase() + module.status.slice(1)}
+                        {module.status.replace('_', ' ').charAt(0).toUpperCase() +
+                          module.status.slice(1)}
                       </p>
                     </div>
-                    <p className="text-sm text-muted-foreground">
-                      {module.progress}%
-                    </p>
+                    <p className="text-sm text-muted-foreground">{module.progress}%</p>
                   </div>
                   <Progress value={module.progress} />
                   {module.lastActivity && (
@@ -142,13 +138,13 @@ export function ApprenticeProgress(): React.ReactElement {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {assessments.map((assessment) => (
+                {assessments.map(assessment => (
                   <TableRow key={assessment.name}>
-                    <TableCell className="font-medium">
-                      {assessment.name}
-                    </TableCell>
+                    <TableCell className="font-medium">{assessment.name}</TableCell>
                     <TableCell>
-                      <span className={assessment.score >= 85 ? 'text-green-600' : 'text-yellow-600'}>
+                      <span
+                        className={assessment.score >= 85 ? 'text-green-600' : 'text-yellow-600'}
+                      >
                         {assessment.score}%
                       </span>
                     </TableCell>

@@ -112,7 +112,8 @@ export class AppError extends Error {
    */
   static fromValidationErrors(errors: Record<string, string[]>): AppError {
     const firstField = Object.keys(errors)[0];
-    const firstMessage = firstField && errors[firstField]?.length > 0 ? errors[firstField][0] : 'Validation failed';
+    const firstMessage =
+      firstField && errors[firstField]?.length > 0 ? errors[firstField][0] : 'Validation failed';
 
     return new AppError({
       message: firstMessage,

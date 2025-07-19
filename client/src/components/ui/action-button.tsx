@@ -1,5 +1,5 @@
-import { Button, ButtonProps } from "@/components/ui/button";
-import { PermissionGuard } from "@/components/auth/permission-guard";
+import { Button, ButtonProps } from '@/components/ui/button';
+import { PermissionGuard } from '@/components/auth/permission-guard';
 
 interface ActionButtonProps extends ButtonProps {
   permission?: string;
@@ -19,11 +19,7 @@ export function ActionButton({
   ...props
 }: ActionButtonProps) {
   return (
-    <PermissionGuard
-      permission={permission}
-      permissions={permissions}
-      requireAll={requireAll}
-    >
+    <PermissionGuard permission={permission} permissions={permissions} requireAll={requireAll}>
       <Button {...props}>{label}</Button>
     </PermissionGuard>
   );
