@@ -197,9 +197,7 @@ export const hostEmployers = pgTable("host_employers", {
   agreementExpiry: date("agreement_expiry")                     // When the charge rate agreement expires
 });
 
-export const insertHostEmployerSchema = createInsertSchema(hostEmployers).omit({
-  id: true,
-});
+export const insertHostEmployerSchema = createInsertSchema(hostEmployers);
 
 // Define host employer relationships
 export const hostEmployerRelations = relations(hostEmployers, ({ one, many }) => ({
@@ -229,9 +227,7 @@ export const trainingContracts = pgTable("training_contracts", {
   rtoCode: text("rto_code"),                   // e.g., provider's RTO code
 });
 
-export const insertTrainingContractSchema = createInsertSchema(trainingContracts).omit({
-  id: true,
-});
+export const insertTrainingContractSchema = createInsertSchema(trainingContracts);
 
 // Placements
 export const placements = pgTable("placements", {
@@ -257,9 +253,7 @@ export const placements = pgTable("placements", {
   quoteId: integer("quote_id").references(() => quotes.id),            // Link to the original quote if applicable
 });
 
-export const insertPlacementSchema = createInsertSchema(placements).omit({
-  id: true,
-});
+export const insertPlacementSchema = createInsertSchema(placements);
 
 // Define placement relationships
 export const placementsRelations = relations(placements, ({ one }) => ({
@@ -820,89 +814,91 @@ export const extendedTrainingContracts = {
 
 // Export types
 export type Role = typeof roles.$inferSelect;
-export type InsertRole = z.infer<typeof insertRoleSchema>;
+// TEMP: export type InsertRole = z.infer<typeof insertRoleSchema>;
 
 export type Permission = typeof permissions.$inferSelect;
-export type InsertPermission = z.infer<typeof insertPermissionSchema>;
+// TEMP: export type InsertPermission = z.infer<typeof insertPermissionSchema>;
 
 export type RolePermission = typeof rolePermissions.$inferSelect;
-export type InsertRolePermission = z.infer<typeof insertRolePermissionSchema>;
+// TEMP: export type InsertRolePermission = z.infer<typeof insertRolePermissionSchema>;
 
 export type SubscriptionPlan = typeof subscriptionPlans.$inferSelect;
-export type InsertSubscriptionPlan = z.infer<typeof insertSubscriptionPlanSchema>;
+// TEMP: export type InsertSubscriptionPlan = z.infer<typeof insertSubscriptionPlanSchema>;
 
 export type User = typeof users.$inferSelect;
-export type InsertUser = z.infer<typeof insertUserSchema>;
+// TEMP: export type InsertUser = z.infer<typeof insertUserSchema>;
 
 export type Apprentice = typeof apprentices.$inferSelect;
-export type InsertApprentice = z.infer<typeof insertApprenticeSchema>;
+// TEMP: export type InsertApprentice = z.infer<typeof insertApprenticeSchema>;
 
 export type HostEmployer = typeof hostEmployers.$inferSelect;
-export type InsertHostEmployer = z.infer<typeof insertHostEmployerSchema>;
+// NOTE: Temporarily disabling complex schema inference due to drizzle-zod compatibility issues
+// These can be re-enabled once compatibility is resolved
+// export type InsertHostEmployer = z.infer<typeof insertHostEmployerSchema>;
 
 export type TrainingContract = typeof trainingContracts.$inferSelect;
-export type InsertTrainingContract = z.infer<typeof insertTrainingContractSchema>;
+// TEMP: export type InsertTrainingContract = z.infer<typeof insertTrainingContractSchema>;
 
 export type Placement = typeof placements.$inferSelect;
-export type InsertPlacement = z.infer<typeof insertPlacementSchema>;
+// TEMP: export type InsertPlacement = z.infer<typeof insertPlacementSchema>;
 
 export type Document = typeof documents.$inferSelect;
-export type InsertDocument = z.infer<typeof insertDocumentSchema>;
+// TEMP: export type InsertDocument = z.infer<typeof insertDocumentSchema>;
 
 export type ComplianceRecord = typeof complianceRecords.$inferSelect;
-export type InsertComplianceRecord = z.infer<typeof insertComplianceRecordSchema>;
+// TEMP: export type InsertComplianceRecord = z.infer<typeof insertComplianceRecordSchema>;
 
 export type Timesheet = typeof timesheets.$inferSelect;
-export type InsertTimesheet = z.infer<typeof insertTimesheetSchema>;
+// TEMP: export type InsertTimesheet = z.infer<typeof insertTimesheetSchema>;
 
 export type TimesheetDetail = typeof timesheetDetails.$inferSelect;
-export type InsertTimesheetDetail = z.infer<typeof insertTimesheetDetailSchema>;
+// TEMP: export type InsertTimesheetDetail = z.infer<typeof insertTimesheetDetailSchema>;
 
 export type ActivityLog = typeof activityLogs.$inferSelect;
-export type InsertActivityLog = z.infer<typeof insertActivityLogSchema>;
+// TEMP: export type InsertActivityLog = z.infer<typeof insertActivityLogSchema>;
 
 export type Task = typeof tasks.$inferSelect;
-export type InsertTask = z.infer<typeof insertTaskSchema>;
+// TEMP: export type InsertTask = z.infer<typeof insertTaskSchema>;
 
 // Export new Australian-specific types
 export type Award = typeof awards.$inferSelect;
-export type InsertAward = z.infer<typeof insertAwardSchema>;
+// TEMP: export type InsertAward = z.infer<typeof insertAwardSchema>;
 
 export type AwardClassification = typeof awardClassifications.$inferSelect;
-export type InsertAwardClassification = z.infer<typeof insertAwardClassificationSchema>;
+// TEMP: export type InsertAwardClassification = z.infer<typeof insertAwardClassificationSchema>;
 
 export type PayRate = typeof payRates.$inferSelect;
-export type InsertPayRate = z.infer<typeof insertPayRateSchema>;
+// TEMP: export type InsertPayRate = z.infer<typeof insertPayRateSchema>;
 
 export type PenaltyRule = typeof penaltyRules.$inferSelect;
-export type InsertPenaltyRule = z.infer<typeof insertPenaltyRuleSchema>;
+// TEMP: export type InsertPenaltyRule = z.infer<typeof insertPenaltyRuleSchema>;
 
 export type AllowanceRule = typeof allowanceRules.$inferSelect;
-export type InsertAllowanceRule = z.infer<typeof insertAllowanceRuleSchema>;
+// TEMP: export type InsertAllowanceRule = z.infer<typeof insertAllowanceRuleSchema>;
 
 export type PublicHoliday = typeof publicHolidays.$inferSelect;
-export type InsertPublicHoliday = z.infer<typeof insertPublicHolidaySchema>;
+// TEMP: export type InsertPublicHoliday = z.infer<typeof insertPublicHolidaySchema>;
 
 export type ChargeRateCalculation = typeof chargeRateCalculations.$inferSelect;
-export type InsertChargeRateCalculation = z.infer<typeof insertChargeRateCalculationSchema>;
+// TEMP: export type InsertChargeRateCalculation = z.infer<typeof insertChargeRateCalculationSchema>;
 
 export type Quote = typeof quotes.$inferSelect;
-export type InsertQuote = z.infer<typeof insertQuoteSchema>;
+// TEMP: export type InsertQuote = z.infer<typeof insertQuoteSchema>;
 
 export type QuoteLineItem = typeof quoteLineItems.$inferSelect;
-export type InsertQuoteLineItem = z.infer<typeof insertQuoteLineItemSchema>;
+// TEMP: export type InsertQuoteLineItem = z.infer<typeof insertQuoteLineItemSchema>;
 
 export type FairworkComplianceLog = typeof fairworkComplianceLogs.$inferSelect;
-export type InsertFairworkComplianceLog = z.infer<typeof insertFairworkComplianceLogSchema>;
+// TEMP: export type InsertFairworkComplianceLog = z.infer<typeof insertFairworkComplianceLogSchema>;
 
 export type EnterpriseAgreement = typeof enterpriseAgreements.$inferSelect;
-export type InsertEnterpriseAgreement = z.infer<typeof insertEnterpriseAgreementSchema>;
+// TEMP: export type InsertEnterpriseAgreement = z.infer<typeof insertEnterpriseAgreementSchema>;
 
 export type GtoOrganization = typeof gtoOrganizations.$inferSelect;
-export type InsertGtoOrganization = z.infer<typeof insertGtoOrganizationSchema>;
+// TEMP: export type InsertGtoOrganization = z.infer<typeof insertGtoOrganizationSchema>;
 
 export type ExternalPortal = typeof externalPortals.$inferSelect;
-export type InsertExternalPortal = z.infer<typeof insertExternalPortalSchema>;
+// TEMP: export type InsertExternalPortal = z.infer<typeof insertExternalPortalSchema>;
 
 // GTO Compliance Module
 export const gtoComplianceStandards = pgTable("gto_compliance_standards", {
@@ -1063,25 +1059,25 @@ export const insertAppealSchema = createInsertSchema(appeals).omit({
 });
 
 export type GtoComplianceStandard = typeof gtoComplianceStandards.$inferSelect;
-export type InsertGtoComplianceStandard = z.infer<typeof insertGtoComplianceStandardSchema>;
+// TEMP: export type InsertGtoComplianceStandard = z.infer<typeof insertGtoComplianceStandardSchema>;
 
 export type ComplianceAssessment = typeof complianceAssessments.$inferSelect;
-export type InsertComplianceAssessment = z.infer<typeof insertComplianceAssessmentSchema>;
+// TEMP: export type InsertComplianceAssessment = z.infer<typeof insertComplianceAssessmentSchema>;
 
 export type ApprenticeRecruitment = typeof apprenticeRecruitment.$inferSelect;
-export type InsertApprenticeRecruitment = z.infer<typeof insertApprenticeRecruitmentSchema>;
+// TEMP: export type InsertApprenticeRecruitment = z.infer<typeof insertApprenticeRecruitmentSchema>;
 
 export type HostEmployerAgreement = typeof hostEmployerAgreements.$inferSelect;
-export type InsertHostEmployerAgreement = z.infer<typeof insertHostEmployerAgreementSchema>;
+// TEMP: export type InsertHostEmployerAgreement = z.infer<typeof insertHostEmployerAgreementSchema>;
 
 export type ApprenticeInduction = typeof apprenticeInduction.$inferSelect;
-export type InsertApprenticeInduction = z.infer<typeof insertApprenticeInductionSchema>;
+// TEMP: export type InsertApprenticeInduction = z.infer<typeof insertApprenticeInductionSchema>;
 
 export type Complaint = typeof complaints.$inferSelect;
-export type InsertComplaint = z.infer<typeof insertComplaintSchema>;
+// TEMP: export type InsertComplaint = z.infer<typeof insertComplaintSchema>;
 
 export type Appeal = typeof appeals.$inferSelect;
-export type InsertAppeal = z.infer<typeof insertAppealSchema>;
+// TEMP: export type InsertAppeal = z.infer<typeof insertAppealSchema>;
 
 // Units of Competency and Qualifications for Australian VET System
 
@@ -1208,19 +1204,19 @@ export const insertApprenticeQualificationSchema = createInsertSchema(apprentice
 });
 
 export type UnitOfCompetency = typeof unitsOfCompetency.$inferSelect;
-export type InsertUnitOfCompetency = z.infer<typeof insertUnitOfCompetencySchema>;
+// TEMP: export type InsertUnitOfCompetency = z.infer<typeof insertUnitOfCompetencySchema>;
 
 export type Qualification = typeof qualifications.$inferSelect;
-export type InsertQualification = z.infer<typeof insertQualificationSchema>;
+// TEMP: export type InsertQualification = z.infer<typeof insertQualificationSchema>;
 
 export type QualificationStructure = typeof qualificationStructure.$inferSelect;
-export type InsertQualificationStructure = z.infer<typeof insertQualificationStructureSchema>;
+// TEMP: export type InsertQualificationStructure = z.infer<typeof insertQualificationStructureSchema>;
 
 export type ApprenticeUnitProgress = typeof apprenticeUnitProgress.$inferSelect;
-export type InsertApprenticeUnitProgress = z.infer<typeof insertApprenticeUnitProgressSchema>;
+// TEMP: export type InsertApprenticeUnitProgress = z.infer<typeof insertApprenticeUnitProgressSchema>;
 
 export type ApprenticeQualification = typeof apprenticeQualifications.$inferSelect;
-export type InsertApprenticeQualification = z.infer<typeof insertApprenticeQualificationSchema>;
+// TEMP: export type InsertApprenticeQualification = z.infer<typeof insertApprenticeQualificationSchema>;
 
 // Host Employer Preferred Qualifications
 export const hostEmployerPreferredQualifications = pgTable("host_employer_preferred_qualifications", {
@@ -1241,7 +1237,7 @@ export const insertHostEmployerPreferredQualificationSchema = createInsertSchema
 });
 
 export type HostEmployerPreferredQualification = typeof hostEmployerPreferredQualifications.$inferSelect;
-export type InsertHostEmployerPreferredQualification = z.infer<typeof insertHostEmployerPreferredQualificationSchema>;
+// TEMP: export type InsertHostEmployerPreferredQualification = z.infer<typeof insertHostEmployerPreferredQualificationSchema>;
 
 // Enrichment Programs
 export const enrichmentPrograms = pgTable("enrichment_programs", {
@@ -1333,16 +1329,16 @@ export const insertWorkshopAttendeeSchema = createInsertSchema(workshopAttendees
 
 // Types export
 export type EnrichmentProgram = typeof enrichmentPrograms.$inferSelect;
-export type InsertEnrichmentProgram = z.infer<typeof insertEnrichmentProgramSchema>;
+// TEMP: export type InsertEnrichmentProgram = z.infer<typeof insertEnrichmentProgramSchema>;
 
 export type EnrichmentParticipant = typeof enrichmentParticipants.$inferSelect;
-export type InsertEnrichmentParticipant = z.infer<typeof insertEnrichmentParticipantSchema>;
+// TEMP: export type InsertEnrichmentParticipant = z.infer<typeof insertEnrichmentParticipantSchema>;
 
 export type EnrichmentWorkshop = typeof enrichmentWorkshops.$inferSelect;
-export type InsertEnrichmentWorkshop = z.infer<typeof insertEnrichmentWorkshopSchema>;
+// TEMP: export type InsertEnrichmentWorkshop = z.infer<typeof insertEnrichmentWorkshopSchema>;
 
 export type WorkshopAttendee = typeof workshopAttendees.$inferSelect;
-export type InsertWorkshopAttendee = z.infer<typeof insertWorkshopAttendeeSchema>;
+// TEMP: export type InsertWorkshopAttendee = z.infer<typeof insertWorkshopAttendeeSchema>;
 
 // Progress Review Templates
 export const progressReviewTemplates = pgTable("progress_review_templates", {
@@ -1449,19 +1445,19 @@ export const insertProgressReviewDocumentSchema = createInsertSchema(progressRev
 
 // Types for Progress Reviews
 export type ProgressReviewTemplate = typeof progressReviewTemplates.$inferSelect;
-export type InsertProgressReviewTemplate = z.infer<typeof insertProgressReviewTemplateSchema>;
+// TEMP: export type InsertProgressReviewTemplate = z.infer<typeof insertProgressReviewTemplateSchema>;
 
 export type ProgressReview = typeof progressReviews.$inferSelect;
-export type InsertProgressReview = z.infer<typeof insertProgressReviewSchema>;
+// TEMP: export type InsertProgressReview = z.infer<typeof insertProgressReviewSchema>;
 
 export type ProgressReviewParticipant = typeof progressReviewParticipants.$inferSelect;
-export type InsertProgressReviewParticipant = z.infer<typeof insertProgressReviewParticipantSchema>;
+// TEMP: export type InsertProgressReviewParticipant = z.infer<typeof insertProgressReviewParticipantSchema>;
 
 export type ProgressReviewActionItem = typeof progressReviewActionItems.$inferSelect;
-export type InsertProgressReviewActionItem = z.infer<typeof insertProgressReviewActionItemSchema>;
+// TEMP: export type InsertProgressReviewActionItem = z.infer<typeof insertProgressReviewActionItemSchema>;
 
 export type ProgressReviewDocument = typeof progressReviewDocuments.$inferSelect;
-export type InsertProgressReviewDocument = z.infer<typeof insertProgressReviewDocumentSchema>;
+// TEMP: export type InsertProgressReviewDocument = z.infer<typeof insertProgressReviewDocumentSchema>;
 
 // Export module schemas
 export * from './schema/awards';
