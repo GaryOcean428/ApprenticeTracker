@@ -16,7 +16,7 @@ const createLazyRoute = (importPath: string, showFullLoader = true) => {
     ) : (
       <div>Loading...</div>
     );
-    
+
     // In real implementation this would use Suspense
     // For testing, we'll just return the component directly
     return <Component />;
@@ -39,7 +39,7 @@ describe('Route Creation Helper', () => {
   it('handles different loader configurations', () => {
     const routeWithFullLoader = createLazyRoute('./pages/test', true);
     const routeWithSimpleLoader = createLazyRoute('./pages/test', false);
-    
+
     expect(typeof routeWithFullLoader).toBe('function');
     expect(typeof routeWithSimpleLoader).toBe('function');
   });
@@ -48,9 +48,9 @@ describe('Route Creation Helper', () => {
     const testPaths = [
       './pages/financial/invoicing',
       './pages/dashboard',
-      './pages/apprentices/index'
+      './pages/apprentices/index',
     ];
-    
+
     testPaths.forEach(path => {
       const routeComponent = createLazyRoute(path);
       expect(typeof routeComponent).toBe('function');

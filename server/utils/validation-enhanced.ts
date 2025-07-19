@@ -9,7 +9,7 @@ import { z } from 'zod';
 export const emailSchema = z.string().email('Invalid email format');
 export const phoneSchema = z
   .string()
-  .regex(/^[\+]?[\d\s\-\(\)]{10,}$/, 'Invalid phone number format');
+  .regex(/^[+]?[\d\s\-()]{10,}$/, 'Invalid phone number format');
 export const positiveNumberSchema = z.number().positive('Must be a positive number');
 export const percentageSchema = z
   .number()
@@ -107,7 +107,7 @@ export function validateAustralianPhoneNumber(phone: string): boolean {
   const mobilePattern = /^(\+61|0)[4-5]\d{8}$/;
   const landlinePattern = /^(\+61|0)[2-8]\d{8}$/;
 
-  const cleanPhone = phone.replace(/[\s\-\(\)]/g, '');
+  const cleanPhone = phone.replace(/[\s\-()]/g, '');
   return mobilePattern.test(cleanPhone) || landlinePattern.test(cleanPhone);
 }
 
@@ -244,7 +244,7 @@ export function sanitizeEmail(email: string): string {
 }
 
 export function formatPhoneNumber(phone: string): string {
-  const cleaned = phone.replace(/[\s\-\(\)]/g, '');
+  const cleaned = phone.replace(/[\s\-()]/g, '');
   if (cleaned.startsWith('0')) {
     return '+61' + cleaned.substring(1);
   }

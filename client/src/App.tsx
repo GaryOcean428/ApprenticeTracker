@@ -5,7 +5,6 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import ErrorBoundary from '@/components/error-boundary';
-import { withIdValidation } from '@/components/route-validator';
 import { AuthProvider } from '@/hooks/use-auth';
 import { ProtectedRoute } from '@/components/auth/protected-route';
 import LoginPage from '@/pages/auth/login';
@@ -91,7 +90,7 @@ const createLazyRoute = (importPath: string, showFullLoader = true) => {
     ) : (
       <div>Loading...</div>
     );
-    
+
     return (
       <Suspense fallback={fallback}>
         <Component />
@@ -1186,21 +1185,18 @@ function Router() {
         />
 
         {/* Accounts & Finance Routes */}
-        <ProtectedRoute 
-          path="/invoicing" 
-          component={createLazyRoute('./pages/financial/invoicing')} 
+        <ProtectedRoute
+          path="/invoicing"
+          component={createLazyRoute('./pages/financial/invoicing')}
         />
-        <ProtectedRoute 
-          path="/financial-reports" 
-          component={createLazyRoute('./pages/financial/reports')} 
+        <ProtectedRoute
+          path="/financial-reports"
+          component={createLazyRoute('./pages/financial/reports')}
         />
-        <ProtectedRoute 
-          path="/budget" 
-          component={createLazyRoute('./pages/financial/budget')} 
-        />
-        <ProtectedRoute 
-          path="/expenses" 
-          component={createLazyRoute('./pages/financial/expenses')} 
+        <ProtectedRoute path="/budget" component={createLazyRoute('./pages/financial/budget')} />
+        <ProtectedRoute
+          path="/expenses"
+          component={createLazyRoute('./pages/financial/expenses')}
         />
 
         {/* Progress Reviews Module */}

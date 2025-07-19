@@ -5,81 +5,77 @@ import { z } from 'zod';
 import { Request, Response, NextFunction } from 'express';
 
 /**
- * Validates request query parameters against a Zod schema
- * @param schema The Zod schema to validate against
- * @returns Express middleware that validates request query parameters
+ * Common error handler for validation errors
  */
-export function validateQuery<T extends z.ZodType>(schema: T) {
+function handleValidationError(error: unknown, res: Response, next: NextFunction) {
+  if (error instanceof z.ZodError) {
+    return res.status(400).json({
+      message: 'Validation error',
+      errors: error.errors.map(e => ({
+        path: e.path.join('.'),
+        message: e.message,
+      })),
+    });
+  }
+  next(error);
+}
+
+/**
+ * Generic validation middleware factory
+ */
+function createValidator<T extends z.ZodType>(
+  schema: T,
+  getTarget: (req: Request) => any,
+  setTarget: (req: Request, data: any) => void
+) {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const validatedData = await schema.parseAsync(req.query);
-      req.query = validatedData;
+      const validatedData = await schema.parseAsync(getTarget(req));
+      setTarget(req, validatedData);
       next();
     } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({
-          message: 'Validation error',
-          errors: error.errors.map(e => ({
-            path: e.path.join('.'),
-            message: e.message,
-          })),
-        });
-      }
-      next(error);
+      handleValidationError(error, res, next);
     }
   };
+}
+
+/**
+ * Validates request query parameters against a Zod schema
+ */
+export function validateQuery<T extends z.ZodType>(schema: T) {
+  return createValidator(
+    schema,
+    req => req.query,
+    (req, data) => {
+      req.query = data;
+    }
+  );
 }
 
 /**
  * Validates request body against a Zod schema
- * @param schema The Zod schema to validate against
- * @returns Express middleware that validates request body
  */
 export function validateBody<T extends z.ZodType>(schema: T) {
-  return async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const validatedData = await schema.parseAsync(req.body);
-      req.body = validatedData;
-      next();
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({
-          message: 'Validation error',
-          errors: error.errors.map(e => ({
-            path: e.path.join('.'),
-            message: e.message,
-          })),
-        });
-      }
-      next(error);
+  return createValidator(
+    schema,
+    req => req.body,
+    (req, data) => {
+      req.body = data;
     }
-  };
+  );
 }
 
 /**
  * Validates request parameters against a Zod schema
- * @param schema The Zod schema to validate against
- * @returns Express middleware that validates request parameters
  */
 export function validateParams<T extends z.ZodType>(schema: T) {
-  return async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const validatedData = await schema.parseAsync(req.params);
-      req.params = validatedData;
-      next();
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({
-          message: 'Validation error',
-          errors: error.errors.map(e => ({
-            path: e.path.join('.'),
-            message: e.message,
-          })),
-        });
-      }
-      next(error);
+  return createValidator(
+    schema,
+    req => req.params,
+    (req, data) => {
+      req.params = data;
     }
-  };
+  );
 }
 
 // Common validation schemas
