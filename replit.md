@@ -131,6 +131,15 @@ npm run start:prod
 - June 25, 2025. Fixed deployment syntax error in use-auth.tsx and corrected production server configuration
 - June 25, 2025. Resolved deployment issues: Fixed 401 Fair Work API errors and styling problems in production
 - June 25, 2025. Successfully removed authentication middleware from Fair Work award-updates endpoint, resolving 401 errors
+- June 25, 2025. Fixed favicon 500 error by adding proper favicon handling and copying favicon assets
+- June 25, 2025. Added favicon handling to production servers and ensured favicon is included in build output
+- June 25, 2025. Fixed production server configuration for proper asset serving and API route registration
+- June 25, 2025. Moved favicon handling to priority route before static middleware to prevent 500 errors
+- June 25, 2025. Enhanced production server with proper JSON error responses and missing asset handling
+- June 25, 2025. Fixed Toaster component crash and completed production build with all assets
+- June 25, 2025. **DEPLOYMENT FIX COMPLETED**: Resolved ES module syntax errors by replacing require() calls with import statements, added proper error handling, and validated production server startup
+- June 25, 2025. **PORT CONFLICT RESOLUTION**: Fixed EADDRINUSE deployment errors by separating development (port 5001) and production (port 5000) server configurations, added graceful port detection, and resolved Toaster component crashes
+- July 3, 2025. **DEPLOYMENT PORT FIXES**: Resolved port conflicts by maintaining port 5000 for development (as expected by Replit workflows), created clean production server (server.production.js) with improved port detection and fallback handling, and ensured proper separation between development and production environments
 
 ## User Preferences
 
