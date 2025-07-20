@@ -43,6 +43,11 @@ app.use(express.urlencoded({ extended: false }));
 // Favicon handler
 app.get('/favicon.ico', (_req, res) => res.status(204).end());
 
+// Test page for authentication
+app.get('/test-auth', (_req, res) => {
+  res.sendFile('/tmp/auth-test.html');
+});
+
 // Dynamic port (default 5000 for dev, from env for prod)
 const port = parseInt(process.env.PORT || '5000', 10);
 
