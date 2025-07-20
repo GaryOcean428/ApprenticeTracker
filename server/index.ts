@@ -1,4 +1,5 @@
 import express, { type Request, Response, NextFunction } from 'express';
+import cors from 'cors';
 import { registerRoutes } from './routes';
 import { setupVite, serveStatic, log } from './vite';
 import { seedDatabase } from './seed-db';
@@ -20,11 +21,32 @@ import { migrateUnifiedContactsSystem, seedContactTags } from './migrate-unified
 import { initializeScheduledTasks } from './scheduled-tasks';
 
 const app = express();
+
+// CORS configuration
+app.use(cors({
+  origin: [
+    'http://localhost:5173', // Vite dev server
+    'http://localhost:3000', // Common React dev port
+    'http://localhost:5000', // Same port as server
+    'http://127.0.0.1:5173',
+    'http://127.0.0.1:3000', 
+    'http://127.0.0.1:5000'
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+}));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 // Favicon handler
 app.get('/favicon.ico', (_req, res) => res.status(204).end());
+
+// Test page for authentication
+app.get('/test-auth', (_req, res) => {
+  res.sendFile('/tmp/auth-test.html');
+});
 
 // Dynamic port (default 5000 for dev, from env for prod)
 const port = parseInt(process.env.PORT || '5000', 10);
