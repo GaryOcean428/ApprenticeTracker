@@ -47,7 +47,7 @@ export const getQueryFn: <T>(options: { on401: UnauthorizedBehavior }) => QueryF
     // Add Authorization header if we have a token
     const token = localStorage.getItem('authToken');
     if (token) {
-      headers['Authorization'] = token;
+      headers['Authorization'] = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
     }
 
     const res = await fetch(queryKey[0] as string, {
