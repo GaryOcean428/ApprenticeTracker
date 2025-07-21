@@ -9,8 +9,11 @@ import jwt from 'jsonwebtoken';
 export const authRouter = Router();
 
 // Secret for JWT signing - in production, this should be in environment variables
-const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-key-for-dev-only';
+const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_EXPIRES_IN = '7d';
+if (!JWT_SECRET) {
+  throw new Error('JWT_SECRET environment variable is required but not set.');
+}
 
 // Zod schemas for validation
 const loginSchema = z.object({
