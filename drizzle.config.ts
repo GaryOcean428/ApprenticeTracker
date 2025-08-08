@@ -9,7 +9,7 @@ if (process.env.NODE_ENV === 'production' && !process.env.DATABASE_URL) {
 
 const connectionString =
   process.env.DATABASE_URL ??
-  'postgresql://app_user:password@localhost:5432/apprentice_db';
+  'postgresql://localhost:5432/apprentice_db';
 
 export default defineConfig({
   out: './migrations',
