@@ -6,6 +6,7 @@ import {
   whs_policies,
   whs_documents,
   insertPolicySchema,
+  updatePolicySchema,
   insertDocumentSchema,
 } from '@shared/schema/whs';
 
@@ -114,10 +115,12 @@ export function setupPolicyRoutes(router: express.Router) {
         return res.status(404).json({ message: 'Safety policy not found' });
       }
 
+      const validatedData = updatePolicySchema.parse(req.body);
+
       // Update policy
       const [updatedPolicy] = await db
         .update(whs_policies)
-        .set(req.body)
+        .set(validatedData)
         .where(sql`${whs_policies.id} = ${id}`)
         .returning();
 

@@ -22,11 +22,11 @@ import { migrateLabourHireSchema } from './migrate-labour-hire';
 import { migrateUnifiedContactsSystem, seedContactTags } from './migrate-unified-contacts';
 import { initializeScheduledTasks } from './scheduled-tasks';
 import { env } from './utils/env';
-
 const uploadDir = path.resolve(env.UPLOAD_DIR);
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
+import { assertEnvVars } from './utils/env';
 
 const app = express();
 
@@ -58,6 +58,13 @@ app.get('/test-auth', (_req, res) => {
 
 // Dynamic port (default 5000 for dev, from env for prod)
 const port = env.PORT;
+
+// Ensure required environment variables are present before starting
+const requiredEnv = ['DATABASE_URL', 'UPLOAD_DIR'];
+if (process.env.NODE_ENV === 'production') {
+  requiredEnv.push('FAIRWORK_API_URL', 'FAIRWORK_API_KEY');
+}
+assertEnvVars(requiredEnv);
 
 // Health routes
 if (env.NODE_ENV === 'production') {

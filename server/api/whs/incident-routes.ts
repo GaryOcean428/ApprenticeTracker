@@ -7,6 +7,7 @@ import {
   whs_witnesses,
   whs_documents,
   insertIncidentSchema,
+  updateIncidentSchema,
   insertWitnessSchema,
   insertDocumentSchema,
 } from '@shared/schema/whs';
@@ -123,10 +124,12 @@ export function setupIncidentRoutes(router: express.Router) {
         return res.status(404).json({ message: 'Incident not found' });
       }
 
+      const validatedData = updateIncidentSchema.parse(req.body);
+
       // Update incident
       const [updatedIncident] = await db
         .update(whs_incidents)
-        .set(req.body)
+        .set(validatedData)
         .where(sql`${whs_incidents.id} = ${id}`)
         .returning();
 
