@@ -1,5 +1,7 @@
 import express, { type Request, Response, NextFunction } from 'express';
 import cors from 'cors';
+import fs from 'fs';
+import path from 'path';
 import { registerRoutes } from './routes';
 import { setupVite, serveStatic, log } from './vite';
 import { seedDatabase } from './seed-db';
@@ -19,6 +21,11 @@ import { migrateWhsRiskAssessments } from './migrate-whs-risk-assessments';
 import { migrateLabourHireSchema } from './migrate-labour-hire';
 import { migrateUnifiedContactsSystem, seedContactTags } from './migrate-unified-contacts';
 import { initializeScheduledTasks } from './scheduled-tasks';
+import { env } from './utils/env';
+const uploadDir = path.resolve(env.UPLOAD_DIR);
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
 import { assertEnvVars } from './utils/env';
 
 const app = express();
@@ -50,7 +57,7 @@ app.get('/test-auth', (_req, res) => {
 });
 
 // Dynamic port (default 5000 for dev, from env for prod)
-const port = parseInt(process.env.PORT || '5000', 10);
+const port = env.PORT;
 
 // Ensure required environment variables are present before starting
 const requiredEnv = ['DATABASE_URL', 'UPLOAD_DIR'];
@@ -60,7 +67,7 @@ if (process.env.NODE_ENV === 'production') {
 assertEnvVars(requiredEnv);
 
 // Health routes
-if (process.env.NODE_ENV === 'production') {
+if (env.NODE_ENV === 'production') {
   app.get('/', (_req, res) => {
     res.status(200).json({
       status: 'healthy',
@@ -76,10 +83,10 @@ app.get('/api/health', (_req, res) => {
     status: 'ok',
     timestamp: new Date().toISOString(),
     service: 'apprentice-tracker',
-    environment: process.env.NODE_ENV || 'development',
+    environment: env.NODE_ENV,
     fairwork_api: {
-      url_configured: !!process.env.FAIRWORK_API_URL,
-      key_configured: !!process.env.FAIRWORK_API_KEY,
+      url_configured: !!env.FAIRWORK_API_URL,
+      key_configured: !!env.FAIRWORK_API_KEY,
     },
   });
 });
@@ -176,7 +183,7 @@ app.use((req, res, next) => {
     res.status(500).json({ error: 'Internal Server Error', message: err.message });
   });
 
-  log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+  log(`Environment: ${env.NODE_ENV}`);
   log(`Using port: ${port}`);
 
   // Port robust start: fallback to alt ports if needed
@@ -213,7 +220,7 @@ app.use((req, res, next) => {
     serverInstance = await startServerWithFallback(port);
   } catch (error) {
     // Try fallback ports if default in use
-    const alternatives = process.env.NODE_ENV === 'production'
+    const alternatives = env.NODE_ENV === 'production'
       ? [8080, 3000, 5001]
       : [5002, 5003, 8080];
     let started = false;
