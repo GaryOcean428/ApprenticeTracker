@@ -1,6 +1,42 @@
-import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
+import { createRoot } from 'react-dom/client';
+import { act } from 'react-dom/test-utils';
+import type { ReactElement } from 'react';
 import ErrorBoundary, { withErrorBoundary } from '@/components/error-boundary';
+
+function render(ui: ReactElement) {
+  const container = document.createElement('div');
+  document.body.appendChild(container);
+  const root = createRoot(container);
+  act(() => {
+    root.render(ui);
+  });
+  return {
+    container,
+    unmount: () => {
+      root.unmount();
+      document.body.removeChild(container);
+    },
+  };
+}
+
+function getByText(container: HTMLElement, text: string) {
+  const el = Array.from(container.querySelectorAll('*')).find(
+    (node) => node.textContent?.trim() === text
+  );
+  if (!el) {
+    throw new Error(`Unable to find text: ${text}`);
+  }
+  return el as HTMLElement;
+}
+
+function queryByText(container: HTMLElement, text: string) {
+  return (
+    Array.from(container.querySelectorAll('*')).find(
+      (node) => node.textContent?.trim() === text
+    ) || null
+  );
+}
 
 // Component that throws an error for testing
 const ThrowError = ({ shouldThrow = false }: { shouldThrow?: boolean }) => {
@@ -12,53 +48,61 @@ const ThrowError = ({ shouldThrow = false }: { shouldThrow?: boolean }) => {
 
 describe('ErrorBoundary', () => {
   it('renders children when there is no error', () => {
-    render(
+    const { container, unmount } = render(
       <ErrorBoundary>
         <div>Test content</div>
       </ErrorBoundary>
     );
 
-    expect(screen.getByText('Test content')).toBeInTheDocument();
+    expect(getByText(container, 'Test content')).toBeTruthy();
+    unmount();
   });
 
   it('renders error UI when child component throws', () => {
     // Suppress console.error for this test
     const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const fetchSpy = vi.spyOn(global, 'fetch' as any).mockResolvedValue({} as Response);
 
-    render(
+    const { container, unmount } = render(
       <ErrorBoundary>
         <ThrowError shouldThrow={true} />
       </ErrorBoundary>
     );
 
-    expect(screen.getByText('Something went wrong')).toBeInTheDocument();
-    expect(screen.getByText('Try Again')).toBeInTheDocument();
-    expect(screen.getByText('Reload Page')).toBeInTheDocument();
+    expect(getByText(container, 'Something went wrong')).toBeTruthy();
+    expect(getByText(container, 'Try Again')).toBeTruthy();
+    expect(getByText(container, 'Reload Page')).toBeTruthy();
 
+    unmount();
+    fetchSpy.mockRestore();
     consoleSpy.mockRestore();
   });
 
   it('renders custom fallback when provided', () => {
     const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     const customFallback = <div>Custom error message</div>;
+    const fetchSpy = vi.spyOn(global, 'fetch' as any).mockResolvedValue({} as Response);
 
-    render(
+    const { container, unmount } = render(
       <ErrorBoundary fallback={customFallback}>
         <ThrowError shouldThrow={true} />
       </ErrorBoundary>
     );
 
-    expect(screen.getByText('Custom error message')).toBeInTheDocument();
-    expect(screen.queryByText('Something went wrong')).not.toBeInTheDocument();
+    expect(getByText(container, 'Custom error message')).toBeTruthy();
+    expect(queryByText(container, 'Something went wrong')).toBeNull();
 
+    unmount();
+    fetchSpy.mockRestore();
     consoleSpy.mockRestore();
   });
 
   it('calls onError callback when error occurs', () => {
     const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     const onErrorSpy = vi.fn();
+    const fetchSpy = vi.spyOn(global, 'fetch' as any).mockResolvedValue({} as Response);
 
-    render(
+    const { unmount } = render(
       <ErrorBoundary onError={onErrorSpy}>
         <ThrowError shouldThrow={true} />
       </ErrorBoundary>
@@ -71,6 +115,8 @@ describe('ErrorBoundary', () => {
       })
     );
 
+    unmount();
+    fetchSpy.mockRestore();
     consoleSpy.mockRestore();
   });
 });
@@ -80,9 +126,10 @@ describe('withErrorBoundary', () => {
     const TestComponent = () => <div>Wrapped component</div>;
     const WrappedComponent = withErrorBoundary(TestComponent);
 
-    render(<WrappedComponent />);
+    const { container, unmount } = render(<WrappedComponent />);
 
-    expect(screen.getByText('Wrapped component')).toBeInTheDocument();
+    expect(getByText(container, 'Wrapped component')).toBeTruthy();
+    unmount();
   });
 
   it('sets correct display name', () => {

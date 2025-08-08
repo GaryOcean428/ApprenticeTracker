@@ -5,6 +5,7 @@ import {
   parseISODate,
   DATE_FORMATS,
 } from '../../../lib/date-utils';
+import { vi } from 'vitest';
 
 describe('Date Utilities', () => {
   describe('parseDate', () => {
@@ -73,28 +74,22 @@ describe('Date Utilities', () => {
   });
 
   describe('formatRelativeDate', () => {
-    it('formats date relative to now', () => {
-      // Mock current date for consistent testing
-      const originalDate = global.Date;
-      global.Date = class extends Date {
-        constructor() {
-          super('2023-05-15T12:00:00Z'); // Fixed point in time
-        }
-        static now() {
-          return new Date('2023-05-15T12:00:00Z').getTime();
-        }
-      } as typeof Date;
+    beforeEach(() => {
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date('2023-05-15T12:00:00Z'));
+    });
 
-      // Test relative dates
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it('formats date relative to now', () => {
       expect(formatRelativeDate(new Date('2023-05-14T12:00:00Z'))).toBe('1 day ago');
       expect(formatRelativeDate(new Date('2023-05-10T12:00:00Z'))).toBe('5 days ago');
       expect(formatRelativeDate(new Date('2023-05-16T12:00:00Z'))).toBe('in 1 day');
 
       // Without suffix
       expect(formatRelativeDate(new Date('2023-05-14T12:00:00Z'), false)).toBe('1 day');
-
-      // Restore original Date
-      global.Date = originalDate;
     });
 
     it('returns empty string for null/undefined/invalid input', () => {
