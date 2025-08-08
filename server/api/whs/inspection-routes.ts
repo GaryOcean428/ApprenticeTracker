@@ -1,15 +1,14 @@
 import express from 'express';
-import { storage } from '../../storage';
 import { db } from '../../db';
-import { z } from 'zod';
 import {
   whs_inspections,
   whs_documents,
   insertInspectionSchema,
   insertDocumentSchema,
+  updateInspectionSchema,
 } from '@shared/schema';
-import { eq, desc, asc, sql } from 'drizzle-orm';
-import { isAuthenticated, hasPermission } from '../../middleware/auth';
+import { desc, sql } from 'drizzle-orm';
+import { hasPermission } from '../../middleware/auth';
 
 export function setupInspectionRoutes(router: express.Router) {
   // GET all inspections with pagination
@@ -64,7 +63,7 @@ export function setupInspectionRoutes(router: express.Router) {
   // GET inspection by ID with related data
   router.get('/inspections/:id', async (req, res) => {
     try {
-      const id = Number(req.params.id);
+      const id = req.params.id;
 
       // Get inspection
       const [inspection] = await db
@@ -113,7 +112,7 @@ export function setupInspectionRoutes(router: express.Router) {
   // UPDATE inspection
   router.patch('/inspections/:id', hasPermission('whs.update_inspection'), async (req, res) => {
     try {
-      const id = Number(req.params.id);
+      const id = req.params.id;
 
       // Ensure inspection exists
       const [existingInspection] = await db
@@ -125,10 +124,12 @@ export function setupInspectionRoutes(router: express.Router) {
         return res.status(404).json({ message: 'Inspection not found' });
       }
 
+      const validatedData = updateInspectionSchema.parse(req.body);
+
       // Update inspection
       const [updatedInspection] = await db
         .update(whs_inspections)
-        .set(req.body)
+        .set(validatedData)
         .where(sql`${whs_inspections.id} = ${id}`)
         .returning();
 
@@ -142,7 +143,7 @@ export function setupInspectionRoutes(router: express.Router) {
   // DELETE inspection
   router.delete('/inspections/:id', hasPermission('whs.delete_inspection'), async (req, res) => {
     try {
-      const id = Number(req.params.id);
+      const id = req.params.id;
 
       // Delete inspection
       await db.delete(whs_inspections).where(sql`${whs_inspections.id} = ${id}`);
@@ -172,14 +173,19 @@ export function setupInspectionRoutes(router: express.Router) {
           return res.status(404).json({ message: 'Inspection not found' });
         }
 
+        const documentData = insertDocumentSchema.parse({
+          ...req.body,
+          inspection_id: inspectionId,
+        });
+
         // Execute raw SQL instead of using the typed ORM
         // This avoids TypeScript errors that are hard to resolve due to circular references
         const query = sql`
         INSERT INTO whs_documents (
           title, file_path, filename, file_type, file_size, uploaded_by_id, inspection_id
         ) VALUES (
-          ${req.body.title}, ${req.body.file_path}, ${req.body.filename}, 
-          ${req.body.file_type}, ${req.body.file_size}, ${req.body.uploaded_by_id}, ${inspectionId}
+          ${documentData.title}, ${documentData.file_path}, ${documentData.filename},
+          ${documentData.file_type}, ${documentData.file_size}, ${documentData.uploaded_by_id}, ${inspectionId}
         )
         RETURNING *
       `;
