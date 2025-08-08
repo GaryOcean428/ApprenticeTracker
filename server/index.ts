@@ -19,6 +19,7 @@ import { migrateWhsRiskAssessments } from './migrate-whs-risk-assessments';
 import { migrateLabourHireSchema } from './migrate-labour-hire';
 import { migrateUnifiedContactsSystem, seedContactTags } from './migrate-unified-contacts';
 import { initializeScheduledTasks } from './scheduled-tasks';
+import { assertEnvVars } from './utils/env';
 
 const app = express();
 
@@ -50,6 +51,13 @@ app.get('/test-auth', (_req, res) => {
 
 // Dynamic port (default 5000 for dev, from env for prod)
 const port = parseInt(process.env.PORT || '5000', 10);
+
+// Ensure required environment variables are present before starting
+const requiredEnv = ['DATABASE_URL', 'UPLOAD_DIR'];
+if (process.env.NODE_ENV === 'production') {
+  requiredEnv.push('FAIRWORK_API_URL', 'FAIRWORK_API_KEY');
+}
+assertEnvVars(requiredEnv);
 
 // Health routes
 if (process.env.NODE_ENV === 'production') {
