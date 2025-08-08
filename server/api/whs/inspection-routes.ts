@@ -112,7 +112,7 @@ export function setupInspectionRoutes(router: express.Router) {
   // UPDATE inspection
   router.patch('/inspections/:id', hasPermission('whs.update_inspection'), async (req, res) => {
     try {
-      const id = req.params.id;
+      const {id} = req.params;
 
       // Ensure inspection exists
       const [existingInspection] = await db
