@@ -143,7 +143,7 @@ export function setupInspectionRoutes(router: express.Router) {
   // DELETE inspection
   router.delete('/inspections/:id', hasPermission('whs.delete_inspection'), async (req, res) => {
     try {
-      const id = req.params.id;
+      const {id} = req.params;
 
       // Delete inspection
       await db.delete(whs_inspections).where(sql`${whs_inspections.id} = ${id}`);
