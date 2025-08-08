@@ -192,6 +192,7 @@ export const insertIncidentSchema = createInsertSchema(whs_incidents, {
     message: 'Invalid date format for followup date'
   }).optional(),
 });
+export const updateIncidentSchema = insertIncidentSchema.partial();
 
 export const insertWitnessSchema = createInsertSchema(whs_witnesses, {
   name: z.string().min(2, 'Witness name must be at least 2 characters').max(100, 'Witness name must not exceed 100 characters'),
@@ -222,6 +223,7 @@ export const insertRiskAssessmentSchema = createInsertSchema(whs_risk_assessment
   recommendations: z.string().optional(),
   action_plan: z.string().optional(),
 });
+export const updateRiskAssessmentSchema = insertRiskAssessmentSchema.partial();
 
 export const insertInspectionSchema = createInsertSchema(whs_inspections, {
   title: z.string().min(5, 'Title must be at least 5 characters').max(200, 'Title must not exceed 200 characters'),
@@ -236,6 +238,7 @@ export const insertInspectionSchema = createInsertSchema(whs_inspections, {
   findings: z.string().optional(),
   compliance_score: z.number().int('Compliance score must be an integer').min(0, 'Compliance score must be at least 0').max(100, 'Compliance score must not exceed 100').optional(),
 });
+export const updateInspectionSchema = insertInspectionSchema.partial();
 
 export const insertPolicySchema = createInsertSchema(whs_policies, {
   title: z.string().min(5, 'Title must be at least 5 characters').max(200, 'Title must not exceed 200 characters'),
@@ -246,10 +249,12 @@ export const insertPolicySchema = createInsertSchema(whs_policies, {
   version: z.string().min(1, 'Version is required').max(50, 'Version must not exceed 50 characters'),
   file_path: z.string().max(500, 'File path must not exceed 500 characters').optional(),
 });
+export const updatePolicySchema = insertPolicySchema.partial();
 
 // Define types
 export type Incident = typeof whs_incidents.$inferSelect;
 export type InsertIncident = z.infer<typeof insertIncidentSchema>;
+export type UpdateIncident = z.infer<typeof updateIncidentSchema>;
 
 export type Witness = typeof whs_witnesses.$inferSelect;
 export type InsertWitness = z.infer<typeof insertWitnessSchema>;
@@ -259,8 +264,14 @@ export type InsertWHSDocument = z.infer<typeof insertDocumentSchema>;
 
 export type RiskAssessment = typeof whs_risk_assessments.$inferSelect;
 export type InsertRiskAssessment = z.infer<typeof insertRiskAssessmentSchema>;
+export type UpdateRiskAssessment = z.infer<typeof updateRiskAssessmentSchema>;
 
 export type Inspection = typeof whs_inspections.$inferSelect;
+export type InsertInspection = z.infer<typeof insertInspectionSchema>;
+export type UpdateInspection = z.infer<typeof updateInspectionSchema>;
+export type Policy = typeof whs_policies.$inferSelect;
+export type InsertPolicy = z.infer<typeof insertPolicySchema>;
+export type UpdatePolicy = z.infer<typeof updatePolicySchema>;
 // WHS Metrics/Reports Table
 export const whs_metrics = pgTable('whs_metrics', {
   id: uuid('id').defaultRandom().primaryKey(),

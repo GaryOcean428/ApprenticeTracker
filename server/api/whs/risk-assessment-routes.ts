@@ -6,6 +6,7 @@ import {
   whs_risk_assessments,
   whs_documents,
   insertRiskAssessmentSchema,
+  updateRiskAssessmentSchema,
   insertDocumentSchema,
 } from '@shared/schema/whs';
 
@@ -200,10 +201,12 @@ export function setupRiskAssessmentRoutes(router: express.Router) {
           data.hazards = JSON.stringify(data.hazards);
         }
 
+        const validatedData = updateRiskAssessmentSchema.parse(data);
+
         // Update risk assessment
         const [updatedAssessment] = await db
           .update(whs_risk_assessments)
-          .set(data)
+          .set(validatedData)
           .where(sql`${whs_risk_assessments.id} = ${id}`)
           .returning();
 
