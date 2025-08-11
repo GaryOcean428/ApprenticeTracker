@@ -10,8 +10,8 @@ const envSchema = z.object({
     .default(5000),
   DATABASE_URL: z.string().optional(),
   UPLOAD_DIR: z.string().default('uploads'),
-  FAIRWORK_API_URL: z.string().url().optional(),
-  FAIRWORK_API_KEY: z.string().optional(),
+  FAIRWORK_API_URL: z.string().optional().transform(val => val || undefined),
+  FAIRWORK_API_KEY: z.string().optional().transform(val => val || undefined),
   JWT_SECRET: z.string().min(32, 'JWT_SECRET must be at least 32 characters').optional(),
   JWT_EXPIRES_IN: z.string().default('7d'),
 });
