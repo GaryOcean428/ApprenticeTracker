@@ -8,6 +8,7 @@
     "build": "vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist",
     "start": "NODE_ENV=production node dist/index.js",
     "start:prod": "npm run build && NODE_ENV=production node production-server.js",
+    "demo:auth": "NODE_ENV=development node server/demo-auth.js",
     "check": "tsc",
     "db:push": "drizzle-kit push",
     "test": "vitest",

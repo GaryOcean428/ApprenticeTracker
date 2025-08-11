@@ -289,6 +289,13 @@ export class AuthService {
       // Production authentication
       if (!db) {
         auditLog('LOGIN_DB_UNAVAILABLE', req!, { email });
+        
+        // In development mode, create fallback user even without DB
+        if (process.env.NODE_ENV === 'development') {
+          auditLog('LOGIN_DEV_FALLBACK', req!, { email });
+          return await this.createDevFallbackLogin(email, req);
+        }
+        
         return {
           success: false,
           error: {

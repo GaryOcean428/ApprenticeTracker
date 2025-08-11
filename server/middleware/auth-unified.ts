@@ -410,8 +410,8 @@ export function getAuthSystemHealth(): Record<string, any> {
     },
     rateLimit: {
       enabled: true,
-      loginLimit: authRateLimiters.login.options.max,
-      registerLimit: authRateLimiters.register.options.max,
+      loginLimit: authRateLimiters.login.options?.max || 5,
+      registerLimit: authRateLimiters.register.options?.max || 3,
     },
     timestamp: new Date().toISOString(),
   };
