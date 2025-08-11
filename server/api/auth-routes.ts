@@ -81,72 +81,74 @@ authRouter.post('/login', validateBody(loginSchema), async (req: Request, res: R
     // Development fallback - when database is not available
     if (process.env.NODE_ENV === 'development') {
       try {
-        // Try database first - query using email field with case-insensitive search
-        const [user] = await db.select().from(users).where(eq(users.email, email.toLowerCase()));
-        
-        if (user) {
-          // Database user found, proceed with normal auth
-          if (!user.isActive) {
-            return res.status(401).json({
-              success: false,
-              message: 'Account is inactive. Please contact an administrator.',
-            });
-          }
-
-          // Verify password
-          let isPasswordValid = false;
-          if (password === user.password) {
-            isPasswordValid = true;
-          } else if (user.password.startsWith('$2')) {
-            try {
-              isPasswordValid = await compare(password, user.password);
-            } catch (error) {
-              console.error('Password comparison error:', error);
+        if (db) {
+          // Try database first - query using email field with case-insensitive search
+          const [user] = await db.select().from(users).where(eq(users.email, email.toLowerCase()));
+          
+          if (user) {
+            // Database user found, proceed with normal auth
+            if (!user.isActive) {
+              return res.status(401).json({
+                success: false,
+                message: 'Account is inactive. Please contact an administrator.',
+              });
             }
-          }
 
-          if (!isPasswordValid) {
-            return res.status(401).json({
-              success: false,
-              message: 'Invalid email or password',
-            });
-          }
+            // Verify password
+            let isPasswordValid = false;
+            if (password === user.password) {
+              isPasswordValid = true;
+            } else if (user.password.startsWith('$2')) {
+              try {
+                isPasswordValid = await compare(password, user.password);
+              } catch (error) {
+                console.error('Password comparison error:', error);
+              }
+            }
 
-          // Create JWT payload using email as identifier
-          const payload = {
-            id: user.id,
-            username: user.username,
-            email: user.email,
-            role: user.role,
-            roleId: user.roleId,
-            organizationId: user.organizationId,
-          };
+            if (!isPasswordValid) {
+              return res.status(401).json({
+                success: false,
+                message: 'Invalid email or password',
+              });
+            }
 
-          // Sign token using the enhanced auth function
-          const token = generateToken(payload);
-
-          // Try to update last login time (don't fail if this errors)
-          try {
-            await db.update(users).set({ lastLogin: new Date() }).where(eq(users.id, user.id));
-          } catch (updateError) {
-            console.warn('Failed to update last login time:', updateError);
-          }
-
-          return res.status(200).json({
-            success: true,
-            token: token,
-            user: {
+            // Create JWT payload using email as identifier
+            const payload = {
               id: user.id,
               username: user.username,
               email: user.email,
-              firstName: user.firstName,
-              lastName: user.lastName,
               role: user.role,
               roleId: user.roleId,
               organizationId: user.organizationId,
-              profileImage: user.profileImage,
-            },
-          });
+            };
+
+            // Sign token using the enhanced auth function
+            const token = generateToken(payload);
+
+            // Try to update last login time (don't fail if this errors)
+            try {
+              await db.update(users).set({ lastLogin: new Date() }).where(eq(users.id, user.id));
+            } catch (updateError) {
+              console.warn('Failed to update last login time:', updateError);
+            }
+
+            return res.status(200).json({
+              success: true,
+              token: token,
+              user: {
+                id: user.id,
+                username: user.username,
+                email: user.email,
+                firstName: user.firstName,
+                lastName: user.lastName,
+                role: user.role,
+                roleId: user.roleId,
+                organizationId: user.organizationId,
+                profileImage: user.profileImage,
+              },
+            });
+          }
         }
       } catch (dbError) {
         console.warn('Database unavailable, using development fallback auth:', dbError);
@@ -186,6 +188,13 @@ authRouter.post('/login', validateBody(loginSchema), async (req: Request, res: R
     }
 
     // Production mode - require database
+    if (!db) {
+      return res.status(503).json({
+        success: false,
+        message: 'Database service unavailable',
+      });
+    }
+    
     // Query using email field with case-insensitive search
     const [user] = await db.select().from(users).where(eq(users.email, email.toLowerCase()));
 
@@ -289,6 +298,13 @@ authRouter.post('/register', validateBody(registerSchema), async (req: Request, 
 
     // Normalize email to lowercase for consistency
     const normalizedEmail = email.toLowerCase();
+
+    if (!db) {
+      return res.status(503).json({
+        success: false,
+        message: 'Registration service unavailable - database not connected',
+      });
+    }
 
     // Check if username already exists
     const [existingUsername] = await db.select().from(users).where(eq(users.username, username));
@@ -401,32 +417,34 @@ authRouter.get('/verify', async (req: Request, res: Response) => {
       // Development fallback - when database is not available
       if (process.env.NODE_ENV === 'development') {
         try {
-          // Try database first
-          const [user] = await db.select().from(users).where(eq(users.id, decoded.id));
+          if (db) {
+            // Try database first
+            const [user] = await db.select().from(users).where(eq(users.id, decoded.id));
 
-          if (user) {
-            // Database user found, proceed with normal verification
-            if (!user.isActive) {
-              return res.status(401).json({
-                success: false,
-                message: 'Account is inactive',
+            if (user) {
+              // Database user found, proceed with normal verification
+              if (!user.isActive) {
+                return res.status(401).json({
+                  success: false,
+                  message: 'Account is inactive',
+                });
+              }
+
+              return res.status(200).json({
+                success: true,
+                user: {
+                  id: user.id,
+                  username: user.username,
+                  email: user.email,
+                  firstName: user.firstName,
+                  lastName: user.lastName,
+                  role: user.role,
+                  roleId: user.roleId,
+                  organizationId: user.organizationId,
+                  profileImage: user.profileImage,
+                },
               });
             }
-
-            return res.status(200).json({
-              success: true,
-              user: {
-                id: user.id,
-                username: user.username,
-                email: user.email,
-                firstName: user.firstName,
-                lastName: user.lastName,
-                role: user.role,
-                roleId: user.roleId,
-                organizationId: user.organizationId,
-                profileImage: user.profileImage,
-              },
-            });
           }
         } catch (dbError) {
           console.warn('Database unavailable, using token data for verification:', dbError);
@@ -452,6 +470,13 @@ authRouter.get('/verify', async (req: Request, res: Response) => {
       }
 
       // Production mode - require database
+      if (!db) {
+        return res.status(503).json({
+          success: false,
+          message: 'Database service unavailable',
+        });
+      }
+      
       const [user] = await db.select().from(users).where(eq(users.id, decoded.id));
 
       if (!user) {
