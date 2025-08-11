@@ -36,30 +36,32 @@ const allowedOrigins = [
   'http://localhost:3000', // Common React dev port
   'http://localhost:5000', // Same port as server
   'http://127.0.0.1:5173',
-  'http://127.0.0.1:3000', 
+  'http://127.0.0.1:3000',
   'http://127.0.0.1:5000',
   // Railway domains
   process.env.RAILWAY_PUBLIC_DOMAIN && `https://${process.env.RAILWAY_PUBLIC_DOMAIN}`,
   process.env.FRONTEND_URL,
-  'https://crm7.up.railway.app'
+  'https://crm7.up.railway.app',
 ].filter(Boolean);
 
-app.use(cors({
-  origin: (origin, callback) => {
-    // Allow requests with no origin (mobile apps, Postman, etc.)
-    if (!origin) return callback(null, true);
-    
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    }
-    console.warn(`CORS blocked origin: ${origin}`);
-    return callback(null, false);
-  },
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-  exposedHeaders: ['X-Total-Count']
-}));
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // Allow requests with no origin (mobile apps, Postman, etc.)
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      console.warn(`CORS blocked origin: ${origin}`);
+      return callback(null, false);
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+    exposedHeaders: ['X-Total-Count'],
+  })
+);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -132,29 +134,46 @@ app.use((req, res, next) => {
 (async () => {
   // Migrations, with error logging
   try {
-    await migrateRolesSchema(); log('Role Management schema migration completed');
-    await migrateFairWorkSchema(); log('Fair Work schema migration completed');
-    await migrateGtoComplianceSchema(); log('GTO Compliance schema migration completed');
-    await migrateVetSchema(); log('VET Training schema migration completed');
-    await migrateHostPreferredQualifications(); log('Host Preferred Qualifications schema migration completed');
-    await migrateEnrichmentSchema(); log('Enrichment Program schema migration completed');
-    await migrateProgressReviewsSchema(); log('Progress Reviews schema migration completed');
-    await migrateHostEmployersFields(); log('Host Employers Fields migration completed');
-    await migrateWHS(); log('Work Health and Safety (WHS) tables migration completed');
-    await migrateWhsDocuments(); log('WHS documents schema updated successfully');
-    await migrateWhsRiskAssessments(); log('WHS Risk Assessments schema updated successfully');
-    await migrateLabourHireSchema(); log('Labour Hire Workers schema migration completed');
-    await migrateUnifiedContactsSystem(); log('Unified Contacts and Clients schema migration completed');
+    await migrateRolesSchema();
+    log('Role Management schema migration completed');
+    await migrateFairWorkSchema();
+    log('Fair Work schema migration completed');
+    await migrateGtoComplianceSchema();
+    log('GTO Compliance schema migration completed');
+    await migrateVetSchema();
+    log('VET Training schema migration completed');
+    await migrateHostPreferredQualifications();
+    log('Host Preferred Qualifications schema migration completed');
+    await migrateEnrichmentSchema();
+    log('Enrichment Program schema migration completed');
+    await migrateProgressReviewsSchema();
+    log('Progress Reviews schema migration completed');
+    await migrateHostEmployersFields();
+    log('Host Employers Fields migration completed');
+    await migrateWHS();
+    log('Work Health and Safety (WHS) tables migration completed');
+    await migrateWhsDocuments();
+    log('WHS documents schema updated successfully');
+    await migrateWhsRiskAssessments();
+    log('WHS Risk Assessments schema updated successfully');
+    await migrateLabourHireSchema();
+    log('Labour Hire Workers schema migration completed');
+    await migrateUnifiedContactsSystem();
+    log('Unified Contacts and Clients schema migration completed');
   } catch (error) {
     log('Error migrating database schema: ' + error);
   }
 
   // Seeding, with error logging
   try {
-    await seedDatabase(); log('Database seeded successfully');
-    await seedGtoComplianceStandards(); log('GTO Compliance Standards seeded successfully');
-    await seedEnrichmentData(); log('Enrichment Program data seeded successfully');
-    await seedContactTags(); log('Contact Tags seeded successfully');
+    await seedDatabase();
+    log('Database seeded successfully');
+    await seedGtoComplianceStandards();
+    log('GTO Compliance Standards seeded successfully');
+    await seedEnrichmentData();
+    log('Enrichment Program data seeded successfully');
+    await seedContactTags();
+    log('Contact Tags seeded successfully');
   } catch (error) {
     log('Error seeding database: ' + error);
   }
@@ -206,20 +225,23 @@ app.use((req, res, next) => {
   // Port robust start: fallback to alt ports if needed
   const startServerWithFallback = (targetPort: number): Promise<any> => {
     return new Promise((resolve, reject) => {
-      const instance = server.listen({
-        port: targetPort,
-        host: '0.0.0.0',
-        reusePort: true,
-      }, () => {
-        log(`Server successfully started on port ${targetPort}`);
-        try {
-          initializeScheduledTasks();
-          log('Scheduled tasks initialized');
-        } catch (error) {
-          log(`Failed to initialize scheduled tasks: ${error}`);
+      const instance = server.listen(
+        {
+          port: targetPort,
+          host: '0.0.0.0',
+          reusePort: true,
+        },
+        () => {
+          log(`Server successfully started on port ${targetPort}`);
+          try {
+            initializeScheduledTasks();
+            log('Scheduled tasks initialized');
+          } catch (error) {
+            log(`Failed to initialize scheduled tasks: ${error}`);
+          }
+          resolve(instance);
         }
-        resolve(instance);
-      });
+      );
       instance.on('error', (error: any) => {
         if (error.code === 'EADDRINUSE') {
           log(`Port ${targetPort} is already in use`);
@@ -237,9 +259,7 @@ app.use((req, res, next) => {
     serverInstance = await startServerWithFallback(port);
   } catch (error) {
     // Try fallback ports if default in use
-    const alternatives = env.NODE_ENV === 'production'
-      ? [8080, 3000, 5001]
-      : [5002, 5003, 8080];
+    const alternatives = env.NODE_ENV === 'production' ? [8080, 3000, 5001] : [5002, 5003, 8080];
     let started = false;
     for (const alt of alternatives) {
       try {

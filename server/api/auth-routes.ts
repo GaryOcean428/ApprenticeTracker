@@ -4,19 +4,19 @@ import { users } from '@shared/schema';
 import { eq } from 'drizzle-orm';
 import { z } from 'zod';
 import { compare, hash } from 'bcrypt';
-import { sign as jwtSign, verify as jwtVerify } from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 import { generateToken, authenticateToken, AuthRequest } from '../middleware/auth-enhanced';
 
 export const authRouter = Router();
 
 // Health check endpoint
 authRouter.get('/health', (req: Request, res: Response) => {
-  res.json({ 
+  res.json({
     status: 'ok',
     environment: process.env.NODE_ENV,
     hasDB: !!process.env.DATABASE_URL,
-    hasJWT: !!(process.env.JWT_SECRET || (process.env.NODE_ENV !== 'production')),
-    timestamp: new Date().toISOString()
+    hasJWT: !!(process.env.JWT_SECRET || process.env.NODE_ENV !== 'production'),
+    timestamp: new Date().toISOString(),
   });
 });
 
@@ -77,7 +77,7 @@ authRouter.post('/login', validateBody(loginSchema), async (req: Request, res: R
         if (db) {
           // Try database first - query using email field with case-insensitive search
           const [user] = await db.select().from(users).where(eq(users.email, email.toLowerCase()));
-          
+
           if (user) {
             // Database user found, proceed with normal auth
             if (!user.isActive) {
@@ -149,7 +149,7 @@ authRouter.post('/login', validateBody(loginSchema), async (req: Request, res: R
 
       // Development fallback - create a mock user for any email/password
       console.log('Using development fallback authentication for email:', email);
-      
+
       const mockUser = {
         id: 1,
         username: email.split('@')[0],
@@ -187,7 +187,7 @@ authRouter.post('/login', validateBody(loginSchema), async (req: Request, res: R
         message: 'Database service unavailable',
       });
     }
-    
+
     // Query using email field with case-insensitive search
     const [user] = await db.select().from(users).where(eq(users.email, email.toLowerCase()));
 
@@ -273,7 +273,12 @@ authRouter.post('/login', validateBody(loginSchema), async (req: Request, res: R
     return res.status(500).json({
       success: false,
       message: 'Authentication service error',
-      error: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.message : String(error)) : undefined,
+      error:
+        process.env.NODE_ENV === 'development'
+          ? error instanceof Error
+            ? error.message
+            : String(error)
+          : undefined,
     });
   }
 });
@@ -372,7 +377,12 @@ authRouter.post('/register', validateBody(registerSchema), async (req: Request, 
     return res.status(503).json({
       success: false,
       message: 'Registration service unavailable',
-      error: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.message : String(error)) : undefined,
+      error:
+        process.env.NODE_ENV === 'development'
+          ? error instanceof Error
+            ? error.message
+            : String(error)
+          : undefined,
     });
   }
 });
@@ -387,7 +397,7 @@ authRouter.get('/verify', authenticateToken, async (req: AuthRequest, res: Respo
 
     // Token is already verified by middleware, req.user is populated
     const userId = req.user!.id;
-    
+
     // Development fallback - when database is not available
     if (process.env.NODE_ENV === 'development') {
       try {
@@ -426,7 +436,7 @@ authRouter.get('/verify', authenticateToken, async (req: AuthRequest, res: Respo
 
       // Development fallback - use token data
       console.log('Using development fallback verification for user:', req.user!.email);
-      
+
       return res.status(200).json({
         success: true,
         user: {
@@ -450,7 +460,7 @@ authRouter.get('/verify', authenticateToken, async (req: AuthRequest, res: Respo
         message: 'Database service unavailable',
       });
     }
-    
+
     const [user] = await db.select().from(users).where(eq(users.id, userId));
 
     if (!user) {

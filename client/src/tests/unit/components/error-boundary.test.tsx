@@ -22,7 +22,7 @@ function render(ui: ReactElement) {
 
 function getByText(container: HTMLElement, text: string) {
   const el = Array.from(container.querySelectorAll('*')).find(
-    (node) => node.textContent?.trim() === text
+    node => node.textContent?.trim() === text
   );
   if (!el) {
     throw new Error(`Unable to find text: ${text}`);
@@ -32,9 +32,8 @@ function getByText(container: HTMLElement, text: string) {
 
 function queryByText(container: HTMLElement, text: string) {
   return (
-    Array.from(container.querySelectorAll('*')).find(
-      (node) => node.textContent?.trim() === text
-    ) || null
+    Array.from(container.querySelectorAll('*')).find(node => node.textContent?.trim() === text) ||
+    null
   );
 }
 
