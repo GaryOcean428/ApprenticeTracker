@@ -59,9 +59,14 @@ router.post('/programs', async (req, res) => {
     const programData = insertEnrichmentProgramSchema.parse(req.body);
     const program = await storage.createEnrichmentProgram(programData);
 
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ message: 'User not authenticated' });
+    }
+
     // Create activity log
     await storage.createActivityLog({
-      userId: 1, // Assuming admin user
+      userId,
       action: 'created',
       relatedTo: 'enrichment_program',
       relatedId: program.id,
