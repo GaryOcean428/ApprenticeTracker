@@ -31,18 +31,35 @@ import { assertEnvVars } from './utils/env';
 const app = express();
 
 // CORS configuration
+const allowedOrigins = [
+  'http://localhost:5173', // Vite dev server
+  'http://localhost:3000', // Common React dev port
+  'http://localhost:5000', // Same port as server
+  'http://127.0.0.1:5173',
+  'http://127.0.0.1:3000', 
+  'http://127.0.0.1:5000',
+  // Railway domains
+  process.env.RAILWAY_PUBLIC_DOMAIN && `https://${process.env.RAILWAY_PUBLIC_DOMAIN}`,
+  process.env.FRONTEND_URL,
+  'https://crm7.up.railway.app'
+].filter(Boolean);
+
 app.use(cors({
-  origin: [
-    'http://localhost:5173', // Vite dev server
-    'http://localhost:3000', // Common React dev port
-    'http://localhost:5000', // Same port as server
-    'http://127.0.0.1:5173',
-    'http://127.0.0.1:3000', 
-    'http://127.0.0.1:5000'
-  ],
+  origin: (origin, callback) => {
+    // Allow requests with no origin (mobile apps, Postman, etc.)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      console.warn(`CORS blocked origin: ${origin}`);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  exposedHeaders: ['X-Total-Count']
 }));
 
 app.use(express.json());
@@ -154,6 +171,7 @@ app.use((req, res, next) => {
       message: `API route not found: ${req.method} ${req.originalUrl}`,
       availableRoutes: [
         'GET /api/health',
+        'GET /api/auth/health',
         'POST /api/auth/login',
         'POST /api/auth/register',
         'GET /api/auth/verify',
