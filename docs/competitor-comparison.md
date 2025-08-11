@@ -65,7 +65,7 @@ The comparison focuses on key functional areas essential for GTO operations and 
 ### ApprenticeTracker (Current)
 - Modern microservices architecture
 - Integrated approach with public website, admin portals, and CRM
-- Strong technology stack (Next.js, TypeScript, TailwindCSS)
+- Strong technology stack (React, Vite, TypeScript, TailwindCSS)
 
 ## Key Differentiators to Develop
 

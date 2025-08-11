@@ -937,7 +937,7 @@ settingsRouter.post('/data-views', async (req: Request, res: Response) => {
       sortBy: viewData.sortBy || 'id',
       sortDirection: viewData.sortDirection || 'asc',
       isPublic: viewData.isPublic !== undefined ? viewData.isPublic : false,
-      userId: 1, // TODO: Get from authenticated user
+      userId: req.user?.id || 1,
       createdAt: new Date(),
       updatedAt: new Date(),
     });
