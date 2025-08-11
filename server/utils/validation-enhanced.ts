@@ -7,9 +7,7 @@ import { z } from 'zod';
 
 // Common validation patterns
 export const emailSchema = z.string().email('Invalid email format');
-export const phoneSchema = z
-  .string()
-  .regex(/^[+]?[\d\s\-()]{10,}$/, 'Invalid phone number format');
+export const phoneSchema = z.string().regex(/^[+]?[\d\s\-()]{10,}$/, 'Invalid phone number format');
 export const positiveNumberSchema = z.number().positive('Must be a positive number');
 export const percentageSchema = z
   .number()

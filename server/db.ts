@@ -29,11 +29,9 @@ if (databaseUrl) {
     // Regular PostgreSQL (Railway, etc.) with SSL support
     const pgPool = new PgPool({
       connectionString: databaseUrl,
-      ssl: process.env.NODE_ENV === 'production' 
-        ? { rejectUnauthorized: false } 
-        : false
+      ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
     });
-    
+
     // Test the connection
     pgPool.connect((err, client, release) => {
       if (err) {
@@ -41,7 +39,9 @@ if (databaseUrl) {
         if (process.env.NODE_ENV === 'production') {
           process.exit(1);
         } else {
-          console.warn('⚠️  Database connection failed in development - continuing without database');
+          console.warn(
+            '⚠️  Database connection failed in development - continuing without database'
+          );
         }
       } else {
         console.log('✅ Database connected successfully');
@@ -56,7 +56,7 @@ if (databaseUrl) {
   const closePool = async () => {
     if (!pool) return;
     try {
-      await new Promise<void>((resolve) => {
+      await new Promise<void>(resolve => {
         // @ts-expect-error end signature differs between pools; both accept callback
         pool.end(() => resolve());
       });
@@ -65,7 +65,7 @@ if (databaseUrl) {
       console.warn('Error closing database pool:', e);
     }
   };
-  
+
   const shutdown = async () => {
     const timeout = setTimeout(() => {
       console.warn('Force exiting after shutdown timeout');
@@ -75,7 +75,7 @@ if (databaseUrl) {
     clearTimeout(timeout);
     process.exit(0);
   };
-  
+
   process.on('SIGTERM', shutdown);
   process.on('SIGINT', shutdown);
 } else {
