@@ -53,14 +53,31 @@ if (databaseUrl) {
     db = drizzlePg(pgPool, { schema });
   }
 
-  // Graceful shutdown
-  process.on('SIGTERM', () => {
-    if (pool) {
-      pool.end(() => {
-        console.log('Database pool closed');
+  const closePool = async () => {
+    if (!pool) return;
+    try {
+      await new Promise<void>((resolve) => {
+        // @ts-expect-error end signature differs between pools; both accept callback
+        pool.end(() => resolve());
       });
+      console.log('Database pool closed');
+    } catch (e) {
+      console.warn('Error closing database pool:', e);
     }
-  });
+  };
+  
+  const shutdown = async () => {
+    const timeout = setTimeout(() => {
+      console.warn('Force exiting after shutdown timeout');
+      process.exit(0);
+    }, 5000);
+    await closePool();
+    clearTimeout(timeout);
+    process.exit(0);
+  };
+  
+  process.on('SIGTERM', shutdown);
+  process.on('SIGINT', shutdown);
 } else {
   console.log('📝 Running without database connection in development mode');
 }
