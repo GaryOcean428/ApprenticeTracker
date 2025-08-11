@@ -5,19 +5,31 @@ import { eq } from 'drizzle-orm';
 import { z } from 'zod';
 import { compare, hash } from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import { generateToken } from '../middleware/auth-enhanced';
 
 export const authRouter = Router();
 
 // Secret for JWT signing - in production, this should be in environment variables
 const JWT_SECRET = process.env.JWT_SECRET;
-const JWT_EXPIRES_IN = '7d';
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
 if (!JWT_SECRET) {
   throw new Error('JWT_SECRET environment variable is required but not set.');
 }
 
+// Health check endpoint
+authRouter.get('/health', (req: Request, res: Response) => {
+  res.json({ 
+    status: 'ok',
+    environment: process.env.NODE_ENV,
+    hasDB: !!process.env.DATABASE_URL,
+    hasJWT: !!JWT_SECRET,
+    timestamp: new Date().toISOString()
+  });
+});
+
 // Zod schemas for validation
 const loginSchema = z.object({
-  username: z.string().min(1, 'Username is required'),
+  email: z.string().email('Valid email address is required').min(1, 'Email is required'),
   password: z.string().min(1, 'Password is required'),
 });
 
@@ -57,20 +69,20 @@ function validateBody<T>(schema: z.ZodType<T>) {
 }
 
 /**
- * Login endpoint - authenticates user and returns JWT
+ * Login endpoint - authenticates user with email and returns JWT
  */
 authRouter.post('/login', validateBody(loginSchema), async (req: Request, res: Response) => {
   try {
     // Ensure we always return JSON
     res.setHeader('Content-Type', 'application/json');
 
-    const { username, password } = req.body;
+    const { email, password } = req.body;
 
     // Development fallback - when database is not available
     if (process.env.NODE_ENV === 'development') {
       try {
-        // Try database first
-        const [user] = await db.select().from(users).where(eq(users.username, username));
+        // Try database first - query using email field with case-insensitive search
+        const [user] = await db.select().from(users).where(eq(users.email, email.toLowerCase()));
         
         if (user) {
           // Database user found, proceed with normal auth
@@ -96,23 +108,22 @@ authRouter.post('/login', validateBody(loginSchema), async (req: Request, res: R
           if (!isPasswordValid) {
             return res.status(401).json({
               success: false,
-              message: 'Invalid username or password',
+              message: 'Invalid email or password',
             });
           }
 
-          // Create JWT payload
+          // Create JWT payload using email as identifier
           const payload = {
             id: user.id,
             username: user.username,
+            email: user.email,
             role: user.role,
             roleId: user.roleId,
             organizationId: user.organizationId,
           };
 
-          // Sign token
-          const token = jwt.sign(payload, JWT_SECRET, {
-            expiresIn: JWT_EXPIRES_IN,
-          });
+          // Sign token using the enhanced auth function
+          const token = generateToken(payload);
 
           // Try to update last login time (don't fail if this errors)
           try {
@@ -141,13 +152,13 @@ authRouter.post('/login', validateBody(loginSchema), async (req: Request, res: R
         console.warn('Database unavailable, using development fallback auth:', dbError);
       }
 
-      // Development fallback - create a mock user for any username/password
-      console.log('Using development fallback authentication for user:', username);
+      // Development fallback - create a mock user for any email/password
+      console.log('Using development fallback authentication for email:', email);
       
       const mockUser = {
         id: 1,
-        username: username,
-        email: `${username}@example.com`,
+        username: email.split('@')[0],
+        email: email,
         firstName: 'Dev',
         lastName: 'User',
         role: 'admin',
@@ -159,14 +170,13 @@ authRouter.post('/login', validateBody(loginSchema), async (req: Request, res: R
       const payload = {
         id: mockUser.id,
         username: mockUser.username,
+        email: mockUser.email,
         role: mockUser.role,
         roleId: mockUser.roleId,
         organizationId: mockUser.organizationId,
       };
 
-      const token = jwt.sign(payload, JWT_SECRET, {
-        expiresIn: JWT_EXPIRES_IN,
-      });
+      const token = generateToken(payload);
 
       return res.status(200).json({
         success: true,
@@ -176,12 +186,14 @@ authRouter.post('/login', validateBody(loginSchema), async (req: Request, res: R
     }
 
     // Production mode - require database
-    const [user] = await db.select().from(users).where(eq(users.username, username));
+    // Query using email field with case-insensitive search
+    const [user] = await db.select().from(users).where(eq(users.email, email.toLowerCase()));
 
     if (!user) {
+      console.log(`Login attempt failed: email ${email} not found`);
       return res.status(401).json({
         success: false,
-        message: 'Invalid username or password',
+        message: 'Invalid email or password',
       });
     }
 
@@ -213,28 +225,30 @@ authRouter.post('/login', validateBody(loginSchema), async (req: Request, res: R
     }
 
     if (!isPasswordValid) {
+      console.log(`Login attempt failed: incorrect password for ${email}`);
       return res.status(401).json({
         success: false,
-        message: 'Invalid username or password',
+        message: 'Invalid email or password',
       });
     }
 
-    // Create JWT payload
+    // Create JWT payload using email as identifier
     const payload = {
       id: user.id,
       username: user.username,
+      email: user.email,
       role: user.role,
       roleId: user.roleId,
       organizationId: user.organizationId,
     };
 
-    // Sign token
-    const token = jwt.sign(payload, JWT_SECRET, {
-      expiresIn: JWT_EXPIRES_IN,
-    });
+    // Sign token using the enhanced auth function
+    const token = generateToken(payload);
 
     // Update last login time
     await db.update(users).set({ lastLogin: new Date() }).where(eq(users.id, user.id));
+
+    console.log(`Login successful for email: ${user.email}`);
 
     // Return token and user info
     return res.status(200).json({
@@ -256,14 +270,14 @@ authRouter.post('/login', validateBody(loginSchema), async (req: Request, res: R
     console.error('Login error:', error);
     return res.status(500).json({
       success: false,
-      message: 'Internal server error',
-      error: error instanceof Error ? error.message : String(error),
+      message: 'Authentication service error',
+      error: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.message : String(error)) : undefined,
     });
   }
 });
 
 /**
- * Register endpoint - creates a new user
+ * Register endpoint - creates a new user with email validation
  */
 authRouter.post('/register', validateBody(registerSchema), async (req: Request, res: Response) => {
   try {
@@ -272,6 +286,9 @@ authRouter.post('/register', validateBody(registerSchema), async (req: Request, 
 
     const { username, password, email, firstName, lastName, role, roleId, organizationId } =
       req.body;
+
+    // Normalize email to lowercase for consistency
+    const normalizedEmail = email.toLowerCase();
 
     // Check if username already exists
     const [existingUsername] = await db.select().from(users).where(eq(users.username, username));
@@ -283,11 +300,11 @@ authRouter.post('/register', validateBody(registerSchema), async (req: Request, 
       });
     }
 
-    // Check if email already exists
-    const [existingEmail] = await db.select().from(users).where(eq(users.email, email));
+    // Check if email already exists (case-insensitive)
+    const [existingEmail] = await db.select().from(users).where(eq(users.email, normalizedEmail));
 
     if (existingEmail) {
-      return res.status(400).json({
+      return res.status(409).json({
         success: false,
         message: 'Email already registered',
       });
@@ -307,13 +324,13 @@ authRouter.post('/register', validateBody(registerSchema), async (req: Request, 
       }
     }
 
-    // Create new user
+    // Create new user with normalized email
     const [newUser] = await db
       .insert(users)
       .values({
         username,
         password: hashedPassword,
-        email,
+        email: normalizedEmail,
         firstName,
         lastName,
         role: role || 'user',
@@ -334,6 +351,8 @@ authRouter.post('/register', validateBody(registerSchema), async (req: Request, 
         organizationId: users.organizationId,
       });
 
+    console.log(`Registration successful for email: ${normalizedEmail}`);
+
     return res.status(201).json({
       success: true,
       message: 'User registered successfully',
@@ -341,10 +360,10 @@ authRouter.post('/register', validateBody(registerSchema), async (req: Request, 
     });
   } catch (error) {
     console.error('Registration error:', error);
-    return res.status(500).json({
+    return res.status(503).json({
       success: false,
-      message: 'Internal server error',
-      error: error instanceof Error ? error.message : String(error),
+      message: 'Registration service unavailable',
+      error: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.message : String(error)) : undefined,
     });
   }
 });
@@ -369,10 +388,11 @@ authRouter.get('/verify', async (req: Request, res: Response) => {
     const token = authHeader.split(' ')[1];
 
     try {
-      // Verify token
+      // Verify token using JWT_SECRET
       const decoded = jwt.verify(token, JWT_SECRET) as { 
         id: number; 
-        username: string; 
+        username: string;
+        email: string;
         role: string;
         roleId?: number;
         organizationId?: number;
@@ -413,14 +433,14 @@ authRouter.get('/verify', async (req: Request, res: Response) => {
         }
 
         // Development fallback - use token data
-        console.log('Using development fallback verification for user:', decoded.username);
+        console.log('Using development fallback verification for user:', decoded.email);
         
         return res.status(200).json({
           success: true,
           user: {
             id: decoded.id,
             username: decoded.username,
-            email: `${decoded.username}@example.com`,
+            email: decoded.email,
             firstName: 'Dev',
             lastName: 'User',
             role: decoded.role,
