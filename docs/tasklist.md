@@ -129,11 +129,11 @@ This file captures the prioritized development tasks identified by comparing the
 - **Success Criteria**: Users receive relevant notifications according to their preferences.
 
 ### 13. Training.gov.au API Integration
-- **Status**: Service exists; API routes and UI incomplete.
+- **Status**: Service exists; API routes and UI incomplete. Superseded qualification search implemented.
 - **Tasks**:
-  - Expose REST endpoints using the existing TGAService.
+  - Expose REST endpoints using the existing TGAService. ✅
   - Cache qualification data and allow searching from the UI.
-  - Track superseded qualifications.
+  - Track superseded qualifications. ✅
 - **Complexity**: Medium
 - **Dependencies**: SOAP/REST endpoints, caching layer
 - **Success Criteria**: Users can search and view qualification details pulled from TGA with caching.

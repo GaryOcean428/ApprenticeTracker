@@ -104,7 +104,12 @@ export const codeParamSchema = z.object({
 });
 
 // Specific validation schemas for TGA
-export const tgaSearchSchema = searchQuerySchema;
+export const tgaSearchSchema = searchQuerySchema.extend({
+  includeSuperseded: z
+    .string()
+    .optional()
+    .transform(val => val === 'true'),
+});
 
 export const tgaQualificationSchema = z.object({
   code: z
