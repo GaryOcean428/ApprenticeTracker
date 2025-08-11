@@ -75,6 +75,13 @@ Service-specific endpoints:
 3. **Security**: Store credentials securely and use environment variables
 4. **Data Sync**: Consider periodic synchronization to maintain a local database of commonly used entities
 
+## Application Endpoints
+
+The application exposes a REST endpoint that proxies qualification search to the TGA API:
+
+- `GET /api/tga/search?q=<query>&limit=<n>&includeSuperseded=true|false`
+  - `includeSuperseded` is optional and when `true` also returns superseded qualifications
+
 ## Support Resources
 
 For technical issues or additional information:

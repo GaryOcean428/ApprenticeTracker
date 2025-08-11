@@ -30,7 +30,7 @@ CRM7 is built using a microservices pattern with named services:
 
 ## Technical Stack
 
-- **Frontend**: Next.js 15.1.6, TypeScript, TailwindCSS, shadcn/ui
+- **Frontend**: React 18 with Vite 6, TypeScript, TailwindCSS, shadcn/ui
 - **Backend**: Node.js with Express
 - **Database**: PostgreSQL via Supabase
 - **Authentication**: Supabase Auth with JWT token handling
@@ -139,3 +139,4 @@ CRM7 follows a strategic development roadmap based on comprehensive analysis of 
 ## License
 
 Proprietary - Braden Group Pty Ltd
+

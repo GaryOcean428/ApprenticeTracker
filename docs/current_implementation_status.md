@@ -19,7 +19,7 @@ The following documentation has been completed and is up-to-date:
 
 - ✅ **Microservices Architecture** - Successfully implemented with named services 
 - ✅ **Database Foundation** - PostgreSQL via Supabase with Drizzle ORM
-- ✅ **Frontend Framework** - Next.js with TypeScript, TailwindCSS, and shadcn/ui 
+- ✅ **Frontend Framework** - React with Vite, TypeScript, TailwindCSS, and shadcn/ui
 - ✅ **Authentication Framework** - JWT token-based authentication with Supabase Auth
 - ✅ **File Storage** - Document management infrastructure for file uploads and retrieval
 - ✅ **API Structure** - RESTful API design patterns implemented
