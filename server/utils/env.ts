@@ -20,4 +20,21 @@ if (env.NODE_ENV === 'production' && !env.DATABASE_URL) {
   throw new Error('DATABASE_URL is required in production');
 }
 
+export function assertEnvVars(requiredVars: string[]): void {
+  const missing: string[] = [];
+  
+  for (const varName of requiredVars) {
+    if (!process.env[varName]) {
+      missing.push(varName);
+    }
+  }
+  
+  if (missing.length > 0) {
+    throw new Error(
+      `Missing required environment variables: ${missing.join(', ')}\n` +
+      'Please ensure all required variables are set in Railway dashboard or .env file'
+    );
+  }
+}
+
 export { env };
