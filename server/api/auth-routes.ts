@@ -1,20 +1,13 @@
-import { Router, Request, Response } from 'express';
+import { Router, Request, Response, NextFunction } from 'express';
 import { db } from '../db';
 import { users } from '@shared/schema';
 import { eq } from 'drizzle-orm';
 import { z } from 'zod';
 import { compare, hash } from 'bcrypt';
-import jwt from 'jsonwebtoken';
-import { generateToken } from '../middleware/auth-enhanced';
+import { sign as jwtSign, verify as jwtVerify } from 'jsonwebtoken';
+import { generateToken, authenticateToken, AuthRequest } from '../middleware/auth-enhanced';
 
 export const authRouter = Router();
-
-// Secret for JWT signing - in production, this should be in environment variables
-const JWT_SECRET = process.env.JWT_SECRET;
-const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
-if (!JWT_SECRET) {
-  throw new Error('JWT_SECRET environment variable is required but not set.');
-}
 
 // Health check endpoint
 authRouter.get('/health', (req: Request, res: Response) => {
@@ -22,7 +15,7 @@ authRouter.get('/health', (req: Request, res: Response) => {
     status: 'ok',
     environment: process.env.NODE_ENV,
     hasDB: !!process.env.DATABASE_URL,
-    hasJWT: !!JWT_SECRET,
+    hasJWT: !!(process.env.JWT_SECRET || (process.env.NODE_ENV !== 'production')),
     timestamp: new Date().toISOString()
   });
 });
@@ -48,7 +41,7 @@ const registerSchema = z.object({
  * Middleware to validate request body against a Zod schema
  */
 function validateBody<T>(schema: z.ZodType<T>) {
-  return (req: Request, res: Response, next: Function) => {
+  return (req: Request, res: Response, next: NextFunction) => {
     try {
       schema.parse(req.body);
       next();
@@ -387,134 +380,109 @@ authRouter.post('/register', validateBody(registerSchema), async (req: Request, 
 /**
  * Verify token endpoint - validates JWT and returns user info
  */
-authRouter.get('/verify', async (req: Request, res: Response) => {
+authRouter.get('/verify', authenticateToken, async (req: AuthRequest, res: Response) => {
   try {
     // Ensure we always return JSON
     res.setHeader('Content-Type', 'application/json');
 
-    const authHeader = req.headers.authorization;
+    // Token is already verified by middleware, req.user is populated
+    const userId = req.user!.id;
+    
+    // Development fallback - when database is not available
+    if (process.env.NODE_ENV === 'development') {
+      try {
+        if (db) {
+          // Try database first
+          const [user] = await db.select().from(users).where(eq(users.id, userId));
 
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return res.status(401).json({
-        success: false,
-        message: 'No token provided',
-      });
-    }
-
-    const token = authHeader.split(' ')[1];
-
-    try {
-      // Verify token using JWT_SECRET
-      const decoded = jwt.verify(token, JWT_SECRET) as { 
-        id: number; 
-        username: string;
-        email: string;
-        role: string;
-        roleId?: number;
-        organizationId?: number;
-      };
-
-      // Development fallback - when database is not available
-      if (process.env.NODE_ENV === 'development') {
-        try {
-          if (db) {
-            // Try database first
-            const [user] = await db.select().from(users).where(eq(users.id, decoded.id));
-
-            if (user) {
-              // Database user found, proceed with normal verification
-              if (!user.isActive) {
-                return res.status(401).json({
-                  success: false,
-                  message: 'Account is inactive',
-                });
-              }
-
-              return res.status(200).json({
-                success: true,
-                user: {
-                  id: user.id,
-                  username: user.username,
-                  email: user.email,
-                  firstName: user.firstName,
-                  lastName: user.lastName,
-                  role: user.role,
-                  roleId: user.roleId,
-                  organizationId: user.organizationId,
-                  profileImage: user.profileImage,
-                },
+          if (user) {
+            // Database user found, proceed with normal verification
+            if (!user.isActive) {
+              return res.status(401).json({
+                success: false,
+                message: 'Account is inactive',
               });
             }
+
+            return res.status(200).json({
+              success: true,
+              user: {
+                id: user.id,
+                username: user.username,
+                email: user.email,
+                firstName: user.firstName,
+                lastName: user.lastName,
+                role: user.role,
+                roleId: user.roleId,
+                organizationId: user.organizationId,
+                profileImage: user.profileImage,
+              },
+            });
           }
-        } catch (dbError) {
-          console.warn('Database unavailable, using token data for verification:', dbError);
         }
-
-        // Development fallback - use token data
-        console.log('Using development fallback verification for user:', decoded.email);
-        
-        return res.status(200).json({
-          success: true,
-          user: {
-            id: decoded.id,
-            username: decoded.username,
-            email: decoded.email,
-            firstName: 'Dev',
-            lastName: 'User',
-            role: decoded.role,
-            roleId: decoded.roleId || 1,
-            organizationId: decoded.organizationId || 1,
-            profileImage: null,
-          },
-        });
+      } catch (dbError) {
+        console.warn('Database unavailable, using token data for verification:', dbError);
       }
 
-      // Production mode - require database
-      if (!db) {
-        return res.status(503).json({
-          success: false,
-          message: 'Database service unavailable',
-        });
-      }
+      // Development fallback - use token data
+      console.log('Using development fallback verification for user:', req.user!.email);
       
-      const [user] = await db.select().from(users).where(eq(users.id, decoded.id));
-
-      if (!user) {
-        return res.status(404).json({
-          success: false,
-          message: 'User not found',
-        });
-      }
-
-      // Check if user is active
-      if (!user.isActive) {
-        return res.status(401).json({
-          success: false,
-          message: 'Account is inactive',
-        });
-      }
-
-      // Return user info
       return res.status(200).json({
         success: true,
         user: {
-          id: user.id,
-          username: user.username,
-          email: user.email,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          role: user.role,
-          roleId: user.roleId,
-          organizationId: user.organizationId,
-          profileImage: user.profileImage,
+          id: req.user!.id,
+          username: req.user!.username,
+          email: req.user!.email,
+          firstName: 'Dev',
+          lastName: 'User',
+          role: req.user!.role,
+          roleId: req.user!.roleId || 1,
+          organizationId: req.user!.organizationId || 1,
+          profileImage: null,
         },
       });
-    } catch (jwtError) {
-      return res.status(401).json({
+    }
+
+    // Production mode - require database
+    if (!db) {
+      return res.status(503).json({
         success: false,
-        message: 'Invalid or expired token',
+        message: 'Database service unavailable',
       });
     }
+    
+    const [user] = await db.select().from(users).where(eq(users.id, userId));
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found',
+      });
+    }
+
+    // Check if user is active
+    if (!user.isActive) {
+      return res.status(401).json({
+        success: false,
+        message: 'Account is inactive',
+      });
+    }
+
+    // Return user info
+    return res.status(200).json({
+      success: true,
+      user: {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        role: user.role,
+        roleId: user.roleId,
+        organizationId: user.organizationId,
+        profileImage: user.profileImage,
+      },
+    });
   } catch (error) {
     console.error('Token verification error:', error);
     return res.status(500).json({
@@ -528,60 +496,21 @@ authRouter.get('/verify', async (req: Request, res: Response) => {
 /**
  * Middleware to check if the user is authenticated
  */
-export function isAuthenticated(req: Request, res: Response, next: Function) {
-  try {
-    const authHeader = req.headers.authorization;
-
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return res.status(401).json({
-        success: false,
-        message: 'Authentication required',
-      });
-    }
-
-    const token = authHeader.split(' ')[1];
-
-    try {
-      // Verify token
-      const decoded = jwt.verify(token, JWT_SECRET) as {
-        id: number;
-        username: string;
-        role: string;
-        roleId?: number;
-        organizationId?: number;
-      };
-
-      // Attach user info to request object
-      (req as any).user = decoded;
-
-      next();
-    } catch (jwtError) {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid or expired token',
-      });
-    }
-  } catch (error) {
-    console.error('Authentication error:', error);
-    return res.status(500).json({
-      success: false,
-      message: 'Internal server error',
-      error: error instanceof Error ? error.message : String(error),
-    });
-  }
+export function isAuthenticated(req: Request, res: Response, next: NextFunction) {
+  return authenticateToken(req as AuthRequest, res, next);
 }
 
 /**
  * Middleware to check if the user has a specific role
  */
 export function hasRole(role: string) {
-  return (req: Request, res: Response, next: Function) => {
+  return (req: Request, res: Response, next: NextFunction) => {
     // First check if the user is authenticated
     isAuthenticated(req, res, () => {
       // User is authenticated, check role
-      const user = (req as any).user;
+      const user = (req as AuthRequest).user;
 
-      if (user.role !== role) {
+      if (!user || user.role !== role) {
         return res.status(403).json({
           success: false,
           message: 'Insufficient permissions',

@@ -1,9 +1,16 @@
-import jwt from 'jsonwebtoken';
+import { sign as jwtSign, verify as jwtVerify } from 'jsonwebtoken';
 import { Request, Response, NextFunction } from 'express';
 import { env } from '../utils/env';
 
-interface AuthRequest extends Request {
-  user?: any;
+export interface AuthRequest extends Request {
+  user?: {
+    id: number;
+    username: string;
+    email: string;
+    role: string;
+    roleId?: number;
+    organizationId?: number;
+  };
 }
 
 export const authenticateToken = (
@@ -32,7 +39,7 @@ export const authenticateToken = (
     });
   }
 
-  jwt.verify(token, secret, (err, user) => {
+  jwtVerify(token, secret, (err, user) => {
     if (err) {
       console.error('JWT verification failed:', err.message);
       return res.status(401).json({ 
@@ -52,7 +59,7 @@ export const generateToken = (payload: any): string => {
     throw new Error('JWT_SECRET not configured');
   }
   
-  return jwt.sign(payload, secret, {
+  return jwtSign(payload, secret, {
     expiresIn: env.JWT_EXPIRES_IN || process.env.JWT_EXPIRES_IN || '7d'
   });
 };
