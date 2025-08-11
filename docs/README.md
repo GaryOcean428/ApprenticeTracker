@@ -44,6 +44,7 @@ The `images` directory contains screenshots of the application interface for ref
 - Integration with Training.gov.au for qualification and training data
 
 ### User Interface
-- Built with Next.js, TypeScript, TailwindCSS, and shadcn/ui components
+- Built with React, Vite, TypeScript, TailwindCSS, and shadcn/ui components
 - Responsive design for mobile, tablet, and desktop
 - Organized into modules for different functional areas
+

@@ -85,11 +85,16 @@ export function registerTGARoutes(app: Express) {
     validateQuery(tgaSearchSchema),
     async (req: Request, res: Response) => {
       try {
-        const { q: query, limit } = req.query as z.infer<typeof tgaSearchSchema>;
+        const { q: query, limit, includeSuperseded } =
+          req.query as z.infer<typeof tgaSearchSchema>;
 
         try {
           // First try to fetch from TGA API via our TGA service
-          const searchResults = await tgaService.searchQualifications(query, limit);
+          const searchResults = await tgaService.searchQualifications(
+            query,
+            limit,
+            includeSuperseded
+          );
           return res.json(searchResults);
         } catch (apiError) {
           console.warn(
@@ -155,6 +160,18 @@ export function registerTGARoutes(app: Express) {
               level: 4,
               status: 'Current',
               releaseDate: '2020-12-03',
+              trainingPackage: {
+                code: 'BSB',
+                title: 'Business Services',
+              },
+              nrtFlag: true,
+            },
+            {
+              code: 'BSB42015',
+              title: 'Certificate IV in Leadership and Management',
+              level: 4,
+              status: 'Superseded',
+              releaseDate: '2015-04-01',
               trainingPackage: {
                 code: 'BSB',
                 title: 'Business Services',
@@ -230,12 +247,15 @@ export function registerTGARoutes(app: Express) {
           // Filter results based on the query
           const filteredResults = results.filter(qual => {
             const searchLower = query.toLowerCase();
-            return (
+            const matches =
               qual.code.toLowerCase().includes(searchLower) ||
               qual.title.toLowerCase().includes(searchLower) ||
               qual.trainingPackage.code.toLowerCase().includes(searchLower) ||
-              qual.trainingPackage.title.toLowerCase().includes(searchLower)
-            );
+              qual.trainingPackage.title.toLowerCase().includes(searchLower);
+            if (!includeSuperseded && qual.status.toLowerCase() === 'superseded') {
+              return false;
+            }
+            return matches;
           });
 
           return res.json(filteredResults);
