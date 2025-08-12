@@ -1,5 +1,5 @@
-import { db } from './db';
 import { sql } from 'drizzle-orm';
+import { db } from './db';
 
 /**
  * Migration script to fix schema inconsistencies and rename conflicting tables

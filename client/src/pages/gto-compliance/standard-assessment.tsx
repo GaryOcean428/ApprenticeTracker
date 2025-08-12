@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { queryClient } from '@/lib/queryClient';
 import { Loader2, CheckCircle, AlertCircle, Upload, Paperclip } from 'lucide-react';
+import { useLocation } from 'wouter';
+import { queryClient } from '@/lib/queryClient';
 import {
   Card,
   CardContent,
@@ -17,7 +18,6 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { useLocation } from 'wouter';
 
 export default function StandardAssessment() {
   const [, navigate] = useLocation();

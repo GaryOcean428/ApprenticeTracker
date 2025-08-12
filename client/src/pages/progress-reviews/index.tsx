@@ -1,17 +1,9 @@
 import React from 'react';
 import { Link } from 'wouter';
-import {
-  Calendar,
-  FileText,
-  CheckCircle,
-  PlusCircle,
-  Clock,
-  AlertCircle,
-  FileHeart,
-} from 'lucide-react';
+import { Calendar, FileText, PlusCircle, Clock, FileHeart } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { useQuery } from '@tanstack/react-query';
 
 interface ProgressReview {
   id: number;

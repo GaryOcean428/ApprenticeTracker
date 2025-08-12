@@ -1,11 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Link, useLocation } from 'wouter';
-import { formatDistanceToNow } from 'date-fns';
+import { useLocation } from 'wouter';
 import {
   ChevronDown,
   Search,
-  PlusCircle,
   Filter,
   Building,
   MoreHorizontal,
@@ -19,7 +17,6 @@ import {
   Loader2,
   Users,
   Building2,
-  ChevronRight,
   MapPin,
   Globe,
 } from 'lucide-react';
@@ -44,14 +41,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Dialog,
   DialogContent,
@@ -59,7 +49,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Label } from '@/components/ui/label';

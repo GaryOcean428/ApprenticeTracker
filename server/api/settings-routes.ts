@@ -1,11 +1,10 @@
-import express, { Request, Response } from 'express';
-import { db } from '../db';
-import { storage } from '../storage';
+import fs from 'fs';
+import type { Request, Response } from 'express';
+import express from 'express';
 import { z } from 'zod';
 import { eq } from 'drizzle-orm';
-import { join } from 'path';
-import fs from 'fs';
 import multer from 'multer';
+import { db } from '../db';
 
 // Set up multer for file uploads
 const uploadDir = process.env.UPLOAD_DIR || 'uploads/';

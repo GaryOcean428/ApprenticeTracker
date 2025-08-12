@@ -7,12 +7,12 @@
  * - Triggering a manual check for updates
  */
 
-import { Request, Response } from 'express';
-import { db } from '../../db';
+import type { Request, Response } from 'express';
 import { awardUpdateChecks } from '@shared/schema/awards';
+import { eq } from 'drizzle-orm';
+import { db } from '../../db';
 import { awardMonitor } from '../../services/fairwork/award-monitor';
 import { awardAIAnalyzer } from '../../services/fairwork/award-ai-analyzer';
-import { eq } from 'drizzle-orm';
 import logger from '../../utils/logger';
 
 /**

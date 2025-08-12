@@ -1,5 +1,17 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import {
+  Clipboard,
+  Search,
+  Plus,
+  RefreshCw,
+  Eye,
+  Download,
+  Calendar,
+  Building,
+  CheckSquare,
+  MapPin,
+} from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import {
   Table,
@@ -27,18 +39,6 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import {
-  Clipboard,
-  Search,
-  Plus,
-  RefreshCw,
-  Eye,
-  Download,
-  Calendar,
-  Building,
-  CheckSquare,
-  MapPin,
-} from 'lucide-react';
 
 export default function InspectionsList() {
   const [page, setPage] = useState(1);

@@ -1,7 +1,7 @@
-import { Request, Response } from 'express';
-import { db } from '../../db';
+import type { Request, Response } from 'express';
 import { enrichmentPrograms, enrichmentParticipants } from '@shared/schema';
-import { eq, count, and, SQL, sql } from 'drizzle-orm';
+import { eq, count } from 'drizzle-orm';
+import { db } from '../../db';
 
 /**
  * Get all enrichment programs with participant counts

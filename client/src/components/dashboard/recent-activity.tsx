@@ -1,10 +1,9 @@
-import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'wouter';
+import { User, FileText, AlertTriangle, Check } from 'lucide-react';
+import type { ActivityLog } from '@shared/schema';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { User, FileText, AlertTriangle, Check } from 'lucide-react';
-import { ActivityLog } from '@shared/schema';
 
 interface ActivityItemProps {
   icon: React.ReactNode;

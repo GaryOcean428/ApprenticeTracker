@@ -1,8 +1,8 @@
 import React from 'react';
 import { Link } from 'wouter';
+import { DollarSign, Calendar, Download, PieChart, Clock, Landmark } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/common';
 import { usePermissions } from '@/hooks/use-permissions';
-import { DollarSign, Calendar, FileText, Download, PieChart, Clock, Landmark } from 'lucide-react';
 
 const PayrollPage: React.FC = () => {
   const { hasPermission } = usePermissions();

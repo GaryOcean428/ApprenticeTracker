@@ -1,11 +1,13 @@
 import { useQuery } from '@tanstack/react-query';
-import { useToast } from '@/hooks/use-toast';
 import { Link } from 'wouter';
 import { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { MoreHorizontal, Plus, Search } from 'lucide-react';
+import { format } from 'date-fns';
+import type { LabourHireWorker } from '@shared/schema';
+import { useToast } from '@/hooks/use-toast';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Separator } from '@/components/ui/separator';
 import {
   Table,
   TableBody,
@@ -23,17 +25,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -52,7 +44,6 @@ import {
 import {
   Pagination,
   PaginationContent,
-  PaginationEllipsis,
   PaginationItem,
   PaginationLink,
   PaginationNext,
@@ -61,9 +52,6 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Loader2, MoreHorizontal, Plus, Search, Filter, ArrowUpDown, Check, X } from 'lucide-react';
-import { format } from 'date-fns';
-import { LabourHireWorker } from '@shared/schema';
 import { PageHeader } from '@/components/page-header';
 import { DashboardShell } from '@/components/dashboard-shell';
 import { SkeletonTable } from '@/components/skeleton-table';

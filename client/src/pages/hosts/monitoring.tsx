@@ -1,7 +1,18 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useParams } from 'wouter';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { format } from 'date-fns';
+import {
+  AlertCircle,
+  Calendar,
+  CheckCircle,
+  ClipboardCheck,
+  FileText,
+  Search,
+  User,
+  XCircle,
+} from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -22,18 +33,6 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { format } from 'date-fns';
-import {
-  AlertCircle,
-  Calendar,
-  CheckCircle,
-  ClipboardCheck,
-  FileText,
-  Search,
-  User,
-  Users,
-  XCircle,
-} from 'lucide-react';
 
 // Types for apprentice placements
 interface Placement {

@@ -1,11 +1,6 @@
-import { db } from './db';
 import { sql } from 'drizzle-orm';
-import {
-  enrichmentPrograms,
-  enrichmentParticipants,
-  enrichmentWorkshops,
-  workshopAttendees,
-} from '@shared/schema';
+
+import { db } from './db';
 
 /**
  * This script creates the enrichment program tables for apprentice enrichment activities

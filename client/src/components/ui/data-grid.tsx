@@ -1,4 +1,6 @@
-import React, { ReactNode, useState } from 'react';
+import type { ReactNode } from 'react';
+import React, { useState } from 'react';
+import { Search, SlidersHorizontal, X } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -11,7 +13,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Search, SlidersHorizontal, X } from 'lucide-react';
 
 export interface DataGridColumn<T> {
   /** Unique identifier for the column */

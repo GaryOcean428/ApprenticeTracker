@@ -1,18 +1,15 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Link } from 'wouter';
 import {
   Plus,
   Search,
   Filter,
   Download,
-  SlidersHorizontal,
   ChevronDown,
   Calendar,
   DollarSign,
   MessageSquare,
   BadgeCheck,
-  Clock,
 } from 'lucide-react';
 
 import {

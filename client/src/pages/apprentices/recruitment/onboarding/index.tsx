@@ -1,6 +1,18 @@
-import { useQuery } from '@tanstack/react-query';
-import { useState } from 'react';
 import { useLocation, Link } from 'wouter';
+import {
+  CheckCircle,
+  ClipboardCheck,
+  FileText,
+  UserPlus,
+  ChevronLeft,
+  Clock,
+  Shield,
+  Briefcase,
+  GraduationCap,
+  CheckCheck,
+  AlertCircle,
+  ChevronRight,
+} from 'lucide-react';
 import { DashboardShell } from '@/components/dashboard-shell';
 import { PageHeader } from '@/components/page-header';
 import {
@@ -24,21 +36,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import {
-  CheckCircle,
-  ClipboardCheck,
-  FileText,
-  UserPlus,
-  ChevronLeft,
-  Clock,
-  Shield,
-  Briefcase,
-  GraduationCap,
-  CheckCheck,
-  AlertCircle,
-  ChevronRight,
-  Calendar,
-} from 'lucide-react';
 
 export default function ApprenticeOnboarding() {
   const { toast } = useToast();

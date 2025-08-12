@@ -1,6 +1,6 @@
-import { pool, db } from './db';
 import { sql } from 'drizzle-orm';
 import chalk from 'chalk';
+import { pool, db } from './db';
 
 export async function migrateWhsRiskAssessments() {
   console.log(chalk.blue('[INFO] Updating WHS Risk Assessments schema...'));

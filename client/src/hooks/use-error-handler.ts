@@ -1,7 +1,7 @@
-import { useToast } from '@/hooks/use-toast';
-import { errorService, AppError, ErrorType } from '@/lib/error-service';
 import { useCallback } from 'react';
 import { useNavigate } from 'wouter';
+import { useToast } from '@/hooks/use-toast';
+import { errorService, AppError, ErrorType } from '@/lib/error-service';
 
 /**
  * Hook for consistent error handling across the application

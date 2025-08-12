@@ -1,7 +1,5 @@
-import express from 'express';
-import { db } from '../../db';
+import type express from 'express';
 import { sql } from 'drizzle-orm';
-import { hasPermission } from '../../middleware/auth';
 import {
   whs_risk_assessments,
   whs_documents,
@@ -9,6 +7,8 @@ import {
   updateRiskAssessmentSchema,
   insertDocumentSchema,
 } from '@shared/schema/whs';
+import { db } from '../../db';
+import { hasPermission } from '../../middleware/auth';
 
 export function setupRiskAssessmentRoutes(router: express.Router) {
   // GET all risk assessments

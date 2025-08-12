@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import PublicLayout from '@/layouts/public-layout';
 import { Button } from '@/components/ui/button';
 import {
@@ -18,7 +19,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useState, useEffect } from 'react';
 import { jobsApi, type JobListing } from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
 

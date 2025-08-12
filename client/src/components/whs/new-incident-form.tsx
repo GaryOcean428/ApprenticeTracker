@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { apiRequest } from '@/lib/queryClient';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
+import { Loader2 } from 'lucide-react';
+import { apiRequest } from '@/lib/queryClient';
 import {
   Form,
   FormControl,
@@ -25,7 +26,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2 } from 'lucide-react';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 
 const incidentFormSchema = z.object({

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { CheckCircle, Info, Lock, Shield, ShieldAlert, UserCog, Users } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 import { usePermissions } from '@/hooks/use-permissions';
 import { Permission, UserRole } from '@/lib/permissions';
@@ -17,19 +18,6 @@ import { PermissionGuard } from '@/components/auth/permission-guard';
 import { ActionButton } from '@/components/ui/action-button';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import {
-  AlertCircle,
-  CheckCircle,
-  Info,
-  Lock,
-  Shield,
-  ShieldAlert,
-  ShieldCheck,
-  User,
-  UserCheck,
-  UserCog,
-  Users,
-} from 'lucide-react';
 
 export default function PermissionsDemo() {
   const { user } = useAuth();

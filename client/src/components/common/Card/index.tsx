@@ -1,4 +1,5 @@
-import React, { HTMLAttributes } from 'react';
+import type { HTMLAttributes } from 'react';
+import React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
 
@@ -38,7 +39,7 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
   }
 );
 
-export interface CardHeaderProps extends HTMLAttributes<HTMLDivElement> {}
+export type CardHeaderProps = HTMLAttributes<HTMLDivElement>;
 
 const CardHeader = React.forwardRef<HTMLDivElement, CardHeaderProps>(
   ({ className, ...props }, ref) => (
@@ -46,7 +47,7 @@ const CardHeader = React.forwardRef<HTMLDivElement, CardHeaderProps>(
   )
 );
 
-export interface CardTitleProps extends HTMLAttributes<HTMLHeadingElement> {}
+export type CardTitleProps = HTMLAttributes<HTMLHeadingElement>;
 
 const CardTitle = React.forwardRef<HTMLHeadingElement, CardTitleProps>(
   ({ className, ...props }, ref) => (
@@ -58,7 +59,7 @@ const CardTitle = React.forwardRef<HTMLHeadingElement, CardTitleProps>(
   )
 );
 
-export interface CardDescriptionProps extends HTMLAttributes<HTMLParagraphElement> {}
+export type CardDescriptionProps = HTMLAttributes<HTMLParagraphElement>;
 
 const CardDescription = React.forwardRef<HTMLParagraphElement, CardDescriptionProps>(
   ({ className, ...props }, ref) => (
@@ -66,7 +67,7 @@ const CardDescription = React.forwardRef<HTMLParagraphElement, CardDescriptionPr
   )
 );
 
-export interface CardContentProps extends HTMLAttributes<HTMLDivElement> {}
+export type CardContentProps = HTMLAttributes<HTMLDivElement>;
 
 const CardContent = React.forwardRef<HTMLDivElement, CardContentProps>(
   ({ className, ...props }, ref) => (
@@ -74,7 +75,7 @@ const CardContent = React.forwardRef<HTMLDivElement, CardContentProps>(
   )
 );
 
-export interface CardFooterProps extends HTMLAttributes<HTMLDivElement> {}
+export type CardFooterProps = HTMLAttributes<HTMLDivElement>;
 
 const CardFooter = React.forwardRef<HTMLDivElement, CardFooterProps>(
   ({ className, ...props }, ref) => (

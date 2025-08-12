@@ -1,5 +1,5 @@
-import express, { Request, Response } from 'express';
-import { storage } from '../storage';
+import type { Request, Response } from 'express';
+import express from 'express';
 import {
   insertClientSchema,
   insertClientTypeSchema,
@@ -7,9 +7,10 @@ import {
   insertClientServiceSchema,
   insertClientInteractionSchema,
 } from '@shared/schema';
+import { z } from 'zod';
+import { storage } from '../storage';
 import { isAuthenticated } from '../middleware/auth';
 import { hasPermission } from '../middleware/permissions';
-import { z } from 'zod';
 
 const router = express.Router();
 

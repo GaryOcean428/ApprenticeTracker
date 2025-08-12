@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Loader2, ChevronDown, RefreshCw, Info } from 'lucide-react';
+import { Loader2, RefreshCw, Info } from 'lucide-react';
 import {
   Card,
   CardContent,

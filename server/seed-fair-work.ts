@@ -1,5 +1,5 @@
-import { db } from './db';
 import { awards, awardClassifications, enterpriseAgreements } from '@shared/schema';
+import { db } from './db';
 
 /**
  * Seeds the database with sample Fair Work data (awards, classifications, etc.)

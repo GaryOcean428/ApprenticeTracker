@@ -1,7 +1,7 @@
-import { ReactNode } from 'react';
-import { useAuth } from '@/hooks/use-auth';
+import type { ReactNode } from 'react';
 import { Route, Redirect } from 'wouter';
 import { Loader2 } from 'lucide-react';
+import { useAuth } from '@/hooks/use-auth';
 
 interface ProtectedRouteProps {
   path: string;

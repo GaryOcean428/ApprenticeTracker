@@ -1,10 +1,21 @@
 import { useState, useEffect } from 'react';
 import { useParams, useLocation } from 'wouter';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { queryClient, apiRequest } from '@/lib/queryClient';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import {
+  AlertCircle,
+  ArrowLeft,
+  CheckCircle,
+  FileText,
+  Loader2,
+  Pencil,
+  Plus,
+  Trash,
+  X,
+} from 'lucide-react';
+import { queryClient, apiRequest } from '@/lib/queryClient';
 import {
   Card,
   CardContent,
@@ -41,16 +52,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
-  TableFooter,
   TableHead,
   TableHeader,
   TableRow,
@@ -67,20 +75,6 @@ import {
 } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
-import {
-  AlertCircle,
-  ArrowLeft,
-  CheckCircle,
-  ChevronRight,
-  CircleAlert,
-  FileText,
-  Loader2,
-  Pencil,
-  Plus,
-  Search,
-  Trash,
-  X,
-} from 'lucide-react';
 
 // Define form schema
 const formSchema = z.object({

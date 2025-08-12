@@ -1,10 +1,10 @@
-import { useState } from 'react';
 import { useLocation } from 'wouter';
 import { useMutation } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { insertHostEmployerSchema } from '@shared/schema';
+import { ChevronLeft } from 'lucide-react';
 import { apiRequest } from '@/lib/queryClient';
 import {
   Card,
@@ -17,7 +17,6 @@ import {
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -35,7 +34,6 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { Slider } from '@/components/ui/slider';
 import { useToast } from '@/hooks/use-toast';
-import { ChevronLeft } from 'lucide-react';
 
 // Extend the insertHostEmployerSchema with additional validation
 const hostFormSchema = insertHostEmployerSchema

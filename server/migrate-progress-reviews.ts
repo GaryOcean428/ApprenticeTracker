@@ -1,5 +1,5 @@
-import { db } from './db';
 import { sql } from 'drizzle-orm';
+import { db } from './db';
 
 /**
  * This script creates the Progress Reviews tables for apprentice assessment and reviews

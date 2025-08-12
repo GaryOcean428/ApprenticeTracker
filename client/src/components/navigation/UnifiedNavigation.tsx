@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'wouter';
-import { MAIN_NAV_SECTIONS } from '../../config/unified-navigation';
 import { ChevronDown } from 'lucide-react';
+import { MAIN_NAV_SECTIONS } from '../../config/unified-navigation';
 
 export const UnifiedNavigation: React.FC = () => {
   const [location] = useLocation();

@@ -6,13 +6,13 @@
  * administrators to update award links and data.
  */
 
-import { db } from '../../db';
 import { awards, awardUpdateChecks } from '@shared/schema/awards';
-import { FairWorkApiClient } from './api-client';
-import { sql, eq, desc, gte } from 'drizzle-orm';
+import { eq, desc } from 'drizzle-orm';
 import axios from 'axios';
+import { db } from '../../db';
 import logger from '../../utils/logger';
 import { sendEmailNotification } from '../notification-service';
+import { FairWorkApiClient } from './api-client';
 import { scrapeAwardData } from './award-scraper';
 import { awardAIAnalyzer } from './award-ai-analyzer';
 

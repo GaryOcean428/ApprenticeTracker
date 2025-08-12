@@ -1,6 +1,16 @@
 import { useState } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { useLocation } from 'wouter';
+import {
+  FileText,
+  Plus,
+  FileCheck,
+  AlertTriangle,
+  HelpCircle,
+  ClipboardList,
+  CheckCircle,
+  XCircle,
+} from 'lucide-react';
 import {
   Card,
   CardHeader,
@@ -12,49 +22,17 @@ import {
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
+
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import {
-  FileText,
-  Plus,
-  FileCheck,
-  AlertTriangle,
-  HelpCircle,
-  ClipboardList,
-  CheckCircle,
-  XCircle,
-} from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Label } from '@/components/ui/label';
-import { queryClient } from '@/lib/queryClient';
 
 export default function AccessEquityCompliance() {
   const { toast } = useToast();

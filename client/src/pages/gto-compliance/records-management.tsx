@@ -1,6 +1,20 @@
 import { useState } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { useLocation } from 'wouter';
+import {
+  FileText,
+  Plus,
+  FileCheck,
+  Search,
+  Clock,
+  Filter,
+  CheckCircle,
+  FileX,
+  AlarmClock,
+  FileArchive,
+  Archive,
+  Folder,
+} from 'lucide-react';
 import {
   Card,
   CardHeader,
@@ -12,7 +26,6 @@ import {
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
@@ -31,28 +44,10 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import {
-  FileText,
-  Plus,
-  FileCheck,
-  Calendar,
-  Search,
-  Clock,
-  Filter,
-  CheckCircle,
-  XCircle,
-  FileX,
-  ArrowUpDown,
-  AlarmClock,
-  FileArchive,
-  Archive,
-  Folder,
-} from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
-import { queryClient } from '@/lib/queryClient';
 import {
   Select,
   SelectContent,

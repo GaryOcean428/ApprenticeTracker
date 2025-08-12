@@ -1,5 +1,5 @@
+import type { z } from 'zod';
 import { apiRequest } from './queryClient';
-import { z } from 'zod';
 
 /**
  * API response types and error handling

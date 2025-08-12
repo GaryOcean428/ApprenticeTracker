@@ -1,5 +1,4 @@
-import { Request, Response } from 'express';
-import { storage } from '../../storage';
+import type { Request, Response } from 'express';
 
 /**
  * Get financial summary data

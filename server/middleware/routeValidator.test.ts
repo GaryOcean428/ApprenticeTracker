@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { z } from 'zod';
-import type { Request, Response, NextFunction } from 'express';
+import type { Request, Response } from 'express';
 import { validateRoute } from './routeValidator';
 
 describe('validateRoute', () => {
@@ -38,6 +38,7 @@ describe('validateRoute', () => {
     expect(res.json).toHaveBeenCalledWith({
       message: 'Validation failed',
       errors: expect.any(Array),
+      success: false,
     });
     expect(next).not.toHaveBeenCalled();
   });

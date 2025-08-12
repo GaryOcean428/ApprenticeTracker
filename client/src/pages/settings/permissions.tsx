@@ -1,15 +1,12 @@
 import { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
+import { z } from 'zod';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { PlusCircle, Trash2, Edit, Shield, Lock, Layers } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import {
   Table,
@@ -32,9 +29,6 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { apiRequest, queryClient } from '@/lib/queryClient';
-import { z } from 'zod';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import {
   Form,
   FormControl,
@@ -44,7 +38,6 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { PlusCircle, Trash2, Edit, Shield, Lock, Layers } from 'lucide-react';
 
 // Define types based on schema
 interface Role {

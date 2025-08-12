@@ -6,10 +6,10 @@
  */
 
 import OpenAI from 'openai';
-import { db } from '../../db';
 import { awardUpdateChecks } from '@shared/schema/awards';
-import logger from '../../utils/logger';
 import { eq } from 'drizzle-orm';
+import { db } from '../../db';
+import logger from '../../utils/logger';
 
 /**
  * Interface for AI analysis result

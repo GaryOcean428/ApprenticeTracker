@@ -2,26 +2,16 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
   PlusCircle,
-  FileText,
   Mail,
-  Calendar,
   Download,
   Printer,
   Eye,
   Edit,
   Copy,
-  FilePlus,
-  ArrowUp,
-  ArrowDown,
   Search,
   ChevronDown,
-  CreditCard,
-  DollarSign,
-  Clock,
   CheckCircle,
-  AlertTriangle,
   BanknoteIcon,
-  FileCheck,
   RefreshCcw,
 } from 'lucide-react';
 import { InvoiceFormDialog } from '@/components/financial/invoice-form-dialog';
@@ -41,7 +31,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
@@ -63,7 +52,6 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
 import { DatePickerWithRange } from '@/components/date-range-picker';
 import { useToast } from '@/hooks/use-toast';
 

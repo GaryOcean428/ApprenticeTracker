@@ -1,4 +1,5 @@
-import { Button, ButtonProps } from '@/components/ui/button';
+import type { ButtonProps } from '@/components/ui/button';
+import { Button } from '@/components/ui/button';
 import { PermissionGuard } from '@/components/auth/permission-guard';
 
 interface ActionButtonProps extends ButtonProps {

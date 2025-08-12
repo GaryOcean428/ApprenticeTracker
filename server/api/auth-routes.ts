@@ -1,15 +1,16 @@
-import { Router, Request, Response, NextFunction } from 'express';
+import type { Request, Response, NextFunction } from 'express';
+import { Router } from 'express';
 import { z } from 'zod';
-import { 
-  authenticateToken, 
-  AuthRequest,
+import type { AuthRequest } from '../middleware/auth-unified';
+import {
+  authenticateToken,
   authRateLimiters,
   addSecurityHeaders,
   getAuthSystemHealth,
   auditLog,
-  generateToken
+  generateToken,
 } from '../middleware/auth-unified';
-import { AuthService, validateEmail, validatePassword } from '../services/auth-service';
+import { AuthService } from '../services/auth-service';
 
 export const authRouter = Router();
 
@@ -37,39 +38,47 @@ authRouter.get('/health', (req: Request, res: Response) => {
 
 // Enhanced Zod schemas for validation with better error messages
 const loginSchema = z.object({
-  email: z.string()
+  email: z
+    .string()
     .min(1, 'Email is required')
     .email('Please enter a valid email address')
     .max(255, 'Email is too long')
     .transform(val => val.toLowerCase().trim()),
-  password: z.string()
-    .min(1, 'Password is required')
-    .max(255, 'Password is too long'),
+  password: z.string().min(1, 'Password is required').max(255, 'Password is too long'),
 });
 
 const registerSchema = z.object({
-  username: z.string()
+  username: z
+    .string()
     .min(3, 'Username must be at least 3 characters')
     .max(50, 'Username must not exceed 50 characters')
-    .regex(/^[a-zA-Z0-9_-]+$/, 'Username can only contain letters, numbers, underscores, and hyphens')
+    .regex(
+      /^[a-zA-Z0-9_-]+$/,
+      'Username can only contain letters, numbers, underscores, and hyphens'
+    )
     .transform(val => val.trim()),
-  password: z.string()
+  password: z
+    .string()
     .min(8, 'Password must be at least 8 characters')
     .max(255, 'Password is too long'),
-  email: z.string()
+  email: z
+    .string()
     .min(1, 'Email is required')
     .email('Please enter a valid email address')
     .max(255, 'Email is too long')
     .transform(val => val.toLowerCase().trim()),
-  firstName: z.string()
+  firstName: z
+    .string()
     .min(1, 'First name is required')
     .max(100, 'First name is too long')
     .transform(val => val.trim()),
-  lastName: z.string()
+  lastName: z
+    .string()
     .min(1, 'Last name is required')
     .max(100, 'Last name is too long')
     .transform(val => val.trim()),
-  role: z.string()
+  role: z
+    .string()
     .optional()
     .default('user')
     .transform(val => val?.trim() || 'user'),
@@ -94,9 +103,9 @@ function validateBody<T>(schema: z.ZodType<T>) {
           value: err.received || req.body[err.path[0]],
         }));
 
-        auditLog('VALIDATION_ERROR', req, { 
+        auditLog('VALIDATION_ERROR', req, {
           errors: formattedErrors,
-          endpoint: req.path 
+          endpoint: req.path,
         });
 
         return res.status(400).json({
@@ -120,7 +129,8 @@ function validateBody<T>(schema: z.ZodType<T>) {
 /**
  * Enhanced Login endpoint with rate limiting and comprehensive security
  */
-authRouter.post('/login', 
+authRouter.post(
+  '/login',
   authRateLimiters.login,
   validateBody(loginSchema),
   async (req: Request, res: Response) => {
@@ -151,11 +161,10 @@ authRouter.post('/login',
         expiresAt: expiresAt.toISOString(),
         timestamp: new Date().toISOString(),
       });
-
     } catch (error) {
       console.error('Login endpoint error:', error);
       auditLog('LOGIN_ENDPOINT_ERROR', req, { error: error.message });
-      
+
       return res.status(500).json({
         success: false,
         code: 'INTERNAL_ERROR',
@@ -169,7 +178,8 @@ authRouter.post('/login',
 /**
  * Enhanced Register endpoint with comprehensive validation and security
  */
-authRouter.post('/register', 
+authRouter.post(
+  '/register',
   authRateLimiters.register,
   validateBody(registerSchema),
   async (req: Request, res: Response) => {
@@ -177,24 +187,32 @@ authRouter.post('/register',
       // Ensure JSON response
       res.setHeader('Content-Type', 'application/json');
 
-      const { username, password, email, firstName, lastName, role, roleId, organizationId } = req.body;
+      const { username, password, email, firstName, lastName, role, roleId, organizationId } =
+        req.body;
 
       // Use the enhanced auth service
-      const result = await AuthService.register({
-        username,
-        password,
-        email,
-        firstName,
-        lastName,
-        role,
-        roleId,
-        organizationId,
-      }, req);
+      const result = await AuthService.register(
+        {
+          username,
+          password,
+          email,
+          firstName,
+          lastName,
+          role,
+          roleId,
+          organizationId,
+        },
+        req
+      );
 
       if (!result.success) {
-        const statusCode = result.error!.code === 'SERVICE_UNAVAILABLE' ? 503 : 
-                          result.error!.code.includes('EXISTS') ? 409 : 400;
-        
+        const statusCode =
+          result.error!.code === 'SERVICE_UNAVAILABLE'
+            ? 503
+            : result.error!.code.includes('EXISTS')
+              ? 409
+              : 400;
+
         return res.status(statusCode).json({
           success: false,
           code: result.error!.code,
@@ -211,11 +229,10 @@ authRouter.post('/register',
         user,
         timestamp: new Date().toISOString(),
       });
-
     } catch (error) {
       console.error('Registration endpoint error:', error);
       auditLog('REGISTER_ENDPOINT_ERROR', req, { error: error.message });
-      
+
       return res.status(500).json({
         success: false,
         code: 'INTERNAL_ERROR',
@@ -241,9 +258,13 @@ authRouter.get('/verify', authenticateToken, async (req: AuthRequest, res: Respo
     const result = await AuthService.verifyUser(userId, req);
 
     if (!result.success) {
-      const statusCode = result.error!.code === 'USER_NOT_FOUND' ? 404 :
-                        result.error!.code === 'USER_INACTIVE' ? 401 : 503;
-      
+      const statusCode =
+        result.error!.code === 'USER_NOT_FOUND'
+          ? 404
+          : result.error!.code === 'USER_INACTIVE'
+            ? 401
+            : 503;
+
       return res.status(statusCode).json({
         success: false,
         code: result.error!.code,
@@ -261,11 +282,10 @@ authRouter.get('/verify', authenticateToken, async (req: AuthRequest, res: Respo
       // Include audit context in response
       auditContext: req.auditContext,
     });
-
   } catch (error) {
     console.error('Token verification endpoint error:', error);
     auditLog('VERIFY_ENDPOINT_ERROR', req, { error: error.message });
-    
+
     return res.status(500).json({
       success: false,
       code: 'INTERNAL_ERROR',
@@ -307,7 +327,7 @@ authRouter.post('/refresh', authenticateToken, async (req: AuthRequest, res: Res
     };
 
     const newToken = generateToken(tokenPayload);
-    const expiresAt = new Date(Date.now() + (7 * 24 * 60 * 60 * 1000)); // 7 days
+    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
 
     auditLog('TOKEN_REFRESH_SUCCESS', req, { userId: user.id });
 
@@ -317,11 +337,10 @@ authRouter.post('/refresh', authenticateToken, async (req: AuthRequest, res: Res
       expiresAt: expiresAt.toISOString(),
       timestamp: new Date().toISOString(),
     });
-
   } catch (error) {
     console.error('Token refresh error:', error);
     auditLog('TOKEN_REFRESH_ERROR', req, { error: error.message });
-    
+
     return res.status(500).json({
       success: false,
       code: 'INTERNAL_ERROR',
@@ -351,11 +370,10 @@ authRouter.post('/logout', authenticateToken, async (req: AuthRequest, res: Resp
       message: 'Logged out successfully',
       timestamp: new Date().toISOString(),
     });
-
   } catch (error) {
     console.error('Logout error:', error);
     auditLog('LOGOUT_ERROR', req, { error: error.message });
-    
+
     return res.status(500).json({
       success: false,
       code: 'INTERNAL_ERROR',
@@ -379,9 +397,13 @@ authRouter.get('/profile', authenticateToken, async (req: AuthRequest, res: Resp
     const result = await AuthService.verifyUser(userId, req);
 
     if (!result.success) {
-      const statusCode = result.error!.code === 'USER_NOT_FOUND' ? 404 :
-                        result.error!.code === 'USER_INACTIVE' ? 401 : 503;
-      
+      const statusCode =
+        result.error!.code === 'USER_NOT_FOUND'
+          ? 404
+          : result.error!.code === 'USER_INACTIVE'
+            ? 401
+            : 503;
+
       return res.status(statusCode).json({
         success: false,
         code: result.error!.code,
@@ -395,11 +417,10 @@ authRouter.get('/profile', authenticateToken, async (req: AuthRequest, res: Resp
       profile: result.data!.user,
       timestamp: new Date().toISOString(),
     });
-
   } catch (error) {
     console.error('Profile fetch error:', error);
     auditLog('PROFILE_ERROR', req, { error: error.message });
-    
+
     return res.status(500).json({
       success: false,
       code: 'INTERNAL_ERROR',
@@ -436,10 +457,10 @@ export function hasRole(role: string) {
 }
 
 // Export enhanced middleware functions
-export { 
+export {
   authenticateToken as enhancedAuthenticateToken,
   authRateLimiters,
-  addSecurityHeaders
+  addSecurityHeaders,
 } from '../middleware/auth-unified';
 
 // Export auth service

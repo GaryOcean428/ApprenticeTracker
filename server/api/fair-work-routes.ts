@@ -1,5 +1,7 @@
-import { Router, Request, Response } from 'express';
-import { db } from '../db';
+import path from 'path';
+import fs from 'fs';
+import type { Request, Response } from 'express';
+import { Router } from 'express';
 import {
   awards,
   awardClassifications,
@@ -7,10 +9,9 @@ import {
   penaltyRules,
   allowanceRules,
 } from '@shared/schema';
-import { eq, sql, ilike, or, and, inArray } from 'drizzle-orm';
+import { eq, ilike, or } from 'drizzle-orm';
 import multer from 'multer';
-import path from 'path';
-import fs from 'fs';
+import { db } from '../db';
 import { FairWorkApiClient } from '../services/fairwork/api-client';
 import { createFairWorkSyncScheduler } from '../services/fairwork/scheduler';
 import logger from '../utils/logger';

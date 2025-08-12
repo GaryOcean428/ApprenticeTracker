@@ -1,7 +1,7 @@
-import { Request, Response } from 'express';
-import { db } from '../../db';
+import type { Request, Response } from 'express';
 import { timesheets, apprentices, users } from '@shared/schema';
-import { eq, and, SQL, sql } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
+import { db } from '../../db';
 
 /**
  * Get all timesheets with apprentice and approver information

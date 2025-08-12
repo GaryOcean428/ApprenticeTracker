@@ -1,9 +1,10 @@
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React from 'react';
+import { AlertTriangle, ArrowLeft } from 'lucide-react';
+import { useRoute } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { AlertTriangle, ArrowLeft } from 'lucide-react';
-import { useRoute } from 'wouter';
 
 interface PageHeaderProps {
   /** Page title */

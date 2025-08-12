@@ -1,6 +1,10 @@
-import { useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useLocation } from 'wouter';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { addDays, format } from 'date-fns';
+import { ArrowLeft, FileText } from 'lucide-react';
 import {
   Form,
   FormControl,
@@ -10,14 +14,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Select,
   SelectContent,
@@ -31,11 +28,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { DatePicker } from '@/components/ui/date-picker';
 import { useToast } from '@/hooks/use-toast';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { addDays, format } from 'date-fns';
-import { ArrowLeft, FileText, Building2 } from 'lucide-react';
 import { queryClient, apiRequest } from '@/lib/queryClient';
 
 // Define the form schema

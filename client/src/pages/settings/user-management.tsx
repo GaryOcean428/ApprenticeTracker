@@ -1,17 +1,23 @@
 import { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
+import type { User } from '@shared/schema';
+import { z } from 'zod';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import {
+  PlusCircle,
+  Trash2,
+  UserPlus,
+  Edit,
+  Users,
+  Shield,
+  KeyRound,
+  CreditCard,
+} from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Select,
@@ -36,14 +42,9 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 import { Checkbox } from '@/components/ui/checkbox';
-import { User } from '@shared/schema';
 import { apiRequest, queryClient } from '@/lib/queryClient';
-import { z } from 'zod';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import {
   Form,
   FormControl,
@@ -54,17 +55,6 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Badge } from '@/components/ui/badge';
-import {
-  PlusCircle,
-  Trash2,
-  UserPlus,
-  Edit,
-  Users,
-  Settings,
-  Shield,
-  KeyRound,
-  CreditCard,
-} from 'lucide-react';
 
 const userRoleOptions = [
   {

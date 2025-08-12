@@ -2,7 +2,7 @@
  * Validation utility functions for server-side validation
  */
 import { z } from 'zod';
-import { Request, Response, NextFunction } from 'express';
+import type { Request, Response, NextFunction } from 'express';
 
 /**
  * Common error handler for validation errors

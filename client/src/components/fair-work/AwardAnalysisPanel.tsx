@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { AlertCircle, BrainCircuit, Loader2 } from 'lucide-react';
+import axios from 'axios';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -10,8 +12,6 @@ import {
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { AlertCircle, BrainCircuit, Loader2 } from 'lucide-react';
-import axios from 'axios';
 
 interface AwardAnalysisPanelProps {
   awardUpdate: any;

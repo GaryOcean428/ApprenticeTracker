@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { useAuth } from '@/hooks/use-auth';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useLocation, Link } from 'wouter';
 import { useMutation } from '@tanstack/react-query';
+import { Eye, EyeOff, Loader2 } from 'lucide-react';
+import { useAuth } from '@/hooks/use-auth';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 
@@ -28,7 +29,6 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { Eye, EyeOff, Loader2 } from 'lucide-react';
 
 const loginSchema = z.object({
   email: z.string().email('Please enter a valid email address').min(1, 'Email is required'),

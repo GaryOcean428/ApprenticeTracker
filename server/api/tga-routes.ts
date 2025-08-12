@@ -1,8 +1,9 @@
 import type { Express, Request, Response } from 'express';
+import { qualifications, unitsOfCompetency, qualificationStructure } from '@shared/schema';
+import { eq, count } from 'drizzle-orm';
+import { z } from 'zod';
 import { tgaService } from '../services/tga-service';
 import { db } from '../db';
-import { qualifications, unitsOfCompetency, qualificationStructure } from '@shared/schema';
-import { eq, and, desc, asc, like, or, count } from 'drizzle-orm';
 import {
   validateQuery,
   validateParams,
@@ -15,7 +16,6 @@ import {
   tgaSyncBatchSchema,
   tgaSyncAllSchema,
 } from '../utils/validation';
-import { z } from 'zod';
 
 export function registerTGARoutes(app: Express) {
   // Register specific routes before parameterized routes to prevent conflicts
@@ -85,8 +85,7 @@ export function registerTGARoutes(app: Express) {
     validateQuery(tgaSearchSchema),
     async (req: Request, res: Response) => {
       try {
-        const { q: query, limit, includeSuperseded } =
-          req.query as z.infer<typeof tgaSearchSchema>;
+        const { q: query, limit, includeSuperseded } = req.query as z.infer<typeof tgaSearchSchema>;
 
         try {
           // First try to fetch from TGA API via our TGA service

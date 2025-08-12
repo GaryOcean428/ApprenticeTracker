@@ -1,5 +1,5 @@
-import { db } from './db';
 import { sql } from 'drizzle-orm';
+import { db } from './db';
 
 /**
  * This script creates the role-based access control tables and updates the users table

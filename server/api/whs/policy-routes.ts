@@ -1,7 +1,5 @@
-import express from 'express';
-import { db } from '../../db';
+import type express from 'express';
 import { sql } from 'drizzle-orm';
-import { hasPermission } from '../../middleware/auth';
 import {
   whs_policies,
   whs_documents,
@@ -9,6 +7,8 @@ import {
   updatePolicySchema,
   insertDocumentSchema,
 } from '@shared/schema/whs';
+import { db } from '../../db';
+import { hasPermission } from '../../middleware/auth';
 
 export function setupPolicyRoutes(router: express.Router) {
   // GET all safety policies

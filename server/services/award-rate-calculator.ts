@@ -5,9 +5,9 @@
  * to ensure all charge rates are based on up-to-date and compliant wage data.
  */
 
+import { awards } from '@shared/schema';
+import { eq, sql } from 'drizzle-orm';
 import { db } from '../db';
-import { awards, awardClassifications, payRates } from '@shared/schema';
-import { and, eq, gte, lte, desc, isNull, sql } from 'drizzle-orm';
 import logger from '../utils/logger';
 import { FairWorkApiClient } from './fairwork/api-client';
 

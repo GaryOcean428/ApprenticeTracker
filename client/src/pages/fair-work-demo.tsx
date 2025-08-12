@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'wouter';
-import { ArrowLeft, Info, Calculator } from 'lucide-react';
+import { ArrowLeft, Calculator } from 'lucide-react';
 import EnhancedAwardSelector from '@/components/fair-work/EnhancedAwardSelector';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -16,8 +16,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 // Define types for charge rate calculations
 interface CostConfig {

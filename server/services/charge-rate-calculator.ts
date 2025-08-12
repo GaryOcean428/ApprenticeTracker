@@ -1,6 +1,4 @@
-import { db } from '../db';
-import { eq, and, gt, lt, gte, lte, sql, inArray, desc } from 'drizzle-orm';
-import logger from '../utils/logger';
+import { eq, and, sql, desc } from 'drizzle-orm';
 import {
   apprentices,
   placements,
@@ -9,10 +7,10 @@ import {
   quotes,
   quoteLineItems,
   awards,
-  awardClassifications,
   penaltyRules,
-  allowanceRules,
 } from '@shared/schema';
+import { db } from '../db';
+import logger from '../utils/logger';
 import { awardRateCalculator } from './award-rate-calculator';
 
 /**

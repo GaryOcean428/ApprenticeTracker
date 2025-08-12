@@ -1,5 +1,17 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import {
+  AlertTriangle,
+  FileWarning,
+  Search,
+  Plus,
+  RefreshCw,
+  Eye,
+  Pencil,
+  Trash,
+} from 'lucide-react';
+import NewIncidentForm from './new-incident-form';
+import IncidentDetailsView from './incident-details-view';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import {
   Table,
@@ -28,18 +40,6 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import {
-  AlertTriangle,
-  FileWarning,
-  Search,
-  Plus,
-  RefreshCw,
-  Eye,
-  Pencil,
-  Trash,
-} from 'lucide-react';
-import NewIncidentForm from './new-incident-form';
-import IncidentDetailsView from './incident-details-view';
 
 export default function IncidentsList() {
   const [page, setPage] = useState(1);

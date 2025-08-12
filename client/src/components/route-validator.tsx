@@ -1,9 +1,10 @@
-import React, { ComponentType } from 'react';
+import type { ComponentType } from 'react';
+import React from 'react';
 import { useRoute } from 'wouter';
 import { z } from 'zod';
+import { AlertTriangle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { AlertTriangle } from 'lucide-react';
 
 interface ValidationOptions {
   /**

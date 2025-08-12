@@ -2,7 +2,7 @@
 
 /**
  * Demo script showcasing the 100x improved authentication routes
- * 
+ *
  * Run with: node server/demo-auth.js
  */
 
@@ -22,28 +22,28 @@ app.get('/', (req, res) => {
     message: '🚀 Enhanced Authentication Demo Server',
     features: [
       'Rate limiting (5 login attempts per 15min)',
-      'Comprehensive audit logging', 
+      'Comprehensive audit logging',
       'Input validation & sanitization',
       'Security headers (XSS, CSRF protection)',
       'JWT token refresh mechanism',
       'User caching for performance',
       'Development fallback authentication',
-      'Standardized error responses'
+      'Standardized error responses',
     ],
     endpoints: {
       'GET /api/auth/health': 'System health check',
       'POST /api/auth/login': 'User authentication',
-      'POST /api/auth/register': 'User registration', 
+      'POST /api/auth/register': 'User registration',
       'GET /api/auth/verify': 'Token verification',
       'POST /api/auth/refresh': 'Refresh JWT token',
       'POST /api/auth/logout': 'User logout',
-      'GET /api/auth/profile': 'User profile'
+      'GET /api/auth/profile': 'User profile',
     },
     testCommands: [
       'curl -X GET http://localhost:3001/api/auth/health',
       'curl -X POST http://localhost:3001/api/auth/login -H "Content-Type: application/json" -d \'{"email":"demo@example.com","password":"demopassword"}\'',
-      'curl -X GET http://localhost:3001/api/auth/verify -H "Authorization: Bearer YOUR_TOKEN_HERE"'
-    ]
+      'curl -X GET http://localhost:3001/api/auth/verify -H "Authorization: Bearer YOUR_TOKEN_HERE"',
+    ],
   });
 });
 

@@ -9,19 +9,12 @@ import {
   GraduationCap,
   ClipboardCheck,
   Calendar,
-  Briefcase,
   Award,
-  BookOpen,
-  GanttChart,
-  Medal,
   DollarSign,
   Search,
   Globe,
-  Mail,
   Contact,
   Building,
-  UserCircle,
-  UserPlus,
 } from 'lucide-react';
 
 export interface SubNavItem {

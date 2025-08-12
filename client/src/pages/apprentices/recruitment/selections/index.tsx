@@ -1,6 +1,20 @@
-import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useLocation, Link } from 'wouter';
+import {
+  CheckCircle,
+  Calendar,
+  Search,
+  Filter,
+  ChevronDown,
+  FileText,
+  UserPlus,
+  Check,
+  X,
+  MessageSquare,
+  ArrowRight,
+  ChevronLeft,
+  Clock,
+} from 'lucide-react';
 import { DashboardShell } from '@/components/dashboard-shell';
 import { PageHeader } from '@/components/page-header';
 import {
@@ -29,21 +43,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import {
-  CheckCircle,
-  Calendar,
-  Search,
-  Filter,
-  ChevronDown,
-  FileText,
-  UserPlus,
-  Check,
-  X,
-  MessageSquare,
-  ArrowRight,
-  ChevronLeft,
-  Clock,
-} from 'lucide-react';
 
 export default function ApprenticeSelections() {
   const { toast } = useToast();

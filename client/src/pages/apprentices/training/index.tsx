@@ -1,8 +1,5 @@
 import { useState } from 'react';
 import { useLocation } from 'wouter';
-import { useQuery } from '@tanstack/react-query';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import {
   Plus,
   GraduationCap,
@@ -13,6 +10,8 @@ import {
   ChevronDown,
   BarChart,
 } from 'lucide-react';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';

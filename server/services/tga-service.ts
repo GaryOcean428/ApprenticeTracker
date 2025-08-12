@@ -10,11 +10,11 @@
  * - SOAP API (Complete): http://tga.hsd.com.au
  */
 
-import { db } from '../db';
 import { qualifications, unitsOfCompetency, qualificationStructure } from '@shared/schema';
-import { eq, and, desc, sql } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
 import axios from 'axios';
 import * as soap from 'soap';
+import { db } from '../db';
 import { cacheService } from '../utils/cache-service';
 
 // API Base URLs

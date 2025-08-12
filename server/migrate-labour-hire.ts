@@ -4,8 +4,8 @@
  * This migration adds support for labour hire workers (non-apprentice employees)
  * including placements, timesheets, and document management.
  */
-import { db } from './db';
 import { sql } from 'drizzle-orm';
+import { db } from './db';
 import logger from './utils/logger';
 
 export async function migrateLabourHireSchema() {

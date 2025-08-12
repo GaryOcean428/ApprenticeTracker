@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
-import { useParams, useLocation, Link } from 'wouter';
+import { useParams, useLocation } from 'wouter';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiRequest } from '@/lib/queryClient';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { AlertCircle, ArrowLeft, Loader2 } from 'lucide-react';
+import { apiRequest } from '@/lib/queryClient';
 import {
   Card,
   CardContent,
@@ -22,13 +23,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -44,7 +39,6 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
-import { AlertCircle, ArrowLeft, Loader2 } from 'lucide-react';
 
 // Define form schema
 const formSchema = z.object({

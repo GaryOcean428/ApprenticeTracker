@@ -1,5 +1,4 @@
-import express from 'express';
-import { db } from '../../db';
+import type express from 'express';
 import {
   whs_inspections,
   whs_documents,
@@ -8,6 +7,7 @@ import {
   updateInspectionSchema,
 } from '@shared/schema';
 import { desc, sql } from 'drizzle-orm';
+import { db } from '../../db';
 import { hasPermission } from '../../middleware/auth';
 
 export function setupInspectionRoutes(router: express.Router) {

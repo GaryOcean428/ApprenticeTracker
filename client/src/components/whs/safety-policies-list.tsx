@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { Search, Plus, Download, FileText, Clock, ExternalLink, ShieldCheck } from 'lucide-react';
 import {
   Card,
   CardContent,
@@ -19,7 +20,6 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Search, Plus, Download, FileText, Clock, ExternalLink, ShieldCheck } from 'lucide-react';
 
 export default function SafetyPoliciesList() {
   const [search, setSearch] = useState('');

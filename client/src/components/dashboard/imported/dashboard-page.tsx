@@ -1,9 +1,9 @@
+import { Suspense } from 'react';
 import type { DashboardAlert } from '@/types/dashboard';
 import PlacementTrends from '@/components/dashboard/placement-trends';
 import { AlertsSection } from '@/components/dashboard/alerts-section';
 import { QuickActions } from '@/components/dashboard/quick-actions';
 import { DashboardStats } from '@/components/dashboard/stats-cards';
-import { Suspense } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card } from '@/components/ui/card';
 

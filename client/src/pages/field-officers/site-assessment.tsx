@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useLocation } from 'wouter';
+import { Calendar, Plus, Upload } from 'lucide-react';
 import { PageLayout } from '@/components/page-layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,7 +16,6 @@ import {
 } from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Input } from '@/components/ui/input';
-import { ArrowLeft, Calendar, Plus, Upload } from 'lucide-react';
 
 interface ChecklistItem {
   id: string;

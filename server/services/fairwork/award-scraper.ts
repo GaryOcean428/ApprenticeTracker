@@ -12,10 +12,10 @@
  */
 
 import axios from 'axios';
+import { awards } from '@shared/schema';
+import { eq } from 'drizzle-orm';
 import logger from '../../utils/logger';
 import { db } from '../../db';
-import { awards, awardClassifications } from '@shared/schema';
-import { eq } from 'drizzle-orm';
 
 // In a real implementation, this would use PDF parsing libraries like pdf-parse
 // or html parsing libraries like cheerio to extract structured data

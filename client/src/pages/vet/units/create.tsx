@@ -5,6 +5,7 @@ import { useLocation } from 'wouter';
 import { useMutation } from '@tanstack/react-query';
 import { z } from 'zod';
 import { insertUnitOfCompetencySchema, type InsertUnitOfCompetency } from '@shared/schema';
+import { ArrowLeft, Save } from 'lucide-react';
 import {
   Form,
   FormControl,
@@ -28,7 +29,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, Save } from 'lucide-react';
 
 // Extend the insert schema with additional validation
 const createUnitSchema = insertUnitOfCompetencySchema.extend({

@@ -1,11 +1,8 @@
-import type { Express } from 'express';
 import { createServer, type Server } from 'http';
-import { storage } from './storage';
+import type { Express } from 'express';
 import {
   insertUserSchema,
   insertRoleSchema,
-  insertPermissionSchema,
-  insertRolePermissionSchema,
   insertSubscriptionPlanSchema,
   insertApprenticeSchema,
   insertHostEmployerSchema,
@@ -16,15 +13,18 @@ import {
   insertTimesheetSchema,
   insertTaskSchema,
 } from '@shared/schema';
-import { insertContactTagSchema, insertContactTagAssignmentSchema } from '@shared/schema/contacts';
 import { z } from 'zod';
+import { eq } from 'drizzle-orm';
+import { gtoOrganizations } from '@shared/schema';
+import jwt from 'jsonwebtoken';
+import { storage } from './storage';
 import { gtoComplianceRouter } from './api/gto-compliance-routes';
 import { vetRouter } from './api/vet-routes';
 import { settingsRouter } from './api/settings-routes';
 import { registerHostRoutes } from './api/host-routes';
 import { registerTGARoutes } from './api/tga-routes';
 import { fairWorkRouter } from './api/fair-work-routes';
-import { authRouter, isAuthenticated, hasRole } from './api/auth-routes';
+import { authRouter } from './api/auth-routes';
 import payrollRouter from './api/payroll';
 import fairworkApiRouter from './api/fairwork';
 import fairworkEnhancedRouter from './api/fairwork-enhanced';
@@ -37,10 +37,7 @@ import complianceRouter from './api/compliance';
 import { setupWhsRoutes } from './api/whs/index';
 import labourHireRouter from './api/labour-hire-routes';
 import tagsRouter from './api/tags-routes';
-import { eq, and } from 'drizzle-orm';
 import { db } from './db'; // Assuming db connection is defined here
-import { users, gtoOrganizations } from '@shared/schema';
-import jwt from 'jsonwebtoken';
 
 // Special test endpoints for Fair Work API that won't be intercepted by Vite
 const fairworkTestEndpoints = (app: Express) => {

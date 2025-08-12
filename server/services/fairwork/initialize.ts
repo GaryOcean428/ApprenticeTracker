@@ -4,8 +4,8 @@
  * This file initializes all Fair Work-related services
  */
 
-import { AwardMonitorService } from './award-monitor';
 import logger from '../../utils/logger';
+import { AwardMonitorService } from './award-monitor';
 
 // Initialize the Award Monitor Service
 export function initializeFairWorkServices(): void {

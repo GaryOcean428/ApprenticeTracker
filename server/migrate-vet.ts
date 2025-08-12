@@ -1,5 +1,5 @@
-import { db } from './db';
 import { sql } from 'drizzle-orm';
+import { db } from './db';
 
 /**
  * This script creates the VET Training tables for Units of Competency and Qualifications

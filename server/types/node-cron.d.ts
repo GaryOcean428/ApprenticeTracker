@@ -7,7 +7,7 @@ declare module 'node-cron' {
 
     export function schedule(
       expression: string,
-      func: Function,
+      func: () => void,
       options?: {
         scheduled?: boolean;
         timezone?: string;

@@ -1,30 +1,22 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'wouter';
-import { cn } from '@/lib/utils';
 import {
   ChevronDown,
   LayoutDashboard,
   Users,
   Building2,
   ShieldCheck,
-  DollarSign,
   BarChart2,
   FileText,
-  Settings,
   GraduationCap,
   ClipboardCheck,
   Calendar,
   UserCog,
   Briefcase,
-  FileHeart,
-  Network,
-  ExternalLink,
   Award,
-  ClipboardList,
   BookOpen,
-  GanttChart,
-  Medal,
 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface SidebarItemProps {
   icon: React.ReactNode;

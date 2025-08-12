@@ -4,7 +4,7 @@ import { useLocation, Link } from 'wouter';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { ArrowLeft, Calculator, Info, Upload, Users, FileCheck, Check } from 'lucide-react';
+import { ArrowLeft, Calculator, Info, Upload, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -19,14 +19,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Checkbox } from '@/components/ui/checkbox';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Select,
   SelectContent,

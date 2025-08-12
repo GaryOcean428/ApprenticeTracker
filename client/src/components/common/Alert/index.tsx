@@ -1,7 +1,8 @@
-import React, { HTMLAttributes } from 'react';
+import type { HTMLAttributes } from 'react';
+import React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
-import { cn } from '@/lib/utils';
 import { AlertCircle, CheckCircle2, Info, XCircle } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 const alertVariants = cva(
   'relative w-full rounded-lg border p-4 [&>svg~*]:pl-7 [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4',
@@ -48,7 +49,7 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
   }
 );
 
-export interface AlertTitleProps extends HTMLAttributes<HTMLHeadingElement> {}
+export type AlertTitleProps = HTMLAttributes<HTMLHeadingElement>;
 
 const AlertTitle = React.forwardRef<HTMLHeadingElement, AlertTitleProps>(
   ({ className, ...props }, ref) => (
@@ -60,7 +61,7 @@ const AlertTitle = React.forwardRef<HTMLHeadingElement, AlertTitleProps>(
   )
 );
 
-export interface AlertDescriptionProps extends HTMLAttributes<HTMLParagraphElement> {}
+export type AlertDescriptionProps = HTMLAttributes<HTMLParagraphElement>;
 
 const AlertDescription = React.forwardRef<HTMLParagraphElement, AlertDescriptionProps>(
   ({ className, ...props }, ref) => (

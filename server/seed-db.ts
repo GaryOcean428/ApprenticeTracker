@@ -1,5 +1,4 @@
-import { storage } from './storage';
-import {
+import type {
   InsertUser,
   InsertApprentice,
   InsertHostEmployer,
@@ -9,14 +8,14 @@ import {
   InsertComplianceRecord,
   InsertTask,
   InsertActivityLog,
-  apprentices,
-  trainingContracts,
 } from '@shared/schema';
-import { db } from './db';
+import { trainingContracts } from '@shared/schema';
 import { eq } from 'drizzle-orm';
-import { seedFairWorkData } from './seed-fair-work';
 import { importHostEmployers } from '../scripts/import-host-employers';
-import { seedContacts, seedContactTags } from './seed/contact-seed';
+import { storage } from './storage';
+import { db } from './db';
+import { seedFairWorkData } from './seed-fair-work';
+import { seedContactTags } from './seed/contact-seed';
 
 // Helper function to convert JavaScript Date to ISO string (date part only)
 function formatDate(date: Date): string {

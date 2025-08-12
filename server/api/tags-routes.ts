@@ -1,8 +1,8 @@
-import express, { Request, Response } from 'express';
-import { isAuthenticated } from '../middleware/auth';
-import { storage } from '../storage';
+import type { Request, Response } from 'express';
+import express from 'express';
 import { insertContactTagSchema } from '@shared/schema';
 import { z } from 'zod';
+import { isAuthenticated } from '../middleware/auth';
 
 const router = express.Router();
 
