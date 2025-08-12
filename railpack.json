@@ -61,6 +61,11 @@
     "environment": {
       "NODE_ENV": "production",
       "NPM_CONFIG_PRODUCTION": "false"
+    },
+    "metadata": {
+      "migration": "Migrated from bcrypt to bcryptjs for deployment stability",
+      "native_dependencies": "none",
+      "deployment_optimized": true
     }
   }
 }
