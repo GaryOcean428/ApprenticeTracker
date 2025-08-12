@@ -63,7 +63,7 @@ const FinancialSummary = () => {
         const res = await fetch(`/api/financial/summary?timeframe=${timeframe}`);
         if (!res.ok) throw new Error('Failed to fetch financial summary');
         return res.json() as Promise<FinancialSummary>;
-      } catch (error) {
+      } catch (_error) {
         // If API fails, use summarized data from our pages
         // This is a fallback to ensure we display something useful
         return {

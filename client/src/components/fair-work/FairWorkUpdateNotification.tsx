@@ -18,16 +18,6 @@ interface FairWorkUpdateNotificationProps {
   onDismiss?: () => void;
 }
 
-interface AwardUpdate {
-  id: string;
-  awardCode: string;
-  awardName: string;
-  currentVersion: string;
-  latestVersion: string;
-  updateUrl: string | null;
-  checkDate: string;
-}
-
 export default function FairWorkUpdateNotification({
   onUpdateClick,
   onDismiss,

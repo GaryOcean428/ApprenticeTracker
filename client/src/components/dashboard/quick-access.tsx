@@ -1,5 +1,5 @@
 import { Link } from 'wouter';
-import { Shield, Building, FileText, Clock } from 'lucide-react';
+import { Shield, Building, FileText, Clock, Users } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 const QuickAccess = () => {
@@ -59,7 +59,5 @@ const QuickAccess = () => {
     </Card>
   );
 };
-
-import { Users } from 'lucide-react';
 
 export default QuickAccess;
