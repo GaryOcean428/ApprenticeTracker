@@ -1,241 +1,303 @@
 import { Router, Request, Response, NextFunction } from 'express';
-import { db } from '../db';
-import { users } from '@shared/schema';
-import { eq } from 'drizzle-orm';
 import { z } from 'zod';
-import { compare, hash } from 'bcrypt';
-import jwt from 'jsonwebtoken';
-import { generateToken, authenticateToken, AuthRequest } from '../middleware/auth-enhanced';
+import { 
+  authenticateToken, 
+  AuthRequest,
+  authRateLimiters,
+  addSecurityHeaders,
+  getAuthSystemHealth,
+  auditLog,
+  generateToken
+} from '../middleware/auth-unified';
+import { AuthService, validateEmail, validatePassword } from '../services/auth-service';
 
 export const authRouter = Router();
 
-// Health check endpoint
+// Apply security headers to all auth routes
+authRouter.use(addSecurityHeaders);
+
+// Apply general rate limiting to all auth routes
+authRouter.use(authRateLimiters.general);
+
+// Enhanced health check endpoint with detailed system status
 authRouter.get('/health', (req: Request, res: Response) => {
-  res.json({
-    status: 'ok',
-    environment: process.env.NODE_ENV,
-    hasDB: !!process.env.DATABASE_URL,
-    hasJWT: !!(process.env.JWT_SECRET || process.env.NODE_ENV !== 'production'),
-    timestamp: new Date().toISOString(),
-  });
+  try {
+    const healthStatus = getAuthSystemHealth();
+    auditLog('HEALTH_CHECK', req, { status: healthStatus.status });
+    res.json(healthStatus);
+  } catch (error) {
+    console.error('Health check error:', error);
+    res.status(503).json({
+      status: 'error',
+      message: 'Health check failed',
+      timestamp: new Date().toISOString(),
+    });
+  }
 });
 
-// Zod schemas for validation
+// Enhanced Zod schemas for validation with better error messages
 const loginSchema = z.object({
-  email: z.string().email('Valid email address is required').min(1, 'Email is required'),
-  password: z.string().min(1, 'Password is required'),
+  email: z.string()
+    .min(1, 'Email is required')
+    .email('Please enter a valid email address')
+    .max(255, 'Email is too long')
+    .transform(val => val.toLowerCase().trim()),
+  password: z.string()
+    .min(1, 'Password is required')
+    .max(255, 'Password is too long'),
 });
 
 const registerSchema = z.object({
-  username: z.string().min(3, 'Username must be at least 3 characters').max(50),
-  password: z.string().min(8, 'Password must be at least 8 characters'),
-  email: z.string().email('Invalid email address'),
-  firstName: z.string().min(1, 'First name is required'),
-  lastName: z.string().min(1, 'Last name is required'),
-  role: z.string().optional().default('user'),
-  roleId: z.number().optional(),
-  organizationId: z.number().optional(),
+  username: z.string()
+    .min(3, 'Username must be at least 3 characters')
+    .max(50, 'Username must not exceed 50 characters')
+    .regex(/^[a-zA-Z0-9_-]+$/, 'Username can only contain letters, numbers, underscores, and hyphens')
+    .transform(val => val.trim()),
+  password: z.string()
+    .min(8, 'Password must be at least 8 characters')
+    .max(255, 'Password is too long'),
+  email: z.string()
+    .min(1, 'Email is required')
+    .email('Please enter a valid email address')
+    .max(255, 'Email is too long')
+    .transform(val => val.toLowerCase().trim()),
+  firstName: z.string()
+    .min(1, 'First name is required')
+    .max(100, 'First name is too long')
+    .transform(val => val.trim()),
+  lastName: z.string()
+    .min(1, 'Last name is required')
+    .max(100, 'Last name is too long')
+    .transform(val => val.trim()),
+  role: z.string()
+    .optional()
+    .default('user')
+    .transform(val => val?.trim() || 'user'),
+  roleId: z.number().int().positive().optional(),
+  organizationId: z.number().int().positive().optional(),
 });
 
 /**
- * Middleware to validate request body against a Zod schema
+ * Enhanced middleware to validate request body against a Zod schema
  */
 function validateBody<T>(schema: z.ZodType<T>) {
   return (req: Request, res: Response, next: NextFunction) => {
     try {
-      schema.parse(req.body);
+      const validatedData = schema.parse(req.body);
+      req.body = validatedData; // Replace with validated data
       next();
     } catch (error) {
       if (error instanceof z.ZodError) {
+        const formattedErrors = error.errors.map(err => ({
+          field: err.path.join('.'),
+          message: err.message,
+          value: err.received || req.body[err.path[0]],
+        }));
+
+        auditLog('VALIDATION_ERROR', req, { 
+          errors: formattedErrors,
+          endpoint: req.path 
+        });
+
         return res.status(400).json({
           success: false,
-          message: 'Validation error',
-          errors: error.errors,
+          code: 'VALIDATION_ERROR',
+          message: 'Please check your input and try again',
+          errors: formattedErrors,
+          timestamp: new Date().toISOString(),
         });
       }
       return res.status(400).json({
         success: false,
-        message: 'Invalid request',
+        code: 'INVALID_REQUEST',
+        message: 'Invalid request format',
+        timestamp: new Date().toISOString(),
       });
     }
   };
 }
 
 /**
- * Login endpoint - authenticates user with email and returns JWT
+ * Enhanced Login endpoint with rate limiting and comprehensive security
  */
-authRouter.post('/login', validateBody(loginSchema), async (req: Request, res: Response) => {
-  try {
-    // Ensure we always return JSON
-    res.setHeader('Content-Type', 'application/json');
+authRouter.post('/login', 
+  authRateLimiters.login,
+  validateBody(loginSchema),
+  async (req: Request, res: Response) => {
+    try {
+      // Ensure JSON response
+      res.setHeader('Content-Type', 'application/json');
 
-    const { email, password } = req.body;
+      const { email, password } = req.body;
 
-    // Development fallback - when database is not available
-    if (process.env.NODE_ENV === 'development') {
-      try {
-        if (db) {
-          // Try database first - query using email field with case-insensitive search
-          const [user] = await db.select().from(users).where(eq(users.email, email.toLowerCase()));
+      // Use the enhanced auth service
+      const result = await AuthService.login({ email, password }, req);
 
-          if (user) {
-            // Database user found, proceed with normal auth
-            if (!user.isActive) {
-              return res.status(401).json({
-                success: false,
-                message: 'Account is inactive. Please contact an administrator.',
-              });
-            }
-
-            // Verify password
-            let isPasswordValid = false;
-            if (password === user.password) {
-              isPasswordValid = true;
-            } else if (user.password.startsWith('$2')) {
-              try {
-                isPasswordValid = await compare(password, user.password);
-              } catch (error) {
-                console.error('Password comparison error:', error);
-              }
-            }
-
-            if (!isPasswordValid) {
-              return res.status(401).json({
-                success: false,
-                message: 'Invalid email or password',
-              });
-            }
-
-            // Create JWT payload using email as identifier
-            const payload = {
-              id: user.id,
-              username: user.username,
-              email: user.email,
-              role: user.role,
-              roleId: user.roleId,
-              organizationId: user.organizationId,
-            };
-
-            // Sign token using the enhanced auth function
-            const token = generateToken(payload);
-
-            // Try to update last login time (don't fail if this errors)
-            try {
-              await db.update(users).set({ lastLogin: new Date() }).where(eq(users.id, user.id));
-            } catch (updateError) {
-              console.warn('Failed to update last login time:', updateError);
-            }
-
-            return res.status(200).json({
-              success: true,
-              token: token,
-              user: {
-                id: user.id,
-                username: user.username,
-                email: user.email,
-                firstName: user.firstName,
-                lastName: user.lastName,
-                role: user.role,
-                roleId: user.roleId,
-                organizationId: user.organizationId,
-                profileImage: user.profileImage,
-              },
-            });
-          }
-        }
-      } catch (dbError) {
-        console.warn('Database unavailable, using development fallback auth:', dbError);
+      if (!result.success) {
+        return res.status(401).json({
+          success: false,
+          code: result.error!.code,
+          message: result.error!.message,
+          timestamp: new Date().toISOString(),
+        });
       }
 
-      // Development fallback - create a mock user for any email/password
-      console.log('Using development fallback authentication for email:', email);
-
-      const mockUser = {
-        id: 1,
-        username: email.split('@')[0],
-        email: email,
-        firstName: 'Dev',
-        lastName: 'User',
-        role: 'admin',
-        roleId: 1,
-        organizationId: 1,
-        profileImage: null,
-      };
-
-      const payload = {
-        id: mockUser.id,
-        username: mockUser.username,
-        email: mockUser.email,
-        role: mockUser.role,
-        roleId: mockUser.roleId,
-        organizationId: mockUser.organizationId,
-      };
-
-      const token = generateToken(payload);
+      const { token, user, expiresAt } = result.data!;
 
       return res.status(200).json({
         success: true,
-        token: token,
-        user: mockUser,
+        token,
+        user,
+        expiresAt: expiresAt.toISOString(),
+        timestamp: new Date().toISOString(),
       });
-    }
 
-    // Production mode - require database
-    if (!db) {
-      return res.status(503).json({
+    } catch (error) {
+      console.error('Login endpoint error:', error);
+      auditLog('LOGIN_ENDPOINT_ERROR', req, { error: error.message });
+      
+      return res.status(500).json({
         success: false,
-        message: 'Database service unavailable',
+        code: 'INTERNAL_ERROR',
+        message: 'Authentication service temporarily unavailable',
+        timestamp: new Date().toISOString(),
       });
     }
+  }
+);
 
-    // Query using email field with case-insensitive search
-    const [user] = await db.select().from(users).where(eq(users.email, email.toLowerCase()));
+/**
+ * Enhanced Register endpoint with comprehensive validation and security
+ */
+authRouter.post('/register', 
+  authRateLimiters.register,
+  validateBody(registerSchema),
+  async (req: Request, res: Response) => {
+    try {
+      // Ensure JSON response
+      res.setHeader('Content-Type', 'application/json');
 
-    if (!user) {
-      console.log(`Login attempt failed: email ${email} not found`);
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid email or password',
-      });
-    }
+      const { username, password, email, firstName, lastName, role, roleId, organizationId } = req.body;
 
-    // Check if user is active
-    if (!user.isActive) {
-      return res.status(401).json({
-        success: false,
-        message: 'Account is inactive. Please contact an administrator.',
-      });
-    }
+      // Use the enhanced auth service
+      const result = await AuthService.register({
+        username,
+        password,
+        email,
+        firstName,
+        lastName,
+        role,
+        roleId,
+        organizationId,
+      }, req);
 
-    // Verify password - check if plain text match or hashed password
-    let isPasswordValid = false;
-
-    // First check if it's a plain text match (for development/seeded accounts)
-    if (password === user.password) {
-      isPasswordValid = true;
-    } else {
-      // If not a plain match, try bcrypt compare (for properly hashed passwords)
-      try {
-        // Only try to compare if the password appears to be hashed (starts with $2a$, $2b$, etc.)
-        if (user.password.startsWith('$2')) {
-          isPasswordValid = await compare(password, user.password);
-        }
-      } catch (error) {
-        console.error('Password comparison error:', error);
-        // Continue with isPasswordValid = false
+      if (!result.success) {
+        const statusCode = result.error!.code === 'SERVICE_UNAVAILABLE' ? 503 : 
+                          result.error!.code.includes('EXISTS') ? 409 : 400;
+        
+        return res.status(statusCode).json({
+          success: false,
+          code: result.error!.code,
+          message: result.error!.message,
+          timestamp: new Date().toISOString(),
+        });
       }
-    }
 
-    if (!isPasswordValid) {
-      console.log(`Login attempt failed: incorrect password for ${email}`);
-      return res.status(401).json({
+      const { user, message } = result.data!;
+
+      return res.status(201).json({
+        success: true,
+        message,
+        user,
+        timestamp: new Date().toISOString(),
+      });
+
+    } catch (error) {
+      console.error('Registration endpoint error:', error);
+      auditLog('REGISTER_ENDPOINT_ERROR', req, { error: error.message });
+      
+      return res.status(500).json({
         success: false,
-        message: 'Invalid email or password',
+        code: 'INTERNAL_ERROR',
+        message: 'Registration service temporarily unavailable',
+        timestamp: new Date().toISOString(),
+      });
+    }
+  }
+);
+
+/**
+ * Enhanced Verify token endpoint with comprehensive security checks
+ */
+authRouter.get('/verify', authenticateToken, async (req: AuthRequest, res: Response) => {
+  try {
+    // Ensure JSON response
+    res.setHeader('Content-Type', 'application/json');
+
+    // Token is already verified by middleware, req.user is populated
+    const userId = req.user!.id;
+
+    // Use the enhanced auth service
+    const result = await AuthService.verifyUser(userId, req);
+
+    if (!result.success) {
+      const statusCode = result.error!.code === 'USER_NOT_FOUND' ? 404 :
+                        result.error!.code === 'USER_INACTIVE' ? 401 : 503;
+      
+      return res.status(statusCode).json({
+        success: false,
+        code: result.error!.code,
+        message: result.error!.message,
+        timestamp: new Date().toISOString(),
       });
     }
 
-    // Create JWT payload using email as identifier
-    const payload = {
+    const { user } = result.data!;
+
+    return res.status(200).json({
+      success: true,
+      user,
+      timestamp: new Date().toISOString(),
+      // Include audit context in response
+      auditContext: req.auditContext,
+    });
+
+  } catch (error) {
+    console.error('Token verification endpoint error:', error);
+    auditLog('VERIFY_ENDPOINT_ERROR', req, { error: error.message });
+    
+    return res.status(500).json({
+      success: false,
+      code: 'INTERNAL_ERROR',
+      message: 'Verification service temporarily unavailable',
+      timestamp: new Date().toISOString(),
+    });
+  }
+});
+
+/**
+ * Token refresh endpoint - generates new token for authenticated users
+ */
+authRouter.post('/refresh', authenticateToken, async (req: AuthRequest, res: Response) => {
+  try {
+    // Ensure JSON response
+    res.setHeader('Content-Type', 'application/json');
+
+    const user = req.user!;
+
+    // Verify user is still active
+    const verifyResult = await AuthService.verifyUser(user.id, req);
+    if (!verifyResult.success) {
+      return res.status(401).json({
+        success: false,
+        code: verifyResult.error!.code,
+        message: verifyResult.error!.message,
+        timestamp: new Date().toISOString(),
+      });
+    }
+
+    // Generate new token with updated user data
+    const tokenPayload = {
       id: user.id,
       username: user.username,
       email: user.email,
@@ -244,286 +306,127 @@ authRouter.post('/login', validateBody(loginSchema), async (req: Request, res: R
       organizationId: user.organizationId,
     };
 
-    // Sign token using the enhanced auth function
-    const token = generateToken(payload);
+    const newToken = generateToken(tokenPayload);
+    const expiresAt = new Date(Date.now() + (7 * 24 * 60 * 60 * 1000)); // 7 days
 
-    // Update last login time
-    await db.update(users).set({ lastLogin: new Date() }).where(eq(users.id, user.id));
+    auditLog('TOKEN_REFRESH_SUCCESS', req, { userId: user.id });
 
-    console.log(`Login successful for email: ${user.email}`);
-
-    // Return token and user info
     return res.status(200).json({
       success: true,
-      token: token,
-      user: {
-        id: user.id,
-        username: user.username,
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        role: user.role,
-        roleId: user.roleId,
-        organizationId: user.organizationId,
-        profileImage: user.profileImage,
-      },
+      token: newToken,
+      expiresAt: expiresAt.toISOString(),
+      timestamp: new Date().toISOString(),
     });
+
   } catch (error) {
-    console.error('Login error:', error);
+    console.error('Token refresh error:', error);
+    auditLog('TOKEN_REFRESH_ERROR', req, { error: error.message });
+    
     return res.status(500).json({
       success: false,
-      message: 'Authentication service error',
-      error:
-        process.env.NODE_ENV === 'development'
-          ? error instanceof Error
-            ? error.message
-            : String(error)
-          : undefined,
+      code: 'INTERNAL_ERROR',
+      message: 'Token refresh service temporarily unavailable',
+      timestamp: new Date().toISOString(),
     });
   }
 });
 
 /**
- * Register endpoint - creates a new user with email validation
+ * Logout endpoint - invalidates current session
  */
-authRouter.post('/register', validateBody(registerSchema), async (req: Request, res: Response) => {
+authRouter.post('/logout', authenticateToken, async (req: AuthRequest, res: Response) => {
   try {
-    // Ensure we always return JSON
+    // Ensure JSON response
     res.setHeader('Content-Type', 'application/json');
 
-    const { username, password, email, firstName, lastName, role, roleId, organizationId } =
-      req.body;
+    const user = req.user!;
 
-    // Normalize email to lowercase for consistency
-    const normalizedEmail = email.toLowerCase();
+    // Clear user cache
+    AuthService.clearUserCache(user.id, user.email);
 
-    if (!db) {
-      return res.status(503).json({
-        success: false,
-        message: 'Registration service unavailable - database not connected',
-      });
-    }
+    auditLog('LOGOUT_SUCCESS', req, { userId: user.id });
 
-    // Check if username already exists
-    const [existingUsername] = await db.select().from(users).where(eq(users.username, username));
-
-    if (existingUsername) {
-      return res.status(400).json({
-        success: false,
-        message: 'Username already taken',
-      });
-    }
-
-    // Check if email already exists (case-insensitive)
-    const [existingEmail] = await db.select().from(users).where(eq(users.email, normalizedEmail));
-
-    if (existingEmail) {
-      return res.status(409).json({
-        success: false,
-        message: 'Email already registered',
-      });
-    }
-
-    // Hash password
-    let hashedPassword = password; // Default to plain text for dev
-    if (process.env.NODE_ENV === 'production') {
-      try {
-        hashedPassword = await hash(password, 10);
-      } catch (hashError) {
-        console.error('Password hashing error:', hashError);
-        return res.status(500).json({
-          success: false,
-          message: 'Error creating user account',
-        });
-      }
-    }
-
-    // Create new user with normalized email
-    const [newUser] = await db
-      .insert(users)
-      .values({
-        username,
-        password: hashedPassword,
-        email: normalizedEmail,
-        firstName,
-        lastName,
-        role: role || 'user',
-        roleId,
-        organizationId,
-        isActive: true,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      })
-      .returning({
-        id: users.id,
-        username: users.username,
-        email: users.email,
-        firstName: users.firstName,
-        lastName: users.lastName,
-        role: users.role,
-        roleId: users.roleId,
-        organizationId: users.organizationId,
-      });
-
-    console.log(`Registration successful for email: ${normalizedEmail}`);
-
-    return res.status(201).json({
+    return res.status(200).json({
       success: true,
-      message: 'User registered successfully',
-      user: newUser,
+      message: 'Logged out successfully',
+      timestamp: new Date().toISOString(),
     });
+
   } catch (error) {
-    console.error('Registration error:', error);
-    return res.status(503).json({
+    console.error('Logout error:', error);
+    auditLog('LOGOUT_ERROR', req, { error: error.message });
+    
+    return res.status(500).json({
       success: false,
-      message: 'Registration service unavailable',
-      error:
-        process.env.NODE_ENV === 'development'
-          ? error instanceof Error
-            ? error.message
-            : String(error)
-          : undefined,
+      code: 'INTERNAL_ERROR',
+      message: 'Logout service temporarily unavailable',
+      timestamp: new Date().toISOString(),
     });
   }
 });
 
 /**
- * Verify token endpoint - validates JWT and returns user info
+ * Profile endpoint - get current user's profile
  */
-authRouter.get('/verify', authenticateToken, async (req: AuthRequest, res: Response) => {
+authRouter.get('/profile', authenticateToken, async (req: AuthRequest, res: Response) => {
   try {
-    // Ensure we always return JSON
+    // Ensure JSON response
     res.setHeader('Content-Type', 'application/json');
 
-    // Token is already verified by middleware, req.user is populated
     const userId = req.user!.id;
 
-    // Development fallback - when database is not available
-    if (process.env.NODE_ENV === 'development') {
-      try {
-        if (db) {
-          // Try database first
-          const [user] = await db.select().from(users).where(eq(users.id, userId));
+    // Get fresh user data
+    const result = await AuthService.verifyUser(userId, req);
 
-          if (user) {
-            // Database user found, proceed with normal verification
-            if (!user.isActive) {
-              return res.status(401).json({
-                success: false,
-                message: 'Account is inactive',
-              });
-            }
-
-            return res.status(200).json({
-              success: true,
-              user: {
-                id: user.id,
-                username: user.username,
-                email: user.email,
-                firstName: user.firstName,
-                lastName: user.lastName,
-                role: user.role,
-                roleId: user.roleId,
-                organizationId: user.organizationId,
-                profileImage: user.profileImage,
-              },
-            });
-          }
-        }
-      } catch (dbError) {
-        console.warn('Database unavailable, using token data for verification:', dbError);
-      }
-
-      // Development fallback - use token data
-      console.log('Using development fallback verification for user:', req.user!.email);
-
-      return res.status(200).json({
-        success: true,
-        user: {
-          id: req.user!.id,
-          username: req.user!.username,
-          email: req.user!.email,
-          firstName: 'Dev',
-          lastName: 'User',
-          role: req.user!.role,
-          roleId: req.user!.roleId || 1,
-          organizationId: req.user!.organizationId || 1,
-          profileImage: null,
-        },
-      });
-    }
-
-    // Production mode - require database
-    if (!db) {
-      return res.status(503).json({
+    if (!result.success) {
+      const statusCode = result.error!.code === 'USER_NOT_FOUND' ? 404 :
+                        result.error!.code === 'USER_INACTIVE' ? 401 : 503;
+      
+      return res.status(statusCode).json({
         success: false,
-        message: 'Database service unavailable',
+        code: result.error!.code,
+        message: result.error!.message,
+        timestamp: new Date().toISOString(),
       });
     }
 
-    const [user] = await db.select().from(users).where(eq(users.id, userId));
-
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: 'User not found',
-      });
-    }
-
-    // Check if user is active
-    if (!user.isActive) {
-      return res.status(401).json({
-        success: false,
-        message: 'Account is inactive',
-      });
-    }
-
-    // Return user info
     return res.status(200).json({
       success: true,
-      user: {
-        id: user.id,
-        username: user.username,
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        role: user.role,
-        roleId: user.roleId,
-        organizationId: user.organizationId,
-        profileImage: user.profileImage,
-      },
+      profile: result.data!.user,
+      timestamp: new Date().toISOString(),
     });
+
   } catch (error) {
-    console.error('Token verification error:', error);
+    console.error('Profile fetch error:', error);
+    auditLog('PROFILE_ERROR', req, { error: error.message });
+    
     return res.status(500).json({
       success: false,
-      message: 'Internal server error',
-      error: error instanceof Error ? error.message : String(error),
+      code: 'INTERNAL_ERROR',
+      message: 'Profile service temporarily unavailable',
+      timestamp: new Date().toISOString(),
     });
   }
 });
 
 /**
- * Middleware to check if the user is authenticated
+ * Middleware exports for backward compatibility and external use
  */
 export function isAuthenticated(req: Request, res: Response, next: NextFunction) {
   return authenticateToken(req as AuthRequest, res, next);
 }
 
-/**
- * Middleware to check if the user has a specific role
- */
 export function hasRole(role: string) {
   return (req: Request, res: Response, next: NextFunction) => {
-    // First check if the user is authenticated
     isAuthenticated(req, res, () => {
-      // User is authenticated, check role
       const user = (req as AuthRequest).user;
 
       if (!user || user.role !== role) {
         return res.status(403).json({
           success: false,
+          code: 'INSUFFICIENT_ROLE',
           message: 'Insufficient permissions',
+          timestamp: new Date().toISOString(),
         });
       }
 
@@ -531,3 +434,13 @@ export function hasRole(role: string) {
     });
   };
 }
+
+// Export enhanced middleware functions
+export { 
+  authenticateToken as enhancedAuthenticateToken,
+  authRateLimiters,
+  addSecurityHeaders
+} from '../middleware/auth-unified';
+
+// Export auth service
+export { AuthService } from '../services/auth-service';
