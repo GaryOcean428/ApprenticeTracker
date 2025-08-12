@@ -7,8 +7,7 @@
     "dev": "NODE_ENV=development tsx server/index.ts",
     "build": "vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist",
     "start": "NODE_ENV=production node dist/index.js",
-    "start:prod": "npm run build && NODE_ENV=production node production-server.js",
-    "check": "tsc",
+    "start:prod": "pnpm run build && NODE_ENV=production node production-server.js",
     "db:push": "drizzle-kit push",
     "test": "vitest",
     "test:ui": "vitest --ui",
@@ -18,10 +17,11 @@
     "lint": "eslint client/src server --ext .ts,.tsx,.js,.jsx --report-unused-disable-directives --max-warnings 0",
     "lint:fix": "eslint client/src server --ext .ts,.tsx,.js,.jsx --fix",
     "analyze:duplication": "jscpd client/src server shared",
-    "analyze:bundle": "npm run build && open dist/bundle-analysis.html",
+    "analyze:bundle": "pnpm run build && open dist/bundle-analysis.html",
     "analyze:unused": "ts-unused-exports tsconfig.json --excludePathsFromReport=node_modules",
-    "qa:audit": "npm audit && npm run analyze:duplication && npm run analyze:unused",
-    "qa:health": "./scripts/health-check.sh"
+    "qa:audit": "pnpm audit && pnpm run analyze:duplication && pnpm run analyze:unused",
+    "qa:health": "./scripts/health-check.sh",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
     "@eslint/js": "^9.26.0",
@@ -160,5 +160,10 @@
   },
   "optionalDependencies": {
     "bufferutil": "^4.0.8"
+  },
+  "packageManager": "pnpm@10.5.2",
+  "engines": {
+    "node": ">=20",
+    "pnpm": ">=10"
   }
 }
