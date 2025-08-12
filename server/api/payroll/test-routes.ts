@@ -1,9 +1,9 @@
-import { Request, Response } from 'express';
+import type { Request, Response } from 'express';
+import { quotes, quoteLineItems } from '@shared/schema';
+import { eq } from 'drizzle-orm';
 import { chargeRateCalculator } from '../../services/charge-rate-calculator';
 import logger from '../../utils/logger';
 import { db } from '../../db';
-import { quotes, quoteLineItems } from '@shared/schema';
-import { eq } from 'drizzle-orm';
 
 /**
  * Test route for calculating charge rate (no auth)

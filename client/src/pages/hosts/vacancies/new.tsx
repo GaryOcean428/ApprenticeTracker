@@ -3,7 +3,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useLocation } from 'wouter';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { format } from 'date-fns';
+import { Loader2, ArrowLeft } from 'lucide-react';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -28,8 +30,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { format } from 'date-fns';
-import { Loader2, CalendarIcon, ArrowLeft } from 'lucide-react';
 
 // Form schema
 const vacancyFormSchema = z.object({

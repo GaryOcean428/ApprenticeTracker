@@ -1,19 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'wouter';
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
-import { PageHeader } from '@/components/page-header';
-import { DashboardShell } from '@/components/dashboard-shell';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import {
   Users,
   Briefcase,
   ClipboardList,
@@ -23,7 +10,12 @@ import {
   CheckSquare,
   ArrowRightCircle,
 } from 'lucide-react';
-import { LabourHireWorker } from '@shared/schema';
+import type { LabourHireWorker } from '@shared/schema';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { PageHeader } from '@/components/page-header';
+import { DashboardShell } from '@/components/dashboard-shell';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 
 // Workflow stages component

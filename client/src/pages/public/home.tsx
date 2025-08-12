@@ -1,6 +1,6 @@
+import { Link } from 'wouter';
 import { Button } from '@/components/ui/button';
 import PublicLayout from '@/layouts/public-layout';
-import { Link } from 'wouter';
 
 export default function HomePage() {
   return (

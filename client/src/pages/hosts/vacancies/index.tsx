@@ -1,21 +1,13 @@
 import { useQuery } from '@tanstack/react-query';
 import { useLocation } from 'wouter';
+import { format } from 'date-fns';
+import { MapPin, Users, CalendarClock, BriefcaseBusiness, Plus, Search } from 'lucide-react';
+import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { format } from 'date-fns';
-import {
-  MapPin,
-  Users,
-  CalendarClock,
-  BriefcaseBusiness,
-  Plus,
-  Filter,
-  Search,
-} from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { useState } from 'react';
 import { Label } from '@/components/ui/label';
 import {
   Select,

@@ -4,7 +4,7 @@
  * This middleware handles user authentication for protected API routes.
  */
 
-import { Request, Response, NextFunction } from 'express';
+import type { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import logger from '../utils/logger';
 

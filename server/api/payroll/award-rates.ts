@@ -1,6 +1,5 @@
-import { Request, Response } from 'express';
-import { db } from '../../db';
-import { eq, and, gte, lte, like } from 'drizzle-orm';
+import type { Request, Response } from 'express';
+import { eq } from 'drizzle-orm';
 import {
   awards,
   awardClassifications,
@@ -10,6 +9,7 @@ import {
   timesheets,
   timesheetCalculations,
 } from '@shared/schema';
+import { db } from '../../db';
 import { AwardRateCalculator } from '../../services/award-rate-calculator';
 import logger from '../../utils/logger';
 

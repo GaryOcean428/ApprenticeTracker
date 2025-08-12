@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
 
+import type { DateRange } from 'react-day-picker';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import {
@@ -36,7 +37,6 @@ import { useToast } from '@/hooks/use-toast';
 import { queryClient } from '@/lib/queryClient';
 import { Checkbox } from '@/components/ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { DateRange } from 'react-day-picker';
 
 interface ReportFormDialogProps {
   open: boolean;

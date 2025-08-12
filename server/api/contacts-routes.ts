@@ -1,5 +1,5 @@
-import express, { Request, Response } from 'express';
-import { storage } from '../storage';
+import type { Request, Response } from 'express';
+import express from 'express';
 import {
   insertContactSchema,
   insertContactTagSchema,
@@ -8,11 +8,9 @@ import {
   insertContactGroupMemberSchema,
   insertContactInteractionSchema,
 } from '@shared/schema';
-import { isAuthenticated } from '../middleware/auth';
-import { hasPermission } from '../middleware/permissions';
 import { z } from 'zod';
-import { db } from '../db';
-import { sql } from 'drizzle-orm';
+import { storage } from '../storage';
+import { isAuthenticated } from '../middleware/auth';
 
 const router = express.Router();
 

@@ -1,11 +1,8 @@
 import React from 'react';
-import {
-  Controller,
-  useFormContext,
-  ControllerProps,
-  FieldPath,
-  FieldValues,
-} from 'react-hook-form';
+import type { ControllerProps, FieldPath, FieldValues } from 'react-hook-form';
+import { Controller, useFormContext } from 'react-hook-form';
+import { format } from 'date-fns';
+import { CalendarIcon } from 'lucide-react';
 import {
   FormControl,
   FormDescription,
@@ -29,8 +26,6 @@ import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { format } from 'date-fns';
-import { CalendarIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 /**

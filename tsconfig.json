@@ -1,6 +1,6 @@
 {
-  "include": ["shared/schema.ts"],
-  "exclude": ["node_modules", "build", "dist", "client", "**/*.test.ts"],
+  "include": ["shared/schema.ts", "client/src/**/*", "server/**/*", "shared/**/*"],
+  "exclude": ["node_modules", "build", "dist", "**/*.test.ts"],
   "compilerOptions": {
     "noEmit": true,
     "target": "ES2022",

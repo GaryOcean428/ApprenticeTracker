@@ -1,31 +1,19 @@
-import { useQuery } from '@tanstack/react-query';
 import { Link } from 'wouter';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { DashboardShell } from '@/components/dashboard-shell';
-import { PageHeader } from '@/components/page-header';
 import {
   GraduationCap,
   Briefcase,
   ClipboardList,
-  FileText,
-  Calendar,
   Award,
   BookOpen,
   ArrowRightCircle,
   UserPlus,
-  Settings,
   School,
 } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { DashboardShell } from '@/components/dashboard-shell';
+import { PageHeader } from '@/components/page-header';
 
 export default function ExternalEmployeesApprenticePage() {
   return (

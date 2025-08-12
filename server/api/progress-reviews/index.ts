@@ -1,5 +1,5 @@
-import express, { Request, Response } from 'express';
-import { db } from '../../db';
+import type { Request, Response } from 'express';
+import express from 'express';
 import { eq, and, desc } from 'drizzle-orm';
 import {
   progressReviewTemplates,
@@ -17,6 +17,7 @@ import {
   insertProgressReviewDocumentSchema,
 } from '@shared/schema';
 import { z } from 'zod';
+import { db } from '../../db';
 
 const router = express.Router();
 

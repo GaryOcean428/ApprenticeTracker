@@ -1,8 +1,8 @@
 /**
  * Migration script for creating the unified contact and client management system
  */
-import { db } from './db';
 import { sql } from 'drizzle-orm';
+import { db } from './db';
 // Use console for logging in migration scripts
 const logger = {
   info: (message: string, ...args: any[]) => console.log(`[INFO] ${message}`, ...args),

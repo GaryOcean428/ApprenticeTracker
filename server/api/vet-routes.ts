@@ -1,5 +1,4 @@
 import { Router } from 'express';
-import { db } from '../db';
 import {
   unitsOfCompetency,
   qualifications,
@@ -8,17 +7,16 @@ import {
   apprenticeQualifications,
   apprentices,
   users,
-  documents,
 } from '@shared/schema';
 import { eq, and, sql, or, like } from 'drizzle-orm';
 import { z } from 'zod';
 import {
   insertUnitOfCompetencySchema,
   insertQualificationSchema,
-  insertQualificationStructureSchema,
   insertApprenticeUnitProgressSchema,
   insertApprenticeQualificationSchema,
 } from '@shared/schema';
+import { db } from '../db';
 import {
   validateQuery,
   validateParams,
@@ -26,7 +24,6 @@ import {
   vetUnitSearchSchema,
   vetQualificationSearchSchema,
   vetIdParamSchema,
-  vetQualUnitAssignSchema,
   vetUnitOrderSchema,
 } from '../utils/validation';
 

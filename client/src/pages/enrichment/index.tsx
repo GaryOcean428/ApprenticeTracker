@@ -1,8 +1,8 @@
 import React from 'react';
 import { Link } from 'wouter';
+import { BookOpen, CalendarClock, FileEdit, GraduationCap, User, Users } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/common';
 import { usePermissions } from '@/hooks/use-permissions';
-import { BookOpen, CalendarClock, FileEdit, GraduationCap, User, Users } from 'lucide-react';
 
 const EnrichmentPage: React.FC = () => {
   const { hasPermission } = usePermissions();

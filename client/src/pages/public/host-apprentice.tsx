@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import PublicLayout from '@/layouts/public-layout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,7 +11,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { hostEmployerApi, type HostEmployerInquiry } from '@/lib/api';
 

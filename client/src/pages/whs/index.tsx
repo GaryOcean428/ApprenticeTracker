@@ -1,16 +1,12 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { AlertTriangle, ShieldAlert, Clipboard, FileText, BadgeAlert } from 'lucide-react';
+import { useLocation } from 'wouter';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { AlertTriangle, ShieldAlert, Clipboard, FileText, BadgeAlert } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import IncidentsList from '@/components/whs/incidents-list';
-import RiskAssessmentsList from '@/components/whs/risk-assessments-list';
-import SafetyPoliciesList from '@/components/whs/safety-policies-list';
-import InspectionsList from '@/components/whs/inspections-list';
-import { useLocation } from 'wouter';
 
 export default function WHSPage() {
   const [activeTab, setActiveTab] = React.useState('overview');

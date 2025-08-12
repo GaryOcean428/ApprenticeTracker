@@ -1,4 +1,3 @@
-import { db } from './db';
 import {
   enrichmentPrograms,
   enrichmentParticipants,
@@ -6,6 +5,7 @@ import {
   workshopAttendees,
 } from '@shared/schema';
 import { sql } from 'drizzle-orm';
+import { db } from './db';
 
 /**
  * Seeds the database with sample enrichment program data

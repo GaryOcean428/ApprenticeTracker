@@ -1,10 +1,11 @@
-import { useState } from 'react';
 import { useLocation } from 'wouter';
 import { useMutation } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { insertApprenticeSchema } from '@shared/schema';
+import { ChevronLeft, CalendarIcon } from 'lucide-react';
+import { format } from 'date-fns';
 import { apiRequest } from '@/lib/queryClient';
 import {
   Card,
@@ -34,10 +35,8 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { ChevronLeft, CalendarIcon } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
-import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 
 // Extend the insertApprenticeSchema with additional validation

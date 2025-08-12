@@ -1,10 +1,9 @@
 import React from 'react';
 import { useLocation } from 'wouter';
+import { Download, FileText, Upload } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { Download, FileText, Upload } from 'lucide-react';
-import { Separator } from '@/components/ui/separator';
 import {
   Table,
   TableBody,

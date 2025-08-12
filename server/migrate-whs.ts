@@ -1,5 +1,5 @@
-import { db } from './db';
 import { sql } from 'drizzle-orm';
+import { db } from './db';
 import logger from './utils/logger';
 
 export async function migrateWHS() {

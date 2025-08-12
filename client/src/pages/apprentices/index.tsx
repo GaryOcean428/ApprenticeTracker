@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'wouter';
-import { Apprentice } from '@shared/schema';
+import type { Apprentice } from '@shared/schema';
+import { Eye, Pencil, Trash2, MoreHorizontal, FileText, Plus, Search, Filter } from 'lucide-react';
+import { Building2, Clock } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Table,
@@ -29,7 +31,6 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Eye, Pencil, Trash2, MoreHorizontal, FileText, Plus, Search, Filter } from 'lucide-react';
 
 const ApprenticesList = () => {
   const [filter, setFilter] = useState({
@@ -290,7 +291,5 @@ const ApprenticesList = () => {
     </>
   );
 };
-
-import { Building2, Clock } from 'lucide-react';
 
 export default ApprenticesList;

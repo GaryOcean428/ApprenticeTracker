@@ -6,11 +6,13 @@
  */
 
 import express from 'express';
-import { body, param, query, validationResult } from 'express-validator';
+import { query, validationResult } from 'express-validator';
 import { awardRateCalculator } from '../../services/award-rate-calculator';
 import { fairWorkDataSync } from '../../services/fairwork/data-sync';
 import { FairWorkApiClient } from '../../services/fairwork/api-client';
 import { awardMonitor } from '../../services/fairwork/award-monitor';
+import logger from '../../utils/logger';
+import { isAuthenticated } from '../../middleware/auth';
 import {
   getAwardUpdates,
   checkForUpdates,
@@ -18,8 +20,6 @@ import {
   ignoreAwardUpdate,
   analyzeAwardUpdate,
 } from './award-updates';
-import logger from '../../utils/logger';
-import { isAuthenticated } from '../../middleware/auth';
 
 const router = express.Router();
 // Log status for better debugging

@@ -1,14 +1,5 @@
-import { db } from './db';
-import {
-  gtoComplianceStandards,
-  complianceAssessments,
-  apprenticeRecruitment,
-  hostEmployerAgreements,
-  apprenticeInduction,
-  complaints,
-  appeals,
-} from '@shared/schema';
 import { sql } from 'drizzle-orm';
+import { db } from './db';
 
 /**
  * This script creates the GTO Compliance tables for Australian Apprentice Management

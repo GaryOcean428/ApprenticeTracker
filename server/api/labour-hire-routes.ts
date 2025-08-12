@@ -1,6 +1,4 @@
 import express from 'express';
-import { storage } from '../storage';
-import { isAuthenticated, hasPermission } from '../middleware/auth';
 import {
   insertLabourHireWorkerSchema,
   insertLabourHirePlacementSchema,
@@ -8,6 +6,8 @@ import {
   insertLabourHireWorkerDocumentSchema,
 } from '@shared/schema';
 import { z } from 'zod';
+import { storage } from '../storage';
+import { isAuthenticated, hasPermission } from '../middleware/auth';
 import logger from '../utils/logger';
 
 const router = express.Router();

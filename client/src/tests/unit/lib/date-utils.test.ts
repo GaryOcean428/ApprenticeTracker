@@ -1,3 +1,4 @@
+import { vi } from 'vitest';
 import {
   formatDate,
   parseDate,
@@ -5,7 +6,6 @@ import {
   parseISODate,
   DATE_FORMATS,
 } from '../../../lib/date-utils';
-import { vi } from 'vitest';
 
 describe('Date Utilities', () => {
   describe('parseDate', () => {

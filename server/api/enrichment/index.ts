@@ -1,4 +1,6 @@
 import { Router } from 'express';
+import { isAuthenticated } from '../auth-routes';
+import { hasPermission } from '../../middleware/permissions';
 import {
   getEnrichmentPrograms,
   getEnrichmentProgram,
@@ -6,8 +8,6 @@ import {
   updateEnrichmentProgram,
   deleteEnrichmentProgram,
 } from './programs';
-import { isAuthenticated, hasRole } from '../auth-routes';
-import { hasPermission } from '../../middleware/permissions';
 
 const router = Router();
 

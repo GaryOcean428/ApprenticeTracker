@@ -3,7 +3,8 @@
  * Provides advanced award interpretation features similar to WorkforceOne
  */
 
-import { Router, Request, Response } from 'express';
+import type { Request, Response } from 'express';
+import { Router } from 'express';
 import { isAuthenticated } from '../middleware/auth';
 
 const router = Router();

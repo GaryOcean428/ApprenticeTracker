@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '@/hooks/use-auth';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useLocation, Link } from 'wouter';
 import { useMutation } from '@tanstack/react-query';
+import { Eye, EyeOff, Loader2 } from 'lucide-react';
+import { useAuth } from '@/hooks/use-auth';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 
@@ -27,7 +28,6 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { Eye, EyeOff, Loader2 } from 'lucide-react';
 
 const registerSchema = z
   .object({

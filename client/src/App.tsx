@@ -1,15 +1,7 @@
 import { Switch, Route, useLocation } from 'wouter';
 import { lazy, Suspense } from 'react';
-import { queryClient } from './lib/queryClient';
 import { QueryClientProvider } from '@tanstack/react-query';
-import { Toaster } from '@/components/ui/toaster';
-import { TooltipProvider } from '@/components/ui/tooltip';
-import ErrorBoundary from '@/components/error-boundary';
-import { AuthProvider } from '@/hooks/use-auth';
-import { ProtectedRoute } from '@/components/auth/protected-route';
-import LoginPage from '@/pages/auth/login';
-import RegisterPage from '@/pages/auth/register';
-import NotFound from '@/pages/not-found';
+import { queryClient } from './lib/queryClient';
 import MainLayout from './layouts/main-layout';
 import Dashboard from './pages/dashboard';
 import ApprenticesList from './pages/apprentices/index';
@@ -76,6 +68,14 @@ import ProgressReviewsPage from './pages/progress-reviews';
 import TemplatesListPage from './pages/progress-reviews/templates';
 import CreateTemplatePage from './pages/progress-reviews/templates/create';
 import ReviewsListPage from './pages/progress-reviews/reviews';
+import NotFound from '@/pages/not-found';
+import RegisterPage from '@/pages/auth/register';
+import LoginPage from '@/pages/auth/login';
+import { ProtectedRoute } from '@/components/auth/protected-route';
+import { AuthProvider } from '@/hooks/use-auth';
+import ErrorBoundary from '@/components/error-boundary';
+import { Toaster } from '@/components/ui/toaster';
+import { TooltipProvider } from '@/components/ui/tooltip';
 
 // Financial Pages - using dynamic imports for better code splitting
 

@@ -1,19 +1,16 @@
 import type { Express } from 'express';
-import { db } from '../db';
-import { storage } from '../storage';
-import { eq, and, asc, desc, like, isNull, not, sql } from 'drizzle-orm';
+import { eq, and, desc, isNull, sql } from 'drizzle-orm';
 import {
   hostEmployers,
   hostEmployerAgreements,
   placements,
   apprentices,
   timesheets,
-  hostEmployerPreferredQualifications,
-  qualifications,
 } from '@shared/schema';
-import { z } from 'zod';
+import { storage } from '../storage';
+import { db } from '../db';
 import { isAuthenticated } from '../middleware/auth';
-import { hasPermission, hasAnyPermission } from '../middleware/permissions';
+import { hasPermission } from '../middleware/permissions';
 
 export function registerHostRoutes(app: Express) {
   // Get all host employers

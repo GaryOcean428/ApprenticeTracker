@@ -1,7 +1,5 @@
-import express from 'express';
-import { db } from '../../db';
+import type express from 'express';
 import { sql } from 'drizzle-orm';
-import { hasPermission } from '../../middleware/auth';
 import {
   whs_incidents,
   whs_witnesses,
@@ -11,6 +9,8 @@ import {
   insertWitnessSchema,
   insertDocumentSchema,
 } from '@shared/schema/whs';
+import { db } from '../../db';
+import { hasPermission } from '../../middleware/auth';
 
 export function setupIncidentRoutes(router: express.Router) {
   // GET all incidents

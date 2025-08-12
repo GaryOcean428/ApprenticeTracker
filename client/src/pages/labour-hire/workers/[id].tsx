@@ -1,17 +1,14 @@
 import { useParams, Link } from 'wouter';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
-import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import {
   CalendarDays,
-  User,
   Briefcase,
   FileText,
   Award,
   Clock,
   CreditCard,
-  MapPin,
   Phone,
   Mail,
   Calendar,
@@ -22,6 +19,8 @@ import {
   Edit,
   ChevronLeft,
 } from 'lucide-react';
+import type { LabourHireWorker } from '@shared/schema';
+import { useToast } from '@/hooks/use-toast';
 
 import {
   Card,
@@ -37,8 +36,6 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { DashboardShell } from '@/components/dashboard-shell';
-import { PageHeader } from '@/components/page-header';
-import { LabourHireWorker } from '@shared/schema';
 
 export default function WorkerDetailPage() {
   const { id } = useParams();

@@ -1,17 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
-import {
-  Users,
-  Building2,
-  AlertTriangle,
-  FileWarning,
-  BarChart2,
-  PieChart,
-  FileText,
-} from 'lucide-react';
+import { Users, Building2, AlertTriangle, FileWarning, FileText } from 'lucide-react';
 import { Link } from 'wouter';
 import StatCard from '@/components/dashboard/stat-card';
-import StatsCard from '@/components/dashboard/stats-card';
-import ChartPlaceholder from '@/components/dashboard/chart-placeholder';
 import FinancialSummary from '@/components/dashboard/financial-summary';
 import RecentActivity from '@/components/dashboard/recent-activity';
 import TaskList from '@/components/dashboard/tasks';

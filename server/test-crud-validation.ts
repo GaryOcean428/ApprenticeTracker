@@ -4,8 +4,6 @@
  */
 
 import { describe, it, expect, beforeAll, afterAll } from '@jest/globals';
-import { db } from '../db';
-import { storage } from '../storage';
 import {
   insertUserSchema,
   insertApprenticeSchema,
@@ -16,6 +14,7 @@ import {
   insertEnrichmentProgramSchema,
   insertProgressReviewTemplateSchema,
 } from '@shared/schema';
+import { storage } from '../storage';
 import {
   BusinessRuleValidator,
   createApprenticeValidationSchema,

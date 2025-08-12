@@ -50,9 +50,7 @@ describe('Enhanced Authentication Routes', () => {
 
   describe('Health Check', () => {
     it('should return system health status', async () => {
-      const response = await request(app)
-        .get('/api/auth/health')
-        .expect(200);
+      const response = await request(app).get('/api/auth/health').expect(200);
 
       expect(response.body).toHaveProperty('status', 'ok');
       expect(response.body).toHaveProperty('jwt');
@@ -69,9 +67,7 @@ describe('Enhanced Authentication Routes', () => {
         password: 'testpassword123',
       };
 
-      const response = await request(app)
-        .post('/api/auth/login')
-        .send(loginData);
+      const response = await request(app).post('/api/auth/login').send(loginData);
 
       // Log the actual response to debug
       console.log('Login response:', response.body);
@@ -95,10 +91,7 @@ describe('Enhanced Authentication Routes', () => {
         password: 'testpassword123',
       };
 
-      const response = await request(app)
-        .post('/api/auth/login')
-        .send(loginData)
-        .expect(400);
+      const response = await request(app).post('/api/auth/login').send(loginData).expect(400);
 
       expect(response.body).toHaveProperty('success', false);
       expect(response.body).toHaveProperty('code', 'VALIDATION_ERROR');
@@ -118,10 +111,7 @@ describe('Enhanced Authentication Routes', () => {
         password: '',
       };
 
-      const response = await request(app)
-        .post('/api/auth/login')
-        .send(loginData)
-        .expect(400);
+      const response = await request(app).post('/api/auth/login').send(loginData).expect(400);
 
       expect(response.body).toHaveProperty('success', false);
       expect(response.body).toHaveProperty('code', 'VALIDATION_ERROR');
@@ -133,9 +123,7 @@ describe('Enhanced Authentication Routes', () => {
         password: 'testpassword123',
       };
 
-      const response = await request(app)
-        .post('/api/auth/login')
-        .send(loginData);
+      const response = await request(app).post('/api/auth/login').send(loginData);
 
       expect(response.headers).toHaveProperty('x-content-type-options', 'nosniff');
       expect(response.headers).toHaveProperty('x-frame-options', 'DENY');
@@ -155,9 +143,7 @@ describe('Enhanced Authentication Routes', () => {
 
       // Note: In development mode without database, registration will fail
       // This tests the validation layer
-      const response = await request(app)
-        .post('/api/auth/register')
-        .send(registrationData);
+      const response = await request(app).post('/api/auth/register').send(registrationData);
 
       // Should pass validation but fail at service level due to no DB
       expect(response.body).toHaveProperty('success', false);
@@ -194,15 +180,13 @@ describe('Enhanced Authentication Routes', () => {
     it('should sanitize and validate input fields', async () => {
       const registrationData = {
         username: 'test_user', // Valid username without spaces
-        email: 'test@example.com', // Valid email without spaces  
+        email: 'test@example.com', // Valid email without spaces
         password: 'SecurePass123!',
         firstName: '  Test  ',
         lastName: '  User  ',
       };
 
-      const response = await request(app)
-        .post('/api/auth/register')
-        .send(registrationData);
+      const response = await request(app).post('/api/auth/register').send(registrationData);
 
       // Should pass validation but fail at service level due to no DB
       expect(response.body).toHaveProperty('success', false);
@@ -212,9 +196,7 @@ describe('Enhanced Authentication Routes', () => {
 
   describe('Token Verification', () => {
     it('should reject requests without token', async () => {
-      const response = await request(app)
-        .get('/api/auth/verify')
-        .expect(401);
+      const response = await request(app).get('/api/auth/verify').expect(401);
 
       expect(response.body).toHaveProperty('success', false);
       expect(response.body).toHaveProperty('code', 'NO_TOKEN');
@@ -239,14 +221,12 @@ describe('Enhanced Authentication Routes', () => {
       };
 
       // Make multiple rapid requests to trigger rate limit
-      const promises = Array(10).fill(null).map(() =>
-        request(app)
-          .post('/api/auth/login')
-          .send(loginData)
-      );
+      const promises = Array(10)
+        .fill(null)
+        .map(() => request(app).post('/api/auth/login').send(loginData));
 
       const responses = await Promise.all(promises);
-      
+
       // At least one response should be rate limited
       const rateLimitedResponses = responses.filter(r => r.status === 429);
       expect(rateLimitedResponses.length).toBeGreaterThan(0);
@@ -255,9 +235,7 @@ describe('Enhanced Authentication Routes', () => {
 
   describe('Profile Endpoint', () => {
     it('should require authentication', async () => {
-      const response = await request(app)
-        .get('/api/auth/profile')
-        .expect(401);
+      const response = await request(app).get('/api/auth/profile').expect(401);
 
       expect(response.body).toHaveProperty('success', false);
       expect(response.body).toHaveProperty('code', 'NO_TOKEN');
@@ -266,9 +244,7 @@ describe('Enhanced Authentication Routes', () => {
 
   describe('Logout Endpoint', () => {
     it('should require authentication', async () => {
-      const response = await request(app)
-        .post('/api/auth/logout')
-        .expect(401);
+      const response = await request(app).post('/api/auth/logout').expect(401);
 
       expect(response.body).toHaveProperty('success', false);
       expect(response.body).toHaveProperty('code', 'NO_TOKEN');
@@ -277,9 +253,7 @@ describe('Enhanced Authentication Routes', () => {
 
   describe('Token Refresh', () => {
     it('should require authentication', async () => {
-      const response = await request(app)
-        .post('/api/auth/refresh')
-        .expect(401);
+      const response = await request(app).post('/api/auth/refresh').expect(401);
 
       expect(response.body).toHaveProperty('success', false);
       expect(response.body).toHaveProperty('code', 'NO_TOKEN');

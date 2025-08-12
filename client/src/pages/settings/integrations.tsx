@@ -1,5 +1,24 @@
 import { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
+import { z } from 'zod';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import {
+  AlertTriangle,
+  Check,
+  Cloud,
+  Database,
+  Edit,
+  ExternalLink,
+  FileText,
+  Globe,
+  HardDrive,
+  Plus,
+  Server,
+  Settings,
+  Trash2,
+  Webhook,
+} from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import {
@@ -33,27 +52,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { apiRequest, queryClient } from '@/lib/queryClient';
-import { z } from 'zod';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import {
-  AlertTriangle,
-  Check,
-  Cloud,
-  Database,
-  Edit,
-  ExternalLink,
-  FileText,
-  Globe,
-  HardDrive,
-  Plus,
-  Server,
-  Settings,
-  Trash2,
-  Webhook,
-} from 'lucide-react';
 
 // API Integration schema
 const apiIntegrationSchema = z.object({

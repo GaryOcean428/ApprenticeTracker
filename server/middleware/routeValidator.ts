@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction } from 'express';
-import { z, type ZodTypeAny, ZodError } from 'zod';
+import { type ZodTypeAny, ZodError } from 'zod';
 
 /**
  * Validate body, query, and params against a Zod schema.

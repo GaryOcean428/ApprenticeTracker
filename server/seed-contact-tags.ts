@@ -1,5 +1,5 @@
-import { db } from './db';
 import { contactTags } from '@shared/schema/contacts';
+import { db } from './db';
 
 export async function seedContactTags() {
   console.log('[INFO] Seeding system contact tags...');

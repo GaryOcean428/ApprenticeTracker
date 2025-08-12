@@ -1,6 +1,7 @@
-import { useState } from 'react';
-import { useParams, Link, useLocation } from 'wouter';
+import { useParams, useLocation } from 'wouter';
 import { useQuery } from '@tanstack/react-query';
+import { Pencil, ArrowLeft } from 'lucide-react';
+import { AlertCircle } from 'lucide-react';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -11,13 +12,10 @@ import {
 } from '@/components/ui/breadcrumb';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Pencil, ArrowLeft } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { AlertCircle } from 'lucide-react';
 
 interface TrainingPackage {
   id: number;

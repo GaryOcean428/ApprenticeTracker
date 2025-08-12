@@ -1,4 +1,7 @@
 import { useState } from 'react';
+import { Loader2, AlertCircle, Check, ExternalLink } from 'lucide-react';
+import { useMutation } from '@tanstack/react-query';
+import { useLocation } from 'wouter';
 import { useToast } from '@/hooks/use-toast';
 import MainLayout from '@/layouts/main-layout';
 import { QualificationSearch } from '@/components/vet/qualification-search';
@@ -15,9 +18,6 @@ import {
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { Loader2, AlertCircle, Check, ExternalLink } from 'lucide-react';
-import { useMutation } from '@tanstack/react-query';
-import { useLocation } from 'wouter';
 
 interface Qualification {
   code: string;

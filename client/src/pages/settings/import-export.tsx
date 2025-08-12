@@ -1,5 +1,23 @@
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
+import { z } from 'zod';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import {
+  DownloadCloud,
+  FileInput,
+  FilePlus,
+  FileUp,
+  ArrowDownToLine,
+  FileText,
+  FileIcon,
+  AlertTriangle,
+  Trash2,
+  Columns,
+  Wand2,
+  Check,
+  Loader2,
+} from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import {
@@ -26,11 +44,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
 import { apiRequest, queryClient } from '@/lib/queryClient';
-import { z } from 'zod';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import {
   Form,
   FormControl,
@@ -44,37 +58,11 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import {
-  DownloadCloud,
-  FileInput,
-  FilePlus,
-  FileUp,
-  Upload,
-  ArrowDownToLine,
-  FileText,
-  FileIcon,
-  AlertTriangle,
-  Database,
-  CheckCircle2,
-  Trash2,
-  Settings,
-  Columns,
-  UploadCloud,
-  Eye,
-  Paperclip,
-  X,
-  Wand2,
-  Check,
-  FileSearch,
-  Edit3,
-  Loader2,
-} from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -82,11 +70,9 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Switch } from '@/components/ui/switch';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 // Enhanced schemas for column customization
 interface ColumnMapping {

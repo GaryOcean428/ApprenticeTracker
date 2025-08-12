@@ -1,10 +1,10 @@
-import { db } from '../db';
-import { contactTags, contacts, contactGroups, contactGroupMembers } from '@shared/schema';
-import { parse } from 'csv-parse';
 import { readFileSync } from 'fs';
 import { join } from 'path';
+import { contactTags, contacts, contactGroups, contactGroupMembers } from '@shared/schema';
+import { parse } from 'csv-parse';
 import chalk from 'chalk';
 import { eq } from 'drizzle-orm';
+import { db } from '../db';
 
 /**
  * Seed contact tags in the system

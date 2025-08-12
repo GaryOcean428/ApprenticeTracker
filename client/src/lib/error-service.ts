@@ -1,4 +1,4 @@
-import { useToast } from '@/hooks/use-toast';
+import type { useToast } from '@/hooks/use-toast';
 
 /**
  * Error types for better error categorization and handling

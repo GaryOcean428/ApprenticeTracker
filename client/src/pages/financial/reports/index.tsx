@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Link } from 'wouter';
 import {
   FileText,
   Download,
@@ -10,7 +9,6 @@ import {
   BarChart3,
   PieChart,
   LineChart,
-  ArrowUpDown,
   ChevronDown,
   Calendar,
   Share2,

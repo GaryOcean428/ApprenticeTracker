@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { Calendar, CheckCircle, Clock, Download, Plus, Search, User } from 'lucide-react';
 import {
   Card,
   CardHeader,
@@ -11,7 +12,6 @@ import {
   AlertTitle,
   AlertDescription,
 } from '@/components/common';
-import { Calendar, CheckCircle, Clock, Download, Filter, Plus, Search, User } from 'lucide-react';
 
 interface Timesheet {
   id: number;

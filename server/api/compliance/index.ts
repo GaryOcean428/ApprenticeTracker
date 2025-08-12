@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import standardsRouter from './standards';
 import { storage } from '../../storage';
+import standardsRouter from './standards';
 
 const router = Router();
 

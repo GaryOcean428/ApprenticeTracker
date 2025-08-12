@@ -1,5 +1,5 @@
-import { db } from './db';
 import { sql } from 'drizzle-orm';
+import { db } from './db';
 
 export async function migrateHostPreferredQualifications() {
   console.log('Creating Host Employer Preferred Qualifications table...');

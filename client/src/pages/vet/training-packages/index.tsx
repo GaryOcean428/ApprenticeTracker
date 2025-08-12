@@ -2,6 +2,19 @@ import { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useLocation } from 'wouter';
 import {
+  Plus,
+  Pencil,
+  Trash2,
+  MoreHorizontal,
+  Search,
+  Eye,
+  CheckCircle,
+  XCircle,
+} from 'lucide-react';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import {
   Card,
   CardHeader,
   CardTitle,
@@ -26,45 +39,20 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
+
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import {
-  FileText,
-  Plus,
-  Pencil,
-  Trash2,
-  MoreHorizontal,
-  Package,
-  Search,
-  Filter,
-  Eye,
-  CheckCircle,
-  XCircle,
-} from 'lucide-react';
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import {
   Form,
@@ -75,10 +63,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { queryClient, apiRequest } from '@/lib/queryClient';
-import { z } from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
+import { queryClient } from '@/lib/queryClient';
 
 // Define Training Package interface
 interface TrainingPackage {

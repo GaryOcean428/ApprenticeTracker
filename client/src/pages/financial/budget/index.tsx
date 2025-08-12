@@ -4,18 +4,11 @@ import {
   PlusCircle,
   ChevronDown,
   Download,
-  Calendar,
   BarChart3,
   ArrowRightLeft,
-  Save,
   FileEdit,
   Copy,
-  AlertTriangle,
-  CheckCircle2,
-  Target,
-  Mail,
   Share2,
-  DollarSign,
 } from 'lucide-react';
 import { BudgetFormDialog } from '@/components/financial/budget-form-dialog';
 
@@ -29,13 +22,7 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+
 import {
   Table,
   TableBody,
@@ -48,15 +35,12 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { DatePickerWithRange } from '@/components/date-range-picker';
 import { useToast } from '@/hooks/use-toast';
 
 // Types

@@ -1,5 +1,5 @@
-import { db } from './db';
 import { sql } from 'drizzle-orm';
+import { db } from './db';
 
 /**
  * This script creates the Fair Work integration tables for Australian Apprentice Management

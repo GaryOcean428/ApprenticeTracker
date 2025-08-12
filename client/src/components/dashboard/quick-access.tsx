@@ -1,6 +1,6 @@
 import { Link } from 'wouter';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Shield, Building, FileText, Clock } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 const QuickAccess = () => {
   const quickActions = [

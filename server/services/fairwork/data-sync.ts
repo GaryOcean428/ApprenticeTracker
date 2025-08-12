@@ -5,13 +5,13 @@
  * Fair Work Commission data, including awards, classifications, and pay rates.
  */
 
-import { db } from '../../db';
 import { sql } from 'drizzle-orm';
-import { awards, awardClassifications, payRates } from '@shared/schema';
+import { awards, awardClassifications } from '@shared/schema';
 import { eq, and } from 'drizzle-orm';
-import logger from '../../utils/logger';
-import { FairWorkApiClient } from './api-client';
 import * as cron from 'node-cron';
+import logger from '../../utils/logger';
+import { db } from '../../db';
+import { FairWorkApiClient } from './api-client';
 
 export class FairWorkDataSync {
   private apiClient: FairWorkApiClient;

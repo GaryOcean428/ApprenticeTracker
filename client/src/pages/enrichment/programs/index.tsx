@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { Calendar, Filter, Plus, Search, Tag, Users } from 'lucide-react';
 import {
   Card,
   CardHeader,
@@ -11,7 +12,6 @@ import {
   AlertTitle,
   AlertDescription,
 } from '@/components/common';
-import { Calendar, Filter, GraduationCap, Plus, Search, Tag, Users } from 'lucide-react';
 
 interface EnrichmentProgram {
   id: number;

@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import { Request, Response, NextFunction } from 'express';
+import type { Request, Response, NextFunction } from 'express';
 import { env } from '../utils/env';
 
 export interface AuthRequest extends Request {

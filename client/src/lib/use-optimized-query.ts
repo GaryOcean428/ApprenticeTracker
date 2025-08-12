@@ -1,7 +1,8 @@
-import { UseQueryOptions, UseQueryResult, useQuery, QueryKey } from '@tanstack/react-query';
+import type { UseQueryOptions, UseQueryResult, QueryKey } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
+import type { z } from 'zod';
 import { getQueryFn } from './queryClient';
 import { useToast } from '@/hooks/use-toast';
-import { z } from 'zod';
 
 export interface OptimizedQueryOptions<TData>
   extends Omit<UseQueryOptions<TData, Error>, 'queryKey'> {

@@ -1,6 +1,6 @@
-import { db } from './db';
 import { gtoComplianceStandards } from '@shared/schema';
-import { InsertGtoComplianceStandard } from '@shared/schema';
+import type { InsertGtoComplianceStandard } from '@shared/schema';
+import { db } from './db';
 
 /**
  * Seeds the GTO Compliance Standards from the Australian National Standards for GTOs

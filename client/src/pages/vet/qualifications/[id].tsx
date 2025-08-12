@@ -2,13 +2,17 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useParams, useLocation } from 'wouter';
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+  ChevronLeft,
+  FileText,
+  Award,
+  BookOpen,
+  Clock,
+  PenLine,
+  AlertCircle,
+  FileCode,
+  Monitor,
+} from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
   Table,
@@ -29,33 +33,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
-import {
-  ChevronLeft,
-  GraduationCap,
-  FileText,
-  Award,
-  BookOpen,
-  ListTodo,
-  Clock,
-  Users,
-  PenLine,
-  Download,
-  Share2,
-  AlertCircle,
-  Tags,
-  Code,
-  FileCode,
-  Monitor,
-  ArrowUpDown,
-  ChevronDown,
-  User,
-  Building,
-  Calendar,
-  ListChecks,
-  Briefcase,
-} from 'lucide-react';
 
 interface Unit {
   id: number;

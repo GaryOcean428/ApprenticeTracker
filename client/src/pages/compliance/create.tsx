@@ -1,15 +1,16 @@
-import { useState } from 'react';
-import { useLocation, useRoute } from 'wouter';
+import { useLocation } from 'wouter';
 import { useMutation } from '@tanstack/react-query';
 import { z } from 'zod';
 import { insertComplianceRecordSchema } from '@shared/schema';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
+import { Calendar as CalendarIcon, ArrowLeft } from 'lucide-react';
+import { format } from 'date-fns';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -25,12 +26,9 @@ import {
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Calendar as CalendarIcon, ArrowLeft } from 'lucide-react';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
-import { format } from 'date-fns';
-import { toast } from 'sonner';
 import { queryClient } from '@/lib/queryClient';
 // No need for Link import
 

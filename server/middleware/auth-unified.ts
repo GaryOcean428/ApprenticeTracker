@@ -1,10 +1,10 @@
 import jwt from 'jsonwebtoken';
-import { Request, Response, NextFunction } from 'express';
+import type { Request, Response, NextFunction } from 'express';
 import rateLimit from 'express-rate-limit';
-import { env } from '../utils/env';
-import { db } from '../db';
 import { users } from '@shared/schema';
 import { eq } from 'drizzle-orm';
+import { env } from '../utils/env';
+import { db } from '../db';
 
 // Enhanced request interface with user and audit info
 export interface AuthRequest extends Request {
@@ -102,11 +102,7 @@ export const authRateLimiters = {
 };
 
 // Audit logging function
-export function auditLog(
-  event: string,
-  req: Request,
-  details?: Record<string, any>
-): void {
+export function auditLog(event: string, req: Request, details?: Record<string, any>): void {
   const logEntry = {
     timestamp: new Date().toISOString(),
     event,
@@ -169,17 +165,22 @@ export function verifyToken(token: string): Promise<any> {
       return;
     }
 
-    jwt.verify(token, JWT_CONFIG.secret, {
-      algorithms: [JWT_CONFIG.algorithm],
-      issuer: JWT_CONFIG.issuer,
-      audience: JWT_CONFIG.audience,
-    }, (err, decoded) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(decoded);
+    jwt.verify(
+      token,
+      JWT_CONFIG.secret,
+      {
+        algorithms: [JWT_CONFIG.algorithm],
+        issuer: JWT_CONFIG.issuer,
+        audience: JWT_CONFIG.audience,
+      },
+      (err, decoded) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(decoded);
+        }
       }
-    });
+    );
   });
 }
 
@@ -209,7 +210,7 @@ export const authenticateToken = async (
 
     try {
       const decoded = await verifyToken(token);
-      
+
       // Additional validation for token claims
       if (!decoded.id || !decoded.email) {
         auditLog('AUTH_INVALID_CLAIMS', req, { tokenClaims: Object.keys(decoded) });
@@ -253,10 +254,10 @@ export const authenticateToken = async (
       next();
     } catch (tokenError) {
       auditLog('AUTH_TOKEN_INVALID', req, { error: tokenError.message });
-      
+
       let errorCode = 'INVALID_TOKEN';
       let errorMessage = 'Invalid or expired token';
-      
+
       if (tokenError.name === 'TokenExpiredError') {
         errorCode = 'TOKEN_EXPIRED';
         errorMessage = 'Token has expired';
@@ -272,7 +273,7 @@ export const authenticateToken = async (
   } catch (error) {
     console.error('Authentication middleware error:', error);
     auditLog('AUTH_MIDDLEWARE_ERROR', req, { error: error.message });
-    
+
     const authError = createAuthError(
       'AUTH_SERVICE_ERROR',
       'Authentication service temporarily unavailable',
@@ -294,14 +295,14 @@ export function requireRole(role: string | string[]) {
     }
 
     const requiredRoles = Array.isArray(role) ? role : [role];
-    
+
     if (!requiredRoles.includes(req.user.role)) {
-      auditLog('AUTH_INSUFFICIENT_ROLE', req, { 
-        userRole: req.user.role, 
+      auditLog('AUTH_INSUFFICIENT_ROLE', req, {
+        userRole: req.user.role,
         requiredRoles,
-        userId: req.user.id 
+        userId: req.user.id,
       });
-      
+
       const error = createAuthError('INSUFFICIENT_ROLE', 'Insufficient role permissions', 403, req);
       res.status(403).json(error);
       return;
@@ -322,21 +323,27 @@ export function requirePermission(permission: string | string[]) {
 
     const requiredPermissions = Array.isArray(permission) ? permission : [permission];
     const userPermissions = req.user.permissions || [];
-    
+
     // Check if user has any of the required permissions
-    const hasPermission = requiredPermissions.some(perm => 
-      userPermissions.includes(perm) || 
-      (process.env.NODE_ENV === 'development' && ['admin', 'developer'].includes(req.user!.role))
+    const hasPermission = requiredPermissions.some(
+      perm =>
+        userPermissions.includes(perm) ||
+        (process.env.NODE_ENV === 'development' && ['admin', 'developer'].includes(req.user!.role))
     );
 
     if (!hasPermission) {
-      auditLog('AUTH_INSUFFICIENT_PERMISSIONS', req, { 
-        userPermissions, 
+      auditLog('AUTH_INSUFFICIENT_PERMISSIONS', req, {
+        userPermissions,
         requiredPermissions,
-        userId: req.user.id 
+        userId: req.user.id,
       });
-      
-      const error = createAuthError('INSUFFICIENT_PERMISSIONS', 'Insufficient permissions', 403, req);
+
+      const error = createAuthError(
+        'INSUFFICIENT_PERMISSIONS',
+        'Insufficient permissions',
+        403,
+        req
+      );
       res.status(403).json(error);
       return;
     }
@@ -361,15 +368,20 @@ export function requireSameOrganization(req: AuthRequest, res: Response, next: N
   // Check if user belongs to the same organization as the resource they're accessing
   // This would need to be customized based on the specific endpoint
   const resourceOrgId = req.params.organizationId || req.body.organizationId;
-  
+
   if (resourceOrgId && req.user.organizationId !== parseInt(resourceOrgId)) {
-    auditLog('AUTH_ORG_ACCESS_DENIED', req, { 
-      userOrgId: req.user.organizationId, 
+    auditLog('AUTH_ORG_ACCESS_DENIED', req, {
+      userOrgId: req.user.organizationId,
       requestedOrgId: resourceOrgId,
-      userId: req.user.id 
+      userId: req.user.id,
     });
-    
-    const error = createAuthError('ORGANIZATION_ACCESS_DENIED', 'Access denied for this organization', 403, req);
+
+    const error = createAuthError(
+      'ORGANIZATION_ACCESS_DENIED',
+      'Access denied for this organization',
+      403,
+      req
+    );
     res.status(403).json(error);
     return;
   }
@@ -383,15 +395,18 @@ export function addSecurityHeaders(req: Request, res: Response, next: NextFuncti
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('X-Frame-Options', 'DENY');
   res.setHeader('X-XSS-Protection', '1; mode=block');
-  
+
   // Ensure HTTPS in production
   if (process.env.NODE_ENV === 'production') {
     res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
   }
-  
+
   // Content Security Policy for auth endpoints
-  res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'none'; object-src 'none'");
-  
+  res.setHeader(
+    'Content-Security-Policy',
+    "default-src 'self'; script-src 'none'; object-src 'none'"
+  );
+
   next();
 }
 

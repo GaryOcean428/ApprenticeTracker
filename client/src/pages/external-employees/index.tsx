@@ -1,5 +1,14 @@
-import { useQuery } from '@tanstack/react-query';
 import { Link } from 'wouter';
+import {
+  Briefcase,
+  GraduationCap,
+  UserPlus,
+  FileText,
+  CheckCircle2,
+  Calendar,
+  ClipboardList,
+  Building2,
+} from 'lucide-react';
 import {
   Card,
   CardContent,
@@ -12,16 +21,6 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { PageHeader } from '@/components/page-header';
 import { DashboardShell } from '@/components/dashboard-shell';
-import {
-  Briefcase,
-  GraduationCap,
-  UserPlus,
-  FileText,
-  CheckCircle2,
-  Calendar,
-  ClipboardList,
-  Building2,
-} from 'lucide-react';
 
 export default function ExternalEmployeesPage() {
   return (

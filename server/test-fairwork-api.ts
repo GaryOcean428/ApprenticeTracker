@@ -1,9 +1,9 @@
-import express from 'express';
 import { createServer } from 'http';
+import express from 'express';
 import cors from 'cors';
-import { awards, awardClassifications, penaltyRules, allowanceRules } from '../shared/schema';
-import { db } from './db';
 import { eq } from 'drizzle-orm';
+import { awards, awardClassifications, penaltyRules } from '../shared/schema';
+import { db } from './db';
 
 // This file is for direct testing of Fair Work API routes without Vite interference
 

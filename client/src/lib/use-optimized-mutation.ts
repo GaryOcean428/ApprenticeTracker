@@ -1,12 +1,8 @@
-import {
-  UseMutationOptions,
-  UseMutationResult,
-  useMutation,
-  useQueryClient,
-} from '@tanstack/react-query';
+import type { UseMutationOptions, UseMutationResult } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import type { z } from 'zod';
 import { apiRequest } from './queryClient';
 import { useToast } from '@/hooks/use-toast';
-import { z } from 'zod';
 
 export type HttpMethod = 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 

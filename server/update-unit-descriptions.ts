@@ -1,9 +1,9 @@
 /**
  * Script to update generic unit descriptions with more detailed information
  */
-import { db } from './db';
 import { unitsOfCompetency } from '@shared/schema';
 import { eq, like } from 'drizzle-orm';
+import { db } from './db';
 
 export async function updateUnitDescriptions() {
   try {
@@ -69,12 +69,11 @@ export async function updateUnitDescriptions() {
 }
 
 // Run the script
-updateUnitDescriptions()
-  .then(count => {
-    console.log(`Updated ${count} unit descriptions`);
-    process.exit(0);
-  })
-  .catch(error => {
-    console.error('Script failed:', error);
-    process.exit(1);
-  });
+try {
+  const count = await updateUnitDescriptions();
+  console.log(`Updated ${count} unit descriptions`);
+  process.exit(0);
+} catch (error) {
+  console.error('Script failed:', error);
+  process.exit(1);
+}

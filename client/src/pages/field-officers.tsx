@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useLocation } from 'wouter';
+import { Calendar, Clock, FileEdit, Trash2, Users } from 'lucide-react';
 import { PageLayout } from '@/components/page-layout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { FilterBar, FilterGroup } from '@/components/filter-bar';
 import { DataGrid } from '@/components/ui/data-grid';
 import { formatDate } from '@/lib/date-utils';
-import { Calendar, Clock, FileEdit, Trash2, Users } from 'lucide-react';
 
 /**
  * Types for Field Officer Activities

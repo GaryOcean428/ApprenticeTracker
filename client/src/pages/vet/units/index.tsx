@@ -1,7 +1,17 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'wouter';
-import { UnitOfCompetency } from '@shared/schema';
+import type { UnitOfCompetency } from '@shared/schema';
+import {
+  Eye,
+  Pencil,
+  Trash2,
+  MoreHorizontal,
+  Plus,
+  Search,
+  CheckCircle,
+  XCircle,
+} from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Table,
@@ -28,17 +38,6 @@ import {
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import {
-  Eye,
-  Pencil,
-  Trash2,
-  MoreHorizontal,
-  Plus,
-  Search,
-  Filter,
-  CheckCircle,
-  XCircle,
-} from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 export default function UnitsOfCompetencyList() {

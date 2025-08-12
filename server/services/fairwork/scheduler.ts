@@ -5,9 +5,9 @@
  * to ensure our system stays up-to-date with the latest rates and rules.
  */
 
-import { FairWorkApiClient } from './api-client';
-import { FairWorkDataSync } from './data-sync';
 import logger from '../../utils/logger';
+import type { FairWorkApiClient } from './api-client';
+import { FairWorkDataSync } from './data-sync';
 
 // Interval for Fair Work data syncs (in milliseconds)
 // Default to weekly (7 days) updates

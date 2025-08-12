@@ -1,21 +1,18 @@
 import { Router } from 'express';
-import { db } from '../db';
 import {
   gtoComplianceStandards,
   complianceAssessments,
-  apprenticeRecruitment,
-  apprenticeInduction,
-  hostEmployerAgreements,
   complaints,
   appeals,
   gtoOrganizations,
 } from '@shared/schema';
-import { eq, and, sql } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
 import {
   insertGtoComplianceStandardSchema,
   insertComplianceAssessmentSchema,
 } from '@shared/schema';
 import { z } from 'zod';
+import { db } from '../db';
 
 export const gtoComplianceRouter = Router();
 

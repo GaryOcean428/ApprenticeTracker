@@ -5,17 +5,10 @@
  */
 
 import { Router } from 'express';
-import { ChargeRateCalculator } from '../../services/charge-rate-calculator';
-import { z } from 'zod';
+import { chargeRateCalculations, apprentices, hostEmployers } from '@shared/schema';
+import { eq, desc } from 'drizzle-orm';
 import { db } from '../../db';
-import {
-  chargeRateCalculations,
-  apprentices,
-  hostEmployers,
-  awards,
-  awardClassifications,
-} from '@shared/schema';
-import { eq, desc, and } from 'drizzle-orm';
+import { ChargeRateCalculator } from '../../services/charge-rate-calculator';
 import logger from '../../utils/logger';
 import { authenticateUser, requirePermission } from '../../middleware/permissions';
 

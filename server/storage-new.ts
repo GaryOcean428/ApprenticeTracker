@@ -1,6 +1,5 @@
 import { and, desc, eq } from 'drizzle-orm';
-import { db } from './db';
-import {
+import type {
   Apprentice,
   Document,
   HostEmployer,
@@ -13,17 +12,6 @@ import {
   Placement,
   TrainingContract,
   User,
-  users,
-  apprentices,
-  hostEmployers,
-  trainingContracts,
-  placements,
-  documents,
-  complianceRecords,
-  timesheets,
-  timesheetDetails,
-  activityLogs,
-  tasks,
   InsertComplianceRecord,
   ComplianceRecord,
   InsertTimesheet,
@@ -35,6 +23,20 @@ import {
   InsertTask,
   Task,
 } from '@shared/schema';
+import {
+  users,
+  apprentices,
+  hostEmployers,
+  trainingContracts,
+  placements,
+  documents,
+  complianceRecords,
+  timesheets,
+  timesheetDetails,
+  activityLogs,
+  tasks,
+} from '@shared/schema';
+import { db } from './db';
 
 export interface IStorage {
   // Users

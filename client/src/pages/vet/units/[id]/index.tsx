@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useParams, useLocation, Link } from 'wouter';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { ArrowLeft, Edit, CheckCircle2, XCircle } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -14,7 +15,6 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, Edit, FileSymlink, CheckCircle2, XCircle, FileCog } from 'lucide-react';
 
 export default function UnitOfCompetencyDetail() {
   const { id } = useParams();

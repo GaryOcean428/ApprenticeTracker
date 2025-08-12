@@ -1,7 +1,7 @@
 import { Link } from 'wouter';
-import { Button } from '@/components/ui/button';
-import { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import logoPath from '@assets/500x160 Black Logo (1).png';
+import { Button } from '@/components/ui/button';
 
 interface PublicLayoutProps {
   children: ReactNode;

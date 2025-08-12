@@ -1,7 +1,19 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link, useLocation } from 'wouter';
-import { Placement, Apprentice, HostEmployer } from '@shared/schema';
+import type { Placement, Apprentice, HostEmployer } from '@shared/schema';
+import {
+  Eye,
+  Pencil,
+  Trash2,
+  MoreHorizontal,
+  Plus,
+  Search,
+  Filter,
+  User,
+  Building2,
+  CalendarRange,
+} from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Table,
@@ -28,18 +40,6 @@ import {
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import {
-  Eye,
-  Pencil,
-  Trash2,
-  MoreHorizontal,
-  Plus,
-  Search,
-  Filter,
-  User,
-  Building2,
-  CalendarRange,
-} from 'lucide-react';
 
 const PlacementsList = () => {
   const [location, params] = useLocation();
