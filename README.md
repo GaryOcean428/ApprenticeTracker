@@ -81,10 +81,14 @@ Comprehensive documentation is available in the `/docs` directory:
 
 1. Clone the repository
 2. Install dependencies: `pnpm install`
+
 3. Set up environment variables (see Environment Configuration below)
+  3.1 Copy `.env.example` to `.env` and update values
 4. Start the development server: `pnpm dev`
 
 ### Environment Configuration
+
+Start by copying `.env.example` to `.env` and filling in the values described below.
 
 The following environment variables are required for deployment:
 
@@ -105,6 +109,12 @@ For Railway deployment, ensure:
 3. Mount a persistent volume to the path specified in `UPLOAD_DIR`
 
 **Note**: Without proper `UPLOAD_DIR` configuration, uploaded files will be lost on container restart/redeploy.
+
+### Post-deployment checklist
+1. Verify logs show `Listening on 0.0.0.0:<PORT>`.
+2. Open the public URL and ensure basic pages load.
+3. Test a WebSocket connection from the client.
+4. Check the browser console for CORS errors.
 
 ## Development Roadmap
 
