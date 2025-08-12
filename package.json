@@ -30,7 +30,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   }
 }
-  },
+  }
   "dependencies": {
     "@eslint/js": "^9.26.0",
     "@hookform/resolvers": "^3.10.0",
