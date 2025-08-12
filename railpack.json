@@ -1,0 +1,66 @@
+{
+  "$schema": "https://schema.railpack.com",
+  "version": "1",
+  "build": {
+    "provider": "node",
+    "packageManager": "pnpm@10.5.2",
+    "nodeVersion": "22",
+    "steps": [
+      {
+        "id": "install",
+        "description": "Install dependencies with PNPM",
+        "commands": [
+          "corepack enable",
+          "corepack prepare pnpm@10.5.2 --activate",
+          "pnpm install --frozen-lockfile"
+        ],
+        "cache": [
+          {
+            "path": "node_modules/.pnpm",
+            "key": "pnpm-store-{{ checksum \"pnpm-lock.yaml\" }}"
+          },
+          {
+            "path": ".pnpm-store", 
+            "key": "pnpm-cache-{{ checksum \"pnpm-lock.yaml\" }}"
+          }
+        ]
+      },
+      {
+        "id": "build",
+        "description": "Build production assets",
+        "dependencies": ["install"],
+        "commands": [
+          "pnpm build"
+        ],
+        "cache": [
+          {
+            "path": "dist",
+            "key": "build-cache-{{ checksum \"client/**\" \"server/**\" \"package.json\" \"vite.config.ts\" }}"
+          },
+          {
+            "path": "node_modules/.vite",
+            "key": "vite-cache-{{ checksum \"package.json\" }}"
+          }
+        ]
+      }
+    ]
+  },
+  "deploy": {
+    "base": {
+      "image": "node:22-alpine"
+    },
+    "dependencies": ["build"],
+    "startCommand": "pnpm start",
+    "healthcheck": {
+      "path": "/api/health",
+      "interval": 30,
+      "timeout": 10,
+      "retries": 3,
+      "startPeriod": 40
+    },
+    "environment": {
+      "NODE_ENV": "production",
+      "NPM_CONFIG_PRODUCTION": "false"
+    }
+  }
+}
