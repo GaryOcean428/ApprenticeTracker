@@ -94,7 +94,7 @@ CRM7 is a comprehensive enterprise workforce management platform designed specif
 ## Deployment Strategy
 
 ### Development Environment
-- **Command**: `npm run dev`
+- **Command**: `pnpm run dev`
 - **Ports**: 5000 (backend), 5001 (frontend)
 - **Hot Reload**: Enabled for both client and server
 - **Database**: Uses DATABASE_URL environment variable
@@ -116,13 +116,13 @@ CRM7 is a comprehensive enterprise workforce management platform designed specif
 ### Build Commands
 ```bash
 # Development
-npm run dev
+pnpm run dev
 
 # Production build
-npm run build
+pnpm run build
 
 # Production start
-npm run start:prod
+pnpm run start:prod
 ```
 
 ## Changelog

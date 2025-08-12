@@ -211,7 +211,7 @@ app.use('*', (req, res) => {
     console.error('Frontend build files not found at:', indexPath);
     return res.status(503).json({
       error: 'Application not ready',
-      message: 'Frontend build files are missing. Please run npm run build first.'
+      message: 'Frontend build files are missing. Please run pnpm run build first.'
     });
   }
   

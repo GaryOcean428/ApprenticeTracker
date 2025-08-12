@@ -80,9 +80,9 @@ Comprehensive documentation is available in the `/docs` directory:
 ### Installation
 
 1. Clone the repository
-2. Install dependencies: `npm install`
+2. Install dependencies: `pnpm install`
 3. Set up environment variables (see Environment Configuration below)
-4. Start the development server: `npm run dev`
+4. Start the development server: `pnpm run dev`
 
 ### Environment Configuration
 
@@ -101,7 +101,7 @@ The following environment variables are required for deployment:
 
 For Railway deployment, ensure:
 1. Set `UPLOAD_DIR` environment variable to your persistent volume mount path (e.g., `/data/uploads`)
-2. Use the correct start command: `npm start` (not `npm run start:prod` unless you need the production server wrapper)
+2. Use the correct start command: `pnpm start` (not `pnpm run start:prod` unless you need the production server wrapper)
 3. Mount a persistent volume to the path specified in `UPLOAD_DIR`
 
 **Note**: Without proper `UPLOAD_DIR` configuration, uploaded files will be lost on container restart/redeploy.

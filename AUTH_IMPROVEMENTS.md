@@ -422,20 +422,20 @@ const registerResult = await AuthService.register({
 
 ```bash
 # Run all auth tests
-npm run test:run server/__tests__/auth-routes.test.ts
+pnpm run test:run server/__tests__/auth-routes.test.ts
 
 # Run tests with coverage
-npm run test:coverage
+pnpm run test:coverage
 
 # Run tests in watch mode
-npm test
+pnpm test
 ```
 
 ### Demo Server
 
 ```bash
 # Start demo server on port 3001
-npm run demo:auth
+pnpm run demo:auth
 
 # Test endpoints
 curl -X GET http://localhost:3001/api/auth/health
