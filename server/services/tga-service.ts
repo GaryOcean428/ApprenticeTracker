@@ -229,9 +229,15 @@ export class TGAService {
   /**
    * Search qualifications from Training.gov.au using SOAP API
    */
-  async searchQualifications(query: string, limit: number = 20): Promise<TGAQualification[]> {
+  async searchQualifications(
+    query: string,
+    limit: number = 20,
+    includeSuperseded = false
+  ): Promise<TGAQualification[]> {
     try {
-      console.log(`Searching qualifications with query: "${query}" (limit: ${limit})`);
+      console.log(
+        `Searching qualifications with query: "${query}" (limit: ${limit}, includeSuperseded: ${includeSuperseded})`
+      );
 
       // Search validation for normal search operations
       if (query.length < 3) {
@@ -239,7 +245,7 @@ export class TGAService {
       }
 
       // Try to get results from cache first
-      const cacheKey = `tga:search:${query}:${limit}`;
+      const cacheKey = `tga:search:${query}:${limit}:${includeSuperseded}`;
       const cachedResults = cacheService.get<TGAQualification[]>(cacheKey);
 
       if (cachedResults) {
@@ -254,7 +260,7 @@ export class TGAService {
       if (!soapClientError) {
         try {
           // Try the SOAP API if it hasn't failed previously
-          results = await this.searchQualificationsSoap(query, limit);
+          results = await this.searchQualificationsSoap(query, limit, includeSuperseded);
         } catch (soapError: unknown) {
           const errorMessage = soapError instanceof Error ? soapError.message : 'Unknown error';
           console.error(`TGA SOAP API error: ${errorMessage}`);
@@ -267,14 +273,16 @@ export class TGAService {
       // If SOAP didn't return results, try REST API
       if (results.length === 0 && (!soapClientError || soapClientError)) {
         try {
-          console.log(`Calling Training.gov.au REST API with search query: "${query}"`);
+          console.log(
+            `Calling Training.gov.au REST API with search query: "${query}" (includeSuperseded: ${includeSuperseded})`
+          );
 
           const response = await axios.get(`${TGA_REST_API_URL}/search`, {
             params: {
               type: 'qualification',
               searchQuery: query,
               pageSize: limit,
-              includeSuperseded: false,
+              includeSuperseded,
               includeDeleted: false,
               sortOrder: 'relevance',
             },
@@ -318,7 +326,8 @@ export class TGAService {
    */
   private async searchQualificationsSoap(
     query: string,
-    limit: number = 20
+    limit: number = 20,
+    includeSuperseded = false
   ): Promise<TGAQualification[]> {
     try {
       console.log(`Searching qualifications with SOAP API, query: "${query}"`);
@@ -332,7 +341,7 @@ export class TGAService {
         searchText: query,
         filterParams: {
           TrainingComponentType: 'QUALIFICATION',
-          StatusFilter: ['CURRENT'], // Can also include "SUPERSEDED" if needed
+          StatusFilter: includeSuperseded ? ['CURRENT', 'SUPERSEDED'] : ['CURRENT'],
           MaximumResults: limit,
         },
       };

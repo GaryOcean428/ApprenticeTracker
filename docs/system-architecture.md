@@ -121,7 +121,7 @@ The CRM7 platform follows a microservices architecture pattern, with clearly def
 
 ### Frontend
 
-- Next.js 15.1.6
+- React with Vite 6
 - TypeScript
 - TailwindCSS
 - shadcn/ui components

@@ -4,7 +4,7 @@
 
 ### Completed Milestones
 - **Architectural Foundation** - Established robust microservices architecture with named services for identity, documents, notifications, compliance, training, and placement
-- **Technical Stack Implementation** - Successfully integrated modern tech stack (Next.js, TypeScript, TailwindCSS, shadcn/ui, Supabase/PostgreSQL)
+- **Technical Stack Implementation** - Successfully integrated modern tech stack (React, Vite, TypeScript, TailwindCSS, shadcn/ui, Supabase/PostgreSQL)
 - **Documentation and Planning** - Completed comprehensive gap analysis, national standards alignment documentation, competitor comparison, and initial roadmap
 - **WHS Module (Phase 1)** - Implemented core database structure, API endpoints, and frontend components:
   - Database schema for incidents, risk assessments, inspections, and safety policies
