@@ -556,6 +556,10 @@ settingsRouter.delete('/webhooks/:id', async (req: Request, res: Response) => {
 settingsRouter.get('/data-jobs', async (req: Request, res: Response) => {
   try {
     const { type } = req.query;
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ message: 'User not authenticated' });
+    }
 
     // Mock data temporarily while schema is being implemented
     let jobs = [
@@ -570,7 +574,7 @@ settingsRouter.get('/data-jobs', async (req: Request, res: Response) => {
         recordsTotal: 124,
         options: { skipHeader: true, updateExisting: true },
         errors: null,
-        userId: 1,
+        userId,
         createdAt: new Date(Date.now() - 86400000),
         completedAt: new Date(Date.now() - 86395000),
         updatedAt: new Date(Date.now() - 86395000),
@@ -586,7 +590,7 @@ settingsRouter.get('/data-jobs', async (req: Request, res: Response) => {
         recordsTotal: 150,
         options: { includeArchived: false },
         errors: null,
-        userId: 1,
+        userId,
         createdAt: new Date(),
         completedAt: null,
         updatedAt: new Date(),
@@ -602,7 +606,7 @@ settingsRouter.get('/data-jobs', async (req: Request, res: Response) => {
         recordsTotal: 78,
         options: { skipHeader: true, updateExisting: false },
         errors: ['Row 6: Invalid apprentice ID', 'Row 10: Missing required field: contractNumber'],
-        userId: 2,
+        userId,
         createdAt: new Date(Date.now() - 172800000),
         completedAt: new Date(Date.now() - 172790000),
         updatedAt: new Date(Date.now() - 172790000),
@@ -644,6 +648,11 @@ settingsRouter.post('/import', upload.single('file'), async (req: Request, res: 
     else if (fileExtension === 'xlsx' || fileExtension === 'xls') fileFormat = 'xlsx';
     else if (fileExtension === 'json') fileFormat = 'json';
 
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ message: 'User not authenticated' });
+    }
+
     // Mock data temporarily while schema is being implemented
     const importJob = {
       id: 4,
@@ -656,7 +665,7 @@ settingsRouter.post('/import', upload.single('file'), async (req: Request, res: 
       recordsTotal: 0,
       options: options ? JSON.parse(options) : {},
       errors: null,
-      userId: 1,
+      userId,
       createdAt: new Date(),
       completedAt: null,
       updatedAt: new Date(),
@@ -686,6 +695,11 @@ settingsRouter.post('/export', async (req: Request, res: Response) => {
     const dateString = now.toISOString().slice(0, 10).replace(/-/g, '');
     const fileName = `${type}-export-${dateString}.${format}`;
 
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ message: 'User not authenticated' });
+    }
+
     // Mock data temporarily while schema is being implemented
     const exportJob = {
       id: 5,
@@ -698,7 +712,7 @@ settingsRouter.post('/export', async (req: Request, res: Response) => {
       recordsTotal: 0,
       options: { dateRange, includeArchived },
       errors: null,
-      userId: 1,
+      userId,
       createdAt: now,
       completedAt: null,
       updatedAt: now,
@@ -718,6 +732,10 @@ settingsRouter.post('/export', async (req: Request, res: Response) => {
 settingsRouter.get('/data-jobs/:id', async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id);
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ message: 'User not authenticated' });
+    }
 
     // Mock data temporarily while schema is being implemented
     const jobs = [
@@ -732,7 +750,7 @@ settingsRouter.get('/data-jobs/:id', async (req: Request, res: Response) => {
         recordsTotal: 124,
         options: { skipHeader: true, updateExisting: true },
         errors: null,
-        userId: 1,
+        userId,
         createdAt: new Date(Date.now() - 86400000),
         completedAt: new Date(Date.now() - 86395000),
         updatedAt: new Date(Date.now() - 86395000),
@@ -748,7 +766,7 @@ settingsRouter.get('/data-jobs/:id', async (req: Request, res: Response) => {
         recordsTotal: 150,
         options: { includeArchived: false },
         errors: null,
-        userId: 1,
+        userId,
         createdAt: new Date(),
         completedAt: null,
         updatedAt: new Date(),
@@ -775,6 +793,10 @@ settingsRouter.get('/data-jobs/:id', async (req: Request, res: Response) => {
 settingsRouter.post('/data-jobs/:id/cancel', async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id);
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ message: 'User not authenticated' });
+    }
 
     // Mock data temporarily while schema is being implemented
     const job = {
@@ -788,7 +810,7 @@ settingsRouter.post('/data-jobs/:id/cancel', async (req: Request, res: Response)
       recordsTotal: 100,
       options: { skipHeader: true, updateExisting: true },
       errors: { message: 'Job cancelled by user' },
-      userId: 1,
+      userId,
       createdAt: new Date(Date.now() - 3600000),
       completedAt: new Date(),
       updatedAt: new Date(),
@@ -808,6 +830,11 @@ settingsRouter.post('/data-jobs/:id/cancel', async (req: Request, res: Response)
 // Get all data views
 settingsRouter.get('/data-views', async (req: Request, res: Response) => {
   try {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ message: 'User not authenticated' });
+    }
+
     // Mock data temporarily while schema is being implemented
     const allViews = [
       {
@@ -829,7 +856,7 @@ settingsRouter.get('/data-views', async (req: Request, res: Response) => {
         sortBy: 'lastName',
         sortDirection: 'asc',
         isPublic: true,
-        userId: 1,
+        userId,
         createdAt: new Date(Date.now() - 86400000),
         updatedAt: new Date(Date.now() - 86400000),
       },
@@ -843,7 +870,7 @@ settingsRouter.get('/data-views', async (req: Request, res: Response) => {
         sortBy: 'dueDate',
         sortDirection: 'asc',
         isPublic: false,
-        userId: 1,
+        userId,
         createdAt: new Date(Date.now() - 172800000),
         updatedAt: new Date(Date.now() - 172800000),
       },
@@ -863,6 +890,10 @@ settingsRouter.get('/data-views', async (req: Request, res: Response) => {
 settingsRouter.get('/data-views/:id', async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id);
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ message: 'User not authenticated' });
+    }
 
     // Mock data temporarily while schema is being implemented
     const views = [
@@ -885,7 +916,7 @@ settingsRouter.get('/data-views/:id', async (req: Request, res: Response) => {
         sortBy: 'lastName',
         sortDirection: 'asc',
         isPublic: true,
-        userId: 1,
+        userId,
         createdAt: new Date(Date.now() - 86400000),
         updatedAt: new Date(Date.now() - 86400000),
       },
@@ -899,7 +930,7 @@ settingsRouter.get('/data-views/:id', async (req: Request, res: Response) => {
         sortBy: 'dueDate',
         sortDirection: 'asc',
         isPublic: false,
-        userId: 1,
+        userId,
         createdAt: new Date(Date.now() - 172800000),
         updatedAt: new Date(Date.now() - 172800000),
       },
@@ -924,6 +955,11 @@ settingsRouter.get('/data-views/:id', async (req: Request, res: Response) => {
 // Create data view
 settingsRouter.post('/data-views', async (req: Request, res: Response) => {
   try {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ message: 'User not authenticated' });
+    }
+
     // Mock data temporarily while schema is being implemented
     const viewData = req.body;
 
@@ -937,7 +973,7 @@ settingsRouter.post('/data-views', async (req: Request, res: Response) => {
       sortBy: viewData.sortBy || 'id',
       sortDirection: viewData.sortDirection || 'asc',
       isPublic: viewData.isPublic !== undefined ? viewData.isPublic : false,
-      userId: 1, // TODO: Get from authenticated user
+      userId: req.user?.id || 1,
       createdAt: new Date(),
       updatedAt: new Date(),
     });
@@ -958,6 +994,11 @@ settingsRouter.post('/data-views', async (req: Request, res: Response) => {
 settingsRouter.patch('/data-views/:id', async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id);
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ message: 'User not authenticated' });
+    }
+
     const viewData = req.body;
 
     // Mock data temporarily while schema is being implemented
@@ -971,7 +1012,7 @@ settingsRouter.patch('/data-views/:id', async (req: Request, res: Response) => {
       sortBy: viewData.sortBy || 'id',
       sortDirection: viewData.sortDirection || 'asc',
       isPublic: viewData.isPublic !== undefined ? viewData.isPublic : false,
-      userId: 1,
+      userId,
       createdAt: new Date(Date.now() - 86400000),
       updatedAt: new Date(),
     });

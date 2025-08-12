@@ -679,7 +679,7 @@ All components should be responsive, using Tailwind's breakpoint system:
 
 ## Theme Customization
 
-Our theme is defined in `client/src/lib/utils/theme.ts` and can be customized to match brand requirements.
+Our theme is defined in `client/src/lib/theme.ts` and can be customized to match brand requirements.
 
 ```typescript
 // Example theme customization
