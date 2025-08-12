@@ -1,3 +1,2 @@
-// Production server entry point
-// This file is used when deploying to Replit
+// Server entry point for production
 import './dist/index.js';

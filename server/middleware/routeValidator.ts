@@ -1,46 +1,39 @@
 import type { Request, Response, NextFunction } from 'express';
-import { type AnyZodObject, ZodError } from 'zod';
+import { z, type ZodTypeAny, ZodError } from 'zod';
 
-export function validateRoute(schema: AnyZodObject) {
+/**
+ * Validate body, query, and params against a Zod schema.
+ * On success, parsed values are written back to req.* for downstream handlers.
+ */
+export const validateRoute = (schema: ZodTypeAny) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
       const parsed = await schema.parseAsync({
-
-import { z } from 'zod';
-import type { Request, Response, NextFunction } from 'express';
-
-/**
- * Validates the incoming request against a provided Zod schema.
- * Sends a 400 response with detailed errors when validation fails.
- */
-export const validateRoute = (schema: z.ZodTypeAny) => {
-  return (req: Request, res: Response, next: NextFunction) => {
-    try {
-      schema.parse({
         body: req.body,
         query: req.query,
         params: req.params,
       });
 
-      req.body = parsed.body;
-      req.query = parsed.query;
-      req.params = parsed.params;
+      // If schema returns a shape with body/query/params, persist sanitized values.
+      if (parsed && typeof parsed === 'object') {
+        // @ts-expect-error Express doesn't strongly type these assignments
+        req.body = (parsed as any).body ?? req.body;
+        // @ts-expect-error
+        req.query = (parsed as any).query ?? req.query;
+        // @ts-expect-error
+        req.params = (parsed as any).params ?? req.params;
+      }
 
       next();
     } catch (error) {
       if (error instanceof ZodError) {
         return res.status(400).json({
+          success: false,
           message: 'Validation failed',
           errors: error.errors,
-      next();
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({
-          error: 'Validation failed',
-          details: error.errors,
         });
       }
       next(error);
     }
   };
-}
+};
