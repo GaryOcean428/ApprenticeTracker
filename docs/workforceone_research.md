@@ -65,7 +65,7 @@ Manage the workforce in one solution, tailored for Group Training and Labour Hir
 *   **Flexibility**: In rate setup, GL integration, and debtor management.
 *   **Customer Support**: Emphasizes direct support from developers.
 
-## Further Information Needed (based on initial user request for ApprenticeTracker)
+## Further Information Needed (based on initial user request for CRM7)
 
 *   Specific details on WHS/safety modules and compliance management beyond payroll.
 *   More in-depth features for field officer activities (beyond general workforce management).

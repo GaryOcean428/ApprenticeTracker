@@ -1,6 +1,6 @@
 # Authentication & Database Connectivity Fix
 
-This document outlines the changes made to fix the authentication 401 (Unauthorized) and 503 (Service Unavailable) errors in the ApprenticeTracker application.
+This document outlines the changes made to fix the authentication 401 (Unauthorized) and 503 (Service Unavailable) errors in the CRM7 application.
 
 ## Issues Addressed
 

@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This document compares ApprenticeTracker with leading Australian GTO software solutions:
+This document compares CRM7 with leading Australian GTO software solutions:
 1. ReadyTech Ready Apprentice
 2. WorkforceOne
 
@@ -12,7 +12,7 @@ The comparison focuses on key functional areas essential for GTO operations and 
 
 ### Core GTO Operations
 
-| Feature Area | ApprenticeTracker (Current) | ReadyTech Ready Apprentice | WorkforceOne |
+| Feature Area | CRM7 (Current) | ReadyTech Ready Apprentice | WorkforceOne |
 |--------------|------------------------------|----------------------------|--------------|
 | **Apprentice Management** | Basic profile system with Training.gov.au integration | Complete lifecycle management with milestone tracking | Comprehensive management with status tracking (leave, training, suspensions) |
 | **Host Employer Management** | Basic employer profiles and interface | Employer contacts and pipeline management | Client engagement, placement, and invoicing |
@@ -24,7 +24,7 @@ The comparison focuses on key functional areas essential for GTO operations and 
 
 ### Financial Operations
 
-| Feature Area | ApprenticeTracker (Current) | ReadyTech Ready Apprentice | WorkforceOne |
+| Feature Area | CRM7 (Current) | ReadyTech Ready Apprentice | WorkforceOne |
 |--------------|------------------------------|----------------------------|--------------|
 | **Payroll** | In progress; award rate integration planned | Not explicitly detailed | Comprehensive with award interpretation, STP compliance |
 | **Host Billing** | Missing | Not explicitly detailed | Integrated with payroll for seamless invoicing |
@@ -33,7 +33,7 @@ The comparison focuses on key functional areas essential for GTO operations and 
 
 ### Compliance & Safety
 
-| Feature Area | ApprenticeTracker (Current) | ReadyTech Ready Apprentice | WorkforceOne |
+| Feature Area | CRM7 (Current) | ReadyTech Ready Apprentice | WorkforceOne |
 |--------------|------------------------------|----------------------------|--------------|
 | **Compliance Tracking** | Basic monitoring of Fair Work and GTO standards | Data submission to authorities, smart forms | Payroll compliance focus |
 | **WHS Management** | Missing | Not explicitly detailed | Not explicitly detailed |
@@ -42,7 +42,7 @@ The comparison focuses on key functional areas essential for GTO operations and 
 
 ### User Experience & Technical
 
-| Feature Area | ApprenticeTracker (Current) | ReadyTech Ready Apprentice | WorkforceOne |
+| Feature Area | CRM7 (Current) | ReadyTech Ready Apprentice | WorkforceOne |
 |--------------|------------------------------|----------------------------|--------------|
 | **Mobile Support** | Partial | Strong field mobility emphasis | Online timesheets optimized for mobile |
 | **Dashboards** | Basic | Personalized with visualizations | Not explicitly detailed |
@@ -62,14 +62,14 @@ The comparison focuses on key functional areas essential for GTO operations and 
 - Flexible pay and charge rate system
 - Australian-owned with direct support from developers
 
-### ApprenticeTracker (Current)
+### CRM7 (Current)
 - Modern microservices architecture
 - Integrated approach with public website, admin portals, and CRM
 - Strong technology stack (React, Vite, TypeScript, TailwindCSS)
 
 ## Key Differentiators to Develop
 
-Based on this comparison, ApprenticeTracker should focus on developing these differentiators:
+Based on this comparison, CRM7 should focus on developing these differentiators:
 
 1. **Integrated Ecosystem**: Strengthen the unified approach with seamless flow between public site, portals, and CRM
 2. **Modern User Experience**: Leverage the modern tech stack to create a superior UX compared to competitors
@@ -93,11 +93,11 @@ Based on this comparison, ApprenticeTracker should focus on developing these dif
 
 ## Conclusion
 
-While ApprenticeTracker has a modern foundation, significant gaps exist compared to established competitors. The most critical areas requiring development are:
+While CRM7 has a modern foundation, significant gaps exist compared to established competitors. The most critical areas requiring development are:
 
 1. Financial operations (payroll completion, host billing, claims management)
 2. WHS and comprehensive compliance
 3. Advanced recruitment and onboarding
 4. Field operations tools
 
-By focusing on these areas while leveraging its modern technology foundation, ApprenticeTracker can develop into a competitive solution that combines the strengths of existing platforms with innovative features and superior user experience.
+By focusing on these areas while leveraging its modern technology foundation, CRM7 can develop into a competitive solution that combines the strengths of existing platforms with innovative features and superior user experience.
