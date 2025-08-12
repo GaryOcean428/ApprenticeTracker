@@ -81,7 +81,9 @@ Comprehensive documentation is available in the `/docs` directory:
 
 1. Clone the repository
 2. Install dependencies: `pnpm install`
-3. Copy `.env.example` to `.env` and update values
+
+3. Set up environment variables (see Environment Configuration below)
+  3.1 Copy `.env.example` to `.env` and update values
 4. Start the development server: `pnpm dev`
 
 ### Environment Configuration
