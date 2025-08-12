@@ -403,7 +403,7 @@ function Router() {
         />
         <Route
           path="/awards/:id"
-          component={(params: { params: any }) => {
+          component={(params: { params: { id: string } }) => {
             const AwardDetail = lazy(() => import('./pages/awards/[id]/index'));
             return (
               <Suspense
@@ -420,7 +420,7 @@ function Router() {
         />
         <Route
           path="/awards/:id/edit"
-          component={(params: { params: any }) => {
+          component={(params: { params: { id: string } }) => {
             const AwardEdit = lazy(() => import('./pages/awards/[id]/edit'));
             return (
               <Suspense

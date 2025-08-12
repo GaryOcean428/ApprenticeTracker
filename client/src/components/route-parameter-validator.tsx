@@ -10,7 +10,7 @@ interface ValidationOptions {
   /**
    * Zod schema for validating route parameters
    */
-  schema: z.ZodObject<any>;
+  schema: z.ZodObject<Record<string, z.ZodTypeAny>>;
   /**
    * URL to redirect to if validation fails
    */
