@@ -73,18 +73,20 @@ Comprehensive documentation is available in the `/docs` directory:
 
 ### Prerequisites
 
-- Node.js 18.x or higher
+- Node.js 20.x or higher
 - PostgreSQL database
 - Supabase account (for authentication)
 
 ### Installation
 
 1. Clone the repository
-2. Install dependencies: `npm install`
-3. Set up environment variables (see Environment Configuration below)
-4. Start the development server: `npm run dev`
+2. Install dependencies: `pnpm install`
+3. Copy `.env.example` to `.env` and update values
+4. Start the development server: `pnpm dev`
 
 ### Environment Configuration
+
+Start by copying `.env.example` to `.env` and filling in the values described below.
 
 The following environment variables are required for deployment:
 
@@ -101,10 +103,16 @@ The following environment variables are required for deployment:
 
 For Railway deployment, ensure:
 1. Set `UPLOAD_DIR` environment variable to your persistent volume mount path (e.g., `/data/uploads`)
-2. Use the correct start command: `npm start` (not `npm run start:prod` unless you need the production server wrapper)
+2. Use the correct start command: `pnpm start` (not `pnpm run start:prod` unless you need the production server wrapper)
 3. Mount a persistent volume to the path specified in `UPLOAD_DIR`
 
 **Note**: Without proper `UPLOAD_DIR` configuration, uploaded files will be lost on container restart/redeploy.
+
+### Post-deployment checklist
+1. Verify logs show `Listening on 0.0.0.0:<PORT>`.
+2. Open the public URL and ensure basic pages load.
+3. Test a WebSocket connection from the client.
+4. Check the browser console for CORS errors.
 
 ## Development Roadmap
 
