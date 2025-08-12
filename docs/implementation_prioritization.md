@@ -1,8 +1,8 @@
-# ApprenticeTracker Implementation Prioritization (May 9, 2025)
+# CRM7 Implementation Prioritization (May 9, 2025)
 
 ## Overview
 
-This document outlines the implementation prioritization plan for ApprenticeTracker, separating features into:
+This document outlines the implementation prioritization plan for CRM7, separating features into:
 1. **Independent Tasks** - Work that can be completed without external API dependencies
 2. **API-Dependent Tasks** - Work that requires integration with external services
 3. **Hybrid Tasks** - Work that can be partially implemented without APIs but will require integration later

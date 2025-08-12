@@ -2,7 +2,7 @@
 
 ## Overview
 
-The National Standards for Group Training Organisations (GTOs) establish baseline requirements for delivering high-quality services. This document summarizes the key standards and their technological implications for ApprenticeTracker.
+The National Standards for Group Training Organisations (GTOs) establish baseline requirements for delivering high-quality services. This document summarizes the key standards and their technological implications for CRM7.
 
 ## Standard 1: Recruitment, Employment, and Induction
 

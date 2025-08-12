@@ -1,14 +1,14 @@
-# ApprenticeTracker Upgrade Roadmap
+# CRM7 Upgrade Roadmap
 
 ## Introduction
 
-This document outlines the strategic upgrade path for ApprenticeTracker based on comprehensive analysis of:
+This document outlines the strategic upgrade path for CRM7 based on comprehensive analysis of:
 1. National Standards for Group Training Organisations (GTOs)
 2. Industry-leading competitors (ReadyTech and WorkforceOne)
 3. Current system capabilities
 4. Identified feature gaps
 
-The roadmap is designed to transform ApprenticeTracker into a production-ready solution that fully supports Australian GTO operations while meeting all regulatory requirements.
+The roadmap is designed to transform CRM7 into a production-ready solution that fully supports Australian GTO operations while meeting all regulatory requirements.
 
 ## Guiding Principles
 

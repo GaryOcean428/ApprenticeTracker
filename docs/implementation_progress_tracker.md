@@ -1,7 +1,7 @@
-# ApprenticeTracker Implementation Progress Tracker
+# CRM7 Implementation Progress Tracker
 
 ## Overview
-This document tracks the implementation progress of ApprenticeTracker features against the roadmap. It provides a clear view of completed, in-progress, and planned work.
+This document tracks the implementation progress of CRM7 features against the roadmap. It provides a clear view of completed, in-progress, and planned work.
 
 ## Phase 1: Foundational Compliance and Core Financial Operations
 

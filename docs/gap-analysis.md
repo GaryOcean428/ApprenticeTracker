@@ -1,8 +1,8 @@
-# ApprenticeTracker Gap Analysis
+# CRM7 Gap Analysis
 
 ## Introduction
 
-This document identifies the current feature gaps in ApprenticeTracker by comparing it against:
+This document identifies the current feature gaps in CRM7 by comparing it against:
 1. National Standards for Group Training Organisations (GTOs)
 2. Industry-leading software (ReadyTech Ready Apprentice and WorkforceOne)
 3. User-specified requirements for a production-quality GTO system
@@ -192,7 +192,7 @@ Each gap is categorized by importance and mapped to the upgrade roadmap.
 
 ## Conclusion
 
-This gap analysis highlights the critical areas requiring attention to transform ApprenticeTracker into a production-ready GTO management system. The most urgent priorities are:
+This gap analysis highlights the critical areas requiring attention to transform CRM7 into a production-ready GTO management system. The most urgent priorities are:
 
 1. WHS Management (critical compliance requirement)
 2. Government Claims Management (financial operations)
