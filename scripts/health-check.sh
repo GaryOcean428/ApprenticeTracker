@@ -21,56 +21,56 @@ print_status() {
 
 # Security audit
 echo "🔒 Security Audit..."
-npm audit --audit-level moderate
+pnpm audit --audit-level moderate
 audit_result=$?
 print_status $audit_result "Security vulnerabilities check"
 echo
 
 # Dependency check
 echo "📦 Dependency Analysis..."
-npm outdated --depth=0
+pnpm outdated --depth=0
 outdated_result=$?
 print_status $outdated_result "Dependency currency check"
 echo
 
 # TypeScript compilation
 echo "🔧 TypeScript Compilation..."
-npm run check > /dev/null 2>&1
+pnpm check > /dev/null 2>&1
 ts_result=$?
 print_status $ts_result "TypeScript compilation"
 echo
 
 # Code duplication analysis
 echo "🔍 Code Quality Analysis..."
-npx jscpd client/src server shared --min-lines 10 --min-tokens 50 --reporters console --silent
+pnpm exec jscpd client/src server shared --min-lines 10 --min-tokens 50 --reporters console --silent
 duplication_result=$?
 print_status $duplication_result "Code duplication analysis"
 echo
 
 # Unused exports detection
 echo "🧹 Unused Code Detection..."
-npx ts-unused-exports tsconfig.json --excludePathsFromReport=node_modules > /dev/null 2>&1
+pnpm exec ts-unused-exports tsconfig.json --excludePathsFromReport=node_modules > /dev/null 2>&1
 unused_result=$?
 print_status $unused_result "Unused exports check"
 echo
 
 # Linting
 echo "📝 Code Style Check..."
-npm run lint > /dev/null 2>&1
+pnpm lint > /dev/null 2>&1
 lint_result=$?
 print_status $lint_result "ESLint code style"
 echo
 
 # Build test
 echo "🏗️  Build Verification..."
-npm run build > /dev/null 2>&1
+pnpm build > /dev/null 2>&1
 build_result=$?
 print_status $build_result "Production build"
 echo
 
 # Test execution
 echo "🧪 Test Suite..."
-npm run test:run > /dev/null 2>&1
+pnpm test:run > /dev/null 2>&1
 test_result=$?
 print_status $test_result "Test suite execution"
 echo
