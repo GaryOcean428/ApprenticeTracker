@@ -51,7 +51,7 @@ Retrieves all penalty rate adjustments, including calculated values, description
 ### Edge Function Deployment
 If you're seeing a 404 error when calling edge functions, they may not be deployed. Execute these steps:
 
-1. Make sure Supabase CLI is installed: `npm install -g supabase`
+1. Make sure Supabase CLI is installed: `pnpm add -g supabase`
 2. Link your project: `supabase link --project-ref <your-project-ref>`
 3. Deploy the functions: `supabase functions deploy auth-fairwork`
 

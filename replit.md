@@ -94,7 +94,7 @@ CRM7 is a comprehensive enterprise workforce management platform designed specif
 ## Deployment Strategy
 
 ### Development Environment
-- **Command**: `npm run dev`
+- **Command**: `pnpm dev`
 - **Ports**: 5000 (backend), 5001 (frontend)
 - **Hot Reload**: Enabled for both client and server
 - **Database**: Uses DATABASE_URL environment variable
@@ -104,7 +104,7 @@ CRM7 is a comprehensive enterprise workforce management platform designed specif
   1. Vite builds client-side assets to `/dist/public`
   2. esbuild bundles server code to `/dist`
   3. Static files served from compiled output
-- **Server**: `production-server.js` serves compiled application
+- **Server**: `server.js` serves compiled application
 - **Health Checks**: `/health` and `/health-check` endpoints
 
 ### Replit Configuration
@@ -116,13 +116,13 @@ CRM7 is a comprehensive enterprise workforce management platform designed specif
 ### Build Commands
 ```bash
 # Development
-npm run dev
+pnpm dev
 
 # Production build
-npm run build
+pnpm build
 
 # Production start
-npm run start:prod
+pnpm start
 ```
 
 ## Changelog
@@ -139,7 +139,7 @@ npm run start:prod
 - June 25, 2025. Fixed Toaster component crash and completed production build with all assets
 - June 25, 2025. **DEPLOYMENT FIX COMPLETED**: Resolved ES module syntax errors by replacing require() calls with import statements, added proper error handling, and validated production server startup
 - June 25, 2025. **PORT CONFLICT RESOLUTION**: Fixed EADDRINUSE deployment errors by separating development (port 5001) and production (port 5000) server configurations, added graceful port detection, and resolved Toaster component crashes
-- July 3, 2025. **DEPLOYMENT PORT FIXES**: Resolved port conflicts by maintaining port 5000 for development (as expected by Replit workflows), created clean production server (server.production.js) with improved port detection and fallback handling, and ensured proper separation between development and production environments
+- July 3, 2025. **DEPLOYMENT PORT FIXES**: Resolved port conflicts by maintaining port 5000 for development (as expected by Replit workflows), created clean production server with improved port detection and fallback handling, and ensured proper separation between development and production environments
 
 ## User Preferences
 

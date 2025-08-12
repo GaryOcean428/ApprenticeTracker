@@ -178,13 +178,13 @@ Use the provided test script:
 ./scripts/setup-env.sh
 
 # Install dependencies
-npm install
+pnpm install
 
 # Build application
-npm run build
+pnpm build
 
 # Start development server
-npm run dev
+pnpm dev
 ```
 
 ## Expected Behavior
