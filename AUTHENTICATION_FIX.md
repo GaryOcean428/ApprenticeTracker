@@ -181,10 +181,10 @@ Use the provided test script:
 pnpm install
 
 # Build application
-pnpm build
+pnpm run build
 
 # Start development server
-pnpm dev
+pnpm run dev
 ```
 
 ## Expected Behavior
