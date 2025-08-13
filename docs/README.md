@@ -5,16 +5,26 @@ This documentation provides comprehensive information about the CRM7 Australian 
 
 ## Contents
 
+### Primary Documentation
+- **[Development Roadmap](../roadmap.md)** - Canonical development roadmap with current status and next steps
+- **[National Standards Implementation](national_standards_implementation_status.md)** - Progress tracking against GTO compliance requirements
+
 ### System Architecture
 - [System Architecture Overview](system-architecture.md) - Detailed description of system components, technical stack, and data models
 
-### Compliance
+### Compliance & Standards
 - [GTO Compliance](gto-compliance.md) - Information about the compliance requirements for GTOs in Australia
 - [Evidence Guide for GTOs](Evidence%20Guide%20for%20GTOs%20to%20Support%20the%20National%20Standards.pdf) - Official guide to support the National Standards
 
 ### API Integrations
 - [Fair Work API](fair-work-api.md) - Documentation for the Fair Work Commission API integration
 - [Training.gov.au API](tga-api.md) - Information about connecting to the Training.gov.au web services
+
+### Development Guidelines
+- [Code Standards](code-standards.md) - Development standards and best practices
+- [Component Library](component-library.md) - UI component documentation and design system
+- [Testing Strategy](testing-strategy.md) - Testing approach and quality assurance
+- [Performance Optimization](performance-optimization.md) - Performance guidelines and optimization strategies
 
 ### Sample Data
 The following CSV files contain sample data for testing and development:
