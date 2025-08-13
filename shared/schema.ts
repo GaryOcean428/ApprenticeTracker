@@ -1459,6 +1459,253 @@ export type ProgressReviewActionItem = typeof progressReviewActionItems.$inferSe
 export type ProgressReviewDocument = typeof progressReviewDocuments.$inferSelect;
 // TEMP: export type InsertProgressReviewDocument = z.infer<typeof insertProgressReviewDocumentSchema>;
 
+// ============================================
+// APPRENTICE MENTORING & ADVANCED MONITORING
+// ============================================
+
+// Mentors
+export const mentors = pgTable("mentors", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id), // If mentor is a system user
+  firstName: text("first_name").notNull(),
+  lastName: text("last_name").notNull(),
+  email: text("email").notNull().unique(),
+  phone: text("phone"),
+  specializations: text("specializations"), // JSON array of trade specializations
+  experienceYears: integer("experience_years"),
+  qualifications: text("qualifications"), // JSON array of qualifications
+  availability: text("availability").notNull().default("active"), // active, inactive, limited
+  maxApprentices: integer("max_apprentices").default(10),
+  rating: numeric("rating", { precision: 3, scale: 2 }), // Average rating from feedback
+  notes: text("notes"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertMentorSchema = createInsertSchema(mentors).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+// Mentor-Apprentice Assignments
+export const mentorAssignments = pgTable("mentor_assignments", {
+  id: serial("id").primaryKey(),
+  mentorId: integer("mentor_id").references(() => mentors.id).notNull(),
+  apprenticeId: integer("apprentice_id").references(() => apprentices.id).notNull(),
+  startDate: date("start_date").notNull(),
+  endDate: date("end_date"), // null for active assignments
+  status: text("status").notNull().default("active"), // active, paused, completed, terminated
+  assignmentType: text("assignment_type").notNull().default("primary"), // primary, secondary, specialist
+  goals: text("goals"), // JSON array of mentoring goals
+  notes: text("notes"),
+  createdBy: integer("created_by").references(() => users.id).notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertMentorAssignmentSchema = createInsertSchema(mentorAssignments).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+// Mentoring Sessions
+export const mentoringSessions = pgTable("mentoring_sessions", {
+  id: serial("id").primaryKey(),
+  assignmentId: integer("assignment_id").references(() => mentorAssignments.id).notNull(),
+  sessionDate: date("session_date").notNull(),
+  sessionTime: text("session_time"), // stored as HH:MM format
+  duration: integer("duration"), // duration in minutes
+  sessionType: text("session_type").notNull().default("in-person"), // in-person, virtual, phone, email
+  location: text("location"),
+  topics: text("topics"), // JSON array of topics covered
+  goals: text("goals"), // Goals for this session
+  outcomes: text("outcomes"), // Outcomes achieved
+  apprenticeRating: integer("apprentice_rating"), // 1-5 rating by apprentice
+  mentorRating: integer("mentor_rating"), // 1-5 rating by mentor
+  nextSessionPlanned: date("next_session_planned"),
+  status: text("status").notNull().default("completed"), // scheduled, completed, cancelled, no-show
+  notes: text("notes"),
+  createdBy: integer("created_by").references(() => users.id).notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertMentoringSessionSchema = createInsertSchema(mentoringSessions).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+// Competencies & Skills Tracking
+export const competencies = pgTable("competencies", {
+  id: serial("id").primaryKey(),
+  code: text("code").notNull().unique(), // e.g., UEENEEE101A
+  title: text("title").notNull(),
+  description: text("description"),
+  category: text("category"), // e.g., "Core", "Elective", "Specialist"
+  level: text("level"), // e.g., "Beginner", "Intermediate", "Advanced"
+  tradeArea: text("trade_area"), // e.g., "Electrical", "Plumbing", "Carpentry"
+  assessmentCriteria: text("assessment_criteria"), // JSON array of criteria
+  prerequisites: text("prerequisites"), // JSON array of prerequisite competency IDs
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertCompetencySchema = createInsertSchema(competencies).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+// Apprentice Competency Progress
+export const apprenticeCompetencies = pgTable("apprentice_competencies", {
+  id: serial("id").primaryKey(),
+  apprenticeId: integer("apprentice_id").references(() => apprentices.id).notNull(),
+  competencyId: integer("competency_id").references(() => competencies.id).notNull(),
+  status: text("status").notNull().default("not_started"), // not_started, in_progress, competent, not_yet_competent
+  progressPercentage: integer("progress_percentage").default(0),
+  startDate: date("start_date"),
+  completionDate: date("completion_date"),
+  assessorId: integer("assessor_id").references(() => users.id),
+  assessmentDate: date("assessment_date"),
+  assessmentNotes: text("assessment_notes"),
+  evidenceSubmitted: text("evidence_submitted"), // JSON array of evidence/documents
+  lastUpdated: timestamp("last_updated").notNull().defaultNow(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const insertApprenticeCompetencySchema = createInsertSchema(apprenticeCompetencies).omit({
+  id: true,
+  createdAt: true,
+  lastUpdated: true,
+});
+
+// Milestones & Achievements
+export const apprenticeMilestones = pgTable("apprentice_milestones", {
+  id: serial("id").primaryKey(),
+  apprenticeId: integer("apprentice_id").references(() => apprentices.id).notNull(),
+  milestoneType: text("milestone_type").notNull(), // completion, assessment, probation_end, certification, etc.
+  title: text("title").notNull(),
+  description: text("description"),
+  targetDate: date("target_date"),
+  achievedDate: date("achieved_date"),
+  status: text("status").notNull().default("pending"), // pending, achieved, overdue, cancelled
+  priority: text("priority").notNull().default("medium"), // low, medium, high, critical
+  notificationSent: boolean("notification_sent").default(false),
+  celebrationNotes: text("celebration_notes"), // Notes about recognition/celebration
+  createdBy: integer("created_by").references(() => users.id).notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertApprenticeMilestoneSchema = createInsertSchema(apprenticeMilestones).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+// Performance Analytics
+export const performanceMetrics = pgTable("performance_metrics", {
+  id: serial("id").primaryKey(),
+  apprenticeId: integer("apprentice_id").references(() => apprentices.id).notNull(),
+  metricType: text("metric_type").notNull(), // attendance, assessment_scores, mentor_feedback, employer_feedback
+  periodStart: date("period_start").notNull(),
+  periodEnd: date("period_end").notNull(),
+  value: numeric("value", { precision: 10, scale: 2 }).notNull(),
+  targetValue: numeric("target_value", { precision: 10, scale: 2 }),
+  unit: text("unit"), // percentage, hours, score, rating, etc.
+  notes: text("notes"),
+  calculatedAt: timestamp("calculated_at").notNull().defaultNow(),
+});
+
+export const insertPerformanceMetricSchema = createInsertSchema(performanceMetrics).omit({
+  id: true,
+  calculatedAt: true,
+});
+
+// Communication Log (between mentors, apprentices, and supervisors)
+export const communicationLog = pgTable("communication_log", {
+  id: serial("id").primaryKey(),
+  fromUserId: integer("from_user_id").references(() => users.id).notNull(),
+  toUserId: integer("to_user_id").references(() => users.id).notNull(),
+  apprenticeId: integer("apprentice_id").references(() => apprentices.id), // Context: which apprentice the communication is about
+  communicationType: text("communication_type").notNull(), // email, phone, sms, meeting, note
+  subject: text("subject"),
+  content: text("content").notNull(),
+  priority: text("priority").notNull().default("normal"), // low, normal, high, urgent
+  isRead: boolean("is_read").default(false),
+  responseRequired: boolean("response_required").default(false),
+  responseDeadline: timestamp("response_deadline"),
+  parentMessageId: integer("parent_message_id").references(() => communicationLog.id), // For threaded conversations
+  attachments: text("attachments"), // JSON array of document references
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const insertCommunicationLogSchema = createInsertSchema(communicationLog).omit({
+  id: true,
+  createdAt: true,
+});
+
+// Apprentice Training Plans (enhanced version)
+export const trainingPlans = pgTable("training_plans", {
+  id: serial("id").primaryKey(),
+  apprenticeId: integer("apprentice_id").references(() => apprentices.id).notNull(),
+  planName: text("plan_name").notNull(),
+  qualificationId: text("qualification_id"), // Reference to qualification/course code
+  startDate: date("start_date").notNull(),
+  targetCompletionDate: date("target_completion_date").notNull(),
+  actualCompletionDate: date("actual_completion_date"),
+  status: text("status").notNull().default("active"), // draft, active, suspended, completed, cancelled
+  overallProgress: integer("overall_progress").default(0), // 0-100 percentage
+  competencyIds: text("competency_ids"), // JSON array of competency IDs in this plan
+  learningResources: text("learning_resources"), // JSON array of resources, materials, etc.
+  assessmentSchedule: text("assessment_schedule"), // JSON array of planned assessments
+  reviewSchedule: text("review_schedule"), // JSON array of review dates
+  customizations: text("customizations"), // JSON object for plan customizations
+  approvedBy: integer("approved_by").references(() => users.id),
+  approvedAt: timestamp("approved_at"),
+  createdBy: integer("created_by").references(() => users.id).notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertTrainingPlanSchema = createInsertSchema(trainingPlans).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+// Type exports for mentoring system
+export type Mentor = typeof mentors.$inferSelect;
+export type InsertMentor = z.infer<typeof insertMentorSchema>;
+
+export type MentorAssignment = typeof mentorAssignments.$inferSelect;
+export type InsertMentorAssignment = z.infer<typeof insertMentorAssignmentSchema>;
+
+export type MentoringSession = typeof mentoringSessions.$inferSelect;
+export type InsertMentoringSession = z.infer<typeof insertMentoringSessionSchema>;
+
+export type Competency = typeof competencies.$inferSelect;
+export type InsertCompetency = z.infer<typeof insertCompetencySchema>;
+
+export type ApprenticeCompetency = typeof apprenticeCompetencies.$inferSelect;
+export type InsertApprenticeCompetency = z.infer<typeof insertApprenticeCompetencySchema>;
+
+export type ApprenticeMilestone = typeof apprenticeMilestones.$inferSelect;
+export type InsertApprenticeMilestone = z.infer<typeof insertApprenticeMilestoneSchema>;
+
+export type PerformanceMetric = typeof performanceMetrics.$inferSelect;
+export type InsertPerformanceMetric = z.infer<typeof insertPerformanceMetricSchema>;
+
+export type CommunicationLog = typeof communicationLog.$inferSelect;
+export type InsertCommunicationLog = z.infer<typeof insertCommunicationLogSchema>;
+
+export type TrainingPlan = typeof trainingPlans.$inferSelect;
+export type InsertTrainingPlan = z.infer<typeof insertTrainingPlanSchema>;
+
 // Export module schemas
 export * from './schema/awards';
 export * from './schema/billing';

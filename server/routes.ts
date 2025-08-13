@@ -38,6 +38,7 @@ import { setupWhsRoutes } from './api/whs/index';
 import { setupClaimsAPI } from './api/claims/index';
 import labourHireRouter from './api/labour-hire-routes';
 import tagsRouter from './api/tags-routes';
+import { apprenticeMentoringRouter } from './api/apprentice-mentoring-routes';
 import { db } from './db'; // Assuming db connection is defined here
 
 // Special test endpoints for Fair Work API that won't be intercepted by Vite
@@ -900,6 +901,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/api/contacts', contactsRouter); // Unified Contacts System routes
   app.use('/api/clients', clientsRouter); // Client Management System routes
   app.use('/api/tags', tagsRouter); // Contact Tags routes
+  app.use('/api', apprenticeMentoringRouter); // Apprentice mentoring and advanced monitoring routes
 
   // Register host employer routes
   registerHostRoutes(app);
