@@ -159,6 +159,8 @@ export const insertClaimSchema = createInsertSchema(claims, {
   notes: z.string().optional(),
 });
 
+export const updateClaimSchema = insertClaimSchema.partial();
+
 export const insertClaimDocumentSchema = createInsertSchema(claim_documents, {
   claim_id: z.string().uuid('Invalid claim ID format'),
   document_type: z.string().min(2, 'Document type is required').max(50, 'Document type must not exceed 50 characters'),
