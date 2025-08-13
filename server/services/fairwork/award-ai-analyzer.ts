@@ -1,11 +1,11 @@
 /**
  * Award AI Analyzer Service
  *
- * This service uses OpenAI's models to analyze award changes and provide summaries,
+ * This service uses Groq's models to analyze award changes and provide summaries,
  * impact assessments, and notification messages.
  */
 
-import OpenAI from 'openai';
+import Groq from 'groq-sdk';
 import { awardUpdateChecks } from '@shared/schema/awards';
 import { eq } from 'drizzle-orm';
 import { db } from '../../db';
@@ -24,25 +24,24 @@ export interface AwardAnalysisResult {
  * Service for analyzing award changes using AI
  */
 export class AwardAIAnalyzer {
-  private openai: OpenAI | null = null;
+  private groq: Groq | null = null;
 
   constructor() {
-    const apiKey = process.env.OPENAI_API_KEY;
+    const apiKey = process.env.GROQ_API_KEY;
 
     if (!apiKey?.trim()) {
-      logger.warn('No OpenAI API key provided, AI analysis will not be available');
+      logger.warn('No Groq API key provided, AI analysis will not be available');
       return;
     }
 
     try {
-      this.openai = new OpenAI({
+      this.groq = new Groq({
         apiKey: apiKey,
-        timeout: 20000, // 20s timeout
       });
       logger.info('AI analysis features enabled');
     } catch (error) {
-      logger.error('Failed to initialize OpenAI client', { error });
-      this.openai = null;
+      logger.error('Failed to initialize Groq client', { error });
+      this.groq = null;
     }
   }
 
@@ -50,7 +49,7 @@ export class AwardAIAnalyzer {
    * Check if AI analysis is available (API key is configured and client initialized)
    */
   public isAvailable(): boolean {
-    return this.openai !== null;
+    return this.groq !== null;
   }
 
   /**
@@ -63,8 +62,8 @@ export class AwardAIAnalyzer {
     newVersion: string,
     updateUrl: string | null
   ): Promise<AwardAnalysisResult> {
-    if (!this.isAvailable() || !this.openai) {
-      logger.info('AI analysis requested but OpenAI client is not available, using fallback', {
+    if (!this.isAvailable() || !this.groq) {
+      logger.info('AI analysis requested but Groq client is not available, using fallback', {
         awardCode,
       });
       return this.generateFallbackAnalysis(awardCode, awardName);
@@ -77,9 +76,9 @@ export class AwardAIAnalyzer {
       let aiResult: any;
 
       try {
-        // Attempt to use the gpt-4.1-mini model with tools if available
-        aiResult = await this.openai.chat.completions.create({
-          model: 'gpt-4o', // Use gpt-4o as the newest OpenAI model. We can replace with gpt-4.1-mini when available
+        // Use Groq's llama-3.3-70b-versatile model
+        aiResult = await this.groq.chat.completions.create({
+          model: 'llama-3.3-70b-versatile',
           messages: [
             {
               role: 'system',
@@ -108,11 +107,13 @@ export class AwardAIAnalyzer {
           temperature: 0.3,
         });
       } catch (error) {
-        logger.error('Error using gpt-4o model, falling back to simpler model', { error });
+        logger.error('Error using llama-3.3-70b-versatile model, falling back to simpler model', {
+          error,
+        });
 
         // Fall back to a simpler model if needed
-        aiResult = await this.openai.chat.completions.create({
-          model: 'gpt-3.5-turbo',
+        aiResult = await this.groq.chat.completions.create({
+          model: 'llama-3.1-8b-instant',
           messages: [
             {
               role: 'system',
@@ -145,9 +146,9 @@ export class AwardAIAnalyzer {
       const aiResponse = aiResult.choices[0].message.content;
 
       // Extract summary, key changes, and impact level
-      const summaryMatch = aiResponse.match(/SUMMARY:(.*?)(?=KEY_CHANGES:|$)/s);
-      const keyChangesMatch = aiResponse.match(/KEY_CHANGES:(.*?)(?=IMPACT:|$)/s);
-      const impactMatch = aiResponse.match(/IMPACT:(.*?)$/s);
+      const summaryMatch = aiResponse.match(/SUMMARY:(.*?)(?=KEY_CHANGES:|$)/gs);
+      const keyChangesMatch = aiResponse.match(/KEY_CHANGES:(.*?)(?=IMPACT:|$)/gs);
+      const impactMatch = aiResponse.match(/IMPACT:(.*?)$/gs);
 
       const summary = summaryMatch ? summaryMatch[1].trim() : 'Award has been updated.';
 
@@ -190,9 +191,9 @@ export class AwardAIAnalyzer {
     awardName: string,
     analysis: AwardAnalysisResult
   ): Promise<string> {
-    if (!this.isAvailable() || !this.openai) {
+    if (!this.isAvailable() || !this.groq) {
       logger.info(
-        'AI notification generation requested but OpenAI client is not available, using fallback',
+        'AI notification generation requested but Groq client is not available, using fallback',
         { awardCode }
       );
       return this.generateFallbackNotification(awardCode, awardName, analysis.impactLevel);
@@ -201,8 +202,8 @@ export class AwardAIAnalyzer {
     try {
       logger.info('Generating notification message for award update', { awardCode });
 
-      const response = await this.openai.chat.completions.create({
-        model: 'gpt-3.5-turbo',
+      const response = await this.groq.chat.completions.create({
+        model: 'llama-3.1-8b-instant',
         messages: [
           {
             role: 'system',
