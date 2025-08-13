@@ -24,23 +24,33 @@ export interface AwardAnalysisResult {
  * Service for analyzing award changes using AI
  */
 export class AwardAIAnalyzer {
-  private openai: OpenAI;
+  private openai: OpenAI | null = null;
 
   constructor() {
-    if (!process.env.OPENAI_API_KEY) {
+    const apiKey = process.env.OPENAI_API_KEY;
+
+    if (!apiKey?.trim()) {
       logger.warn('No OpenAI API key provided, AI analysis will not be available');
+      return;
     }
 
-    this.openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
-    });
+    try {
+      this.openai = new OpenAI({
+        apiKey: apiKey,
+        timeout: 20000, // 20s timeout
+      });
+      logger.info('AI analysis features enabled');
+    } catch (error) {
+      logger.error('Failed to initialize OpenAI client', { error });
+      this.openai = null;
+    }
   }
 
   /**
-   * Check if AI analysis is available (API key is configured)
+   * Check if AI analysis is available (API key is configured and client initialized)
    */
   public isAvailable(): boolean {
-    return !!process.env.OPENAI_API_KEY;
+    return this.openai !== null;
   }
 
   /**
@@ -53,8 +63,10 @@ export class AwardAIAnalyzer {
     newVersion: string,
     updateUrl: string | null
   ): Promise<AwardAnalysisResult> {
-    if (!this.isAvailable()) {
-      logger.warn('AI analysis requested but OpenAI API key is not configured');
+    if (!this.isAvailable() || !this.openai) {
+      logger.info('AI analysis requested but OpenAI client is not available, using fallback', {
+        awardCode,
+      });
       return this.generateFallbackAnalysis(awardCode, awardName);
     }
 
@@ -178,7 +190,11 @@ export class AwardAIAnalyzer {
     awardName: string,
     analysis: AwardAnalysisResult
   ): Promise<string> {
-    if (!this.isAvailable()) {
+    if (!this.isAvailable() || !this.openai) {
+      logger.info(
+        'AI notification generation requested but OpenAI client is not available, using fallback',
+        { awardCode }
+      );
       return this.generateFallbackNotification(awardCode, awardName, analysis.impactLevel);
     }
 
