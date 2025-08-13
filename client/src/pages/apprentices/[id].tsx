@@ -13,8 +13,13 @@ import {
   Cake,
   Briefcase,
   ClipboardList,
+  Users,
+  Target,
+  Award,
+  MessageSquare,
+  TrendingUp,
 } from 'lucide-react';
-import type { Apprentice, TrainingContract, Placement } from '@shared/schema';
+import type { Apprentice, TrainingContract, Placement, MentorAssignment, Mentor, MentoringSession, ApprenticeCompetency, Competency, ApprenticeMilestone } from '@shared/schema';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -70,6 +75,50 @@ const ApprenticeDetails = () => {
       const res = await fetch(`/api/apprentices/${apprenticeId}/placements`);
       if (!res.ok) throw new Error('Failed to fetch placements');
       return res.json() as Promise<Placement[]>;
+    },
+    enabled: !!apprenticeId,
+  });
+
+  // Fetch mentor assignments
+  const { data: mentorAssignments, isLoading: isLoadingMentors } = useQuery({
+    queryKey: [`/api/apprentices/${apprenticeId}/mentors`],
+    queryFn: async () => {
+      const res = await fetch(`/api/apprentices/${apprenticeId}/mentors`);
+      if (!res.ok) throw new Error('Failed to fetch mentors');
+      return res.json() as Promise<(MentorAssignment & { mentor: Mentor })[]>;
+    },
+    enabled: !!apprenticeId,
+  });
+
+  // Fetch mentoring sessions
+  const { data: mentoringSessions, isLoading: isLoadingSessions } = useQuery({
+    queryKey: [`/api/apprentices/${apprenticeId}/mentoring-sessions`],
+    queryFn: async () => {
+      const res = await fetch(`/api/apprentices/${apprenticeId}/mentoring-sessions`);
+      if (!res.ok) throw new Error('Failed to fetch mentoring sessions');
+      return res.json() as Promise<{ session: MentoringSession; assignment: MentorAssignment; mentor: Mentor }[]>;
+    },
+    enabled: !!apprenticeId,
+  });
+
+  // Fetch competency progress
+  const { data: competencyProgress, isLoading: isLoadingCompetencies } = useQuery({
+    queryKey: [`/api/apprentices/${apprenticeId}/competencies`],
+    queryFn: async () => {
+      const res = await fetch(`/api/apprentices/${apprenticeId}/competencies`);
+      if (!res.ok) throw new Error('Failed to fetch competencies');
+      return res.json() as Promise<{ progress: ApprenticeCompetency; competency: Competency }[]>;
+    },
+    enabled: !!apprenticeId,
+  });
+
+  // Fetch milestones
+  const { data: milestones, isLoading: isLoadingMilestones } = useQuery({
+    queryKey: [`/api/apprentices/${apprenticeId}/milestones`],
+    queryFn: async () => {
+      const res = await fetch(`/api/apprentices/${apprenticeId}/milestones`);
+      if (!res.ok) throw new Error('Failed to fetch milestones');
+      return res.json() as Promise<ApprenticeMilestone[]>;
     },
     enabled: !!apprenticeId,
   });
@@ -343,8 +392,24 @@ const ApprenticeDetails = () => {
             </CardContent>
           </Card>
 
-          <Tabs defaultValue="contracts">
-            <TabsList className="grid grid-cols-3 mb-6">
+          <Tabs defaultValue="overview">
+            <TabsList className="grid grid-cols-6 mb-6">
+              <TabsTrigger value="overview">
+                <ClipboardList className="h-4 w-4 mr-2" />
+                Overview
+              </TabsTrigger>
+              <TabsTrigger value="mentoring">
+                <Users className="h-4 w-4 mr-2" />
+                Mentoring
+              </TabsTrigger>
+              <TabsTrigger value="competencies">
+                <Target className="h-4 w-4 mr-2" />
+                Competencies
+              </TabsTrigger>
+              <TabsTrigger value="milestones">
+                <Award className="h-4 w-4 mr-2" />
+                Milestones
+              </TabsTrigger>
               <TabsTrigger value="contracts">
                 <FileText className="h-4 w-4 mr-2" />
                 Contracts
@@ -353,11 +418,292 @@ const ApprenticeDetails = () => {
                 <Building2 className="h-4 w-4 mr-2" />
                 Placements
               </TabsTrigger>
-              <TabsTrigger value="timesheets">
-                <AlarmClock className="h-4 w-4 mr-2" />
-                Timesheets
-              </TabsTrigger>
             </TabsList>
+
+            <TabsContent value="overview">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Recent Activity */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Recent Activity</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {mentoringSessions?.slice(0, 3).map((session, idx) => (
+                        <div key={idx} className="flex items-start space-x-3 p-3 bg-muted/50 rounded-lg">
+                          <MessageSquare className="h-4 w-4 mt-1 text-muted-foreground" />
+                          <div className="flex-1">
+                            <p className="text-sm font-medium">
+                              Mentoring session with {session.mentor.firstName} {session.mentor.lastName}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {formatDate(session.session.sessionDate)}
+                            </p>
+                          </div>
+                        </div>
+                      )) || <div className="text-sm text-muted-foreground">No recent activity</div>}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Progress Summary */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Progress Summary</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div>
+                        <div className="flex justify-between text-sm mb-1">
+                          <span>Overall Progress</span>
+                          <span>{apprentice.progress || 0}%</span>
+                        </div>
+                        <Progress value={apprentice.progress || 0} />
+                      </div>
+                      
+                      <div>
+                        <div className="flex justify-between text-sm mb-1">
+                          <span>Competencies Completed</span>
+                          <span>
+                            {competencyProgress?.filter(c => c.progress.status === 'competent').length || 0} 
+                            / {competencyProgress?.length || 0}
+                          </span>
+                        </div>
+                        <Progress 
+                          value={competencyProgress?.length 
+                            ? (competencyProgress.filter(c => c.progress.status === 'competent').length / competencyProgress.length) * 100 
+                            : 0
+                          } 
+                        />
+                      </div>
+
+                      <div>
+                        <div className="flex justify-between text-sm mb-1">
+                          <span>Milestones Achieved</span>
+                          <span>
+                            {milestones?.filter(m => m.status === 'achieved').length || 0} 
+                            / {milestones?.length || 0}
+                          </span>
+                        </div>
+                        <Progress 
+                          value={milestones?.length 
+                            ? (milestones.filter(m => m.status === 'achieved').length / milestones.length) * 100 
+                            : 0
+                          } 
+                        />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="mentoring">
+              <div className="space-y-6">
+                {/* Current Mentors */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Current Mentors</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {isLoadingMentors ? (
+                      <div className="text-center py-4">Loading mentors...</div>
+                    ) : mentorAssignments && mentorAssignments.length > 0 ? (
+                      <div className="space-y-4">
+                        {mentorAssignments.filter(a => a.status === 'active').map((assignment) => (
+                          <div key={assignment.id} className="flex items-center justify-between p-4 border rounded-lg">
+                            <div className="flex items-center space-x-3">
+                              <Avatar>
+                                <AvatarFallback>
+                                  {assignment.mentor.firstName[0]}{assignment.mentor.lastName[0]}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div>
+                                <div className="font-medium">
+                                  {assignment.mentor.firstName} {assignment.mentor.lastName}
+                                </div>
+                                <div className="text-sm text-muted-foreground">
+                                  {assignment.assignmentType} mentor since {formatDate(assignment.startDate)}
+                                </div>
+                              </div>
+                            </div>
+                            <Badge className="bg-green-100 text-green-800">
+                              {assignment.status}
+                            </Badge>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-8">
+                        <Users className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                        <h3 className="text-lg font-medium mb-2">No Mentors Assigned</h3>
+                        <p className="text-muted-foreground mb-4">
+                          Assign a mentor to start the mentoring process.
+                        </p>
+                        <Button asChild>
+                          <WouterLink href="/mentors">
+                            Assign Mentor
+                          </WouterLink>
+                        </Button>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* Recent Sessions */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Recent Mentoring Sessions</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {isLoadingSessions ? (
+                      <div className="text-center py-4">Loading sessions...</div>
+                    ) : mentoringSessions && mentoringSessions.length > 0 ? (
+                      <div className="space-y-4">
+                        {mentoringSessions.slice(0, 5).map((session) => (
+                          <div key={session.session.id} className="flex items-start space-x-3 p-3 border-l-4 border-blue-200 bg-blue-50/50">
+                            <MessageSquare className="h-5 w-5 mt-1 text-blue-600" />
+                            <div className="flex-1">
+                              <div className="flex items-center justify-between">
+                                <div className="font-medium">
+                                  Session with {session.mentor.firstName} {session.mentor.lastName}
+                                </div>
+                                <Badge variant="outline">
+                                  {session.session.sessionType}
+                                </Badge>
+                              </div>
+                              <p className="text-sm text-muted-foreground mt-1">
+                                {formatDate(session.session.sessionDate)} • {session.session.duration} minutes
+                              </p>
+                              {session.session.topics && (
+                                <div className="flex flex-wrap gap-1 mt-2">
+                                  {JSON.parse(session.session.topics).map((topic: string, idx: number) => (
+                                    <Badge key={idx} variant="secondary" className="text-xs">
+                                      {topic}
+                                    </Badge>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-8 text-muted-foreground">
+                        No mentoring sessions recorded yet.
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="competencies">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Competency Progress</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {isLoadingCompetencies ? (
+                    <div className="text-center py-4">Loading competencies...</div>
+                  ) : competencyProgress && competencyProgress.length > 0 ? (
+                    <div className="space-y-4">
+                      {competencyProgress.map((comp) => (
+                        <div key={comp.progress.id} className="p-4 border rounded-lg">
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <div className="font-medium">{comp.competency.code}</div>
+                              <div className="text-sm text-muted-foreground mb-2">
+                                {comp.competency.title}
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <Progress value={comp.progress.progressPercentage || 0} className="flex-1" />
+                                <span className="text-sm text-muted-foreground w-12">
+                                  {comp.progress.progressPercentage || 0}%
+                                </span>
+                              </div>
+                            </div>
+                            <Badge className={
+                              comp.progress.status === 'competent' 
+                                ? 'bg-green-100 text-green-800'
+                                : comp.progress.status === 'in_progress'
+                                ? 'bg-blue-100 text-blue-800'
+                                : comp.progress.status === 'not_yet_competent'
+                                ? 'bg-yellow-100 text-yellow-800'
+                                : 'bg-gray-100 text-gray-800'
+                            }>
+                              {comp.progress.status.replace('_', ' ')}
+                            </Badge>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <Target className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                      <h3 className="text-lg font-medium mb-2">No Competencies Assigned</h3>
+                      <p className="text-muted-foreground">
+                        Competencies will be assigned as part of the training plan.
+                      </p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="milestones">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Milestones & Achievements</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {isLoadingMilestones ? (
+                    <div className="text-center py-4">Loading milestones...</div>
+                  ) : milestones && milestones.length > 0 ? (
+                    <div className="space-y-4">
+                      {milestones.map((milestone) => (
+                        <div key={milestone.id} className="flex items-center space-x-4 p-4 border rounded-lg">
+                          <div className={`w-3 h-3 rounded-full ${
+                            milestone.status === 'achieved' 
+                              ? 'bg-green-500' 
+                              : milestone.status === 'overdue'
+                              ? 'bg-red-500'
+                              : 'bg-gray-300'
+                          }`} />
+                          <div className="flex-1">
+                            <div className="font-medium">{milestone.title}</div>
+                            <div className="text-sm text-muted-foreground">
+                              {milestone.description}
+                            </div>
+                            <div className="text-xs text-muted-foreground mt-1">
+                              Target: {formatDate(milestone.targetDate)} 
+                              {milestone.achievedDate && ` • Achieved: ${formatDate(milestone.achievedDate)}`}
+                            </div>
+                          </div>
+                          <Badge className={
+                            milestone.status === 'achieved' 
+                              ? 'bg-green-100 text-green-800'
+                              : milestone.status === 'overdue'
+                              ? 'bg-red-100 text-red-800'
+                              : 'bg-yellow-100 text-yellow-800'
+                          }>
+                            {milestone.status}
+                          </Badge>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <Award className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                      <h3 className="text-lg font-medium mb-2">No Milestones Set</h3>
+                      <p className="text-muted-foreground">
+                        Milestones will help track important achievements and deadlines.
+                      </p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
 
             <TabsContent value="contracts">
               <Card>

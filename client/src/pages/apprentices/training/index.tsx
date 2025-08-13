@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useLocation } from 'wouter';
+import { useQuery } from '@tanstack/react-query';
 import {
   Plus,
   GraduationCap,
@@ -9,6 +10,11 @@ import {
   Filter,
   ChevronDown,
   BarChart,
+  Clock,
+  Target,
+  Calendar,
+  CheckCircle,
+  TrendingUp
 } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -16,6 +22,14 @@ import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,74 +39,211 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useToast } from '@/hooks/use-toast';
+import type { TrainingPlan, Apprentice } from '@shared/schema';
 
-export default function ApprenticeTrainingPlans() {
+interface TrainingPlanWithApprentice extends TrainingPlan {
+  apprentice: Apprentice;
+}
+
+export default function TrainingPlansManagement() {
   const { toast } = useToast();
   const [_, navigate] = useLocation();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('active');
 
+  // Fetch all training plans with apprentice details
+  const { data: trainingPlans, isLoading } = useQuery({
+    queryKey: ['/api/training-plans'],
+    queryFn: async (): Promise<TrainingPlanWithApprentice[]> => {
+      const res = await fetch('/api/training-plans');
+      if (!res.ok) throw new Error('Failed to fetch training plans');
+      return res.json();
+    },
+  });
+
+  // Mock data for development - this would be replaced with real data
+  const mockTrainingPlans = [
+    {
+      id: 1,
+      apprenticeId: 1150540,
+      planName: 'Electrical Installation Certification III',
+      qualificationId: 'UEE30811',
+      startDate: '2021-10-01',
+      targetCompletionDate: '2026-07-02',
+      status: 'active',
+      overallProgress: 65,
+      apprentice: {
+        id: 1150540,
+        firstName: 'Abdullah',
+        lastName: 'Mohamed Osman Dihishi',
+        email: 'abdullah.dihishi@example.com',
+        trade: 'Electrical',
+        status: 'active',
+      },
+    },
+    {
+      id: 2,
+      apprenticeId: 1139497,
+      planName: 'Bricklaying and Blocklaying Certification',
+      qualificationId: 'CPC33020',
+      startDate: '2021-10-04',
+      targetCompletionDate: '2024-10-04',
+      status: 'active',
+      overallProgress: 42,
+      apprentice: {
+        id: 1139497,
+        firstName: 'Billy',
+        lastName: 'Douglas Carlton',
+        email: 'billy.carlton@example.com',
+        trade: 'Construction',
+        status: 'active',
+      },
+    },
+    {
+      id: 3,
+      apprenticeId: 479044,
+      planName: 'Engineering Fabrication Trade Certificate',
+      qualificationId: 'MEM30319',
+      startDate: '2021-09-30',
+      targetCompletionDate: '2027-02-27',
+      status: 'active',
+      overallProgress: 78,
+      apprentice: {
+        id: 479044,
+        firstName: 'Sheldon',
+        lastName: 'Douglas Taylor',
+        email: 'sheldon.taylor@example.com',
+        trade: 'Engineering',
+        status: 'active',
+      },
+    },
+  ];
+
+  // Use mock data for now - replace with real data when available
+  const displayPlans = trainingPlans || mockTrainingPlans;
+
+  // Filter plans based on search and tab
+  const filteredPlans = displayPlans.filter(plan => {
+    const matchesSearch = 
+      plan.planName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      plan.apprentice.firstName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      plan.apprentice.lastName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      plan.qualificationId?.toLowerCase().includes(searchQuery.toLowerCase());
+
+    const matchesTab = 
+      activeTab === 'active' ? plan.status === 'active' :
+      activeTab === 'completed' ? plan.status === 'completed' :
+      activeTab === 'draft' ? plan.status === 'draft' :
+      true;
+
+    return matchesSearch && matchesTab;
+  });
+
+  // Calculate statistics
+  const stats = {
+    totalPlans: displayPlans.length,
+    activePlans: displayPlans.filter(p => p.status === 'active').length,
+    averageProgress: displayPlans.reduce((sum, p) => sum + (p.overallProgress || 0), 0) / displayPlans.length || 0,
+    completedPlans: displayPlans.filter(p => p.status === 'completed').length,
+    plansNeedingReview: displayPlans.filter(p => {
+      const daysSinceLastUpdate = Math.floor((new Date().getTime() - new Date(p.startDate).getTime()) / (1000 * 60 * 60 * 24));
+      return daysSinceLastUpdate > 30 && p.overallProgress < 100;
+    }).length,
+  };
+
+  const getProgressColor = (progress: number) => {
+    if (progress >= 80) return 'text-green-600';
+    if (progress >= 50) return 'text-blue-600';
+    if (progress >= 25) return 'text-yellow-600';
+    return 'text-red-600';
+  };
+
+  const getStatusBadge = (status: string) => {
+    const statusColors = {
+      active: 'bg-green-100 text-green-800',
+      completed: 'bg-blue-100 text-blue-800',
+      suspended: 'bg-yellow-100 text-yellow-800',
+      cancelled: 'bg-red-100 text-red-800',
+      draft: 'bg-gray-100 text-gray-800',
+    };
+    
+    return (
+      <Badge className={statusColors[status as keyof typeof statusColors] || statusColors.draft}>
+        {status}
+      </Badge>
+    );
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">Training Plans</h2>
-          <p className="text-muted-foreground">Manage and monitor training plans for apprentices</p>
+          <h1 className="text-3xl font-bold tracking-tight">Training Plans</h1>
+          <p className="text-muted-foreground">
+            Manage and monitor comprehensive training plans for apprentices
+          </p>
         </div>
         <Button
-          onClick={() =>
-            toast({
-              title: 'Coming Soon',
-              description: 'Training plan creation feature coming soon',
-            })
-          }
+          onClick={() => navigate('/apprentices/training/create')}
         >
-          <Plus className="mr-2 h-4 w-4" /> New Training Plan
+          <Plus className="mr-2 h-4 w-4" /> Create Training Plan
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      {/* Statistics Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Active Training Plans</CardTitle>
+            <CardTitle className="text-sm font-medium">Total Plans</CardTitle>
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">124</div>
+            <div className="text-2xl font-bold">{stats.totalPlans}</div>
+            <p className="text-xs text-muted-foreground mt-1">All training plans</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Active Plans</CardTitle>
+            <Target className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.activePlans}</div>
             <p className="text-xs text-muted-foreground mt-1">Currently in progress</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Average Completion</CardTitle>
+            <CardTitle className="text-sm font-medium">Average Progress</CardTitle>
             <BarChart className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">68%</div>
-            <p className="text-xs text-muted-foreground mt-1">Overall progress across all plans</p>
+            <div className="text-2xl font-bold">{stats.averageProgress.toFixed(0)}%</div>
+            <p className="text-xs text-muted-foreground mt-1">Across all active plans</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Plans Requiring Review</CardTitle>
-            <BookOpen className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">Need Review</CardTitle>
+            <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">18</div>
-            <p className="text-xs text-muted-foreground mt-1">Scheduled for review in 30 days</p>
+            <div className="text-2xl font-bold">{stats.plansNeedingReview}</div>
+            <p className="text-xs text-muted-foreground mt-1">Overdue for review</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Completed Plans</CardTitle>
-            <GraduationCap className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">Completed</CardTitle>
+            <CheckCircle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">42</div>
-            <p className="text-xs text-muted-foreground mt-1">Fully completed training plans</p>
+            <div className="text-2xl font-bold">{stats.completedPlans}</div>
+            <p className="text-xs text-muted-foreground mt-1">Successfully completed</p>
           </CardContent>
         </Card>
       </div>
@@ -105,14 +256,14 @@ export default function ApprenticeTrainingPlans() {
                 <TabsTrigger value="active" className="text-sm">
                   Active Plans
                 </TabsTrigger>
-                <TabsTrigger value="review" className="text-sm">
-                  Requiring Review
-                </TabsTrigger>
                 <TabsTrigger value="completed" className="text-sm">
                   Completed
                 </TabsTrigger>
-                <TabsTrigger value="templates" className="text-sm">
-                  Plan Templates
+                <TabsTrigger value="draft" className="text-sm">
+                  Drafts
+                </TabsTrigger>
+                <TabsTrigger value="all" className="text-sm">
+                  All Plans
                 </TabsTrigger>
               </TabsList>
               <div className="flex items-center space-x-2">
@@ -121,7 +272,7 @@ export default function ApprenticeTrainingPlans() {
                   <Input
                     type="search"
                     placeholder="Search training plans..."
-                    className="pl-8 h-9 w-[200px]"
+                    className="pl-8 h-9 w-[250px]"
                     value={searchQuery}
                     onChange={e => setSearchQuery(e.target.value)}
                   />
@@ -136,133 +287,115 @@ export default function ApprenticeTrainingPlans() {
                   <DropdownMenuContent align="end" className="w-40">
                     <DropdownMenuLabel>Filter By</DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem>All Plans</DropdownMenuItem>
+                    <DropdownMenuItem>All Trades</DropdownMenuItem>
                     <DropdownMenuItem>Electrical</DropdownMenuItem>
                     <DropdownMenuItem>Plumbing</DropdownMenuItem>
                     <DropdownMenuItem>Carpentry</DropdownMenuItem>
-                    <DropdownMenuItem>Business</DropdownMenuItem>
+                    <DropdownMenuItem>Engineering</DropdownMenuItem>
+                    <DropdownMenuItem>Construction</DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
             </div>
 
-            <TabsContent value="active" className="py-4">
-              <div className="rounded-md border divide-y">
-                {/* Training plan items from real data */}
-                {[
-                  {
-                    id: 1150540,
-                    name: 'Abdullah Mohamed Osman Dihishi',
-                    qualification: 'UEE30811: Electrotechnology Electrician',
-                    progress: 65,
-                    trade: 'Electrical',
-                    start: '01/10/2021',
-                    end: '02/07/2026',
-                    status: 'Active',
-                  },
-                  {
-                    id: 1139497,
-                    name: 'Billy Douglas Carlton',
-                    qualification: 'CPC33020: Bricklaying and Blocklaying',
-                    progress: 42,
-                    trade: 'Construction',
-                    start: '04/10/2021',
-                    end: '04/10/2024',
-                    status: 'Active',
-                  },
-                  {
-                    id: 479044,
-                    name: 'Sheldon Douglas Taylor',
-                    qualification: 'MEM30319: Engineering - Fabrication Trade',
-                    progress: 78,
-                    trade: 'Engineering',
-                    start: '30/09/2021',
-                    end: '27/02/2027',
-                    status: 'Active',
-                  },
-                  {
-                    id: 1143049,
-                    name: 'Aaron Glen Ford',
-                    qualification: 'UEE30811: Electrotechnology Electrician',
-                    progress: 52,
-                    trade: 'Electrical',
-                    start: '06/09/2021',
-                    end: '06/09/2025',
-                    status: 'Active',
-                  },
-                  {
-                    id: 447528,
-                    name: 'Kyle Thomas Baker',
-                    qualification: 'CPC30220: Carpentry',
-                    progress: 84,
-                    trade: 'Carpentry',
-                    start: '20/09/2021',
-                    end: '20/09/2025',
-                    status: 'Active',
-                  },
-                  {
-                    id: 1196048,
-                    name: 'Shanae Olivia-Anne Miller',
-                    qualification: 'BSB20120: Workplace Skills',
-                    progress: 15,
-                    trade: 'Business',
-                    start: '22/02/2024',
-                    end: '22/08/2025',
-                    status: 'Active',
-                  },
-                ].map(plan => (
-                  <div key={plan.id} className="p-4 flex items-center">
-                    <div className="flex-1">
-                      <h3 className="font-medium">{plan.name}</h3>
-                      <p className="text-sm text-muted-foreground">{plan.qualification}</p>
-                      <div className="text-xs text-muted-foreground mt-1 mb-1">
-                        <span>
-                          Start: {plan.start} • End: {plan.end}
-                        </span>
-                      </div>
-                      <div className="flex items-center space-x-2 mt-2">
-                        <Progress value={plan.progress} className="h-2 flex-1" />
-                        <span className="text-xs text-muted-foreground">{plan.progress}%</span>
-                      </div>
-                    </div>
-                    <div className="ml-4 flex flex-col items-end">
-                      <Badge>{plan.trade}</Badge>
-                      <span className="text-xs mt-1">{plan.status}</span>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="mt-2"
-                        onClick={() => navigate(`/apprentices/${plan.id}`)}
-                      >
-                        View
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="text-center py-8">
-                <h3 className="text-lg font-medium">More Plans Coming Soon</h3>
-                <p className="text-muted-foreground mt-2 max-w-md mx-auto">
-                  The training plans module is under development. Additional features will be
-                  available soon.
-                </p>
-                <Button variant="outline" className="mt-4" onClick={() => navigate('/apprentices')}>
-                  View Apprentice List
-                </Button>
+            <TabsContent value={activeTab} className="py-4">
+              <div className="rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Apprentice</TableHead>
+                      <TableHead>Training Plan</TableHead>
+                      <TableHead>Progress</TableHead>
+                      <TableHead>Start Date</TableHead>
+                      <TableHead>Target Completion</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredPlans.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={7} className="text-center py-8">
+                          <div className="flex flex-col items-center space-y-3">
+                            <BookOpen className="h-12 w-12 text-muted-foreground" />
+                            <div>
+                              <h3 className="text-lg font-medium">No Training Plans Found</h3>
+                              <p className="text-muted-foreground">
+                                {searchQuery ? 'Try adjusting your search criteria.' : 'Create a new training plan to get started.'}
+                              </p>
+                            </div>
+                            {!searchQuery && (
+                              <Button onClick={() => navigate('/apprentices/training/create')}>
+                                <Plus className="mr-2 h-4 w-4" />
+                                Create Training Plan
+                              </Button>
+                            )}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      filteredPlans.map((plan) => (
+                        <TableRow key={plan.id} className="cursor-pointer hover:bg-muted/50">
+                          <TableCell>
+                            <div>
+                              <div className="font-medium">
+                                {plan.apprentice.firstName} {plan.apprentice.lastName}
+                              </div>
+                              <div className="text-sm text-muted-foreground">
+                                {plan.apprentice.trade}
+                              </div>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div>
+                              <div className="font-medium">{plan.planName}</div>
+                              <div className="text-sm text-muted-foreground">
+                                {plan.qualificationId}
+                              </div>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center space-x-2">
+                              <Progress value={plan.overallProgress} className="flex-1 h-2" />
+                              <span className={`text-sm font-medium ${getProgressColor(plan.overallProgress)}`}>
+                                {plan.overallProgress}%
+                              </span>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            {new Date(plan.startDate).toLocaleDateString()}
+                          </TableCell>
+                          <TableCell>
+                            {new Date(plan.targetCompletionDate).toLocaleDateString()}
+                          </TableCell>
+                          <TableCell>
+                            {getStatusBadge(plan.status)}
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex space-x-2">
+                              <Button 
+                                size="sm" 
+                                variant="outline"
+                                onClick={() => navigate(`/apprentices/${plan.apprenticeId}`)}
+                              >
+                                View
+                              </Button>
+                              <Button 
+                                size="sm" 
+                                variant="ghost"
+                                onClick={() => navigate(`/training-plans/${plan.id}/edit`)}
+                              >
+                                Edit
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
               </div>
             </TabsContent>
-
-            {['review', 'completed', 'templates'].map(tab => (
-              <TabsContent key={tab} value={tab} className="py-4">
-                <div className="text-center py-8">
-                  <h3 className="text-lg font-medium">Coming Soon</h3>
-                  <p className="text-muted-foreground mt-2">
-                    This section is currently under development.
-                  </p>
-                </div>
-              </TabsContent>
-            ))}
           </Tabs>
         </CardHeader>
       </Card>
