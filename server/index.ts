@@ -98,14 +98,23 @@ if (env.NODE_ENV === 'production') {
 }
 app.get('/health-check', (_req, res) => res.status(200).send('OK'));
 app.get('/api/health', (_req, res) => {
+  // Import the analyzer here to check AI availability
+  const { awardAIAnalyzer } = require('./services/fairwork/award-ai-analyzer');
+  
   res.status(200).json({
     status: 'ok',
     timestamp: new Date().toISOString(),
     service: 'apprentice-tracker',
     environment: env.NODE_ENV,
-    fairwork_api: {
-      url_configured: !!env.FAIRWORK_API_URL,
-      key_configured: !!env.FAIRWORK_API_KEY,
+    services: {
+      fairwork_api: {
+        url_configured: !!env.FAIRWORK_API_URL,
+        key_configured: !!env.FAIRWORK_API_KEY,
+      },
+      ai_analysis: {
+        available: awardAIAnalyzer?.isAvailable() || false,
+        key_configured: !!env.OPENAI_API_KEY,
+      },
     },
   });
 });
