@@ -10,6 +10,10 @@ import {
 import { db } from '../../db';
 import { hasPermission } from '../../middleware/auth';
 import { sendEmailNotification, sendInAppNotification } from '../../services/notification-service';
+import { 
+  generateRiskAssessmentPDFReport, 
+  generateRiskAssessmentExcelReport 
+} from '../../services/whs-report-generator';
 
 export function setupRiskAssessmentRoutes(router: express.Router) {
   // GET all risk assessments
@@ -389,6 +393,61 @@ export function setupRiskAssessmentRoutes(router: express.Router) {
     } catch (error) {
       console.error('Error updating risk assessment status:', error);
       res.status(400).json({ message: 'Failed to update risk assessment status' });
+    }
+  });
+
+  // REPORTS: Generate risk assessment reports
+  router.get('/risk-assessments/reports', async (req, res) => {
+    try {
+      const { format = 'json', startDate, endDate, status, hostEmployerId } = req.query;
+
+      // Build query with filters
+      let query = db.select().from(whs_risk_assessments);
+
+      if (startDate) {
+        query = query.where(sql`${whs_risk_assessments.assessment_date} >= ${startDate}`);
+      }
+
+      if (endDate) {
+        query = query.where(sql`${whs_risk_assessments.assessment_date} <= ${endDate}`);
+      }
+
+      if (status) {
+        query = query.where(sql`${whs_risk_assessments.status} = ${status}`);
+      }
+
+      if (hostEmployerId) {
+        query = query.where(sql`${whs_risk_assessments.host_employer_id} = ${hostEmployerId}`);
+      }
+
+      query = query.orderBy(sql`${whs_risk_assessments.assessment_date} DESC`);
+
+      const assessments = await query;
+
+      if (format === 'pdf') {
+        // Generate PDF report
+        const pdfBuffer = await generateRiskAssessmentPDFReport(assessments);
+        res.set({
+          'Content-Type': 'application/pdf',
+          'Content-Disposition': `attachment; filename=risk-assessments-report-${new Date().toISOString().split('T')[0]}.pdf`
+        });
+        return res.send(pdfBuffer);
+      }
+
+      if (format === 'excel') {
+        // Generate Excel report
+        const excelBuffer = await generateRiskAssessmentExcelReport(assessments);
+        res.set({
+          'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          'Content-Disposition': `attachment; filename=risk-assessments-report-${new Date().toISOString().split('T')[0]}.xlsx`
+        });
+        return res.send(excelBuffer);
+      }
+
+      res.json({ assessments, total: assessments.length });
+    } catch (error) {
+      console.error('Error generating risk assessment report:', error);
+      res.status(500).json({ message: 'Failed to generate report' });
     }
   });
 }
