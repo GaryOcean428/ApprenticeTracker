@@ -35,6 +35,7 @@ import clientsRouter from './api/clients-routes';
 import financialRouter from './api/financial';
 import complianceRouter from './api/compliance';
 import { setupWhsRoutes } from './api/whs/index';
+import { setupClaimsAPI } from './api/claims/index';
 import labourHireRouter from './api/labour-hire-routes';
 import tagsRouter from './api/tags-routes';
 import { db } from './db'; // Assuming db connection is defined here
@@ -894,6 +895,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/api/financial', financialRouter); // Financial management routes
   app.use('/api/compliance', complianceRouter); // Compliance management routes
   setupWhsRoutes(app); // Work Health & Safety routes
+  setupClaimsAPI(app); // Government Claims Management routes
   app.use('/api/labour-hire', labourHireRouter); // Labour Hire Workers routes
   app.use('/api/contacts', contactsRouter); // Unified Contacts System routes
   app.use('/api/clients', clientsRouter); // Client Management System routes
