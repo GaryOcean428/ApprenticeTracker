@@ -84,9 +84,10 @@ export function AwardSelector({
     queryKey: ['/api/fairwork/awards'],
   });
 
-  const awards = React.useMemo(() => 
-    awardsResponse?.data?.awards || []
-  , [awardsResponse?.data?.awards]);
+  const awards = React.useMemo(
+    () => awardsResponse?.data?.awards || [],
+    [awardsResponse?.data?.awards]
+  );
 
   // Fetch classifications for selected award
   const { data: classificationsResponse, isLoading: isLoadingClassifications } = useQuery({
@@ -94,9 +95,10 @@ export function AwardSelector({
     enabled: !!selectedAward?.code,
   });
 
-  const classifications = React.useMemo(() => 
-    classificationsResponse?.data?.classifications || []
-  , [classificationsResponse?.data?.classifications]);
+  const classifications = React.useMemo(
+    () => classificationsResponse?.data?.classifications || [],
+    [classificationsResponse?.data?.classifications]
+  );
 
   // Extract unique industries and sectors for filtering
   const industries = React.useMemo(() => {
