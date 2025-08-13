@@ -9,6 +9,7 @@ import {
 } from '@shared/schema/whs';
 import { db } from '../../db';
 import { hasPermission } from '../../middleware/auth';
+import { sendEmailNotification, sendInAppNotification } from '../../services/notification-service';
 
 export function setupRiskAssessmentRoutes(router: express.Router) {
   // GET all risk assessments
@@ -297,6 +298,11 @@ export function setupRiskAssessmentRoutes(router: express.Router) {
           return res.status(404).json({ message: 'Risk assessment not found' });
         }
 
+        // Validate workflow transition
+        if (existingAssessment.status === 'completed') {
+          return res.status(400).json({ message: 'Risk assessment is already approved' });
+        }
+
         // Update risk assessment with approval info
         const [updatedAssessment] = await db
           .update(whs_risk_assessments)
@@ -305,9 +311,17 @@ export function setupRiskAssessmentRoutes(router: express.Router) {
             approver_name: approverName,
             approval_date: new Date(),
             approval_notes: approvalNotes || null,
+            updated_at: new Date(),
           })
           .where(sql`${whs_risk_assessments.id} = ${id}`)
           .returning();
+
+        // Send approval notifications
+        try {
+          await sendRiskAssessmentApprovalNotifications(updatedAssessment, approverName);
+        } catch (notificationError) {
+          console.error('Error sending approval notifications:', notificationError);
+        }
 
         res.json(updatedAssessment);
       } catch (error) {
@@ -319,4 +333,179 @@ export function setupRiskAssessmentRoutes(router: express.Router) {
       }
     }
   );
+
+  // WORKFLOW: Transition risk assessment status
+  router.patch('/risk-assessments/:id/status', hasPermission('whs.update_risk_assessment'), async (req, res) => {
+    try {
+      const id = req.params.id;
+      const { status, notes } = req.body;
+
+      // Validate status transition
+      const validStatuses = ['draft', 'in-progress', 'completed', 'review-required', 'expired'];
+      
+      if (!validStatuses.includes(status)) {
+        return res.status(400).json({ message: 'Invalid status transition' });
+      }
+
+      // Get current risk assessment
+      const [currentAssessment] = await db
+        .select()
+        .from(whs_risk_assessments)
+        .where(sql`${whs_risk_assessments.id} = ${id}`);
+
+      if (!currentAssessment) {
+        return res.status(404).json({ message: 'Risk assessment not found' });
+      }
+
+      // Update status
+      const updateData: any = { 
+        status,
+        updated_at: new Date()
+      };
+
+      // Set review date if moving to review-required
+      if (status === 'review-required' && !currentAssessment.review_date) {
+        const reviewDate = new Date();
+        reviewDate.setMonth(reviewDate.getMonth() + 12); // Default to 12 months from now
+        updateData.review_date = reviewDate;
+      }
+
+      const [updatedAssessment] = await db
+        .update(whs_risk_assessments)
+        .set(updateData)
+        .where(sql`${whs_risk_assessments.id} = ${id}`)
+        .returning();
+
+      // Send notifications for status changes
+      if (status === 'review-required') {
+        try {
+          await sendRiskAssessmentReviewNotifications(updatedAssessment);
+        } catch (notificationError) {
+          console.error('Error sending review notifications:', notificationError);
+        }
+      }
+
+      res.json(updatedAssessment);
+    } catch (error) {
+      console.error('Error updating risk assessment status:', error);
+      res.status(400).json({ message: 'Failed to update risk assessment status' });
+    }
+  });
+}
+
+// Helper function to send risk assessment approval notifications
+async function sendRiskAssessmentApprovalNotifications(assessment: any, approverName: string) {
+  try {
+    console.log(`[WHS_NOTIFICATION] Risk assessment approved: ${assessment.id} by ${approverName}`);
+    
+    const emailRecipients: string[] = [];
+    
+    // Notify the assessor if available
+    if (assessment.assessor_email) {
+      emailRecipients.push(assessment.assessor_email);
+    }
+
+    // Notify host employer
+    if (assessment.host_employer_email) {
+      emailRecipients.push(assessment.host_employer_email);
+    }
+
+    // Notify WHS administrators
+    const whsAdminEmails = process.env.WHS_ADMIN_EMAILS?.split(',') || [];
+    emailRecipients.push(...whsAdminEmails.filter(email => email.trim()));
+
+    if (emailRecipients.length > 0) {
+      try {
+        await sendEmailNotification({
+          recipients: emailRecipients,
+          subject: `Risk Assessment Approved: ${assessment.title}`,
+          htmlContent: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+              <div style="background-color: #059669; color: white; padding: 20px; border-radius: 8px 8px 0 0;">
+                <h2 style="margin: 0; color: white;">Risk Assessment Approved</h2>
+              </div>
+              <div style="background-color: #f9f9f9; padding: 20px; border-radius: 0 0 8px 8px; margin: 0;">
+                <h3 style="margin-top: 0; color: #1f2937;">${assessment.title}</h3>
+                <table style="width: 100%; border-collapse: collapse;">
+                  <tr><td style="padding: 8px 0; font-weight: bold;">Location:</td><td style="padding: 8px 0;">${assessment.location}</td></tr>
+                  <tr><td style="padding: 8px 0; font-weight: bold;">Assessment Date:</td><td style="padding: 8px 0;">${new Date(assessment.assessment_date).toLocaleDateString()}</td></tr>
+                  <tr><td style="padding: 8px 0; font-weight: bold;">Assessor:</td><td style="padding: 8px 0;">${assessment.assessor_name || 'Unknown'}</td></tr>
+                  <tr><td style="padding: 8px 0; font-weight: bold;">Approved By:</td><td style="padding: 8px 0;">${approverName}</td></tr>
+                  <tr><td style="padding: 8px 0; font-weight: bold;">Approval Date:</td><td style="padding: 8px 0;">${new Date().toLocaleDateString()}</td></tr>
+                  ${assessment.host_employer_name ? `<tr><td style="padding: 8px 0; font-weight: bold;">Host Employer:</td><td style="padding: 8px 0;">${assessment.host_employer_name}</td></tr>` : ''}
+                </table>
+                ${assessment.approval_notes ? `
+                <div style="margin: 15px 0;">
+                  <strong>Approval Notes:</strong>
+                  <p style="background: white; padding: 15px; border-radius: 4px; margin: 5px 0;">${assessment.approval_notes}</p>
+                </div>` : ''}
+                ${assessment.recommendations ? `
+                <div style="margin: 15px 0;">
+                  <strong>Recommendations:</strong>
+                  <p style="background: white; padding: 15px; border-radius: 4px; margin: 5px 0;">${assessment.recommendations}</p>
+                </div>` : ''}
+              </div>
+              <p style="color: #666; font-size: 12px; margin-top: 20px;">
+                This risk assessment has been approved and is now in effect.
+              </p>
+            </div>
+          `,
+          textContent: `Risk Assessment Approved\n\nTitle: ${assessment.title}\nLocation: ${assessment.location}\nApproved By: ${approverName}\nApproval Date: ${new Date().toLocaleDateString()}`
+        });
+        console.log(`Risk assessment approval notifications sent to ${emailRecipients.length} recipients`);
+      } catch (emailError) {
+        console.error('Error sending approval email notifications:', emailError);
+      }
+    }
+  } catch (error) {
+    console.error('Error sending risk assessment approval notifications:', error);
+  }
+}
+
+// Helper function to send risk assessment review notifications
+async function sendRiskAssessmentReviewNotifications(assessment: any) {
+  try {
+    console.log(`[WHS_NOTIFICATION] Risk assessment requires review: ${assessment.id}`);
+    
+    const emailRecipients: string[] = [];
+    
+    // Notify WHS administrators/managers who can conduct reviews
+    const whsAdminEmails = process.env.WHS_ADMIN_EMAILS?.split(',') || [];
+    emailRecipients.push(...whsAdminEmails.filter(email => email.trim()));
+
+    if (emailRecipients.length > 0) {
+      try {
+        await sendEmailNotification({
+          recipients: emailRecipients,
+          subject: `Risk Assessment Review Required: ${assessment.title}`,
+          htmlContent: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+              <div style="background-color: #d97706; color: white; padding: 20px; border-radius: 8px 8px 0 0;">
+                <h2 style="margin: 0; color: white;">Risk Assessment Review Required</h2>
+              </div>
+              <div style="background-color: #f9f9f9; padding: 20px; border-radius: 0 0 8px 8px; margin: 0;">
+                <h3 style="margin-top: 0; color: #1f2937;">${assessment.title}</h3>
+                <table style="width: 100%; border-collapse: collapse;">
+                  <tr><td style="padding: 8px 0; font-weight: bold;">Location:</td><td style="padding: 8px 0;">${assessment.location}</td></tr>
+                  <tr><td style="padding: 8px 0; font-weight: bold;">Assessment Date:</td><td style="padding: 8px 0;">${new Date(assessment.assessment_date).toLocaleDateString()}</td></tr>
+                  <tr><td style="padding: 8px 0; font-weight: bold;">Assessor:</td><td style="padding: 8px 0;">${assessment.assessor_name || 'Unknown'}</td></tr>
+                  ${assessment.review_date ? `<tr><td style="padding: 8px 0; font-weight: bold;">Review Due:</td><td style="padding: 8px 0;">${new Date(assessment.review_date).toLocaleDateString()}</td></tr>` : ''}
+                  ${assessment.host_employer_name ? `<tr><td style="padding: 8px 0; font-weight: bold;">Host Employer:</td><td style="padding: 8px 0;">${assessment.host_employer_name}</td></tr>` : ''}
+                </table>
+              </div>
+              <p style="color: #666; font-size: 12px; margin-top: 20px;">
+                This risk assessment requires review and approval. Please log into the ApprenticeTracker system to review.
+              </p>
+            </div>
+          `,
+          textContent: `Risk Assessment Review Required\n\nTitle: ${assessment.title}\nLocation: ${assessment.location}\nAssessor: ${assessment.assessor_name}`
+        });
+        console.log(`Risk assessment review notifications sent to ${emailRecipients.length} recipients`);
+      } catch (emailError) {
+        console.error('Error sending review email notifications:', emailError);
+      }
+    }
+  } catch (error) {
+    console.error('Error sending risk assessment review notifications:', error);
+  }
 }

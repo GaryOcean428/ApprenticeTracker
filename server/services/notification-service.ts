@@ -48,21 +48,85 @@ export async function sendEmailNotification(options: EmailNotificationOptions): 
  * Send an in-app notification to users
  */
 export async function sendInAppNotification(
-  userIds: number[],
+  userId: string | number,
+  notification: {
+    type: string;
+    message: string;
+    data?: any;
+    priority?: 'low' | 'normal' | 'high';
+  }
+): Promise<boolean>;
+export async function sendInAppNotification(
+  userIds: (string | number)[],
   message: string,
+  link?: string,
+  type?: 'info' | 'warning' | 'success' | 'error'
+): Promise<boolean>;
+export async function sendInAppNotification(
+  userIds: string | number | (string | number)[],
+  messageOrNotification: string | {
+    type: string;
+    message: string;
+    data?: any;
+    priority?: 'low' | 'normal' | 'high';
+  },
   link?: string,
   type: 'info' | 'warning' | 'success' | 'error' = 'info'
 ): Promise<boolean> {
   try {
+    // Handle both function signatures
+    let targetUserIds: (string | number)[];
+    let notificationData: {
+      type: string;
+      message: string;
+      data?: any;
+      priority?: 'low' | 'normal' | 'high';
+    };
+
+    if (Array.isArray(userIds)) {
+      // Legacy signature
+      targetUserIds = userIds;
+      notificationData = {
+        type: type,
+        message: messageOrNotification as string,
+        data: link ? { link } : undefined,
+        priority: 'normal'
+      };
+    } else if (typeof messageOrNotification === 'object') {
+      // New signature
+      targetUserIds = [userIds];
+      notificationData = messageOrNotification;
+    } else {
+      // Single user legacy signature
+      targetUserIds = [userIds];
+      notificationData = {
+        type: type,
+        message: messageOrNotification,
+        data: link ? { link } : undefined,
+        priority: 'normal'
+      };
+    }
+
     logger.info('Sending in-app notification', {
-      userCount: userIds.length,
-      message,
-      type,
+      userCount: targetUserIds.length,
+      message: notificationData.message,
+      type: notificationData.type,
+      priority: notificationData.priority,
     });
 
-    // In a real implementation, this would store the notification in the database
-    // and potentially trigger real-time updates via websockets
-    logger.info(`Would send in-app notification to ${userIds.length} users`);
+    // In a real implementation, this would:
+    // - Store the notification in the database
+    // - Trigger real-time updates via websockets
+    // - Handle notification preferences per user
+    
+    for (const userId of targetUserIds) {
+      logger.info(`Would send in-app notification to user ${userId}:`, {
+        type: notificationData.type,
+        message: notificationData.message,
+        priority: notificationData.priority,
+        data: notificationData.data
+      });
+    }
 
     return true;
   } catch (error) {
