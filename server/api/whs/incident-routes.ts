@@ -12,6 +12,10 @@ import {
 import { db } from '../../db';
 import { hasPermission } from '../../middleware/auth';
 import { sendEmailNotification, sendInAppNotification, sendSystemAlert } from '../../services/notification-service';
+import { 
+  generateIncidentPDFReport, 
+  generateIncidentExcelReport 
+} from '../../services/whs-report-generator';
 
 export function setupIncidentRoutes(router: express.Router) {
   // GET all incidents
@@ -268,7 +272,7 @@ export function setupIncidentRoutes(router: express.Router) {
 
       if (format === 'pdf') {
         // Generate PDF report
-        const pdfBuffer = await generateIncidentPDFReport(reportData);
+        const pdfBuffer = await generateIncidentPDFReportLegacy(reportData);
         res.set({
           'Content-Type': 'application/pdf',
           'Content-Disposition': `attachment; filename=incidents-report-${new Date().toISOString().split('T')[0]}.pdf`
@@ -278,7 +282,7 @@ export function setupIncidentRoutes(router: express.Router) {
 
       if (format === 'excel') {
         // Generate Excel report
-        const excelBuffer = await generateIncidentExcelReport(reportData);
+        const excelBuffer = await generateIncidentExcelReportLegacy(reportData);
         res.set({
           'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
           'Content-Disposition': `attachment; filename=incidents-report-${new Date().toISOString().split('T')[0]}.xlsx`
@@ -581,58 +585,15 @@ async function sendIncidentStatusNotifications(
 }
 
 // Helper function to generate PDF reports
-async function generateIncidentPDFReport(reportData: any): Promise<Buffer> {
-  try {
-    // This is a placeholder implementation
-    // In a real system, you'd use a PDF generation library like puppeteer or jsPDF
-    
-    const reportContent = `
-WHS Incidents Report
-Generated: ${reportData.summary.reportGeneratedAt}
-
-Summary:
-- Total Incidents: ${reportData.summary.totalIncidents}
-- By Status: ${Object.entries(reportData.summary.statusCounts).map(([status, count]) => `${status}: ${count}`).join(', ')}
-- By Severity: ${Object.entries(reportData.summary.severityCounts).map(([severity, count]) => `${severity}: ${count}`).join(', ')}
-
-Incidents:
-${reportData.incidents.map((incident: any) => `
-- ${incident.title} (${incident.status})
-  Date: ${incident.date_occurred}
-  Severity: ${incident.severity}
-  Location: ${incident.location}
-`).join('')}
-    `;
-    
-    // For now, return a simple buffer with the report content
-    // In production, use a proper PDF generation library
-    return Buffer.from(reportContent, 'utf-8');
-  } catch (error) {
-    console.error('Error generating PDF report:', error);
-    throw new Error('Failed to generate PDF report');
-  }
+async function generateIncidentPDFReportLegacy(reportData: any): Promise<Buffer> {
+  // Use the new report generator
+  return await generateIncidentPDFReport(reportData);
 }
 
 // Helper function to generate Excel reports  
-async function generateIncidentExcelReport(reportData: any): Promise<Buffer> {
-  try {
-    // This is a placeholder implementation
-    // In a real system, you'd use a library like exceljs
-    
-    const csvContent = [
-      'Title,Status,Severity,Date Occurred,Location,Reporter,Description',
-      ...reportData.incidents.map((incident: any) => 
-        `"${incident.title}","${incident.status}","${incident.severity}","${incident.date_occurred}","${incident.location}","${incident.reporter_name || ''}","${(incident.description || '').replace(/"/g, '""')}"`
-      )
-    ].join('\n');
-    
-    // For now, return CSV format as a buffer
-    // In production, generate actual Excel format
-    return Buffer.from(csvContent, 'utf-8');
-  } catch (error) {
-    console.error('Error generating Excel report:', error);
-    throw new Error('Failed to generate Excel report');
-  }
+async function generateIncidentExcelReportLegacy(reportData: any): Promise<Buffer> {
+  // Use the new report generator
+  return await generateIncidentExcelReport(reportData);
 }
 
 // Helper function to generate chart data for dashboard
