@@ -117,33 +117,29 @@ For Railway deployment, ensure:
 
 ## Development Roadmap
 
-CRM7 follows a strategic development roadmap based on comprehensive analysis of regulatory requirements and industry best practices. See our detailed roadmap in `/docs/upgrade-roadmap.md`.
+CRM7 follows a strategic development roadmap based on comprehensive analysis of regulatory requirements and industry best practices. **See our canonical roadmap in `/roadmap.md`** for the complete development plan, current status, and next steps.
 
-### Phase 1: Critical Compliance & Financial Operations (Current Focus)
+### Current Status Summary (August 2025)
 
-🟢 Work Health and Safety (WHS) Management - In Progress (~70%)
-🟢 Host Employer Billing & Rate Calculation - In Progress (~15%)
-⏳ Government Claims Management - Planning Stage
-⏳ Enhanced Onboarding Module - Planning Stage
-⏳ Core Compliance Module Enhancement - Planning Stage
-✅ Payroll system with award rate integration - Complete
+**✅ Completed (Production Ready)**
+- Authentication system with JWT and audit logging
+- Work Health & Safety (WHS) Module (~75% complete)
+- Core apprentice management (~60% complete)
+- Basic host employer management (~40% complete)
+- Award rate calculation system (~45% complete)
 
-### Phase 2: Lifecycle Management & Field Operations
+**🔄 In Progress (Phase 1 Focus)**
+- WHS module completion and advanced workflows
+- Government claims management (planning)
+- Enhanced billing engine development
+- Compliance framework enhancement
 
-⏳ Advanced Apprentice Lifecycle Management
-⏳ Field Officer Mobile Toolkit
-⏳ Host Employer Portal
-✅ Enrichment program management
-⏳ Progress reviews system
-
-### Phase 3: Advanced Features & Integrations
-
-⏳ Advanced Applicant Tracking
-⏳ Enhanced Reporting and Analytics
-⏳ Advanced Document Management
-⏳ External System Integrations
-⏳ Calendar integration for field officers
-⏳ Training plans development and tracking
+**⏳ Planned (Phase 2 & 3)**
+- Advanced apprentice lifecycle management
+- Field officer mobile tools  
+- Host employer portal
+- Advanced analytics and reporting
+- External system integrations
 
 ## License
 
