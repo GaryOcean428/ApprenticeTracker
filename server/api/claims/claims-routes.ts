@@ -14,6 +14,7 @@ import {
 } from '@shared/schema/claims';
 import { db } from '../../db';
 import { hasPermission } from '../../middleware/auth';
+import { sendEmailNotification, sendInAppNotification, sendSystemAlert } from '../../services/notification-service';
 
 export function setupClaimsRoutes(router: express.Router) {
   // GET all claims with pagination and filtering
@@ -143,6 +144,13 @@ export function setupClaimsRoutes(router: express.Router) {
         notes: 'Claim created',
         changes: { action: 'created', status: newClaim.status }
       });
+
+      // Send new claim notifications
+      try {
+        await sendNewClaimNotifications(newClaim);
+      } catch (notificationError) {
+        console.error('Error sending new claim notifications:', notificationError);
+      }
 
       res.status(201).json(newClaim);
     } catch (error) {
@@ -293,6 +301,13 @@ export function setupClaimsRoutes(router: express.Router) {
 
       // Create automatic reminders if needed
       await createAutomaticReminders(updatedClaim, status);
+
+      // Send status change notifications
+      try {
+        await sendClaimStatusNotifications(updatedClaim, currentClaim.status, status);
+      } catch (notificationError) {
+        console.error('Error sending status change notifications:', notificationError);
+      }
 
       res.json(updatedClaim);
     } catch (error) {
@@ -580,5 +595,194 @@ async function createAutomaticReminders(claim: any, status: string) {
     }
   } catch (error) {
     console.error('Error creating automatic reminders:', error);
+  }
+}
+
+// Helper function to send new claim notifications
+async function sendNewClaimNotifications(claim: any) {
+  try {
+    console.log(`[CLAIMS_NOTIFICATION] New claim created: ${claim.id} - ${claim.claim_number}`);
+    
+    const emailRecipients: string[] = [];
+    
+    // Notify claims administrators
+    const claimsAdminEmails = process.env.CLAIMS_ADMIN_EMAILS?.split(',') || [];
+    emailRecipients.push(...claimsAdminEmails.filter(email => email.trim()));
+
+    if (emailRecipients.length > 0) {
+      try {
+        await sendEmailNotification({
+          recipients: emailRecipients,
+          subject: `New Government Claim Created: ${claim.claim_number}`,
+          htmlContent: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+              <div style="background-color: #3b82f6; color: white; padding: 20px; border-radius: 8px 8px 0 0;">
+                <h2 style="margin: 0; color: white;">New Government Claim Created</h2>
+                <p style="margin: 10px 0 0 0; color: white;">Claim Type: ${claim.claim_type}</p>
+              </div>
+              <div style="background-color: #f9f9f9; padding: 20px; border-radius: 0 0 8px 8px; margin: 0;">
+                <h3 style="margin-top: 0; color: #1f2937;">${claim.claim_number}</h3>
+                <table style="width: 100%; border-collapse: collapse;">
+                  <tr><td style="padding: 8px 0; font-weight: bold;">Apprentice:</td><td style="padding: 8px 0;">${claim.apprentice_name || 'Unknown'}</td></tr>
+                  <tr><td style="padding: 8px 0; font-weight: bold;">Claim Type:</td><td style="padding: 8px 0;">${claim.claim_type}</td></tr>
+                  <tr><td style="padding: 8px 0; font-weight: bold;">Amount Requested:</td><td style="padding: 8px 0;">$${claim.amount_requested?.toLocaleString() || '0'}</td></tr>
+                  <tr><td style="padding: 8px 0; font-weight: bold;">Funding Body:</td><td style="padding: 8px 0;">${claim.funding_body}</td></tr>
+                  <tr><td style="padding: 8px 0; font-weight: bold;">Jurisdiction:</td><td style="padding: 8px 0;">${claim.jurisdiction}</td></tr>
+                  <tr><td style="padding: 8px 0; font-weight: bold;">Status:</td><td style="padding: 8px 0;">${claim.status}</td></tr>
+                  <tr><td style="padding: 8px 0; font-weight: bold;">Submitted By:</td><td style="padding: 8px 0;">${claim.submitted_by_name || 'Unknown'}</td></tr>
+                </table>
+              </div>
+              <p style="color: #666; font-size: 12px; margin-top: 20px;">
+                This claim requires review and processing. Please log into the ApprenticeTracker system to manage this claim.
+              </p>
+            </div>
+          `,
+          textContent: `New Government Claim Created\n\nClaim Number: ${claim.claim_number}\nApprentice: ${claim.apprentice_name}\nType: ${claim.claim_type}\nAmount: $${claim.amount_requested?.toLocaleString()}`
+        });
+        console.log(`New claim email notifications sent to ${emailRecipients.length} recipients for claim ${claim.id}`);
+      } catch (emailError) {
+        console.error('Error sending new claim email notifications:', emailError);
+      }
+    }
+
+    return [];
+  } catch (error) {
+    console.error('Error sending new claim notifications:', error);
+    return [];
+  }
+}
+
+// Helper function to send claim status notifications
+async function sendClaimStatusNotifications(claim: any, previousStatus: string, newStatus: string) {
+  try {
+    console.log(`[CLAIMS_NOTIFICATION] Claim ${claim.id} status changed from ${previousStatus} to ${newStatus}`);
+    
+    const emailRecipients: string[] = [];
+    const notifications = [];
+    
+    // Determine notification message and styling based on status
+    const statusMessages = {
+      'pending': 'Claim is pending review',
+      'submitted': 'Claim has been submitted for review',
+      'in-review': 'Claim is currently under review',
+      'approved': 'Claim has been approved for payment',
+      'rejected': 'Claim has been rejected',
+      'paid': 'Payment has been processed',
+      'reconciled': 'Claim has been reconciled',
+      'cancelled': 'Claim has been cancelled'
+    };
+
+    const statusColors = {
+      'pending': '#f59e0b',
+      'submitted': '#3b82f6',
+      'in-review': '#8b5cf6',
+      'approved': '#10b981',
+      'rejected': '#ef4444',
+      'paid': '#059669',
+      'reconciled': '#065f46',
+      'cancelled': '#9ca3af'
+    };
+
+    const statusMessage = statusMessages[newStatus as keyof typeof statusMessages] || `Status updated to ${newStatus}`;
+    const statusColor = statusColors[newStatus as keyof typeof statusColors] || '#6b7280';
+    
+    // Notify claim submitter
+    if (claim.submitted_by_id) {
+      notifications.push({
+        userId: claim.submitted_by_id,
+        type: 'claim_status_update',
+        message: `Claim ${claim.claim_number}: ${statusMessage}`,
+        claimId: claim.id
+      });
+    }
+
+    // Notify claims administrators
+    const claimsAdminEmails = process.env.CLAIMS_ADMIN_EMAILS?.split(',') || [];
+    emailRecipients.push(...claimsAdminEmails.filter(email => email.trim()));
+
+    // Send email notifications
+    if (emailRecipients.length > 0) {
+      try {
+        await sendEmailNotification({
+          recipients: emailRecipients,
+          subject: `Claim Status Update: ${claim.claim_number} - ${statusMessage}`,
+          htmlContent: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+              <div style="background-color: ${statusColor}; color: white; padding: 20px; border-radius: 8px 8px 0 0;">
+                <h2 style="margin: 0; color: white;">Claim Status Update</h2>
+                <p style="margin: 10px 0 0 0; color: white;">Status: ${newStatus.toUpperCase()}</p>
+              </div>
+              <div style="background-color: #f9f9f9; padding: 20px; border-radius: 0 0 8px 8px; margin: 0;">
+                <h3 style="margin-top: 0; color: #1f2937;">${claim.claim_number}</h3>
+                <table style="width: 100%; border-collapse: collapse;">
+                  <tr><td style="padding: 8px 0; font-weight: bold;">Apprentice:</td><td style="padding: 8px 0;">${claim.apprentice_name || 'Unknown'}</td></tr>
+                  <tr><td style="padding: 8px 0; font-weight: bold;">Claim Type:</td><td style="padding: 8px 0;">${claim.claim_type}</td></tr>
+                  <tr><td style="padding: 8px 0; font-weight: bold;">Amount Requested:</td><td style="padding: 8px 0;">$${claim.amount_requested?.toLocaleString() || '0'}</td></tr>
+                  ${claim.amount_approved ? `<tr><td style="padding: 8px 0; font-weight: bold;">Amount Approved:</td><td style="padding: 8px 0;">$${claim.amount_approved.toLocaleString()}</td></tr>` : ''}
+                  <tr><td style="padding: 8px 0; font-weight: bold;">Previous Status:</td><td style="padding: 8px 0;">${previousStatus}</td></tr>
+                  <tr><td style="padding: 8px 0; font-weight: bold;">New Status:</td><td style="padding: 8px 0;">${newStatus}</td></tr>
+                  ${claim.review_date ? `<tr><td style="padding: 8px 0; font-weight: bold;">Review Date:</td><td style="padding: 8px 0;">${new Date(claim.review_date).toLocaleDateString()}</td></tr>` : ''}
+                  ${claim.reviewed_by_name ? `<tr><td style="padding: 8px 0; font-weight: bold;">Reviewed By:</td><td style="padding: 8px 0;">${claim.reviewed_by_name}</td></tr>` : ''}
+                </table>
+                <div style="margin: 15px 0;">
+                  <strong>Update:</strong> ${statusMessage}
+                </div>
+                ${claim.rejection_reason ? `
+                <div style="margin: 15px 0; background: #fef2f2; padding: 15px; border-radius: 4px; border-left: 4px solid #ef4444;">
+                  <strong>Rejection Reason:</strong>
+                  <p style="margin: 5px 0 0 0;">${claim.rejection_reason}</p>
+                </div>` : ''}
+                ${claim.notes && claim.notes !== claim.rejection_reason ? `
+                <div style="margin: 15px 0;">
+                  <strong>Notes:</strong>
+                  <p style="background: white; padding: 15px; border-radius: 4px; margin: 5px 0 0 0;">${claim.notes}</p>
+                </div>` : ''}
+              </div>
+              <p style="color: #666; font-size: 12px; margin-top: 20px;">
+                This is an automated notification from the ApprenticeTracker Claims Management system.
+              </p>
+            </div>
+          `,
+          textContent: `Claim Status Update: ${claim.claim_number}\nStatus: ${previousStatus} → ${newStatus}\n${statusMessage}\nApprentice: ${claim.apprentice_name}\nAmount: $${claim.amount_requested?.toLocaleString()}`
+        });
+        console.log(`Claim status notifications sent to ${emailRecipients.length} recipients for claim ${claim.id}`);
+      } catch (emailError) {
+        console.error('Error sending claim status email notifications:', emailError);
+      }
+    }
+
+    // Send system alerts for critical status changes
+    if (['approved', 'rejected'].includes(newStatus)) {
+      try {
+        await sendSystemAlert(
+          `Claim ${claim.claim_number} has been ${newStatus} - Amount: $${claim.amount_requested?.toLocaleString()}`,
+          newStatus === 'approved' ? 'normal' : 'medium'
+        );
+      } catch (alertError) {
+        console.error('Error sending system alert for claim status:', alertError);
+      }
+    }
+
+    // Send in-app notifications
+    for (const notification of notifications) {
+      try {
+        if (notification.userId) {
+          await sendInAppNotification(notification.userId, {
+            type: notification.type,
+            message: notification.message,
+            data: { claimId: claim.id, newStatus, previousStatus },
+            priority: ['approved', 'rejected', 'paid'].includes(newStatus) ? 'high' : 'normal'
+          });
+        }
+      } catch (inAppError) {
+        console.error('Error sending in-app notification:', inAppError);
+      }
+    }
+    
+    console.log(`Generated ${notifications.length} notifications for claim ${claim.id}`);
+    return notifications;
+  } catch (error) {
+    console.error('Error sending claim status notifications:', error);
+    return [];
   }
 }
