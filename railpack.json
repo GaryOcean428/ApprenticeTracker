@@ -52,7 +52,7 @@
     "dependencies": ["build"],
     "startCommand": "pnpm start",
     "healthcheck": {
-      "path": "/api/health",
+      "path": "/healthz",
       "interval": 30,
       "timeout": 10,
       "retries": 3,

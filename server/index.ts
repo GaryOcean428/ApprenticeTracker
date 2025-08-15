@@ -109,7 +109,14 @@ if (env.NODE_ENV === 'production') {
 app.get('/health-check', (_req, res) => res.status(200).send('OK'));
 app.get('/api/health', (_req, res) => {
   // Import the analyzer here to check AI availability
-  const { awardAIAnalyzer } = require('./services/fairwork/award-ai-analyzer');
+  let awardAIAnalyzer;
+  try {
+    const fairworkModule = require('./services/fairwork/award-ai-analyzer');
+    awardAIAnalyzer = fairworkModule.awardAIAnalyzer;
+  } catch (error) {
+    // Handle import error gracefully
+    awardAIAnalyzer = null;
+  }
   
   res.status(200).json({
     status: 'ok',
@@ -126,6 +133,14 @@ app.get('/api/health', (_req, res) => {
         key_configured: !!env.OPENAI_API_KEY,
       },
     },
+  });
+});
+
+// Railway-specific health check endpoint
+app.get('/healthz', (_req, res) => {
+  res.status(200).json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
   });
 });
 
