@@ -7,6 +7,11 @@ import { db } from './db';
 export async function migrateRolesSchema() {
   console.log('Starting Role Management schema migration...');
 
+  if (!db) {
+    console.warn('⚠️  Database not available - skipping Role Management schema migration');
+    return;
+  }
+
   try {
     // Create roles table
     await db.execute(sql`
