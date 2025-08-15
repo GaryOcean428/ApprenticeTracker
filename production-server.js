@@ -32,6 +32,14 @@ app.get('/health', (req, res) => {
   });
 });
 
+// Railway-specific healthcheck endpoint
+app.get('/healthz', (req, res) => {
+  res.status(200).json({
+    status: 'ok',
+    timestamp: new Date().toISOString()
+  });
+});
+
 // Import and register server routes from the compiled JavaScript
 try {
   // Try importing the compiled server module
