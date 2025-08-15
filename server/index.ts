@@ -23,10 +23,14 @@ import { migrateLabourHireSchema } from './migrate-labour-hire';
 import { migrateUnifiedContactsSystem, seedContactTags } from './migrate-unified-contacts';
 import { initializeScheduledTasks } from './scheduled-tasks';
 import { env } from './utils/env';
+
+// Create upload directory using env value (which has a default)
 const uploadDir = path.resolve(env.UPLOAD_DIR);
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
+  log(`Created upload directory at: ${uploadDir}`);
 }
+
 import { assertEnvVars } from './utils/env';
 
 const app = express();
@@ -79,11 +83,17 @@ app.get('/test-auth', (_req, res) => {
 const port = env.PORT;
 
 // Ensure required environment variables are present before starting
-const requiredEnv = ['DATABASE_URL', 'UPLOAD_DIR'];
+// Note: UPLOAD_DIR has a default value in env.ts, so it doesn't need to be required
+const requiredEnv = ['DATABASE_URL'];
 if (process.env.NODE_ENV === 'production') {
   requiredEnv.push('FAIRWORK_API_URL', 'FAIRWORK_API_KEY');
 }
 assertEnvVars(requiredEnv);
+
+// Validate that UPLOAD_DIR has a usable value (from env or default)
+if (!env.UPLOAD_DIR) {
+  throw new Error('UPLOAD_DIR configuration is missing');
+}
 
 // Health routes
 if (env.NODE_ENV === 'production') {
@@ -231,6 +241,7 @@ app.use((req, res, next) => {
 
   log(`Environment: ${env.NODE_ENV}`);
   log(`Using port: ${port}`);
+  log(`Upload directory: ${uploadDir}`);
 
   // Port robust start: fallback to alt ports if needed
   const startServerWithFallback = (targetPort: number): Promise<any> => {
