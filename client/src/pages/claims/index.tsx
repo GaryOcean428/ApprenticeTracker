@@ -1,7 +1,7 @@
 import React from 'react';
 import { useLocation } from 'wouter';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ClaimsDashboard from './dashboard';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export default function ClaimsPage() {
   const [activeTab, setActiveTab] = React.useState('dashboard');

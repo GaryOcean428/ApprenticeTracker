@@ -64,12 +64,14 @@ export async function sendInAppNotification(
 ): Promise<boolean>;
 export async function sendInAppNotification(
   userIds: string | number | (string | number)[],
-  messageOrNotification: string | {
-    type: string;
-    message: string;
-    data?: any;
-    priority?: 'low' | 'normal' | 'high';
-  },
+  messageOrNotification:
+    | string
+    | {
+        type: string;
+        message: string;
+        data?: any;
+        priority?: 'low' | 'normal' | 'high';
+      },
   link?: string,
   type: 'info' | 'warning' | 'success' | 'error' = 'info'
 ): Promise<boolean> {
@@ -90,7 +92,7 @@ export async function sendInAppNotification(
         type: type,
         message: messageOrNotification as string,
         data: link ? { link } : undefined,
-        priority: 'normal'
+        priority: 'normal',
       };
     } else if (typeof messageOrNotification === 'object') {
       // New signature
@@ -103,7 +105,7 @@ export async function sendInAppNotification(
         type: type,
         message: messageOrNotification,
         data: link ? { link } : undefined,
-        priority: 'normal'
+        priority: 'normal',
       };
     }
 
@@ -118,13 +120,13 @@ export async function sendInAppNotification(
     // - Store the notification in the database
     // - Trigger real-time updates via websockets
     // - Handle notification preferences per user
-    
+
     for (const userId of targetUserIds) {
       logger.info(`Would send in-app notification to user ${userId}:`, {
         type: notificationData.type,
         message: notificationData.message,
         priority: notificationData.priority,
-        data: notificationData.data
+        data: notificationData.data,
       });
     }
 
