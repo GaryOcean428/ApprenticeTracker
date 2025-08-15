@@ -98,10 +98,11 @@ echo "✓ Testing environment variable configuration..."
 cd "$PROJECT_ROOT"
 if command -v node >/dev/null 2>&1; then
     # Test with unset UPLOAD_DIR (should use default)
-    UPLOAD_DIR_TEST=$(unset UPLOAD_DIR && DOTENV_LOG_LEVEL=silent node --import tsx/esm -e "
+    UPLOAD_DIR_TEST=$(unset UPLOAD_DIR && node --import tsx/esm -e "
+        process.env.DOTENV_CONFIG_SILENT = 'true';
         import { env } from './server/utils/env.ts';
         console.log(env.UPLOAD_DIR);
-    " 2>/dev/null || echo "ERROR")
+    " 2>/dev/null | tail -n 1 || echo "ERROR")
     
     if [[ "$UPLOAD_DIR_TEST" == "uploads" ]]; then
         echo "  ✅ UPLOAD_DIR defaults to 'uploads' when not set"
@@ -112,10 +113,11 @@ if command -v node >/dev/null 2>&1; then
     fi
     
     # Test with empty UPLOAD_DIR (should use default)
-    UPLOAD_DIR_EMPTY_TEST=$(UPLOAD_DIR="" DOTENV_LOG_LEVEL=silent node --import tsx/esm -e "
+    UPLOAD_DIR_EMPTY_TEST=$(UPLOAD_DIR="" node --import tsx/esm -e "
+        process.env.DOTENV_CONFIG_SILENT = 'true';
         import { env } from './server/utils/env.ts';
         console.log(env.UPLOAD_DIR || 'EMPTY');
-    " 2>/dev/null || echo "ERROR")
+    " 2>/dev/null | tail -n 1 || echo "ERROR")
     
     if [[ "$UPLOAD_DIR_EMPTY_TEST" == "" ]]; then
         echo "  ⚠️  UPLOAD_DIR becomes empty string when set to empty (should use default)"
