@@ -1,10 +1,27 @@
 import React, { useState, useEffect } from 'react';
+import { AlertTriangle, TrendingUp, TrendingDown, FileText, Download } from 'lucide-react';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+} from 'recharts';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { AlertTriangle, TrendingUp, TrendingDown, FileText, Download } from 'lucide-react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
 interface WHSMetrics {
   totalIncidents: number;
@@ -37,13 +54,13 @@ const STATUS_COLORS = {
   resolved: '#10b981',
   closed: '#6b7280',
   escalated: '#dc2626',
-  'requires-followup': '#f59e0b'
+  'requires-followup': '#f59e0b',
 };
 
 const SEVERITY_COLORS = {
   low: '#10b981',
-  medium: '#f59e0b', 
-  high: '#ef4444'
+  medium: '#f59e0b',
+  high: '#ef4444',
 };
 
 export default function WHSDashboard() {
@@ -82,7 +99,9 @@ export default function WHSDashboard() {
 
   const downloadReport = async (format: 'pdf' | 'excel') => {
     try {
-      const response = await fetch(`/api/whs/incidents/reports?format=${format}&timeframe=${timeframe}`);
+      const response = await fetch(
+        `/api/whs/incidents/reports?format=${format}&timeframe=${timeframe}`
+      );
       if (!response.ok) {
         throw new Error(`Failed to download ${format} report`);
       }
@@ -149,21 +168,13 @@ export default function WHSDashboard() {
               <SelectItem value="90days">90 Days</SelectItem>
             </SelectContent>
           </Select>
-          
+
           <div className="flex space-x-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => downloadReport('pdf')}
-            >
+            <Button variant="outline" size="sm" onClick={() => downloadReport('pdf')}>
               <Download className="h-4 w-4 mr-2" />
               PDF Report
             </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => downloadReport('excel')}
-            >
+            <Button variant="outline" size="sm" onClick={() => downloadReport('excel')}>
               <FileText className="h-4 w-4 mr-2" />
               Excel Report
             </Button>
@@ -212,7 +223,9 @@ export default function WHSDashboard() {
           <CardContent className="p-6">
             <div>
               <p className="text-sm font-medium text-gray-600">High Severity</p>
-              <p className="text-2xl font-bold text-red-600">{metrics?.highSeverityIncidents || 0}</p>
+              <p className="text-2xl font-bold text-red-600">
+                {metrics?.highSeverityIncidents || 0}
+              </p>
             </div>
           </CardContent>
         </Card>
@@ -240,14 +253,19 @@ export default function WHSDashboard() {
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={chartData?.timeline || []}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis 
-                    dataKey="date" 
+                  <XAxis
+                    dataKey="date"
                     tick={{ fontSize: 12 }}
-                    tickFormatter={(value) => new Date(value).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                    tickFormatter={value =>
+                      new Date(value).toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                      })
+                    }
                   />
                   <YAxis tick={{ fontSize: 12 }} />
-                  <Tooltip 
-                    labelFormatter={(value) => new Date(value).toLocaleDateString()}
+                  <Tooltip
+                    labelFormatter={value => new Date(value).toLocaleDateString()}
                     formatter={(value: any) => [value, 'Incidents']}
                   />
                   <Line type="monotone" dataKey="incidents" stroke="#3b82f6" strokeWidth={2} />
@@ -277,7 +295,12 @@ export default function WHSDashboard() {
                     label={({ status, count }) => `${status}: ${count}`}
                   >
                     {(chartData?.statusDistribution || []).map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={STATUS_COLORS[entry.status as keyof typeof STATUS_COLORS] || '#6b7280'} />
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={
+                          STATUS_COLORS[entry.status as keyof typeof STATUS_COLORS] || '#6b7280'
+                        }
+                      />
                     ))}
                   </Pie>
                   <Tooltip />
@@ -297,8 +320,11 @@ export default function WHSDashboard() {
         <CardContent>
           <div className="space-y-4">
             {recentActivity.length > 0 ? (
-              recentActivity.map((activity) => (
-                <div key={activity.id} className="flex items-center justify-between p-3 border rounded-lg">
+              recentActivity.map(activity => (
+                <div
+                  key={activity.id}
+                  className="flex items-center justify-between p-3 border rounded-lg"
+                >
                   <div className="flex-1">
                     <h4 className="font-medium">{activity.title}</h4>
                     <p className="text-sm text-gray-600">
@@ -308,18 +334,19 @@ export default function WHSDashboard() {
                   <div className="flex items-center space-x-2">
                     <Badge
                       variant="outline"
-                      style={{ 
-                        borderColor: SEVERITY_COLORS[activity.severity as keyof typeof SEVERITY_COLORS],
-                        color: SEVERITY_COLORS[activity.severity as keyof typeof SEVERITY_COLORS]
+                      style={{
+                        borderColor:
+                          SEVERITY_COLORS[activity.severity as keyof typeof SEVERITY_COLORS],
+                        color: SEVERITY_COLORS[activity.severity as keyof typeof SEVERITY_COLORS],
                       }}
                     >
                       {activity.severity}
                     </Badge>
                     <Badge
                       variant="outline"
-                      style={{ 
+                      style={{
                         borderColor: STATUS_COLORS[activity.status as keyof typeof STATUS_COLORS],
-                        color: STATUS_COLORS[activity.status as keyof typeof STATUS_COLORS]
+                        color: STATUS_COLORS[activity.status as keyof typeof STATUS_COLORS],
                       }}
                     >
                       {activity.status}
@@ -328,9 +355,7 @@ export default function WHSDashboard() {
                 </div>
               ))
             ) : (
-              <div className="text-center py-8 text-gray-500">
-                No recent activity to display
-              </div>
+              <div className="text-center py-8 text-gray-500">No recent activity to display</div>
             )}
           </div>
         </CardContent>

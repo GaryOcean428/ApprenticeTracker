@@ -1,11 +1,28 @@
 import React, { useState, useEffect } from 'react';
+import { AlertCircle, TrendingUp, FileText, DollarSign, Clock } from 'lucide-react';
+import {
+  PieChart,
+  Pie,
+  Cell,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from 'recharts';
+import { useLocation } from 'wouter';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { AlertCircle, TrendingUp, TrendingDown, FileText, DollarSign, Clock } from 'lucide-react';
-import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { useLocation } from 'wouter';
 
 interface ClaimsMetrics {
   totalClaims: number;
@@ -41,7 +58,7 @@ const STATUS_COLORS = {
   rejected: '#ef4444',
   paid: '#059669',
   reconciled: '#065f46',
-  cancelled: '#9ca3af'
+  cancelled: '#9ca3af',
 };
 
 const CLAIM_TYPE_COLORS = {
@@ -53,7 +70,7 @@ const CLAIM_TYPE_COLORS = {
   'rural-regional': '#06b6d4',
   disability: '#f97316',
   'mature-age': '#84cc16',
-  other: '#6b7280'
+  other: '#6b7280',
 };
 
 export default function ClaimsDashboard() {
@@ -94,7 +111,7 @@ export default function ClaimsDashboard() {
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-AU', {
       style: 'currency',
-      currency: 'AUD'
+      currency: 'AUD',
     }).format(amount / 100); // Assuming amounts are stored in cents
   };
 
@@ -154,14 +171,12 @@ export default function ClaimsDashboard() {
               <SelectItem value="90days">90 Days</SelectItem>
             </SelectContent>
           </Select>
-          
+
           <div className="flex space-x-2">
             <Button variant="outline" onClick={handleViewAllClaims}>
               View All Claims
             </Button>
-            <Button onClick={handleCreateClaim}>
-              Create New Claim
-            </Button>
+            <Button onClick={handleCreateClaim}>Create New Claim</Button>
           </div>
         </div>
       </div>
@@ -241,7 +256,12 @@ export default function ClaimsDashboard() {
                     label={({ status, count }) => `${status}: ${count}`}
                   >
                     {(chartData?.statusDistribution || []).map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={STATUS_COLORS[entry.status as keyof typeof STATUS_COLORS] || '#6b7280'} />
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={
+                          STATUS_COLORS[entry.status as keyof typeof STATUS_COLORS] || '#6b7280'
+                        }
+                      />
                     ))}
                   </Pie>
                   <Tooltip />
@@ -262,8 +282,8 @@ export default function ClaimsDashboard() {
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={chartData?.typeDistribution || []}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis 
-                    dataKey="type" 
+                  <XAxis
+                    dataKey="type"
                     tick={{ fontSize: 12 }}
                     angle={-45}
                     textAnchor="end"
@@ -288,8 +308,11 @@ export default function ClaimsDashboard() {
         <CardContent>
           <div className="space-y-4">
             {recentActivity.length > 0 ? (
-              recentActivity.map((claim) => (
-                <div key={claim.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50">
+              recentActivity.map(claim => (
+                <div
+                  key={claim.id}
+                  className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50"
+                >
                   <div className="flex-1">
                     <div className="flex items-center space-x-3">
                       <div>
@@ -309,9 +332,9 @@ export default function ClaimsDashboard() {
                     </div>
                     <Badge
                       variant="outline"
-                      style={{ 
+                      style={{
                         borderColor: STATUS_COLORS[claim.status as keyof typeof STATUS_COLORS],
-                        color: STATUS_COLORS[claim.status as keyof typeof STATUS_COLORS]
+                        color: STATUS_COLORS[claim.status as keyof typeof STATUS_COLORS],
                       }}
                     >
                       {claim.status.replace('-', ' ')}
@@ -325,7 +348,7 @@ export default function ClaimsDashboard() {
               </div>
             )}
           </div>
-          
+
           {recentActivity.length > 0 && (
             <div className="mt-4 pt-4 border-t">
               <Button variant="outline" onClick={handleViewAllClaims} className="w-full">

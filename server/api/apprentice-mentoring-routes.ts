@@ -1,9 +1,8 @@
 import { Router } from 'express';
 import { eq, and, desc, sql } from 'drizzle-orm';
-import { db } from '../db';
 import {
   mentors,
-  mentorAssignments, 
+  mentorAssignments,
   mentoringSessions,
   competencies,
   apprenticeCompetencies,
@@ -16,13 +15,12 @@ import {
   insertMentorSchema,
   insertMentorAssignmentSchema,
   insertMentoringSessionSchema,
-  insertCompetencySchema,
-  insertApprenticeCompetencySchema,
   insertApprenticeMilestoneSchema,
   insertPerformanceMetricSchema,
   insertCommunicationLogSchema,
   insertTrainingPlanSchema,
 } from '@shared/schema';
+import { db } from '../db';
 
 const router = Router();
 
@@ -44,7 +42,7 @@ router.get('/mentors/:id', async (req, res) => {
   try {
     const id = parseInt(req.params.id);
     const mentor = await db.select().from(mentors).where(eq(mentors.id, id)).limit(1);
-    
+
     if (mentor.length === 0) {
       return res.status(404).json({ error: 'Mentor not found' });
     }
@@ -84,7 +82,7 @@ router.patch('/mentors/:id', async (req, res) => {
   try {
     const id = parseInt(req.params.id);
     const mentorData = req.body;
-    
+
     const [updatedMentor] = await db
       .update(mentors)
       .set({ ...mentorData, updatedAt: new Date() })
@@ -108,7 +106,7 @@ router.patch('/mentors/:id', async (req, res) => {
 router.get('/apprentices/:id/mentors', async (req, res) => {
   try {
     const apprenticeId = parseInt(req.params.id);
-    
+
     const assignments = await db
       .select({
         assignment: mentorAssignments,
@@ -143,7 +141,7 @@ router.patch('/mentor-assignments/:id', async (req, res) => {
   try {
     const id = parseInt(req.params.id);
     const { status, endDate, notes } = req.body;
-    
+
     const [updatedAssignment] = await db
       .update(mentorAssignments)
       .set({ status, endDate, notes, updatedAt: new Date() })
@@ -167,7 +165,7 @@ router.patch('/mentor-assignments/:id', async (req, res) => {
 router.get('/mentor-assignments/:id/sessions', async (req, res) => {
   try {
     const assignmentId = parseInt(req.params.id);
-    
+
     const sessions = await db
       .select()
       .from(mentoringSessions)
@@ -185,7 +183,7 @@ router.get('/mentor-assignments/:id/sessions', async (req, res) => {
 router.get('/apprentices/:id/mentoring-sessions', async (req, res) => {
   try {
     const apprenticeId = parseInt(req.params.id);
-    
+
     const sessions = await db
       .select({
         session: mentoringSessions,
@@ -223,13 +221,13 @@ router.post('/mentoring-sessions', async (req, res) => {
 router.get('/competencies', async (req, res) => {
   try {
     const { tradeArea, category } = req.query;
-    
+
     let query = db.select().from(competencies).where(eq(competencies.isActive, true));
-    
+
     if (tradeArea) {
       query = query.where(eq(competencies.tradeArea, tradeArea as string));
     }
-    
+
     if (category) {
       query = query.where(eq(competencies.category, category as string));
     }
@@ -246,7 +244,7 @@ router.get('/competencies', async (req, res) => {
 router.get('/apprentices/:id/competencies', async (req, res) => {
   try {
     const apprenticeId = parseInt(req.params.id);
-    
+
     const competencyProgress = await db
       .select({
         progress: apprenticeCompetencies,
@@ -269,7 +267,7 @@ router.patch('/apprentice-competencies/:id', async (req, res) => {
   try {
     const id = parseInt(req.params.id);
     const progressData = req.body;
-    
+
     const [updatedProgress] = await db
       .update(apprenticeCompetencies)
       .set({ ...progressData, lastUpdated: new Date() })
@@ -293,7 +291,7 @@ router.patch('/apprentice-competencies/:id', async (req, res) => {
 router.get('/apprentices/:id/milestones', async (req, res) => {
   try {
     const apprenticeId = parseInt(req.params.id);
-    
+
     const milestones = await db
       .select()
       .from(apprenticeMilestones)
@@ -324,7 +322,7 @@ router.patch('/apprentice-milestones/:id', async (req, res) => {
   try {
     const id = parseInt(req.params.id);
     const milestoneData = req.body;
-    
+
     const [updatedMilestone] = await db
       .update(apprenticeMilestones)
       .set({ ...milestoneData, updatedAt: new Date() })
@@ -349,20 +347,20 @@ router.get('/apprentices/:id/performance', async (req, res) => {
   try {
     const apprenticeId = parseInt(req.params.id);
     const { startDate, endDate, metricType } = req.query;
-    
+
     let query = db
       .select()
       .from(performanceMetrics)
       .where(eq(performanceMetrics.apprenticeId, apprenticeId));
-    
+
     if (startDate) {
       query = query.where(sql`${performanceMetrics.periodStart} >= ${startDate}`);
     }
-    
+
     if (endDate) {
       query = query.where(sql`${performanceMetrics.periodEnd} <= ${endDate}`);
     }
-    
+
     if (metricType) {
       query = query.where(eq(performanceMetrics.metricType, metricType as string));
     }
@@ -393,14 +391,11 @@ router.post('/performance-metrics', async (req, res) => {
 router.get('/apprentices/:id/training-plan', async (req, res) => {
   try {
     const apprenticeId = parseInt(req.params.id);
-    
+
     const trainingPlan = await db
       .select()
       .from(trainingPlans)
-      .where(and(
-        eq(trainingPlans.apprenticeId, apprenticeId),
-        eq(trainingPlans.status, 'active')
-      ))
+      .where(and(eq(trainingPlans.apprenticeId, apprenticeId), eq(trainingPlans.status, 'active')))
       .limit(1);
 
     res.json(trainingPlan[0] || null);
@@ -427,7 +422,7 @@ router.patch('/training-plans/:id', async (req, res) => {
   try {
     const id = parseInt(req.params.id);
     const planData = req.body;
-    
+
     const [updatedPlan] = await db
       .update(trainingPlans)
       .set({ ...planData, updatedAt: new Date() })
@@ -451,7 +446,7 @@ router.patch('/training-plans/:id', async (req, res) => {
 router.get('/apprentices/:id/communications', async (req, res) => {
   try {
     const apprenticeId = parseInt(req.params.id);
-    
+
     const communications = await db
       .select({
         communication: communicationLog,

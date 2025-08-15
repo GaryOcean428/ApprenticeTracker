@@ -9,12 +9,14 @@ import {
   claim_reminders,
   insertClaimSchema,
   updateClaimSchema,
-  insertEligibilityCriteriaSchema,
-  insertApprenticeEligibilitySchema,
 } from '@shared/schema/claims';
 import { db } from '../../db';
 import { hasPermission } from '../../middleware/auth';
-import { sendEmailNotification, sendInAppNotification, sendSystemAlert } from '../../services/notification-service';
+import {
+  sendEmailNotification,
+  sendInAppNotification,
+  sendSystemAlert,
+} from '../../services/notification-service';
 
 export function setupClaimsRoutes(router: express.Router) {
   // GET all claims with pagination and filtering
@@ -41,9 +43,7 @@ export function setupClaimsRoutes(router: express.Router) {
       }
 
       if (startDate && endDate) {
-        query = query.where(
-          sql`${claims.submission_date} BETWEEN ${startDate} AND ${endDate}`
-        );
+        query = query.where(sql`${claims.submission_date} BETWEEN ${startDate} AND ${endDate}`);
       }
 
       const claimsData = await query
@@ -125,7 +125,7 @@ export function setupClaimsRoutes(router: express.Router) {
   router.post('/claims', hasPermission('claims.create'), async (req, res) => {
     try {
       const validatedData = insertClaimSchema.parse(req.body);
-      
+
       // Generate claim number if not provided
       if (!validatedData.claim_number) {
         const claimNumber = await generateClaimNumber(validatedData.claim_type);
@@ -142,7 +142,7 @@ export function setupClaimsRoutes(router: express.Router) {
         changed_by_id: validatedData.submitted_by_id,
         changed_by_name: validatedData.submitted_by_name,
         notes: 'Claim created',
-        changes: { action: 'created', status: newClaim.status }
+        changes: { action: 'created', status: newClaim.status },
       });
 
       // Send new claim notifications
@@ -186,7 +186,7 @@ export function setupClaimsRoutes(router: express.Router) {
         .update(claims)
         .set({
           ...validatedData,
-          updated_at: new Date()
+          updated_at: new Date(),
         })
         .where(sql`${claims.id} = ${id}`)
         .returning();
@@ -196,7 +196,7 @@ export function setupClaimsRoutes(router: express.Router) {
         if ((currentClaim as any)[key] !== (validatedData as any)[key]) {
           acc[key] = {
             from: (currentClaim as any)[key],
-            to: (validatedData as any)[key]
+            to: (validatedData as any)[key],
           };
         }
         return acc;
@@ -209,7 +209,7 @@ export function setupClaimsRoutes(router: express.Router) {
           changed_by_id: user_id,
           changed_by_name: user_name,
           notes: 'Claim updated',
-          changes
+          changes,
         });
       }
 
@@ -228,8 +228,15 @@ export function setupClaimsRoutes(router: express.Router) {
 
       // Validate status transition
       const validStatuses = [
-        'draft', 'pending', 'submitted', 'in-review', 'approved', 'rejected', 
-        'paid', 'reconciled', 'cancelled'
+        'draft',
+        'pending',
+        'submitted',
+        'in-review',
+        'approved',
+        'rejected',
+        'paid',
+        'reconciled',
+        'cancelled',
       ];
 
       if (!validStatuses.includes(status)) {
@@ -253,9 +260,9 @@ export function setupClaimsRoutes(router: express.Router) {
       }
 
       // Update claim status
-      const updateData: any = { 
+      const updateData: any = {
         status,
-        updated_at: new Date()
+        updated_at: new Date(),
       };
 
       // Set additional fields based on status
@@ -295,8 +302,8 @@ export function setupClaimsRoutes(router: express.Router) {
         changed_by_name: user_name,
         notes: notes || `Status changed from ${currentClaim.status} to ${status}`,
         changes: {
-          status: { from: currentClaim.status, to: status }
-        }
+          status: { from: currentClaim.status, to: status },
+        },
       });
 
       // Create automatic reminders if needed
@@ -364,9 +371,7 @@ export function setupClaimsRoutes(router: express.Router) {
       }
 
       // Check if apprentice already has eligibility record for this criteria
-      const [existingEligibility] = await db
-        .select()
-        .from(apprentice_eligibility)
+      const [existingEligibility] = await db.select().from(apprentice_eligibility)
         .where(sql`${apprentice_eligibility.apprentice_id} = ${apprentice_id} 
                    AND ${apprentice_eligibility.criteria_id} = ${criteria_id}`);
 
@@ -374,7 +379,7 @@ export function setupClaimsRoutes(router: express.Router) {
         return res.json({
           eligibility: existingEligibility,
           isEligible: existingEligibility.status === 'eligible',
-          message: `Existing eligibility record found with status: ${existingEligibility.status}`
+          message: `Existing eligibility record found with status: ${existingEligibility.status}`,
         });
       }
 
@@ -385,7 +390,7 @@ export function setupClaimsRoutes(router: express.Router) {
         isEligible: eligibilityResult.eligible,
         eligibility: eligibilityResult.eligibility,
         requirements: eligibilityResult.requirements,
-        message: eligibilityResult.message
+        message: eligibilityResult.message,
       });
     } catch (error) {
       console.error('Error checking eligibility:', error);
@@ -397,7 +402,7 @@ export function setupClaimsRoutes(router: express.Router) {
   router.get('/claims/dashboard', async (req, res) => {
     try {
       const { timeframe = '30days' } = req.query;
-      
+
       const daysAgo = timeframe === '7days' ? 7 : timeframe === '90days' ? 90 : 30;
       const startDate = new Date();
       startDate.setDate(startDate.getDate() - daysAgo);
@@ -409,7 +414,7 @@ export function setupClaimsRoutes(router: express.Router) {
         .where(sql`${claims.created_at} >= ${startDate}`);
 
       const totalClaims = recentClaims.length;
-      const pendingClaims = recentClaims.filter(c => 
+      const pendingClaims = recentClaims.filter(c =>
         ['draft', 'pending', 'submitted', 'in-review'].includes(c.status)
       ).length;
 
@@ -417,8 +422,9 @@ export function setupClaimsRoutes(router: express.Router) {
       const paidClaims = recentClaims.filter(c => c.status === 'paid').length;
 
       // Calculate totals
-      const totalRequested = recentClaims.reduce((sum, claim) => 
-        sum + (claim.amount_requested || 0), 0
+      const totalRequested = recentClaims.reduce(
+        (sum, claim) => sum + (claim.amount_requested || 0),
+        0
       );
 
       const totalApproved = recentClaims
@@ -445,19 +451,19 @@ export function setupClaimsRoutes(router: express.Router) {
           paidClaims,
           totalRequested,
           totalApproved,
-          approvalRate: totalClaims > 0 ? Math.round((approvedClaims / totalClaims) * 100) : 0
+          approvalRate: totalClaims > 0 ? Math.round((approvedClaims / totalClaims) * 100) : 0,
         },
         chartData: {
           statusDistribution: Object.entries(statusCounts).map(([status, count]) => ({
             status,
-            count
+            count,
           })),
           typeDistribution: Object.entries(typeCounts).map(([type, count]) => ({
             type,
-            count
-          }))
+            count,
+          })),
         },
-        recentActivity: recentClaims.slice(0, 10)
+        recentActivity: recentClaims.slice(0, 10),
       });
     } catch (error) {
       console.error('Error fetching claims dashboard:', error);
@@ -470,7 +476,7 @@ export function setupClaimsRoutes(router: express.Router) {
 async function generateClaimNumber(claimType: string): Promise<string> {
   const year = new Date().getFullYear();
   const typePrefix = claimType.substring(0, 3).toUpperCase();
-  
+
   // Get the latest claim number for this year and type
   const result = await db
     .select({ claim_number: claims.claim_number })
@@ -491,26 +497,26 @@ async function generateClaimNumber(claimType: string): Promise<string> {
 // Helper function to validate status transitions
 function validateStatusTransition(currentStatus: string, newStatus: string) {
   const transitions: Record<string, string[]> = {
-    'draft': ['pending', 'submitted', 'cancelled'],
-    'pending': ['submitted', 'draft', 'cancelled'],
-    'submitted': ['in-review', 'cancelled'],
+    draft: ['pending', 'submitted', 'cancelled'],
+    pending: ['submitted', 'draft', 'cancelled'],
+    submitted: ['in-review', 'cancelled'],
     'in-review': ['approved', 'rejected', 'pending'],
-    'approved': ['paid', 'cancelled'],
-    'rejected': ['pending', 'cancelled'],
-    'paid': ['reconciled'],
-    'reconciled': [], // Final state
-    'cancelled': [] // Final state
+    approved: ['paid', 'cancelled'],
+    rejected: ['pending', 'cancelled'],
+    paid: ['reconciled'],
+    reconciled: [], // Final state
+    cancelled: [], // Final state
   };
 
   const allowedTransitions = transitions[currentStatus] || [];
-  
+
   if (allowedTransitions.includes(newStatus)) {
     return { valid: true };
   }
 
-  return { 
-    valid: false, 
-    reason: `Cannot transition from ${currentStatus} to ${newStatus}` 
+  return {
+    valid: false,
+    reason: `Cannot transition from ${currentStatus} to ${newStatus}`,
   };
 }
 
@@ -519,7 +525,7 @@ async function performEligibilityCheck(apprenticeId: string, criteria: any) {
   try {
     // This is a placeholder for complex eligibility logic
     // In a real system, this would check apprentice data against criteria rules
-    
+
     // For now, return a basic eligibility result
     const eligibilityResult = {
       eligible: true,
@@ -530,13 +536,13 @@ async function performEligibilityCheck(apprenticeId: string, criteria: any) {
         eligible_from_date: new Date(),
         eligible_to_date: criteria.expiry_date ? new Date(criteria.expiry_date) : null,
         notes: 'Automatic eligibility check passed',
-        documentation_status: []
+        documentation_status: [],
       },
       requirements: {
         documentsRequired: criteria.documentation_required || [],
-        additionalChecks: criteria.eligibility_rules?.checks || []
+        additionalChecks: criteria.eligibility_rules?.checks || [],
       },
-      message: 'Apprentice meets eligibility criteria'
+      message: 'Apprentice meets eligibility criteria',
     };
 
     // Create eligibility record
@@ -554,7 +560,7 @@ async function performEligibilityCheck(apprenticeId: string, criteria: any) {
       eligible: false,
       eligibility: null,
       requirements: {},
-      message: 'Error performing eligibility check'
+      message: 'Error performing eligibility check',
     };
   }
 }
@@ -573,7 +579,7 @@ async function createAutomaticReminders(claim: any, status: string) {
         reminder_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
         reminder_type: 'review',
         assigned_to_id: claim.submitted_by_id,
-        assigned_to_name: claim.submitted_by_name
+        assigned_to_name: claim.submitted_by_name,
       });
     }
 
@@ -586,7 +592,7 @@ async function createAutomaticReminders(claim: any, status: string) {
         reminder_date: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), // 3 days
         reminder_type: 'payment',
         assigned_to_id: claim.reviewed_by_id,
-        assigned_to_name: claim.reviewed_by_name
+        assigned_to_name: claim.reviewed_by_name,
       });
     }
 
@@ -602,9 +608,9 @@ async function createAutomaticReminders(claim: any, status: string) {
 async function sendNewClaimNotifications(claim: any) {
   try {
     console.log(`[CLAIMS_NOTIFICATION] New claim created: ${claim.id} - ${claim.claim_number}`);
-    
+
     const emailRecipients: string[] = [];
-    
+
     // Notify claims administrators
     const claimsAdminEmails = process.env.CLAIMS_ADMIN_EMAILS?.split(',') || [];
     emailRecipients.push(...claimsAdminEmails.filter(email => email.trim()));
@@ -637,9 +643,11 @@ async function sendNewClaimNotifications(claim: any) {
               </p>
             </div>
           `,
-          textContent: `New Government Claim Created\n\nClaim Number: ${claim.claim_number}\nApprentice: ${claim.apprentice_name}\nType: ${claim.claim_type}\nAmount: $${claim.amount_requested?.toLocaleString()}`
+          textContent: `New Government Claim Created\n\nClaim Number: ${claim.claim_number}\nApprentice: ${claim.apprentice_name}\nType: ${claim.claim_type}\nAmount: $${claim.amount_requested?.toLocaleString()}`,
         });
-        console.log(`New claim email notifications sent to ${emailRecipients.length} recipients for claim ${claim.id}`);
+        console.log(
+          `New claim email notifications sent to ${emailRecipients.length} recipients for claim ${claim.id}`
+        );
       } catch (emailError) {
         console.error('Error sending new claim email notifications:', emailError);
       }
@@ -655,44 +663,47 @@ async function sendNewClaimNotifications(claim: any) {
 // Helper function to send claim status notifications
 async function sendClaimStatusNotifications(claim: any, previousStatus: string, newStatus: string) {
   try {
-    console.log(`[CLAIMS_NOTIFICATION] Claim ${claim.id} status changed from ${previousStatus} to ${newStatus}`);
-    
+    console.log(
+      `[CLAIMS_NOTIFICATION] Claim ${claim.id} status changed from ${previousStatus} to ${newStatus}`
+    );
+
     const emailRecipients: string[] = [];
     const notifications = [];
-    
+
     // Determine notification message and styling based on status
     const statusMessages = {
-      'pending': 'Claim is pending review',
-      'submitted': 'Claim has been submitted for review',
+      pending: 'Claim is pending review',
+      submitted: 'Claim has been submitted for review',
       'in-review': 'Claim is currently under review',
-      'approved': 'Claim has been approved for payment',
-      'rejected': 'Claim has been rejected',
-      'paid': 'Payment has been processed',
-      'reconciled': 'Claim has been reconciled',
-      'cancelled': 'Claim has been cancelled'
+      approved: 'Claim has been approved for payment',
+      rejected: 'Claim has been rejected',
+      paid: 'Payment has been processed',
+      reconciled: 'Claim has been reconciled',
+      cancelled: 'Claim has been cancelled',
     };
 
     const statusColors = {
-      'pending': '#f59e0b',
-      'submitted': '#3b82f6',
+      pending: '#f59e0b',
+      submitted: '#3b82f6',
       'in-review': '#8b5cf6',
-      'approved': '#10b981',
-      'rejected': '#ef4444',
-      'paid': '#059669',
-      'reconciled': '#065f46',
-      'cancelled': '#9ca3af'
+      approved: '#10b981',
+      rejected: '#ef4444',
+      paid: '#059669',
+      reconciled: '#065f46',
+      cancelled: '#9ca3af',
     };
 
-    const statusMessage = statusMessages[newStatus as keyof typeof statusMessages] || `Status updated to ${newStatus}`;
+    const statusMessage =
+      statusMessages[newStatus as keyof typeof statusMessages] || `Status updated to ${newStatus}`;
     const statusColor = statusColors[newStatus as keyof typeof statusColors] || '#6b7280';
-    
+
     // Notify claim submitter
     if (claim.submitted_by_id) {
       notifications.push({
         userId: claim.submitted_by_id,
         type: 'claim_status_update',
         message: `Claim ${claim.claim_number}: ${statusMessage}`,
-        claimId: claim.id
+        claimId: claim.id,
       });
     }
 
@@ -727,25 +738,35 @@ async function sendClaimStatusNotifications(claim: any, previousStatus: string, 
                 <div style="margin: 15px 0;">
                   <strong>Update:</strong> ${statusMessage}
                 </div>
-                ${claim.rejection_reason ? `
+                ${
+                  claim.rejection_reason
+                    ? `
                 <div style="margin: 15px 0; background: #fef2f2; padding: 15px; border-radius: 4px; border-left: 4px solid #ef4444;">
                   <strong>Rejection Reason:</strong>
                   <p style="margin: 5px 0 0 0;">${claim.rejection_reason}</p>
-                </div>` : ''}
-                ${claim.notes && claim.notes !== claim.rejection_reason ? `
+                </div>`
+                    : ''
+                }
+                ${
+                  claim.notes && claim.notes !== claim.rejection_reason
+                    ? `
                 <div style="margin: 15px 0;">
                   <strong>Notes:</strong>
                   <p style="background: white; padding: 15px; border-radius: 4px; margin: 5px 0 0 0;">${claim.notes}</p>
-                </div>` : ''}
+                </div>`
+                    : ''
+                }
               </div>
               <p style="color: #666; font-size: 12px; margin-top: 20px;">
                 This is an automated notification from the ApprenticeTracker Claims Management system.
               </p>
             </div>
           `,
-          textContent: `Claim Status Update: ${claim.claim_number}\nStatus: ${previousStatus} → ${newStatus}\n${statusMessage}\nApprentice: ${claim.apprentice_name}\nAmount: $${claim.amount_requested?.toLocaleString()}`
+          textContent: `Claim Status Update: ${claim.claim_number}\nStatus: ${previousStatus} → ${newStatus}\n${statusMessage}\nApprentice: ${claim.apprentice_name}\nAmount: $${claim.amount_requested?.toLocaleString()}`,
         });
-        console.log(`Claim status notifications sent to ${emailRecipients.length} recipients for claim ${claim.id}`);
+        console.log(
+          `Claim status notifications sent to ${emailRecipients.length} recipients for claim ${claim.id}`
+        );
       } catch (emailError) {
         console.error('Error sending claim status email notifications:', emailError);
       }
@@ -771,14 +792,14 @@ async function sendClaimStatusNotifications(claim: any, previousStatus: string, 
             type: notification.type,
             message: notification.message,
             data: { claimId: claim.id, newStatus, previousStatus },
-            priority: ['approved', 'rejected', 'paid'].includes(newStatus) ? 'high' : 'normal'
+            priority: ['approved', 'rejected', 'paid'].includes(newStatus) ? 'high' : 'normal',
           });
         }
       } catch (inAppError) {
         console.error('Error sending in-app notification:', inAppError);
       }
     }
-    
+
     console.log(`Generated ${notifications.length} notifications for claim ${claim.id}`);
     return notifications;
   } catch (error) {

@@ -118,7 +118,7 @@ app.get('/api/health', (_req, res) => {
     // Handle import error gracefully
     awardAIAnalyzer = null;
   }
-  
+
   res.status(200).json({
     status: 'ok',
     timestamp: new Date().toISOString(),

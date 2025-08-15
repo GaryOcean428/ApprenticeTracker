@@ -41,14 +41,15 @@ async function initializeDatabase(): Promise<void> {
     try {
       const pgPool = new PgPool({
         connectionString: databaseUrl,
-        ssl: process.env.NODE_ENV === 'production' 
-          ? { 
-              rejectUnauthorized: false,
-              // Additional SSL options for Railway compatibility
-              requestCert: false,
-              checkServerIdentity: () => undefined,
-            } 
-          : false,
+        ssl:
+          process.env.NODE_ENV === 'production'
+            ? {
+                rejectUnauthorized: false,
+                // Additional SSL options for Railway compatibility
+                requestCert: false,
+                checkServerIdentity: () => undefined,
+              }
+            : false,
         // Connection pool settings for better stability
         max: 20,
         idleTimeoutMillis: 30000,
@@ -73,16 +74,18 @@ async function initializeDatabase(): Promise<void> {
       return; // Success - exit retry loop
     } catch (error) {
       console.error(`Database connection error (attempt ${attempt}/${maxRetries}):`, error);
-      
+
       if (attempt === maxRetries) {
         if (process.env.NODE_ENV === 'production') {
           throw new Error(`Failed to connect to database after ${maxRetries} attempts: ${error}`);
         } else {
-          console.warn('⚠️  Database connection failed in development - continuing without database');
+          console.warn(
+            '⚠️  Database connection failed in development - continuing without database'
+          );
           return;
         }
       }
-      
+
       // Wait before retrying
       console.log(`Retrying database connection in ${retryDelay}ms...`);
       await new Promise(resolve => setTimeout(resolve, retryDelay));

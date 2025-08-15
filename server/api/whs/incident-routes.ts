@@ -11,10 +11,14 @@ import {
 } from '@shared/schema/whs';
 import { db } from '../../db';
 import { hasPermission } from '../../middleware/auth';
-import { sendEmailNotification, sendInAppNotification, sendSystemAlert } from '../../services/notification-service';
-import { 
-  generateIncidentPDFReport, 
-  generateIncidentExcelReport 
+import {
+  sendEmailNotification,
+  sendInAppNotification,
+  sendSystemAlert,
+} from '../../services/notification-service';
+import {
+  generateIncidentPDFReport,
+  generateIncidentExcelReport,
 } from '../../services/whs-report-generator';
 
 export function setupIncidentRoutes(router: express.Router) {
@@ -163,8 +167,15 @@ export function setupIncidentRoutes(router: express.Router) {
 
       // Validate status transition
       const validStatuses = [
-        'reported', 'investigating', 'action-required', 'remediation-in-progress',
-        'pending-review', 'resolved', 'closed', 'escalated', 'requires-followup'
+        'reported',
+        'investigating',
+        'action-required',
+        'remediation-in-progress',
+        'pending-review',
+        'resolved',
+        'closed',
+        'escalated',
+        'requires-followup',
       ];
 
       if (!validStatuses.includes(status)) {
@@ -182,9 +193,9 @@ export function setupIncidentRoutes(router: express.Router) {
       }
 
       // Update incident status
-      const updateData: any = { 
+      const updateData: any = {
         status,
-        updated_at: new Date()
+        updated_at: new Date(),
       };
 
       // Set resolution date if resolved/closed
@@ -216,14 +227,7 @@ export function setupIncidentRoutes(router: express.Router) {
   // REPORTING: Get incident reports with filters
   router.get('/incidents/reports', async (req, res) => {
     try {
-      const {
-        startDate,
-        endDate,
-        status,
-        severity,
-        hostEmployer,
-        format = 'json'
-      } = req.query;
+      const { startDate, endDate, status, severity, hostEmployer, format = 'json' } = req.query;
 
       let query = db.select().from(whs_incidents);
 
@@ -266,8 +270,8 @@ export function setupIncidentRoutes(router: express.Router) {
           totalIncidents,
           statusCounts,
           severityCounts,
-          reportGeneratedAt: new Date().toISOString()
-        }
+          reportGeneratedAt: new Date().toISOString(),
+        },
       };
 
       if (format === 'pdf') {
@@ -275,7 +279,7 @@ export function setupIncidentRoutes(router: express.Router) {
         const pdfBuffer = await generateIncidentPDFReportLegacy(reportData);
         res.set({
           'Content-Type': 'application/pdf',
-          'Content-Disposition': `attachment; filename=incidents-report-${new Date().toISOString().split('T')[0]}.pdf`
+          'Content-Disposition': `attachment; filename=incidents-report-${new Date().toISOString().split('T')[0]}.pdf`,
         });
         return res.send(pdfBuffer);
       }
@@ -285,7 +289,7 @@ export function setupIncidentRoutes(router: express.Router) {
         const excelBuffer = await generateIncidentExcelReportLegacy(reportData);
         res.set({
           'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-          'Content-Disposition': `attachment; filename=incidents-report-${new Date().toISOString().split('T')[0]}.xlsx`
+          'Content-Disposition': `attachment; filename=incidents-report-${new Date().toISOString().split('T')[0]}.xlsx`,
         });
         return res.send(excelBuffer);
       }
@@ -301,7 +305,7 @@ export function setupIncidentRoutes(router: express.Router) {
   router.get('/incidents/metrics', async (req, res) => {
     try {
       const { timeframe = '30days' } = req.query;
-      
+
       const daysAgo = timeframe === '7days' ? 7 : timeframe === '90days' ? 90 : 30;
       const startDate = new Date();
       startDate.setDate(startDate.getDate() - daysAgo);
@@ -314,18 +318,16 @@ export function setupIncidentRoutes(router: express.Router) {
         .orderBy(sql`${whs_incidents.date_occurred} DESC`);
 
       const totalIncidents = recentIncidents.length;
-      const openIncidents = recentIncidents.filter(i => 
-        !['resolved', 'closed'].includes(i.status)
+      const openIncidents = recentIncidents.filter(
+        i => !['resolved', 'closed'].includes(i.status)
       ).length;
 
-      const highSeverityIncidents = recentIncidents.filter(i => 
-        i.severity === 'high'
-      ).length;
+      const highSeverityIncidents = recentIncidents.filter(i => i.severity === 'high').length;
 
       // Calculate trends (compare to previous period)
       const previousPeriodStart = new Date(startDate);
       previousPeriodStart.setDate(previousPeriodStart.getDate() - daysAgo);
-      
+
       const previousIncidents = await db
         .select()
         .from(whs_incidents)
@@ -339,11 +341,13 @@ export function setupIncidentRoutes(router: express.Router) {
           openIncidents,
           highSeverityIncidents,
           incidentTrend,
-          resolvedRate: totalIncidents > 0 ? 
-            Math.round(((totalIncidents - openIncidents) / totalIncidents) * 100) : 0
+          resolvedRate:
+            totalIncidents > 0
+              ? Math.round(((totalIncidents - openIncidents) / totalIncidents) * 100)
+              : 0,
         },
         chartData: generateIncidentChartData(recentIncidents),
-        recentActivity: recentIncidents.slice(0, 5)
+        recentActivity: recentIncidents.slice(0, 5),
       });
     } catch (error) {
       console.error('Error fetching WHS metrics:', error);
@@ -456,30 +460,33 @@ export function setupIncidentRoutes(router: express.Router) {
 
 // Helper function to send incident status notifications
 async function sendIncidentStatusNotifications(
-  incident: any, 
-  previousStatus: string, 
+  incident: any,
+  previousStatus: string,
   newStatus: string
 ) {
   try {
-    console.log(`[WHS_NOTIFICATION] Incident ${incident.id} status changed from ${previousStatus} to ${newStatus}`);
-    
+    console.log(
+      `[WHS_NOTIFICATION] Incident ${incident.id} status changed from ${previousStatus} to ${newStatus}`
+    );
+
     const notifications = [];
     const emailRecipients: string[] = [];
-    
+
     // Determine notification message based on status
     const statusMessages = {
-      'investigating': 'Investigation has begun',
+      investigating: 'Investigation has begun',
       'action-required': 'Immediate action is required',
       'remediation-in-progress': 'Remediation measures are being implemented',
       'pending-review': 'Incident is pending management review',
-      'resolved': 'Incident has been resolved',
-      'closed': 'Incident has been officially closed',
-      'escalated': 'Incident has been escalated to management',
-      'requires-followup': 'Follow-up action is required'
+      resolved: 'Incident has been resolved',
+      closed: 'Incident has been officially closed',
+      escalated: 'Incident has been escalated to management',
+      'requires-followup': 'Follow-up action is required',
     };
 
-    const statusMessage = statusMessages[newStatus as keyof typeof statusMessages] || `Status updated to ${newStatus}`;
-    
+    const statusMessage =
+      statusMessages[newStatus as keyof typeof statusMessages] || `Status updated to ${newStatus}`;
+
     // Notify incident reporter
     if (incident.reporter_id) {
       const notificationBody = `
@@ -495,7 +502,7 @@ async function sendIncidentStatusNotifications(
         userId: incident.reporter_id,
         type: 'incident_status_update',
         message: `Incident "${incident.title}": ${statusMessage}`,
-        incidentId: incident.id
+        incidentId: incident.id,
       });
 
       // Add reporter email if available
@@ -505,7 +512,10 @@ async function sendIncidentStatusNotifications(
     }
 
     // Notify host employer for critical statuses
-    if (incident.host_employer_id && ['action-required', 'resolved', 'closed', 'escalated'].includes(newStatus)) {
+    if (
+      incident.host_employer_id &&
+      ['action-required', 'resolved', 'closed', 'escalated'].includes(newStatus)
+    ) {
       const hostNotificationBody = `
         <h3>WHS Incident Update at Your Facility</h3>
         <p>A Work Health & Safety incident at your facility has been updated.</p>
@@ -521,7 +531,7 @@ async function sendIncidentStatusNotifications(
         hostEmployerId: incident.host_employer_id,
         type: 'incident_update',
         message: `WHS incident at your facility: ${statusMessage}`,
-        incidentId: incident.id
+        incidentId: incident.id,
       });
 
       // Add host employer email if available
@@ -552,9 +562,11 @@ async function sendIncidentStatusNotifications(
               <p style="color: #666; font-size: 12px;">This is an automated notification from the ApprenticeTracker WHS system.</p>
             </div>
           `,
-          textContent: `WHS Incident Update: ${incident.title}\nStatus: ${newStatus}\n${statusMessage}\nLocation: ${incident.location}\nDate: ${new Date(incident.date_occurred).toLocaleDateString()}`
+          textContent: `WHS Incident Update: ${incident.title}\nStatus: ${newStatus}\n${statusMessage}\nLocation: ${incident.location}\nDate: ${new Date(incident.date_occurred).toLocaleDateString()}`,
         });
-        console.log(`Email notifications sent to ${emailRecipients.length} recipients for incident ${incident.id}`);
+        console.log(
+          `Email notifications sent to ${emailRecipients.length} recipients for incident ${incident.id}`
+        );
       } catch (emailError) {
         console.error('Error sending email notifications:', emailError);
       }
@@ -568,14 +580,14 @@ async function sendIncidentStatusNotifications(
             type: notification.type,
             message: notification.message,
             data: { incidentId: incident.id, newStatus, previousStatus },
-            priority: ['escalated', 'action-required'].includes(newStatus) ? 'high' : 'normal'
+            priority: ['escalated', 'action-required'].includes(newStatus) ? 'high' : 'normal',
           });
         }
       } catch (inAppError) {
         console.error('Error sending in-app notification:', inAppError);
       }
     }
-    
+
     console.log(`Generated ${notifications.length} notifications for incident ${incident.id}`);
     return notifications;
   } catch (error) {
@@ -590,7 +602,7 @@ async function generateIncidentPDFReportLegacy(reportData: any): Promise<Buffer>
   return await generateIncidentPDFReport(reportData);
 }
 
-// Helper function to generate Excel reports  
+// Helper function to generate Excel reports
 async function generateIncidentExcelReportLegacy(reportData: any): Promise<Buffer> {
   // Use the new report generator
   return await generateIncidentExcelReport(reportData);
@@ -614,7 +626,7 @@ function generateIncidentChartData(incidents: any[]) {
 
     const chartData = last30Days.map(date => ({
       date,
-      incidents: incidentsByDate[date] || 0
+      incidents: incidentsByDate[date] || 0,
     }));
 
     // Status distribution
@@ -633,19 +645,19 @@ function generateIncidentChartData(incidents: any[]) {
       timeline: chartData,
       statusDistribution: Object.entries(statusDistribution).map(([status, count]) => ({
         status,
-        count
+        count,
       })),
       severityDistribution: Object.entries(severityDistribution).map(([severity, count]) => ({
-        severity, 
-        count
-      }))
+        severity,
+        count,
+      })),
     };
   } catch (error) {
     console.error('Error generating chart data:', error);
     return {
       timeline: [],
       statusDistribution: [],
-      severityDistribution: []
+      severityDistribution: [],
     };
   }
 }
@@ -654,7 +666,7 @@ function generateIncidentChartData(incidents: any[]) {
 async function sendNewIncidentNotifications(incident: any) {
   try {
     console.log(`[WHS_NOTIFICATION] New incident created: ${incident.id} - ${incident.title}`);
-    
+
     const emailRecipients: string[] = [];
     const notifications = [];
 
@@ -673,7 +685,7 @@ async function sendNewIncidentNotifications(incident: any) {
         hostEmployerId: incident.host_employer_id,
         type: 'new_incident_high_severity',
         message: `High severity WHS incident reported at your facility: ${incident.title}`,
-        incidentId: incident.id
+        incidentId: incident.id,
       });
     }
 
@@ -702,20 +714,26 @@ async function sendNewIncidentNotifications(incident: any) {
                   <strong>Description:</strong>
                   <p style="background: white; padding: 15px; border-radius: 4px; margin: 5px 0;">${incident.description}</p>
                 </div>
-                ${incident.immediate_actions ? `
+                ${
+                  incident.immediate_actions
+                    ? `
                 <div style="margin: 15px 0;">
                   <strong>Immediate Actions Taken:</strong>
                   <p style="background: white; padding: 15px; border-radius: 4px; margin: 5px 0;">${incident.immediate_actions}</p>
-                </div>` : ''}
+                </div>`
+                    : ''
+                }
               </div>
               <p style="color: #666; font-size: 12px; margin-top: 20px;">
                 This incident requires attention. Please log into the ApprenticeTracker system to review and take appropriate action.
               </p>
             </div>
           `,
-          textContent: `New WHS Incident Reported\n\nTitle: ${incident.title}\nSeverity: ${incident.severity}\nType: ${incident.type}\nLocation: ${incident.location}\nDate: ${new Date(incident.date_occurred).toLocaleDateString()}\nDescription: ${incident.description}`
+          textContent: `New WHS Incident Reported\n\nTitle: ${incident.title}\nSeverity: ${incident.severity}\nType: ${incident.type}\nLocation: ${incident.location}\nDate: ${new Date(incident.date_occurred).toLocaleDateString()}\nDescription: ${incident.description}`,
         });
-        console.log(`New incident email notifications sent to ${emailRecipients.length} recipients for incident ${incident.id}`);
+        console.log(
+          `New incident email notifications sent to ${emailRecipients.length} recipients for incident ${incident.id}`
+        );
       } catch (emailError) {
         console.error('Error sending new incident email notifications:', emailError);
       }

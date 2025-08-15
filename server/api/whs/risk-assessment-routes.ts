@@ -9,10 +9,10 @@ import {
 } from '@shared/schema/whs';
 import { db } from '../../db';
 import { hasPermission } from '../../middleware/auth';
-import { sendEmailNotification, sendInAppNotification } from '../../services/notification-service';
-import { 
-  generateRiskAssessmentPDFReport, 
-  generateRiskAssessmentExcelReport 
+import { sendEmailNotification } from '../../services/notification-service';
+import {
+  generateRiskAssessmentPDFReport,
+  generateRiskAssessmentExcelReport,
 } from '../../services/whs-report-generator';
 
 export function setupRiskAssessmentRoutes(router: express.Router) {
@@ -339,62 +339,66 @@ export function setupRiskAssessmentRoutes(router: express.Router) {
   );
 
   // WORKFLOW: Transition risk assessment status
-  router.patch('/risk-assessments/:id/status', hasPermission('whs.update_risk_assessment'), async (req, res) => {
-    try {
-      const id = req.params.id;
-      const { status, notes } = req.body;
+  router.patch(
+    '/risk-assessments/:id/status',
+    hasPermission('whs.update_risk_assessment'),
+    async (req, res) => {
+      try {
+        const id = req.params.id;
+        const { status, notes } = req.body;
 
-      // Validate status transition
-      const validStatuses = ['draft', 'in-progress', 'completed', 'review-required', 'expired'];
-      
-      if (!validStatuses.includes(status)) {
-        return res.status(400).json({ message: 'Invalid status transition' });
-      }
+        // Validate status transition
+        const validStatuses = ['draft', 'in-progress', 'completed', 'review-required', 'expired'];
 
-      // Get current risk assessment
-      const [currentAssessment] = await db
-        .select()
-        .from(whs_risk_assessments)
-        .where(sql`${whs_risk_assessments.id} = ${id}`);
-
-      if (!currentAssessment) {
-        return res.status(404).json({ message: 'Risk assessment not found' });
-      }
-
-      // Update status
-      const updateData: any = { 
-        status,
-        updated_at: new Date()
-      };
-
-      // Set review date if moving to review-required
-      if (status === 'review-required' && !currentAssessment.review_date) {
-        const reviewDate = new Date();
-        reviewDate.setMonth(reviewDate.getMonth() + 12); // Default to 12 months from now
-        updateData.review_date = reviewDate;
-      }
-
-      const [updatedAssessment] = await db
-        .update(whs_risk_assessments)
-        .set(updateData)
-        .where(sql`${whs_risk_assessments.id} = ${id}`)
-        .returning();
-
-      // Send notifications for status changes
-      if (status === 'review-required') {
-        try {
-          await sendRiskAssessmentReviewNotifications(updatedAssessment);
-        } catch (notificationError) {
-          console.error('Error sending review notifications:', notificationError);
+        if (!validStatuses.includes(status)) {
+          return res.status(400).json({ message: 'Invalid status transition' });
         }
-      }
 
-      res.json(updatedAssessment);
-    } catch (error) {
-      console.error('Error updating risk assessment status:', error);
-      res.status(400).json({ message: 'Failed to update risk assessment status' });
+        // Get current risk assessment
+        const [currentAssessment] = await db
+          .select()
+          .from(whs_risk_assessments)
+          .where(sql`${whs_risk_assessments.id} = ${id}`);
+
+        if (!currentAssessment) {
+          return res.status(404).json({ message: 'Risk assessment not found' });
+        }
+
+        // Update status
+        const updateData: any = {
+          status,
+          updated_at: new Date(),
+        };
+
+        // Set review date if moving to review-required
+        if (status === 'review-required' && !currentAssessment.review_date) {
+          const reviewDate = new Date();
+          reviewDate.setMonth(reviewDate.getMonth() + 12); // Default to 12 months from now
+          updateData.review_date = reviewDate;
+        }
+
+        const [updatedAssessment] = await db
+          .update(whs_risk_assessments)
+          .set(updateData)
+          .where(sql`${whs_risk_assessments.id} = ${id}`)
+          .returning();
+
+        // Send notifications for status changes
+        if (status === 'review-required') {
+          try {
+            await sendRiskAssessmentReviewNotifications(updatedAssessment);
+          } catch (notificationError) {
+            console.error('Error sending review notifications:', notificationError);
+          }
+        }
+
+        res.json(updatedAssessment);
+      } catch (error) {
+        console.error('Error updating risk assessment status:', error);
+        res.status(400).json({ message: 'Failed to update risk assessment status' });
+      }
     }
-  });
+  );
 
   // REPORTS: Generate risk assessment reports
   router.get('/risk-assessments/reports', async (req, res) => {
@@ -429,7 +433,7 @@ export function setupRiskAssessmentRoutes(router: express.Router) {
         const pdfBuffer = await generateRiskAssessmentPDFReport(assessments);
         res.set({
           'Content-Type': 'application/pdf',
-          'Content-Disposition': `attachment; filename=risk-assessments-report-${new Date().toISOString().split('T')[0]}.pdf`
+          'Content-Disposition': `attachment; filename=risk-assessments-report-${new Date().toISOString().split('T')[0]}.pdf`,
         });
         return res.send(pdfBuffer);
       }
@@ -439,7 +443,7 @@ export function setupRiskAssessmentRoutes(router: express.Router) {
         const excelBuffer = await generateRiskAssessmentExcelReport(assessments);
         res.set({
           'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-          'Content-Disposition': `attachment; filename=risk-assessments-report-${new Date().toISOString().split('T')[0]}.xlsx`
+          'Content-Disposition': `attachment; filename=risk-assessments-report-${new Date().toISOString().split('T')[0]}.xlsx`,
         });
         return res.send(excelBuffer);
       }
@@ -456,9 +460,9 @@ export function setupRiskAssessmentRoutes(router: express.Router) {
 async function sendRiskAssessmentApprovalNotifications(assessment: any, approverName: string) {
   try {
     console.log(`[WHS_NOTIFICATION] Risk assessment approved: ${assessment.id} by ${approverName}`);
-    
+
     const emailRecipients: string[] = [];
-    
+
     // Notify the assessor if available
     if (assessment.assessor_email) {
       emailRecipients.push(assessment.assessor_email);
@@ -493,25 +497,35 @@ async function sendRiskAssessmentApprovalNotifications(assessment: any, approver
                   <tr><td style="padding: 8px 0; font-weight: bold;">Approval Date:</td><td style="padding: 8px 0;">${new Date().toLocaleDateString()}</td></tr>
                   ${assessment.host_employer_name ? `<tr><td style="padding: 8px 0; font-weight: bold;">Host Employer:</td><td style="padding: 8px 0;">${assessment.host_employer_name}</td></tr>` : ''}
                 </table>
-                ${assessment.approval_notes ? `
+                ${
+                  assessment.approval_notes
+                    ? `
                 <div style="margin: 15px 0;">
                   <strong>Approval Notes:</strong>
                   <p style="background: white; padding: 15px; border-radius: 4px; margin: 5px 0;">${assessment.approval_notes}</p>
-                </div>` : ''}
-                ${assessment.recommendations ? `
+                </div>`
+                    : ''
+                }
+                ${
+                  assessment.recommendations
+                    ? `
                 <div style="margin: 15px 0;">
                   <strong>Recommendations:</strong>
                   <p style="background: white; padding: 15px; border-radius: 4px; margin: 5px 0;">${assessment.recommendations}</p>
-                </div>` : ''}
+                </div>`
+                    : ''
+                }
               </div>
               <p style="color: #666; font-size: 12px; margin-top: 20px;">
                 This risk assessment has been approved and is now in effect.
               </p>
             </div>
           `,
-          textContent: `Risk Assessment Approved\n\nTitle: ${assessment.title}\nLocation: ${assessment.location}\nApproved By: ${approverName}\nApproval Date: ${new Date().toLocaleDateString()}`
+          textContent: `Risk Assessment Approved\n\nTitle: ${assessment.title}\nLocation: ${assessment.location}\nApproved By: ${approverName}\nApproval Date: ${new Date().toLocaleDateString()}`,
         });
-        console.log(`Risk assessment approval notifications sent to ${emailRecipients.length} recipients`);
+        console.log(
+          `Risk assessment approval notifications sent to ${emailRecipients.length} recipients`
+        );
       } catch (emailError) {
         console.error('Error sending approval email notifications:', emailError);
       }
@@ -525,9 +539,9 @@ async function sendRiskAssessmentApprovalNotifications(assessment: any, approver
 async function sendRiskAssessmentReviewNotifications(assessment: any) {
   try {
     console.log(`[WHS_NOTIFICATION] Risk assessment requires review: ${assessment.id}`);
-    
+
     const emailRecipients: string[] = [];
-    
+
     // Notify WHS administrators/managers who can conduct reviews
     const whsAdminEmails = process.env.WHS_ADMIN_EMAILS?.split(',') || [];
     emailRecipients.push(...whsAdminEmails.filter(email => email.trim()));
@@ -557,9 +571,11 @@ async function sendRiskAssessmentReviewNotifications(assessment: any) {
               </p>
             </div>
           `,
-          textContent: `Risk Assessment Review Required\n\nTitle: ${assessment.title}\nLocation: ${assessment.location}\nAssessor: ${assessment.assessor_name}`
+          textContent: `Risk Assessment Review Required\n\nTitle: ${assessment.title}\nLocation: ${assessment.location}\nAssessor: ${assessment.assessor_name}`,
         });
-        console.log(`Risk assessment review notifications sent to ${emailRecipients.length} recipients`);
+        console.log(
+          `Risk assessment review notifications sent to ${emailRecipients.length} recipients`
+        );
       } catch (emailError) {
         console.error('Error sending review email notifications:', emailError);
       }

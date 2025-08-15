@@ -3,7 +3,6 @@ import { useLocation } from 'wouter';
 import { useQuery } from '@tanstack/react-query';
 import {
   Plus,
-  GraduationCap,
   FileText,
   BookOpen,
   Search,
@@ -12,10 +11,9 @@ import {
   BarChart,
   Clock,
   Target,
-  Calendar,
   CheckCircle,
-  TrendingUp
 } from 'lucide-react';
+import type { TrainingPlan, Apprentice } from '@shared/schema';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -39,7 +37,6 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useToast } from '@/hooks/use-toast';
-import type { TrainingPlan, Apprentice } from '@shared/schema';
 
 interface TrainingPlanWithApprentice extends TrainingPlan {
   apprentice: Apprentice;
@@ -124,17 +121,20 @@ export default function TrainingPlansManagement() {
 
   // Filter plans based on search and tab
   const filteredPlans = displayPlans.filter(plan => {
-    const matchesSearch = 
+    const matchesSearch =
       plan.planName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       plan.apprentice.firstName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       plan.apprentice.lastName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       plan.qualificationId?.toLowerCase().includes(searchQuery.toLowerCase());
 
-    const matchesTab = 
-      activeTab === 'active' ? plan.status === 'active' :
-      activeTab === 'completed' ? plan.status === 'completed' :
-      activeTab === 'draft' ? plan.status === 'draft' :
-      true;
+    const matchesTab =
+      activeTab === 'active'
+        ? plan.status === 'active'
+        : activeTab === 'completed'
+          ? plan.status === 'completed'
+          : activeTab === 'draft'
+            ? plan.status === 'draft'
+            : true;
 
     return matchesSearch && matchesTab;
   });
@@ -143,10 +143,13 @@ export default function TrainingPlansManagement() {
   const stats = {
     totalPlans: displayPlans.length,
     activePlans: displayPlans.filter(p => p.status === 'active').length,
-    averageProgress: displayPlans.reduce((sum, p) => sum + (p.overallProgress || 0), 0) / displayPlans.length || 0,
+    averageProgress:
+      displayPlans.reduce((sum, p) => sum + (p.overallProgress || 0), 0) / displayPlans.length || 0,
     completedPlans: displayPlans.filter(p => p.status === 'completed').length,
     plansNeedingReview: displayPlans.filter(p => {
-      const daysSinceLastUpdate = Math.floor((new Date().getTime() - new Date(p.startDate).getTime()) / (1000 * 60 * 60 * 24));
+      const daysSinceLastUpdate = Math.floor(
+        (new Date().getTime() - new Date(p.startDate).getTime()) / (1000 * 60 * 60 * 24)
+      );
       return daysSinceLastUpdate > 30 && p.overallProgress < 100;
     }).length,
   };
@@ -166,7 +169,7 @@ export default function TrainingPlansManagement() {
       cancelled: 'bg-red-100 text-red-800',
       draft: 'bg-gray-100 text-gray-800',
     };
-    
+
     return (
       <Badge className={statusColors[status as keyof typeof statusColors] || statusColors.draft}>
         {status}
@@ -183,9 +186,7 @@ export default function TrainingPlansManagement() {
             Manage and monitor comprehensive training plans for apprentices
           </p>
         </div>
-        <Button
-          onClick={() => navigate('/apprentices/training/create')}
-        >
+        <Button onClick={() => navigate('/apprentices/training/create')}>
           <Plus className="mr-2 h-4 w-4" /> Create Training Plan
         </Button>
       </div>
@@ -321,7 +322,9 @@ export default function TrainingPlansManagement() {
                             <div>
                               <h3 className="text-lg font-medium">No Training Plans Found</h3>
                               <p className="text-muted-foreground">
-                                {searchQuery ? 'Try adjusting your search criteria.' : 'Create a new training plan to get started.'}
+                                {searchQuery
+                                  ? 'Try adjusting your search criteria.'
+                                  : 'Create a new training plan to get started.'}
                               </p>
                             </div>
                             {!searchQuery && (
@@ -334,7 +337,7 @@ export default function TrainingPlansManagement() {
                         </TableCell>
                       </TableRow>
                     ) : (
-                      filteredPlans.map((plan) => (
+                      filteredPlans.map(plan => (
                         <TableRow key={plan.id} className="cursor-pointer hover:bg-muted/50">
                           <TableCell>
                             <div>
@@ -357,31 +360,29 @@ export default function TrainingPlansManagement() {
                           <TableCell>
                             <div className="flex items-center space-x-2">
                               <Progress value={plan.overallProgress} className="flex-1 h-2" />
-                              <span className={`text-sm font-medium ${getProgressColor(plan.overallProgress)}`}>
+                              <span
+                                className={`text-sm font-medium ${getProgressColor(plan.overallProgress)}`}
+                              >
                                 {plan.overallProgress}%
                               </span>
                             </div>
                           </TableCell>
-                          <TableCell>
-                            {new Date(plan.startDate).toLocaleDateString()}
-                          </TableCell>
+                          <TableCell>{new Date(plan.startDate).toLocaleDateString()}</TableCell>
                           <TableCell>
                             {new Date(plan.targetCompletionDate).toLocaleDateString()}
                           </TableCell>
-                          <TableCell>
-                            {getStatusBadge(plan.status)}
-                          </TableCell>
+                          <TableCell>{getStatusBadge(plan.status)}</TableCell>
                           <TableCell>
                             <div className="flex space-x-2">
-                              <Button 
-                                size="sm" 
+                              <Button
+                                size="sm"
                                 variant="outline"
                                 onClick={() => navigate(`/apprentices/${plan.apprenticeId}`)}
                               >
                                 View
                               </Button>
-                              <Button 
-                                size="sm" 
+                              <Button
+                                size="sm"
                                 variant="ghost"
                                 onClick={() => navigate(`/training-plans/${plan.id}/edit`)}
                               >

@@ -4,16 +4,14 @@ import { Link } from 'wouter';
 import {
   Target,
   TrendingUp,
-  Award,
   BookOpen,
   CheckCircle,
-  Clock,
   AlertCircle,
   Users,
   BarChart3,
   Search,
-  Filter,
 } from 'lucide-react';
+import type { Competency, ApprenticeCompetency, Apprentice } from '@shared/schema';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -36,7 +34,6 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import type { Competency, ApprenticeCompetency, Apprentice } from '@shared/schema';
 
 interface CompetencyWithProgress extends Competency {
   totalApprentices: number;
@@ -83,7 +80,8 @@ export default function CompetencyManagement() {
       id: 1,
       code: 'UEENEEE101A',
       title: 'Use basic computer applications relevant to a workplace',
-      description: 'This unit covers the skills and knowledge required to use basic computer applications in the workplace.',
+      description:
+        'This unit covers the skills and knowledge required to use basic computer applications in the workplace.',
       category: 'Core',
       level: 'Beginner',
       tradeArea: 'Electrical',
@@ -100,7 +98,8 @@ export default function CompetencyManagement() {
       id: 2,
       code: 'UEENEEE102A',
       title: 'Fabricate, assemble and dismantle utilities infrastructure',
-      description: 'This unit covers fabrication, assembly and dismantling of utilities infrastructure.',
+      description:
+        'This unit covers fabrication, assembly and dismantling of utilities infrastructure.',
       category: 'Core',
       level: 'Intermediate',
       tradeArea: 'Electrical',
@@ -117,7 +116,8 @@ export default function CompetencyManagement() {
       id: 3,
       code: 'CPC33020A',
       title: 'Lay bricks and blocks',
-      description: 'This unit covers the skills required to lay bricks and blocks for various construction applications.',
+      description:
+        'This unit covers the skills required to lay bricks and blocks for various construction applications.',
       category: 'Specialist',
       level: 'Advanced',
       tradeArea: 'Construction',
@@ -134,7 +134,8 @@ export default function CompetencyManagement() {
       id: 4,
       code: 'MEM30319A',
       title: 'Use hand tools',
-      description: 'This unit covers the selection and safe use of hand tools in engineering applications.',
+      description:
+        'This unit covers the selection and safe use of hand tools in engineering applications.',
       category: 'Core',
       level: 'Beginner',
       tradeArea: 'Engineering',
@@ -154,10 +155,10 @@ export default function CompetencyManagement() {
 
   // Filter competencies
   const filteredCompetencies = displayCompetencies.filter(comp => {
-    const matchesSearch = 
+    const matchesSearch =
       comp.code.toLowerCase().includes(searchQuery.toLowerCase()) ||
       comp.title.toLowerCase().includes(searchQuery.toLowerCase());
-    
+
     const matchesTradeArea = filterTradeArea === 'all' || comp.tradeArea === filterTradeArea;
     const matchesCategory = filterCategory === 'all' || comp.category === filterCategory;
 
@@ -169,9 +170,11 @@ export default function CompetencyManagement() {
     totalCompetencies: displayCompetencies.length,
     totalApprentices: displayCompetencies.reduce((sum, c) => sum + c.totalApprentices, 0),
     totalCompetentCount: displayCompetencies.reduce((sum, c) => sum + c.competentCount, 0),
-    averageCompletionRate: displayCompetencies.length > 0 
-      ? displayCompetencies.reduce((sum, c) => sum + c.averageProgress, 0) / displayCompetencies.length 
-      : 0,
+    averageCompletionRate:
+      displayCompetencies.length > 0
+        ? displayCompetencies.reduce((sum, c) => sum + c.averageProgress, 0) /
+          displayCompetencies.length
+        : 0,
     competenciesNeedingAttention: displayCompetencies.filter(c => c.averageProgress < 50).length,
   };
 
@@ -184,7 +187,7 @@ export default function CompetencyManagement() {
 
   const getStatusBadge = (competentCount: number, totalCount: number) => {
     const percentage = totalCount > 0 ? (competentCount / totalCount) * 100 : 0;
-    
+
     if (percentage >= 80) {
       return <Badge className="bg-green-100 text-green-800">Excellent</Badge>;
     } else if (percentage >= 60) {
@@ -278,7 +281,9 @@ export default function CompetencyManagement() {
             <AlertCircle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-600">{stats.competenciesNeedingAttention}</div>
+            <div className="text-2xl font-bold text-red-600">
+              {stats.competenciesNeedingAttention}
+            </div>
             <p className="text-xs text-muted-foreground mt-1">Below 50% progress</p>
           </CardContent>
         </Card>
@@ -298,7 +303,7 @@ export default function CompetencyManagement() {
                 onChange={e => setSearchQuery(e.target.value)}
               />
             </div>
-            
+
             <div className="flex gap-2">
               <Select value={filterTradeArea} onValueChange={setFilterTradeArea}>
                 <SelectTrigger className="w-[180px]">
@@ -358,13 +363,15 @@ export default function CompetencyManagement() {
                   </TableHeader>
                   <TableBody>
                     {isLoadingCompetencies ? (
-                      Array(5).fill(0).map((_, i) => (
-                        <TableRow key={i}>
-                          <TableCell colSpan={7} className="text-center py-4">
-                            Loading competencies...
-                          </TableCell>
-                        </TableRow>
-                      ))
+                      Array(5)
+                        .fill(0)
+                        .map((_, i) => (
+                          <TableRow key={i}>
+                            <TableCell colSpan={7} className="text-center py-4">
+                              Loading competencies...
+                            </TableCell>
+                          </TableRow>
+                        ))
                     ) : filteredCompetencies.length === 0 ? (
                       <TableRow>
                         <TableCell colSpan={7} className="text-center py-8">
@@ -373,14 +380,16 @@ export default function CompetencyManagement() {
                             <div>
                               <h3 className="text-lg font-medium">No Competencies Found</h3>
                               <p className="text-muted-foreground">
-                                {searchQuery ? 'Try adjusting your search criteria.' : 'Add competencies to start tracking apprentice progress.'}
+                                {searchQuery
+                                  ? 'Try adjusting your search criteria.'
+                                  : 'Add competencies to start tracking apprentice progress.'}
                               </p>
                             </div>
                           </div>
                         </TableCell>
                       </TableRow>
                     ) : (
-                      filteredCompetencies.map((competency) => (
+                      filteredCompetencies.map(competency => (
                         <TableRow key={competency.id}>
                           <TableCell>
                             <div>
@@ -401,8 +410,8 @@ export default function CompetencyManagement() {
                           <TableCell>
                             <div className="space-y-1">
                               <div className="flex items-center space-x-2">
-                                <Progress 
-                                  value={competency.averageProgress} 
+                                <Progress
+                                  value={competency.averageProgress}
                                   className="flex-1 h-2"
                                 />
                                 <span className="text-sm text-muted-foreground w-12">
@@ -410,7 +419,8 @@ export default function CompetencyManagement() {
                                 </span>
                               </div>
                               <div className="text-xs text-muted-foreground">
-                                {competency.competentCount} of {competency.totalApprentices} competent
+                                {competency.competentCount} of {competency.totalApprentices}{' '}
+                                competent
                               </div>
                             </div>
                           </TableCell>
@@ -436,9 +446,7 @@ export default function CompetencyManagement() {
                           <TableCell>
                             <div className="flex space-x-2">
                               <Button size="sm" variant="outline" asChild>
-                                <Link href={`/competencies/${competency.id}`}>
-                                  View
-                                </Link>
+                                <Link href={`/competencies/${competency.id}`}>View</Link>
                               </Button>
                             </div>
                           </TableCell>
@@ -459,7 +467,8 @@ export default function CompetencyManagement() {
             </CardHeader>
             <CardContent>
               <div className="text-center py-8 text-muted-foreground">
-                Individual progress tracking view will show detailed apprentice-by-competency progress matrix.
+                Individual progress tracking view will show detailed apprentice-by-competency
+                progress matrix.
               </div>
             </CardContent>
           </Card>

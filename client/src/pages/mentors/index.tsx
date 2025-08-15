@@ -1,18 +1,8 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'wouter';
-import { 
-  Plus, 
-  Users, 
-  Clock, 
-  Calendar, 
-  Star, 
-  MessageSquare, 
-  Target, 
-  TrendingUp,
-  UserCheck,
-  Settings
-} from 'lucide-react';
+import { Plus, Users, Star, TrendingUp, UserCheck } from 'lucide-react';
+import type { Mentor, MentorAssignment, Apprentice } from '@shared/schema';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -26,7 +16,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
   Dialog,
   DialogContent,
@@ -46,7 +36,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import type { Mentor, MentorAssignment, Apprentice } from '@shared/schema';
 
 interface MentorWithAssignments extends Mentor {
   assignments: (MentorAssignment & { apprentice: Apprentice })[];
@@ -139,25 +128,26 @@ export default function MentorManagement() {
   };
 
   // Calculate mentor statistics
-  const mentorStats = mentors ? {
-    totalMentors: mentors.length,
-    activeMentors: mentors.filter(m => m.availability === 'active').length,
-    totalActiveAssignments: mentors.reduce((sum, m) => 
-      sum + m.assignments.filter(a => a.status === 'active').length, 0
-    ),
-    averageRating: mentors.reduce((sum, m) => 
-      sum + (parseFloat(m.rating?.toString() || '0')), 0
-    ) / mentors.length || 0
-  } : null;
+  const mentorStats = mentors
+    ? {
+        totalMentors: mentors.length,
+        activeMentors: mentors.filter(m => m.availability === 'active').length,
+        totalActiveAssignments: mentors.reduce(
+          (sum, m) => sum + m.assignments.filter(a => a.status === 'active').length,
+          0
+        ),
+        averageRating:
+          mentors.reduce((sum, m) => sum + parseFloat(m.rating?.toString() || '0'), 0) /
+            mentors.length || 0,
+      }
+    : null;
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Mentor Management</h1>
-          <p className="text-muted-foreground">
-            Manage mentors and their apprentice assignments
-          </p>
+          <p className="text-muted-foreground">Manage mentors and their apprentice assignments</p>
         </div>
         <div className="flex gap-2">
           <Dialog open={newAssignmentDialog} onOpenChange={setNewAssignmentDialog}>
@@ -177,7 +167,7 @@ export default function MentorManagement() {
               <AssignmentForm
                 mentors={mentors || []}
                 apprentices={apprentices || []}
-                onSubmit={(data) => createAssignmentMutation.mutate(data)}
+                onSubmit={data => createAssignmentMutation.mutate(data)}
                 isLoading={createAssignmentMutation.isPending}
               />
             </DialogContent>
@@ -201,9 +191,7 @@ export default function MentorManagement() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{mentorStats.totalMentors}</div>
-              <p className="text-xs text-muted-foreground">
-                {mentorStats.activeMentors} active
-              </p>
+              <p className="text-xs text-muted-foreground">{mentorStats.activeMentors} active</p>
             </CardContent>
           </Card>
 
@@ -214,9 +202,7 @@ export default function MentorManagement() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{mentorStats.totalActiveAssignments}</div>
-              <p className="text-xs text-muted-foreground">
-                Currently mentoring
-              </p>
+              <p className="text-xs text-muted-foreground">Currently mentoring</p>
             </CardContent>
           </Card>
 
@@ -226,12 +212,8 @@ export default function MentorManagement() {
               <Star className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
-                {mentorStats.averageRating.toFixed(1)}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Out of 5.0
-              </p>
+              <div className="text-2xl font-bold">{mentorStats.averageRating.toFixed(1)}</div>
+              <p className="text-xs text-muted-foreground">Out of 5.0</p>
             </CardContent>
           </Card>
 
@@ -242,13 +224,14 @@ export default function MentorManagement() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {mentorStats.totalMentors > 0 
-                  ? Math.round((mentorStats.totalActiveAssignments / (mentorStats.totalMentors * 10)) * 100)
-                  : 0}%
+                {mentorStats.totalMentors > 0
+                  ? Math.round(
+                      (mentorStats.totalActiveAssignments / (mentorStats.totalMentors * 10)) * 100
+                    )
+                  : 0}
+                %
               </div>
-              <p className="text-xs text-muted-foreground">
-                Average capacity used
-              </p>
+              <p className="text-xs text-muted-foreground">Average capacity used</p>
             </CardContent>
           </Card>
         </div>
@@ -286,32 +269,33 @@ export default function MentorManagement() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {mentors.map((mentor) => (
+                    {mentors.map(mentor => (
                       <TableRow key={mentor.id}>
                         <TableCell>
                           <div className="flex items-center space-x-3">
                             <Avatar>
                               <AvatarFallback>
-                                {mentor.firstName[0]}{mentor.lastName[0]}
+                                {mentor.firstName[0]}
+                                {mentor.lastName[0]}
                               </AvatarFallback>
                             </Avatar>
                             <div>
                               <div className="font-medium">
                                 {mentor.firstName} {mentor.lastName}
                               </div>
-                              <div className="text-sm text-muted-foreground">
-                                {mentor.email}
-                              </div>
+                              <div className="text-sm text-muted-foreground">{mentor.email}</div>
                             </div>
                           </div>
                         </TableCell>
                         <TableCell>
                           <div className="flex flex-wrap gap-1">
-                            {JSON.parse(mentor.specializations || '[]').map((spec: string, idx: number) => (
-                              <Badge key={idx} variant="secondary" className="text-xs">
-                                {spec}
-                              </Badge>
-                            ))}
+                            {JSON.parse(mentor.specializations || '[]').map(
+                              (spec: string, idx: number) => (
+                                <Badge key={idx} variant="secondary" className="text-xs">
+                                  {spec}
+                                </Badge>
+                              )
+                            )}
                           </div>
                         </TableCell>
                         <TableCell>
@@ -322,8 +306,12 @@ export default function MentorManagement() {
                             <div className="text-xs text-muted-foreground">
                               of {mentor.maxApprentices}
                             </div>
-                            <Progress 
-                              value={((mentor.assignments.filter(a => a.status === 'active').length) / (mentor.maxApprentices || 10)) * 100} 
+                            <Progress
+                              value={
+                                (mentor.assignments.filter(a => a.status === 'active').length /
+                                  (mentor.maxApprentices || 10)) *
+                                100
+                              }
                               className="h-1 mt-1"
                             />
                           </div>
@@ -332,7 +320,9 @@ export default function MentorManagement() {
                           <div className="flex items-center">
                             <Star className="h-3 w-3 text-yellow-400 mr-1" />
                             <span className="text-sm">
-                              {mentor.rating ? parseFloat(mentor.rating.toString()).toFixed(1) : 'N/A'}
+                              {mentor.rating
+                                ? parseFloat(mentor.rating.toString()).toFixed(1)
+                                : 'N/A'}
                             </span>
                           </div>
                         </TableCell>
@@ -344,9 +334,7 @@ export default function MentorManagement() {
                         <TableCell>
                           <div className="flex space-x-2">
                             <Button size="sm" variant="outline" asChild>
-                              <Link href={`/mentors/${mentor.id}`}>
-                                View
-                              </Link>
+                              <Link href={`/mentors/${mentor.id}`}>View</Link>
                             </Button>
                           </div>
                         </TableCell>
@@ -389,11 +377,11 @@ export default function MentorManagement() {
   );
 }
 
-function AssignmentForm({ 
-  mentors, 
-  apprentices, 
-  onSubmit, 
-  isLoading 
+function AssignmentForm({
+  mentors,
+  apprentices,
+  onSubmit,
+  isLoading,
 }: {
   mentors: MentorWithAssignments[];
   apprentices: Apprentice[];
@@ -411,7 +399,10 @@ function AssignmentForm({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const goals = formData.goals.split(',').map(g => g.trim()).filter(Boolean);
+    const goals = formData.goals
+      .split(',')
+      .map(g => g.trim())
+      .filter(Boolean);
     onSubmit({
       ...formData,
       mentorId: parseInt(formData.mentorId),
@@ -426,32 +417,42 @@ function AssignmentForm({
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="mentor">Mentor</Label>
-          <Select value={formData.mentorId} onValueChange={(value) => setFormData({...formData, mentorId: value})}>
+          <Select
+            value={formData.mentorId}
+            onValueChange={value => setFormData({ ...formData, mentorId: value })}
+          >
             <SelectTrigger>
               <SelectValue placeholder="Select mentor" />
             </SelectTrigger>
             <SelectContent>
-              {mentors.filter(m => m.availability === 'active').map((mentor) => (
-                <SelectItem key={mentor.id} value={mentor.id.toString()}>
-                  {mentor.firstName} {mentor.lastName}
-                </SelectItem>
-              ))}
+              {mentors
+                .filter(m => m.availability === 'active')
+                .map(mentor => (
+                  <SelectItem key={mentor.id} value={mentor.id.toString()}>
+                    {mentor.firstName} {mentor.lastName}
+                  </SelectItem>
+                ))}
             </SelectContent>
           </Select>
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="apprentice">Apprentice</Label>
-          <Select value={formData.apprenticeId} onValueChange={(value) => setFormData({...formData, apprenticeId: value})}>
+          <Select
+            value={formData.apprenticeId}
+            onValueChange={value => setFormData({ ...formData, apprenticeId: value })}
+          >
             <SelectTrigger>
               <SelectValue placeholder="Select apprentice" />
             </SelectTrigger>
             <SelectContent>
-              {apprentices.filter(a => a.status === 'active').map((apprentice) => (
-                <SelectItem key={apprentice.id} value={apprentice.id.toString()}>
-                  {apprentice.firstName} {apprentice.lastName}
-                </SelectItem>
-              ))}
+              {apprentices
+                .filter(a => a.status === 'active')
+                .map(apprentice => (
+                  <SelectItem key={apprentice.id} value={apprentice.id.toString()}>
+                    {apprentice.firstName} {apprentice.lastName}
+                  </SelectItem>
+                ))}
             </SelectContent>
           </Select>
         </div>
@@ -463,13 +464,16 @@ function AssignmentForm({
           <Input
             type="date"
             value={formData.startDate}
-            onChange={(e) => setFormData({...formData, startDate: e.target.value})}
+            onChange={e => setFormData({ ...formData, startDate: e.target.value })}
           />
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="assignmentType">Assignment Type</Label>
-          <Select value={formData.assignmentType} onValueChange={(value) => setFormData({...formData, assignmentType: value})}>
+          <Select
+            value={formData.assignmentType}
+            onValueChange={value => setFormData({ ...formData, assignmentType: value })}
+          >
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
@@ -487,7 +491,7 @@ function AssignmentForm({
         <Textarea
           placeholder="Improve communication skills, Develop leadership abilities, Technical expertise..."
           value={formData.goals}
-          onChange={(e) => setFormData({...formData, goals: e.target.value})}
+          onChange={e => setFormData({ ...formData, goals: e.target.value })}
         />
       </div>
 
@@ -496,7 +500,7 @@ function AssignmentForm({
         <Textarea
           placeholder="Additional notes about this mentoring assignment..."
           value={formData.notes}
-          onChange={(e) => setFormData({...formData, notes: e.target.value})}
+          onChange={e => setFormData({ ...formData, notes: e.target.value })}
         />
       </div>
 
