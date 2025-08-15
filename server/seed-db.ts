@@ -29,6 +29,11 @@ export async function seedDatabase() {
   try {
     console.log('Seeding database with sample data...');
 
+    if (!db) {
+      console.warn('⚠️  Database not available - skipping database seeding');
+      return;
+    }
+
     // Create default roles if they don't exist
     console.log('Creating default roles...');
     let adminRoleId = 0;

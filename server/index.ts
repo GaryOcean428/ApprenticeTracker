@@ -22,6 +22,7 @@ import { migrateWhsRiskAssessments } from './migrate-whs-risk-assessments';
 import { migrateLabourHireSchema } from './migrate-labour-hire';
 import { migrateUnifiedContactsSystem, seedContactTags } from './migrate-unified-contacts';
 import { initializeScheduledTasks } from './scheduled-tasks';
+import { initializeDatabase } from './db';
 import { env } from './utils/env';
 
 // Create upload directory using env value (which has a default)
@@ -167,6 +168,18 @@ app.use((req, res, next) => {
 });
 
 (async () => {
+  // Initialize database connection before running migrations
+  try {
+    log('Initializing database connection...');
+    await initializeDatabase();
+    log('Database connection initialized successfully');
+  } catch (error) {
+    log('Failed to initialize database connection: ' + error);
+    if (process.env.NODE_ENV === 'production') {
+      process.exit(1);
+    }
+  }
+
   // Migrations, with error logging
   try {
     await migrateRolesSchema();

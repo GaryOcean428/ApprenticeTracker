@@ -18,68 +18,106 @@ if (!databaseUrl) {
 let db: ReturnType<typeof drizzle> | ReturnType<typeof drizzlePg> | null = null;
 let pool: Pool | PgPool | null = null;
 
-if (databaseUrl) {
+/**
+ * Initialize database connection with proper error handling and retry logic
+ */
+async function initializeDatabase(): Promise<void> {
+  if (!databaseUrl) return;
+
+  const maxRetries = 3;
+  const retryDelay = 2000; // 2 seconds
+
   if (databaseUrl.includes('neon') || databaseUrl.includes('@ep-')) {
     // Neon Serverless PostgreSQL
     neonConfig.webSocketConstructor = ws;
     pool = new Pool({ connectionString: databaseUrl });
     db = drizzle({ client: pool, schema });
     console.log('✅ Using Neon serverless database');
-  } else {
-    // Regular PostgreSQL (Railway, etc.) with SSL support
-    const pgPool = new PgPool({
-      connectionString: databaseUrl,
-      ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
-    });
-
-    // Test the connection
-    pgPool.connect((err, client, release) => {
-      if (err) {
-        console.error('Database connection error:', err.stack);
-        if (process.env.NODE_ENV === 'production') {
-          process.exit(1);
-        } else {
-          console.warn(
-            '⚠️  Database connection failed in development - continuing without database'
-          );
-        }
-      } else {
-        console.log('✅ Database connected successfully');
-        release();
-      }
-    });
-
-    pool = pgPool;
-    db = drizzlePg(pgPool, { schema });
+    return;
   }
 
-  const closePool = async () => {
-    if (!pool) return;
+  // Regular PostgreSQL (Railway, etc.) with SSL support and retry logic
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
-      await new Promise<void>(resolve => {
-        // @ts-expect-error end signature differs between pools; both accept callback
-        pool.end(() => resolve());
+      const pgPool = new PgPool({
+        connectionString: databaseUrl,
+        ssl: process.env.NODE_ENV === 'production' 
+          ? { 
+              rejectUnauthorized: false,
+              // Additional SSL options for Railway compatibility
+              requestCert: false,
+              checkServerIdentity: () => undefined,
+            } 
+          : false,
+        // Connection pool settings for better stability
+        max: 20,
+        idleTimeoutMillis: 30000,
+        connectionTimeoutMillis: 10000,
       });
-      console.log('Database pool closed');
-    } catch (e) {
-      console.warn('Error closing database pool:', e);
+
+      // Test the connection synchronously
+      await new Promise<void>((resolve, reject) => {
+        pgPool.connect((err, client, release) => {
+          if (err) {
+            reject(err);
+          } else {
+            console.log(`✅ Database connected successfully (attempt ${attempt})`);
+            release();
+            resolve();
+          }
+        });
+      });
+
+      pool = pgPool;
+      db = drizzlePg(pgPool, { schema });
+      return; // Success - exit retry loop
+    } catch (error) {
+      console.error(`Database connection error (attempt ${attempt}/${maxRetries}):`, error);
+      
+      if (attempt === maxRetries) {
+        if (process.env.NODE_ENV === 'production') {
+          throw new Error(`Failed to connect to database after ${maxRetries} attempts: ${error}`);
+        } else {
+          console.warn('⚠️  Database connection failed in development - continuing without database');
+          return;
+        }
+      }
+      
+      // Wait before retrying
+      console.log(`Retrying database connection in ${retryDelay}ms...`);
+      await new Promise(resolve => setTimeout(resolve, retryDelay));
     }
-  };
-
-  const shutdown = async () => {
-    const timeout = setTimeout(() => {
-      console.warn('Force exiting after shutdown timeout');
-      process.exit(0);
-    }, 5000);
-    await closePool();
-    clearTimeout(timeout);
-    process.exit(0);
-  };
-
-  process.on('SIGTERM', shutdown);
-  process.on('SIGINT', shutdown);
-} else {
-  console.log('📝 Running without database connection in development mode');
+  }
 }
 
-export { pool, db };
+// Database cleanup functions
+const closePool = async () => {
+  if (!pool) return;
+  try {
+    await new Promise<void>(resolve => {
+      // @ts-expect-error end signature differs between pools; both accept callback
+      pool.end(() => resolve());
+    });
+    console.log('Database pool closed');
+  } catch (e) {
+    console.warn('Error closing database pool:', e);
+  }
+};
+
+const shutdown = async () => {
+  const timeout = setTimeout(() => {
+    console.warn('Force exiting after shutdown timeout');
+    process.exit(0);
+  }, 5000);
+  await closePool();
+  clearTimeout(timeout);
+  process.exit(0);
+};
+
+// Setup graceful shutdown handlers
+if (databaseUrl) {
+  process.on('SIGTERM', shutdown);
+  process.on('SIGINT', shutdown);
+}
+
+export { pool, db, initializeDatabase };

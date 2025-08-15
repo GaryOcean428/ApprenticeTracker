@@ -7,6 +7,11 @@ import { db } from './db';
 export async function migrateFairWorkSchema() {
   console.log('Starting Fair Work schema migration...');
 
+  if (!db) {
+    console.warn('⚠️  Database not available - skipping Fair Work schema migration');
+    return;
+  }
+
   try {
     // Create awards table
     await db.execute(sql`
